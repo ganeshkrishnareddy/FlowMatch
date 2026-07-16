@@ -25,6 +25,11 @@ export default function Footer() {
             <p className="text-sm leading-relaxed text-zinc-400 dark:text-zinc-500">
               Search thousands of ready-to-use automation workflows.
             </p>
+            <div className="pt-2">
+              <a href="https://www.producthunt.com/products/flowmatch?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-flowmatch" target="_blank" rel="noopener noreferrer">
+                <img alt="FlowMatch - The open-source search engine for automation workflows | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1198182&amp;theme=dark&amp;t=1784208081526" className="h-10 w-auto" />
+              </a>
+            </div>
             <div className="text-xs text-zinc-400 dark:text-zinc-600 space-y-1.5 mt-2">
               <div>
                 <Link to="/workflows" className="hover:text-zinc-900 dark:hover:text-white transition-colors inline-flex items-center gap-1.5">
@@ -71,6 +76,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/privacy" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><a href="mailto:hello@flowmatch.tech" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Contact Us</a></li>
             </ul>
           </div>
         </div>

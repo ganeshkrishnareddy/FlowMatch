@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, ArrowRight, CheckCircle, Shield, Award } from 'lucide-react';
+import { Search, ArrowRight, CheckCircle, Shield, Award, Layers, Puzzle, Grid3X3 } from 'lucide-react';
 import { workflowRepository } from '../repositories';
 import { Workflow } from '../types/workflow';
 import WorkflowCard from '../components/workflow/WorkflowCard';
@@ -99,12 +99,12 @@ export default function LandingPage() {
       </div>
 
       {/* Infinite scrolling compatibility banner */}
-      <div className="w-full max-w-5xl mx-auto overflow-hidden relative py-6 border-y border-zinc-200/50 dark:border-zinc-800/40">
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#f8fafc] dark:from-[#030303] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#f8fafc] dark:from-[#030303] to-transparent z-10 pointer-events-none" />
+      <div className="w-full overflow-hidden relative py-4">
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#f8fafc] dark:from-[#030303] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#f8fafc] dark:from-[#030303] to-transparent z-10 pointer-events-none" />
         
-        <div className="text-center text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-4">
-          Compatible Automation Blueprints With 7 Target Platforms
+        <div className="flex items-center justify-center gap-2 text-xs text-zinc-400 dark:text-zinc-500 font-semibold mb-6">
+          <span>Works with your favorite automation platforms</span>
         </div>
 
         <div className="flex gap-16 w-max animate-marquee">
@@ -113,21 +113,21 @@ export default function LandingPage() {
             <div key={listIdx} className="flex gap-16 items-center pr-16">
               {[
                 { name: 'n8n', desc: 'Native JSON', logo: N8nLogo },
-                { name: 'Make', desc: 'Scenario mapping', logo: MakeLogo },
-                { name: 'Pipedream', desc: 'Serverless integration', logo: PipedreamLogo },
-                { name: 'Zapier', desc: 'Zap configuration', logo: ZapierLogo },
-                { name: 'Pabbly Connect', desc: 'Canvas layout', logo: PabblyLogo },
-                { name: 'Stack AI', desc: 'LLM agents', logo: StackAiLogo },
-                { name: 'Vellum', desc: 'AI assistant', logo: VellumLogo }
+                { name: 'Make', desc: 'Scenario', logo: MakeLogo },
+                { name: 'Pipedream', desc: 'Serverless', logo: PipedreamLogo },
+                { name: 'Zapier', desc: 'Zaps', logo: ZapierLogo },
+                { name: 'Pabbly Connect', desc: 'Canvas', logo: PabblyLogo },
+                { name: 'Stack AI', desc: 'Agents', logo: StackAiLogo },
+                { name: 'Vellum', desc: 'Assistant', logo: VellumLogo }
               ].map((plat, idx) => {
                 const Logo = plat.logo;
                 return (
-                  <div key={idx} className="flex items-center gap-2.5 whitespace-nowrap">
+                  <div key={idx} className="flex items-center gap-3 whitespace-nowrap opacity-65 hover:opacity-100 transition-opacity">
                     <Logo />
-                    <span className="font-extrabold text-sm text-zinc-800 dark:text-zinc-200 tracking-tight">
+                    <span className="font-extrabold text-sm text-zinc-700 dark:text-zinc-300 tracking-tight">
                       {plat.name}
                     </span>
-                    <span className="text-[10px] bg-zinc-100 dark:bg-zinc-850 px-2 py-0.5 rounded text-zinc-500 font-semibold uppercase tracking-wider">
+                    <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded text-zinc-500 font-semibold uppercase tracking-wider">
                       {plat.desc}
                     </span>
                   </div>
@@ -139,30 +139,50 @@ export default function LandingPage() {
       </div>
 
       {/* Dynamic Statistics Display */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/20 backdrop-blur-sm max-w-5xl mx-auto">
-        <div className="text-center space-y-1">
-          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
-            <AnimatedCounter value={stats.totalWorkflows} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/20 backdrop-blur-sm max-w-5xl mx-auto">
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <div className="p-2.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400">
+            <Layers className="h-5 w-5" />
           </div>
-          <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Workflows</div>
+          <div className="space-y-0.5">
+            <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
+              <AnimatedCounter value={stats.totalWorkflows} />
+            </div>
+            <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold">Workflows</div>
+          </div>
         </div>
-        <div className="text-center space-y-1">
-          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
-            <AnimatedCounter value={stats.integrationsCount} />
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <div className="p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400">
+            <Puzzle className="h-5 w-5" />
           </div>
-          <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Integrations</div>
+          <div className="space-y-0.5">
+            <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
+              <AnimatedCounter value={stats.integrationsCount} />
+            </div>
+            <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold">Integrations</div>
+          </div>
         </div>
-        <div className="text-center space-y-1">
-          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
-            <AnimatedCounter value={stats.categoriesCount} />
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+            <Grid3X3 className="h-5 w-5" />
           </div>
-          <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Categories</div>
+          <div className="space-y-0.5">
+            <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
+              <AnimatedCounter value={stats.categoriesCount} />
+            </div>
+            <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold">Categories</div>
+          </div>
         </div>
-        <div className="text-center space-y-1">
-          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
-            <AnimatedCounter value={stats.verifiedWorkflows} />
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+            <CheckCircle className="h-5 w-5" />
           </div>
-          <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Quality Checked</div>
+          <div className="space-y-0.5">
+            <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
+              <AnimatedCounter value={stats.verifiedWorkflows} />
+            </div>
+            <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold">Quality Checked</div>
+          </div>
         </div>
       </div>
 

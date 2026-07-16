@@ -48,9 +48,12 @@ export class MockWorkflowRepository implements WorkflowRepository {
 
   private async loadAllChunks(): Promise<Workflow[]> {
     const index = await this.ensureIndex();
-    for (const chunk of index.chunks) {
-      await this.loadChunk(chunk);
-    }
+    
+    // Fetch all chunks in parallel for massive performance boost
+    await Promise.all(
+      index.chunks.map(chunk => this.loadChunk(chunk))
+    );
+
     return Object.values(this.workflowCache).filter(
       (w, i, self) => self.findIndex(t => t.id === w.id) === i
     );

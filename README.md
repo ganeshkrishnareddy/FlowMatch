@@ -100,25 +100,9 @@ Every workflow is parsed, normalized, security-scanned, and enriched with human-
 
 <div align="center">
 
-| Homepage (Dark) | AI Match |
-|:---:|:---:|
-| <img src="docs/screenshots/home-dark.png" alt="Homepage Dark" width="400" /> | <img src="docs/screenshots/ai-match.png" alt="AI Match" width="400" /> |
-
-| Workflow Explorer | Workflow Details |
-|:---:|:---:|
-| <img src="docs/screenshots/discover.png" alt="Discover" width="400" /> | <img src="docs/screenshots/workflow-details.png" alt="Workflow Details" width="400" /> |
-
-| Categories | Integrations |
-|:---:|:---:|
-| <img src="docs/screenshots/categories.png" alt="Categories" width="400" /> | <img src="docs/screenshots/integrations.png" alt="Integrations" width="400" /> |
-
-| Homepage (Light) | Alternatives Guide |
-|:---:|:---:|
-| <img src="docs/screenshots/home-light.png" alt="Homepage Light" width="400" /> | <img src="docs/screenshots/alternatives.png" alt="Alternatives" width="400" /> |
+> 📸 *Screenshots will be added as the project evolves. Run `npm run dev` to preview locally.*
 
 </div>
-
-> 📸 *Screenshots will be added as the project evolves. Run `npm run dev` to preview locally.*
 
 ---
 

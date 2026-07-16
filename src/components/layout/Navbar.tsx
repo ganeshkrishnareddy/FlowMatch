@@ -84,7 +84,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
           <Link to="/categories" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white">Categories</Link>
           <Link to="/integrations" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white">Integrations</Link>
           <Link to="/collections" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white">Collections</Link>
-          <a href="https://razorpay.me/@ProgVision" target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20">Support ☕</a>
+          <a href="https://razorpay.me/@ProgVision" target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center mt-2 bg-zinc-50 dark:bg-zinc-900/40">Support ☕</a>
         </div>
       )}
     </nav>

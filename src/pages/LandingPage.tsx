@@ -139,7 +139,7 @@ export default function LandingPage() {
       </div>
 
       {/* Dynamic Statistics Display */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/20 backdrop-blur-sm max-w-5xl mx-auto">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 p-5 sm:p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/20 backdrop-blur-sm max-w-5xl mx-auto">
         <div className="text-center space-y-2 flex flex-col items-center">
           <div className="p-2.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400">
             <Layers className="h-5 w-5" />

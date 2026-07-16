@@ -4,6 +4,7 @@ import { Search, ArrowRight, CheckCircle, Shield, Award } from 'lucide-react';
 import { workflowRepository } from '../repositories';
 import { Workflow } from '../types/workflow';
 import WorkflowCard from '../components/workflow/WorkflowCard';
+import AnimatedCounter from '../components/common/AnimatedCounter';
 
 export default function LandingPage() {
   const [query, setQuery] = useState('');
@@ -96,22 +97,67 @@ export default function LandingPage() {
         </form>
       </div>
 
+      {/* Infinite scrolling compatibility banner */}
+      <div className="w-full max-w-5xl mx-auto overflow-hidden relative py-6 border-y border-zinc-200/50 dark:border-zinc-800/40">
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#f8fafc] dark:from-[#030303] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#f8fafc] dark:from-[#030303] to-transparent z-10 pointer-events-none" />
+        
+        <div className="text-center text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-4">
+          Compatible Automation Blueprints With 7 Target Platforms
+        </div>
+
+        <div className="flex gap-16 w-max animate-marquee">
+          {/* Double list for infinite loop rendering */}
+          {[...Array(2)].map((_, listIdx) => (
+            <div key={listIdx} className="flex gap-16 items-center pr-16">
+              {[
+                { name: 'n8n', desc: 'Native JSON' },
+                { name: 'Make', desc: 'Scenario mapping' },
+                { name: 'Pipedream', desc: 'Serverless integration' },
+                { name: 'Zapier', desc: 'Zap configuration' },
+                { name: 'Pabbly Connect', desc: 'Canvas layout' },
+                { name: 'Stack AI', desc: 'LLM agents' },
+                { name: 'Vellum', desc: 'AI assistant' }
+              ].map((plat, idx) => (
+                <div key={idx} className="flex items-center gap-2.5 whitespace-nowrap">
+                  <span className="h-2 w-2 rounded-full bg-violet-500" />
+                  <span className="font-extrabold text-sm text-zinc-800 dark:text-zinc-200 tracking-tight">
+                    {plat.name}
+                  </span>
+                  <span className="text-[10px] bg-zinc-100 dark:bg-zinc-850 px-2 py-0.5 rounded text-zinc-500 font-semibold uppercase tracking-wider">
+                    {plat.desc}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Dynamic Statistics Display */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/20 backdrop-blur-sm max-w-5xl mx-auto">
         <div className="text-center space-y-1">
-          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">{stats.totalWorkflows.toLocaleString()}</div>
+          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
+            <AnimatedCounter value={stats.totalWorkflows} />
+          </div>
           <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Workflows</div>
         </div>
         <div className="text-center space-y-1">
-          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">{stats.integrationsCount}</div>
+          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
+            <AnimatedCounter value={stats.integrationsCount} />
+          </div>
           <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Integrations</div>
         </div>
         <div className="text-center space-y-1">
-          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">{stats.categoriesCount}</div>
+          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
+            <AnimatedCounter value={stats.categoriesCount} />
+          </div>
           <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Categories</div>
         </div>
         <div className="text-center space-y-1">
-          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">{stats.verifiedWorkflows.toLocaleString()}</div>
+          <div className="text-3xl font-extrabold text-zinc-900 dark:text-white">
+            <AnimatedCounter value={stats.verifiedWorkflows} />
+          </div>
           <div className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Quality Checked</div>
         </div>
       </div>

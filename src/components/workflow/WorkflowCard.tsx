@@ -10,7 +10,7 @@ interface WorkflowCardProps {
 
 export default function WorkflowCard({ workflow }: WorkflowCardProps) {
   return (
-    <div className="group p-5 rounded-2xl border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/10 hover:border-violet-300 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none transition-all duration-200 flex flex-col justify-between h-full">
+    <div className="group p-5 rounded-2xl border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/10 hover:border-violet-300 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none transition-all duration-200 flex flex-col justify-between">
       <div className="space-y-3.5">
         {/* Top Metadata Row */}
         <div className="flex items-center justify-between gap-2">
@@ -31,22 +31,22 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
 
         {/* Title and Description */}
         <div className="space-y-1">
-          <h3 className="font-bold text-slate-900 dark:text-white text-base line-clamp-2 leading-snug group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors min-h-[3rem]">
+          <h3 className="font-bold text-slate-900 dark:text-white text-base line-clamp-2 leading-snug group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
             {workflow.display_title || workflow.name}
           </h3>
-          <p className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-3 leading-relaxed min-h-[2.5rem]">
+          <p className="text-xs text-slate-650 dark:text-zinc-400 line-clamp-3 leading-relaxed">
             {workflow.display_description || workflow.description}
           </p>
         </div>
       </div>
 
       {/* Footer / Integrations and Action */}
-      <div className="border-t border-slate-100 dark:border-zinc-800/60 pt-3.5 mt-4 flex items-center justify-between gap-4">
+      <div className="border-t border-slate-100 dark:border-zinc-800/60 pt-3.5 mt-5 flex items-center justify-between gap-4">
         <div className="flex flex-wrap gap-1">
           {workflow.integrations.slice(0, 3).map((integration, idx) => (
             <span 
               key={idx} 
-              className="text-[9px] bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 px-2.5 py-0.5 rounded font-medium border border-slate-200/60 dark:border-zinc-700/60"
+              className="text-[9px] bg-slate-50 dark:bg-zinc-900 text-slate-650 dark:text-zinc-350 px-2.5 py-0.5 rounded font-medium border border-slate-200/60 dark:border-zinc-800/60"
             >
               {integration}
             </span>
@@ -60,7 +60,7 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
         
         <Link
           to={`/workflow/${workflow.slug}`}
-          className="text-xs font-semibold text-violet-700 dark:text-white bg-violet-50 dark:bg-zinc-800 hover:bg-violet-600 hover:text-white dark:hover:bg-violet-600 px-3.5 py-1.5 rounded-lg border border-violet-200 dark:border-zinc-700 transition-all shadow-sm"
+          className="text-xs font-semibold text-violet-750 dark:text-white bg-violet-50/50 dark:bg-zinc-900 hover:bg-violet-600 hover:text-white dark:hover:bg-violet-600 px-3.5 py-1.5 rounded-lg border border-violet-200/50 dark:border-zinc-850 transition-all shadow-sm"
         >
           View Details
         </Link>

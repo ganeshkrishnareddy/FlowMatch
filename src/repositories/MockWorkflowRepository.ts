@@ -171,7 +171,21 @@ export class MockWorkflowRepository implements WorkflowRepository {
     });
 
     scored.sort((a, b) => b.score - a.score);
-    return scored.map(s => s.workflow).slice(0, limit);
+
+    // Enforce uniqueness and discard generic/duplicate titles
+    const seenTitles = new Set<string>();
+    const uniqueScored: typeof scored = [];
+
+    for (const item of scored) {
+      const title = (item.workflow.display_title || item.workflow.name || '').trim().toLowerCase();
+      if (seenTitles.has(title)) continue;
+      if (title.includes('trigger automated') || title.includes('manual trigger') || title === 'trigger workflow') continue;
+      
+      seenTitles.add(title);
+      uniqueScored.push(item);
+    }
+
+    return uniqueScored.map(s => s.workflow).slice(0, limit);
   }
 
   async getWorkflowsByCategory(categorySlug: string, page: number, perPage: number): Promise<{ workflows: Workflow[]; total: number }> {

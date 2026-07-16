@@ -23,7 +23,7 @@ export default function Footer() {
               <FlowMatchLogo size={22} showWordmark />
             </Link>
             <p className="text-sm leading-relaxed text-zinc-400 dark:text-zinc-500">
-              Search thousands of ready-to-use n8n automation workflows and find the right template for your process.
+              Search thousands of ready-to-use automation workflows.
             </p>
             <div className="text-xs text-zinc-400 dark:text-zinc-600 space-y-1">
               <div>📊 Workflows: <span className="text-zinc-600 dark:text-zinc-400 font-semibold">{stats.totalWorkflows.toLocaleString()}</span></div>
@@ -64,8 +64,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-900 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-          <p className="text-zinc-400 dark:text-zinc-600 max-w-2xl text-center md:text-left leading-relaxed">
-            FlowMatch indexes automation workflows from permitted public and open-source sources. Developed and maintained by <Link to="/about" className="text-violet-650 dark:text-violet-400 font-semibold hover:underline">ProgVision</Link> (<a href="https://razorpay.me/@ProgVision" target="_blank" rel="noopener noreferrer" className="text-rose-500 font-semibold hover:underline">Support Creator ☕</a>).
+          <p className="text-zinc-400 dark:text-zinc-650 max-w-2xl text-center md:text-left leading-relaxed">
+            Built and maintained by <Link to="/about" className="text-violet-650 dark:text-violet-400 font-semibold hover:underline">ProgVision</Link>.
           </p>
           <p className="text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
             &copy; {new Date().getFullYear()} FlowMatch. All rights reserved.

@@ -35,24 +35,24 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
               <Link to="/categories" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Categories</Link>
               <Link to="/integrations" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Integrations</Link>
               <Link to="/collections" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Collections</Link>
-              <a href="https://razorpay.me/@ProgVision" target="_blank" rel="noopener noreferrer" className="text-rose-500 font-semibold hover:text-rose-600 dark:hover:text-rose-400 transition-colors">Support ☕</a>
+              <a href="https://razorpay.me/@ProgVision" target="_blank" rel="noopener noreferrer" className="text-xs bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-300 font-semibold px-2.5 py-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all">Support ☕</a>
             </div>
           </div>
 
-          <div className="hidden sm:flex items-center gap-3 flex-1 max-w-xs md:max-w-sm">
-            <form onSubmit={handleQuickSearch} className="relative w-full">
-              <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-zinc-400 dark:text-zinc-500" />
+          <div className="hidden sm:flex items-center gap-3.5">
+            <form onSubmit={handleQuickSearch} className="relative w-[270px]">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search workflows..."
+                placeholder="Search 5,000+ workflows..."
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
-                className="w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 py-1.5 pl-10 pr-4 text-sm text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                className="w-full h-[42px] rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 pl-11 pr-4 text-sm text-zinc-850 dark:text-zinc-200 placeholder:text-zinc-450 dark:placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 shadow-sm"
               />
             </form>
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="w-10 h-10 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/50 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-55 dark:hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-violet-500/20 transition-all shadow-sm"
               aria-label="Toggle theme"
             >
               {isDark ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}

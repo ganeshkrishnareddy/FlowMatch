@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/banner.png" alt="FlowMatch — Discover, Search & Compare 5,000+ n8n Workflow Templates" width="100%" />
+<img src="docs/banner.png" alt="FlowMatch — Discover, Search & Compare 5,000+ n8n Workflow Templates" width="75%" />
 
 <br />
 

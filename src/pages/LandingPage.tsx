@@ -50,8 +50,10 @@ export default function LandingPage() {
       <SEOHead title="Search 5,000+ n8n Workflow Templates" description="Discover 5,000+ verified n8n workflow templates. Search, compare, visualize, and deploy automation workflows with AI-powered matching, security analysis, and 300+ integrations." path="/" />
       {/* Hero Section */}
       <div className="text-center max-w-4xl mx-auto space-y-6 pt-12 pb-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/30 bg-violet-50 dark:bg-violet-950/20 text-xs font-semibold text-violet-600 dark:text-violet-400">
-          <span>Workflow discovery & matching engine</span>
+        <div className="flex justify-center transition-transform hover:scale-105">
+          <a href="https://www.producthunt.com/products/flowmatch?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-flowmatch" target="_blank" rel="noopener noreferrer">
+            <img alt="FlowMatch - The open-source search engine for automation workflows | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1198182&amp;theme=dark&amp;t=1784206843065" />
+          </a>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight">

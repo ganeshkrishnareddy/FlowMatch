@@ -16,7 +16,7 @@ export function computeWorkflowLayout(
 ): GraphNode[] {
   // Always calculate dynamic layering auto-layout to guarantee clean horizontal alignment
 
-  // Fallback: Automatic left-to-right layout using a simple BFS layering approach
+  // Build adjacency list
   const adjList: Record<string, string[]> = {};
   const inDegree: Record<string, number> = {};
 
@@ -25,7 +25,6 @@ export function computeWorkflowLayout(
     inDegree[n.name] = 0;
   });
 
-  // Build connection graph
   Object.keys(connections || {}).forEach(srcNode => {
     const outputs = connections[srcNode];
     Object.keys(outputs || {}).forEach(outType => {
@@ -42,53 +41,57 @@ export function computeWorkflowLayout(
     });
   });
 
-  // Layering
-  const queue: string[] = [];
-  const layers: Record<string, number> = {};
+  // Traverse using BFS to establish a strict horizontal sequence
+  const orderedNodes: string[] = [];
+  const visited = new Set<string>();
 
-  nodes.forEach(n => {
-    if (inDegree[n.name] === 0) {
-      queue.push(n.name);
-      layers[n.name] = 0;
-    }
-  });
+  // Start with triggers/sources (in-degree = 0)
+  const sources = nodes.filter(n => inDegree[n.name] === 0).map(n => n.name);
+  
+  const queue: string[] = [...sources];
+  sources.forEach(s => visited.add(s));
 
-  // Default layer for disconnected nodes
+  // If no sources, push the first node
+  if (queue.length === 0 && nodes.length > 0) {
+    queue.push(nodes[0].name);
+    visited.add(nodes[0].name);
+  }
+
   while (queue.length > 0) {
     const curr = queue.shift()!;
-    const currLayer = layers[curr] || 0;
+    orderedNodes.push(curr);
 
     (adjList[curr] || []).forEach(next => {
-      if (layers[next] === undefined || layers[next] < currLayer + 1) {
-        layers[next] = currLayer + 1;
+      if (!visited.has(next)) {
+        visited.add(next);
         queue.push(next);
       }
     });
   }
 
-  // Count items per layer to offset vertically
-  const layerCounts: Record<number, number> = {};
-  const layerTrackers: Record<number, number> = {};
-
+  // Add any remaining unvisited nodes
   nodes.forEach(n => {
-    const layer = layers[n.name] || 0;
-    layerCounts[layer] = (layerCounts[layer] || 0) + 1;
-    layerTrackers[layer] = 0;
+    if (!visited.has(n.name)) {
+      orderedNodes.push(n.name);
+      visited.add(n.name);
+    }
+  });
+
+  // Now map coordinates based on their sequence index
+  const positions: Record<string, { x: number; y: number }> = {};
+  
+  orderedNodes.forEach((nodeName, idx) => {
+    positions[nodeName] = {
+      x: 100 + idx * 260,
+      y: 250
+    };
   });
 
   return nodes.map(n => {
-    const layer = layers[n.name] || 0;
-    const count = layerCounts[layer] || 1;
-    const tracker = layerTrackers[layer] || 0;
-    layerTrackers[layer] = tracker + 1;
-
-    // Center layout vertically per layer
-    const x = 100 + layer * 260;
-    const y = 250 + (tracker - (count - 1) / 2) * 120;
-
+    const pos = positions[n.name] || { x: 100, y: 250 };
     return {
       ...n,
-      position: [x, y]
+      position: [pos.x, pos.y]
     };
   });
 }

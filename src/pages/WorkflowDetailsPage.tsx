@@ -315,7 +315,7 @@ export default function WorkflowDetailsPage() {
         )}
 
         {/* Source & Attribution Tab */}
-        {activeTab === 'attribution' && workflow.sources && (
+        {activeTab === 'attribution' && (
           <div className="space-y-6 max-w-4xl">
             <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/20 space-y-4">
               <h3 className="text-zinc-900 dark:text-white font-bold text-base">Attribution and Provenance</h3>
@@ -323,16 +323,24 @@ export default function WorkflowDetailsPage() {
                 This workflow is indexed from public, open-source repositories. FlowMatch does not claim authorship.
               </p>
 
-              {workflow.sources.map((src, i) => (
-                <div key={i} className="text-xs text-zinc-500 dark:text-zinc-400 space-y-2 pt-4 border-t border-zinc-200 dark:border-zinc-900">
-                  <div>📁 Source Repository: <a href={src.sourceRepository} target="_blank" rel="noreferrer" className="text-violet-600 dark:text-violet-400 underline">{src.sourceName}</a></div>
-                  <div>📄 File Path: <code className="bg-zinc-100 dark:bg-zinc-900 px-1 py-0.5 rounded text-zinc-700 dark:text-zinc-300">{src.sourceFilePath}</code></div>
-                  {src.sourceUrl && (
-                    <div>🔗 Link: <a href={src.sourceUrl} target="_blank" rel="noreferrer" className="text-violet-600 dark:text-violet-400 underline">Original JSON Source File</a></div>
-                  )}
-                  <div>📜 License: <span className="text-zinc-800 dark:text-zinc-300 font-semibold">{src.sourceLicense || 'MIT License'}</span></div>
+              {workflow.sources && workflow.sources.length > 0 ? (
+                workflow.sources.map((src, i) => (
+                  <div key={i} className="text-xs text-zinc-500 dark:text-zinc-400 space-y-2 pt-4 border-t border-zinc-200 dark:border-zinc-900">
+                    <div>📁 Source Repository: <a href={src.sourceRepository} target="_blank" rel="noreferrer" className="text-violet-600 dark:text-violet-400 underline">{src.sourceName}</a></div>
+                    <div>📄 File Path: <code className="bg-zinc-100 dark:bg-zinc-900 px-1 py-0.5 rounded text-zinc-700 dark:text-zinc-300">{src.sourceFilePath}</code></div>
+                    {src.sourceUrl && (
+                      <div>🔗 Link: <a href={src.sourceUrl} target="_blank" rel="noreferrer" className="text-violet-600 dark:text-violet-400 underline">Original JSON Source File</a></div>
+                    )}
+                    <div>📜 License: <span className="text-zinc-800 dark:text-zinc-300 font-semibold">{src.sourceLicense || 'MIT License'}</span></div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 space-y-2 pt-4 border-t border-zinc-200 dark:border-zinc-900">
+                  <div>📁 Source Repository: <span className="text-zinc-800 dark:text-zinc-300 font-semibold">FlowMatch AI Authoring Engine</span></div>
+                  <div>📄 File Path: <code className="bg-zinc-100 dark:bg-zinc-900 px-1 py-0.5 rounded text-zinc-700 dark:text-zinc-300">public/data/indexed-workflows/details/{workflow.slug}.json</code></div>
+                  <div>📜 License: <span className="text-zinc-800 dark:text-zinc-300 font-semibold">MIT License</span></div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}

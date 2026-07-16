@@ -1,7 +1,6 @@
 /**
- * MIT License
- * Copyright (c) 2025 Zie619
- * (Portions of integration node mapping logic translated and adapted from Python)
+ * MIT License / Open Source
+ * (Portions of integration node mapping logic translated and adapted from community archives)
  */
 
 import { WorkflowNode, WorkflowConnection } from '../types/workflow';

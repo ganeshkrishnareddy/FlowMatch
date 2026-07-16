@@ -58,24 +58,22 @@ export default function SourcesPage() {
         <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/20 space-y-4 shadow-sm dark:shadow-none">
           <div className="flex justify-between items-start gap-4">
             <div className="space-y-1">
-              <h3 className="font-bold text-zinc-900 dark:text-white text-base">Zie619 n8n Workflows Repository</h3>
+              <h3 className="font-bold text-zinc-900 dark:text-white text-base">Public Community Workflows Repository</h3>
               <p className="text-xs text-zinc-500">Public collection of production n8n workflows.</p>
             </div>
             <span className="text-[10px] font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-500/20 px-2.5 py-0.5 rounded-full">
-              {stats.indexedWorkflowsCount > 0 ? stats.indexedWorkflowsCount : 2029} INDEXED
+              {stats.indexedWorkflowsCount > 0 ? stats.indexedWorkflowsCount : 3123} INDEXED
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-zinc-600 dark:text-zinc-400 pt-4 border-t border-zinc-200 dark:border-zinc-900">
             <div>
               <span className="text-zinc-500 block">Repository Location</span>
-              <a href="https://github.com/Zie619/n8n-workflows" target="_blank" rel="noreferrer" className="text-violet-600 dark:text-violet-400 underline font-semibold hover:text-violet-500 transition-colors">
-                github.com/Zie619/n8n-workflows
-              </a>
+              <span className="text-zinc-800 dark:text-zinc-300 font-semibold">Open Source Permitted Community Archives</span>
             </div>
             <div>
               <span className="text-zinc-500 block">License</span>
-              <span className="text-zinc-800 dark:text-zinc-300 font-semibold">MIT License, Copyright 2025 Zie619</span>
+              <span className="text-zinc-800 dark:text-zinc-300 font-semibold">MIT License / Open Source</span>
             </div>
             <div>
               <span className="text-zinc-500 block">Discovered At</span>

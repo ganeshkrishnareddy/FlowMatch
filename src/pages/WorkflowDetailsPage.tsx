@@ -4,6 +4,7 @@ import { Download, Copy, Share2, Shield, Award, HelpCircle, CheckCircle, Refresh
 import { workflowRepository } from '../repositories';
 import { Workflow } from '../types/workflow';
 import WorkflowGraph from '../components/workflow/WorkflowGraph';
+import { injectStickyNote } from '../services/stickyNoteInjector';
 
 export default function WorkflowDetailsPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -36,14 +37,16 @@ export default function WorkflowDetailsPage() {
   const handleCopyJson = () => {
     if (!workflow) return;
     setCopying(true);
-    navigator.clipboard.writeText(JSON.stringify(workflow.originalWorkflowJson, null, 2))
+    const enrichedJson = injectStickyNote(workflow.originalWorkflowJson, workflow);
+    navigator.clipboard.writeText(JSON.stringify(enrichedJson, null, 2))
       .then(() => setTimeout(() => setCopying(false), 2000))
       .catch(() => setCopying(false));
   };
 
   const handleDownloadJson = () => {
     if (!workflow) return;
-    const blob = new Blob([JSON.stringify(workflow.originalWorkflowJson, null, 2)], { type: 'application/json' });
+    const enrichedJson = injectStickyNote(workflow.originalWorkflowJson, workflow);
+    const blob = new Blob([JSON.stringify(enrichedJson, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

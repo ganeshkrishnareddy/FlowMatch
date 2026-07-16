@@ -6,6 +6,7 @@ import { Workflow } from '../types/workflow';
 import WorkflowCard from '../components/workflow/WorkflowCard';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import { N8nLogo, MakeLogo, PipedreamLogo, ZapierLogo, PabblyLogo, StackAiLogo, VellumLogo } from '../components/brand/PlatformLogos';
+import SEOHead from '../components/common/SEOHead';
 
 export default function LandingPage() {
   const [query, setQuery] = useState('');
@@ -46,6 +47,7 @@ export default function LandingPage() {
 
   return (
     <div className="space-y-20 py-8">
+      <SEOHead title="Search 5,000+ n8n Workflow Templates" description="Discover 5,000+ verified n8n workflow templates. Search, compare, visualize, and deploy automation workflows with AI-powered matching, security analysis, and 300+ integrations." path="/" />
       {/* Hero Section */}
       <div className="text-center max-w-4xl mx-auto space-y-6 pt-12 pb-6">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/30 bg-violet-50 dark:bg-violet-950/20 text-xs font-semibold text-violet-600 dark:text-violet-400">

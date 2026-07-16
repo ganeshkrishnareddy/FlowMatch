@@ -5,6 +5,7 @@ import { workflowRepository } from '../repositories';
 import { Workflow } from '../types/workflow';
 import WorkflowCard from '../components/workflow/WorkflowCard';
 import AnimatedCounter from '../components/common/AnimatedCounter';
+import { N8nLogo, MakeLogo, PipedreamLogo, ZapierLogo, PabblyLogo, StackAiLogo, VellumLogo } from '../components/brand/PlatformLogos';
 
 export default function LandingPage() {
   const [query, setQuery] = useState('');
@@ -111,24 +112,27 @@ export default function LandingPage() {
           {[...Array(2)].map((_, listIdx) => (
             <div key={listIdx} className="flex gap-16 items-center pr-16">
               {[
-                { name: 'n8n', desc: 'Native JSON' },
-                { name: 'Make', desc: 'Scenario mapping' },
-                { name: 'Pipedream', desc: 'Serverless integration' },
-                { name: 'Zapier', desc: 'Zap configuration' },
-                { name: 'Pabbly Connect', desc: 'Canvas layout' },
-                { name: 'Stack AI', desc: 'LLM agents' },
-                { name: 'Vellum', desc: 'AI assistant' }
-              ].map((plat, idx) => (
-                <div key={idx} className="flex items-center gap-2.5 whitespace-nowrap">
-                  <span className="h-2 w-2 rounded-full bg-violet-500" />
-                  <span className="font-extrabold text-sm text-zinc-800 dark:text-zinc-200 tracking-tight">
-                    {plat.name}
-                  </span>
-                  <span className="text-[10px] bg-zinc-100 dark:bg-zinc-850 px-2 py-0.5 rounded text-zinc-500 font-semibold uppercase tracking-wider">
-                    {plat.desc}
-                  </span>
-                </div>
-              ))}
+                { name: 'n8n', desc: 'Native JSON', logo: N8nLogo },
+                { name: 'Make', desc: 'Scenario mapping', logo: MakeLogo },
+                { name: 'Pipedream', desc: 'Serverless integration', logo: PipedreamLogo },
+                { name: 'Zapier', desc: 'Zap configuration', logo: ZapierLogo },
+                { name: 'Pabbly Connect', desc: 'Canvas layout', logo: PabblyLogo },
+                { name: 'Stack AI', desc: 'LLM agents', logo: StackAiLogo },
+                { name: 'Vellum', desc: 'AI assistant', logo: VellumLogo }
+              ].map((plat, idx) => {
+                const Logo = plat.logo;
+                return (
+                  <div key={idx} className="flex items-center gap-2.5 whitespace-nowrap">
+                    <Logo />
+                    <span className="font-extrabold text-sm text-zinc-800 dark:text-zinc-200 tracking-tight">
+                      {plat.name}
+                    </span>
+                    <span className="text-[10px] bg-zinc-100 dark:bg-zinc-850 px-2 py-0.5 rounded text-zinc-500 font-semibold uppercase tracking-wider">
+                      {plat.desc}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>

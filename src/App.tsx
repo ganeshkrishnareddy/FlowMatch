@@ -13,6 +13,7 @@ const IntegrationsPage = lazy(() => import('./pages/IntegrationsPage'));
 const IntegrationDetailPage = lazy(() => import('./pages/IntegrationDetailPage'));
 const SourcesPage = lazy(() => import('./pages/SourcesPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AdminImportPage = lazy(() => import('./pages/AdminImportPage'));
 const AdminGeneratePage = lazy(() => import('./pages/AdminGeneratePage'));
 const CollectionsPage = lazy(() => import('./pages/CollectionsPage'));
@@ -56,6 +57,7 @@ export default function App() {
             {/* Sources and Attributions */}
             <Route path="/sources" element={<SourcesPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/alternatives" element={<AlternativesPage />} />
 
             {/* Legal Policies */}

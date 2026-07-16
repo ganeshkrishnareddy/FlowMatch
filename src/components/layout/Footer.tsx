@@ -76,7 +76,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/privacy" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><a href="mailto:hello@flowmatch.tech" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Contact Us</a></li>
+              <li><Link to="/contact" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
         </div>

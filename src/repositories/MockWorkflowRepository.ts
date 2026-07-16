@@ -271,7 +271,11 @@ export class MockWorkflowRepository implements WorkflowRepository {
   private applyFilters(workflows: Workflow[], filters: WorkflowFilters): Workflow[] {
     return workflows.filter(w => {
       if (filters.category && w.categoryId !== filters.category) return false;
-      if (filters.integration && !w.integrations.some(i => i.toLowerCase() === filters.integration?.toLowerCase())) return false;
+      if (filters.integration && !w.integrations.some(i => {
+        const iSlug = i.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const fSlug = filters.integration?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        return iSlug === fSlug;
+      })) return false;
       if (filters.difficulty && filters.difficulty !== 'all' && w.difficulty !== filters.difficulty) return false;
       if (filters.securityStatus && filters.securityStatus !== 'all' && w.securityStatus !== filters.securityStatus) return false;
       if (filters.verifiedOnly && !w.verified) return false;

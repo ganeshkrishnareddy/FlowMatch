@@ -14,15 +14,7 @@ export function computeWorkflowLayout(
   nodes: GraphNode[],
   connections: Record<string, any>
 ): GraphNode[] {
-  // If at least one node has a non-zero position, keep the original layout
-  const hasCoordinates = nodes.some(n => 
-    n.position && 
-    (Math.abs(n.position[0]) > 0.01 || Math.abs(n.position[1]) > 0.01)
-  );
-
-  if (hasCoordinates) {
-    return nodes;
-  }
+  // Always calculate dynamic layering auto-layout to guarantee clean horizontal alignment
 
   // Fallback: Automatic left-to-right layout using a simple BFS layering approach
   const adjList: Record<string, string[]> = {};

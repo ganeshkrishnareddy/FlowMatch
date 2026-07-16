@@ -48,6 +48,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/about" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Our Story & Creator</Link></li>
               <li><Link to="/sources" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Sources & Attribution</Link></li>
+              <li><Link to="/alternatives" className="hover:text-zinc-900 dark:hover:text-white transition-colors">n8n Alternatives</Link></li>
               <li><Link to="/workflow-removal" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Workflow Removal</Link></li>
               <li><Link to="/copyright-policy" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Copyright Policy</Link></li>
             </ul>

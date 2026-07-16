@@ -26,8 +26,8 @@ export default function Footer() {
               Search thousands of ready-to-use automation workflows.
             </p>
             <div className="pt-2">
-              <a href="https://www.producthunt.com/products/flowmatch?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-flowmatch" target="_blank" rel="noopener noreferrer">
-                <img alt="FlowMatch - The open-source search engine for automation workflows | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1198182&amp;theme=dark&amp;t=1784208081526" className="h-10 w-auto" />
+              <a href="https://www.producthunt.com/products/flowmatch?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-flowmatch" target="_blank" rel="noopener noreferrer">
+                <img alt="FlowMatch - The open-source search engine for automation workflows | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1198182&theme=dark&t=1784208081526" className="h-[46px] w-auto transition-transform hover:scale-105" />
               </a>
             </div>
             <div className="text-xs text-zinc-400 dark:text-zinc-600 space-y-1.5 mt-2">

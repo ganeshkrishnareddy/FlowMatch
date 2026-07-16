@@ -1,0 +1,572 @@
+{
+  "id": "google-calendar-to-outlook-qwi0b",
+  "name": "Google calendar to Outlook",
+  "slug": "google-calendar-to-outlook-ywbl",
+  "description": "Automated workflow: Google calendar to Outlook. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Google calendar to Outlook workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": "0HVA2TOmkdNpH5DP",
+    "meta": {
+      "instanceId": "workflow-ae712b79",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.970575",
+      "updatedAt": "2025-09-29T07:07:50.970595",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Google calendar to Outlook",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "e7e75d4a-ee5a-4ee7-b69d-71d8eb51fe55",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          920,
+          800
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combineBy": "combineAll"
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6e159340-910c-4c1e-9e6b-c6ef679309be",
+        "name": "Incoming Event Trigger",
+        "type": "n8n-nodes-base.googleCalendarTrigger",
+        "position": [
+          500,
+          360
+        ],
+        "parameters": {
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "eventCreated",
+          "calendarId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "your_email@gmail.com",
+            "cachedResultName": "Your Name"
+          }
+        },
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "IgBZqXCtaacRpIKt",
+            "name": "Your Name Google Calendar account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This googleCalendarTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7ffb13c3-7d16-4bd8-aed0-7f6378394a1c",
+        "name": "Cancel Event Trigger",
+        "type": "n8n-nodes-base.googleCalendarTrigger",
+        "position": [
+          280,
+          600
+        ],
+        "parameters": {
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "eventCancelled",
+          "calendarId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "your_email@gmail.com",
+            "cachedResultName": "Your Name"
+          }
+        },
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "IgBZqXCtaacRpIKt",
+            "name": "Your Name Google Calendar account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This googleCalendarTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f0e81f5b-a813-4e03-9400-a97842b6b9b5",
+        "name": "Create Outlook Event",
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "position": [
+          740,
+          360
+        ],
+        "parameters": {
+          "subject": "={{ \"From private: \" + $json.summary }}",
+          "resource": "event",
+          "operation": "create",
+          "calendarId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "AAMkAGUxOTQ4ZmU0LWMxYjUtNDRiZi1iYjdlLTNmYTFhOWQ3MWZhNwBGAAAAAABlzj22ZOwJQZOQBjwNTK5fBwBW9yW5dIfsR51ayk6B4bZSAAAAAAEGAABW9yW5dIfsR51ayk6B4bZSAAAAAeGaAAA=",
+            "cachedResultName": "Calendar"
+          },
+          "endDateTime": "={{ $json.end.dateTime != undefined ? $json.end.dateTime : $json.end.date }}",
+          "startDateTime": "={{ $json.start.dateTime != undefined ? $json.start.dateTime : $json.start.date }}",
+          "additionalFields": {
+            "body": "={{ $json.description != undefined ? $json.description + \"\\n\" : \"\" + $json.htmlLink }}"
+          }
+        },
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "IsGdpQBgFdZ9bMsM",
+            "name": "Microsoft Outlook account (alex NLD)"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This microsoftOutlook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0e7c3511-cb4a-46a7-937e-57bdf6bdc00c",
+        "name": "Get Event to Cancel",
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "position": [
+          520,
+          600
+        ],
+        "parameters": {
+          "limit": 1,
+          "filters": {
+            "custom": "=contains(subject, '{{ $json.summary }}')"
+          },
+          "resource": "event",
+          "calendarId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "AAMkAGUxOTQ4ZmU0LWMxYjUtNDRiZi1iYjdlLTNmYTFhOWQ3MWZhNwBGAAAAAABlzj22ZOwJQZOQBjwNTK5fBwBW9yW5dIfsR51ayk6B4bZSAAAAAAEGAABW9yW5dIfsR51ayk6B4bZSAAAAAeGaAAA=",
+            "cachedResultName": "Calendar"
+          },
+          "fromAllCalendars": false
+        },
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "IsGdpQBgFdZ9bMsM",
+            "name": "Microsoft Outlook account (work email)"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This microsoftOutlook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6540c5f5-963b-4260-8c10-1c7f5bb75315",
+        "name": "Delete Event",
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "position": [
+          780,
+          600
+        ],
+        "parameters": {
+          "eventId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "resource": "event",
+          "operation": "delete",
+          "calendarId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "AAMkAGUxOTQ4ZmU0LWMxYjUtNDRiZi1iYjdlLTNmYTFhOWQ3MWZhNwBGAAAAAABlzj22ZOwJQZOQBjwNTK5fBwBW9yW5dIfsR51ayk6B4bZSAAAAAAEGAABW9yW5dIfsR51ayk6B4bZSAAAAAeGaAAA=",
+            "cachedResultName": "Calendar"
+          }
+        },
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "IsGdpQBgFdZ9bMsM",
+            "name": "Microsoft Outlook account (alex NLD)"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This microsoftOutlook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "03cf261c-4c26-4db1-a335-e249c0f590ec",
+        "name": "Send E-mail with details",
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "position": [
+          1060,
+          620
+        ],
+        "parameters": {
+          "subject": "={{ $json.subject + \" Cancelled\" }}",
+          "bodyContent": "<h1>Event cancelled via Google Calendar</h1>",
+          "toRecipients": "your_email@work.zom",
+          "additionalFields": {
+            "bodyContentType": "html"
+          }
+        },
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "IsGdpQBgFdZ9bMsM",
+            "name": "Microsoft Outlook account (work email)"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This microsoftOutlook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-169032a0",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "34dc3a4d-0db5-4efc-8814-c94d3468540a",
+    "connections": {
+      "6e159340-910c-4c1e-9e6b-c6ef679309be": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6e159340-910c-4c1e-9e6b-c6ef679309be-fb1c8253",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "7ffb13c3-7d16-4bd8-aed0-7f6378394a1c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-7ffb13c3-7d16-4bd8-aed0-7f6378394a1c-cc60f75d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Google calendar to Outlook. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Google calendar to Outlook. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "6e159340-910c-4c1e-9e6b-c6ef679309be": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e159340-910c-4c1e-9e6b-c6ef679309be-fb1c8253"
+            }
+          ]
+        ]
+      },
+      "7ffb13c3-7d16-4bd8-aed0-7f6378394a1c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7ffb13c3-7d16-4bd8-aed0-7f6378394a1c-cc60f75d"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Google calendar to Outlook",
+    "nodes": [
+      {
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Cancel Event Trigger",
+        "parameters": {
+          "calendarId": {
+            "__rl": true,
+            "cachedResultName": "Your Name",
+            "mode": "list",
+            "value": "your_email@gmail.com"
+          },
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "eventCancelled"
+        },
+        "type": "n8n-nodes-base.googleCalendarTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Outlook Event",
+        "parameters": {
+          "additionalFields": {
+            "body": "={{ $json.description != undefined ? $json.description + \"\\n\" : \"\" + $json.htmlLink }}"
+          },
+          "calendarId": {
+            "__rl": true,
+            "cachedResultName": "Calendar",
+            "mode": "list",
+            "value": "AAMkAGUxOTQ4ZmU0LWMxYjUtNDRiZi1iYjdlLTNmYTFhOWQ3MWZhNwBGAAAAAABlzj22ZOwJQZOQBjwNTK5fBwBW9yW5dIfsR51ayk6B4bZSAAAAAAEGAABW9yW5dIfsR51ayk6B4bZSAAAAAeGaAAA="
+          },
+          "endDateTime": "={{ $json.end.dateTime != undefined ? $json.end.dateTime : $json.end.date }}",
+          "operation": "create",
+          "resource": "event",
+          "startDateTime": "={{ $json.start.dateTime != undefined ? $json.start.dateTime : $json.start.date }}",
+          "subject": "={{ \"From private: \" + $json.summary }}"
+        },
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Delete Event",
+        "parameters": {
+          "calendarId": {
+            "__rl": true,
+            "cachedResultName": "Calendar",
+            "mode": "list",
+            "value": "AAMkAGUxOTQ4ZmU0LWMxYjUtNDRiZi1iYjdlLTNmYTFhOWQ3MWZhNwBGAAAAAABlzj22ZOwJQZOQBjwNTK5fBwBW9yW5dIfsR51ayk6B4bZSAAAAAAEGAABW9yW5dIfsR51ayk6B4bZSAAAAAeGaAAA="
+          },
+          "eventId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "operation": "delete",
+          "resource": "event"
+        },
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Event to Cancel",
+        "parameters": {
+          "calendarId": {
+            "__rl": true,
+            "cachedResultName": "Calendar",
+            "mode": "list",
+            "value": "AAMkAGUxOTQ4ZmU0LWMxYjUtNDRiZi1iYjdlLTNmYTFhOWQ3MWZhNwBGAAAAAABlzj22ZOwJQZOQBjwNTK5fBwBW9yW5dIfsR51ayk6B4bZSAAAAAAEGAABW9yW5dIfsR51ayk6B4bZSAAAAAeGaAAA="
+          },
+          "filters": {
+            "custom": "=contains(subject, '{{ $json.summary }}')"
+          },
+          "fromAllCalendars": false,
+          "limit": 1,
+          "resource": "event"
+        },
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Incoming Event Trigger",
+        "parameters": {
+          "calendarId": {
+            "__rl": true,
+            "cachedResultName": "Your Name",
+            "mode": "list",
+            "value": "your_email@gmail.com"
+          },
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "eventCreated"
+        },
+        "type": "n8n-nodes-base.googleCalendarTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "combineBy": "combineAll",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send E-mail with details",
+        "parameters": {
+          "additionalFields": {
+            "bodyContentType": "html"
+          },
+          "bodyContent": "<h1>Event cancelled via Google Calendar</h1>",
+          "subject": "={{ $json.subject + \" Cancelled\" }}",
+          "toRecipients": "your_email@work.zom"
+        },
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Calendar",
+    "Outlook",
+    "Microsoftoutlook"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 172,
+  "viewCount": 433,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Calendar Account",
+      "Outlook Account",
+      "Microsoftoutlook Account"
+    ],
+    "requiredCredentials": [
+      "google Calendar  O Auth2  A P I details",
+      "microsoft Outlook  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Incoming Event Trigger\".",
+      "Verify the settings of the trigger node \"Cancel Event Trigger\".",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Outlook Event\" node (n8n-nodes-base.microsoftOutlook) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Event to Cancel\" node (n8n-nodes-base.microsoftOutlook) and configure the action parameters, mappings, and fields.",
+      "Open the \"Delete Event\" node (n8n-nodes-base.microsoftOutlook) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send E-mail with details\" node (n8n-nodes-base.microsoftOutlook) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-054wx7xva",
+      "workflowId": "google-calendar-to-outlook-qwi0b",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Microsoftoutlook/1870_Microsoftoutlook_GoogleCalendar_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Microsoftoutlook\\1870_Microsoftoutlook_GoogleCalendar_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:19:12.557Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:12.557Z",
+  "updatedAt": "2026-07-15T11:19:12.557Z"
+}

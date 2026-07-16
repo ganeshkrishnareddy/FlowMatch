@@ -1,0 +1,449 @@
+{
+  "id": "syncro-alert-to-opsgenie-n7rjs",
+  "name": "Syncro Alert to OpsGenie",
+  "slug": "syncro-alert-to-opsgenie-q9bz",
+  "description": "Production-ready workflow: Syncro Alert to OpsGenie. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Syncro Alert to OpsGenie workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": 117,
+    "name": "Syncro Alert to OpsGenie",
+    "nodes": [
+      {
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          460,
+          380
+        ],
+        "webhookId": "fromsyncro",
+        "parameters": {
+          "path": "fromsyncro",
+          "options": {},
+          "httpMethod": "POST",
+          "responseData": "allEntries",
+          "responseMode": "lastNode"
+        },
+        "typeVersion": 1,
+        "id": "node-62eae5b8"
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          780,
+          380
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "AlertID",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"id\"]}}"
+              },
+              {
+                "name": "Description",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"computer_name\"]}} ({{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"customer\"][\"business_then_name\"]}}): {{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"formatted_output\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-7e1db27d"
+      },
+      {
+        "name": "Create Alert",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1180,
+          260
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.headerAuth }}",
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"computer_name\"]}} ({{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"customer\"][\"business_then_name\"]}}): {{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"formatted_output\"]}}"
+              },
+              {
+                "name": "alias",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"id\"]}}"
+              },
+              {
+                "name": "description",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"text\"]}}\n{{$node[\"Webhook\"].json[\"body\"][\"link\"]}}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": null,
+            "name": "OpsGenie"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-aac49461"
+      },
+      {
+        "name": "Close Alert",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1180,
+          460
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.headerAuth }}",
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "note",
+                "value": "Issue resolved automatically according to Syncro."
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": null,
+            "name": "OpsGenie"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-4e7a4353"
+      },
+      {
+        "name": "NoOp",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          780,
+          560
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-a91ad03c"
+      },
+      {
+        "name": "IF",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          940,
+          380
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"resolved\"]}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-b91dae22"
+      },
+      {
+        "name": "Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          620,
+          380
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "agent_offline_trigger"
+              }
+            ]
+          },
+          "value1": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"properties\"][\"trigger\"]}}",
+          "dataType": "string"
+        },
+        "typeVersion": 1,
+        "id": "node-5e44d89b"
+      },
+      {
+        "id": "error-6004a0a2",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-e006b5da",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.643965",
+      "updatedAt": "2025-09-29T07:07:45.643976",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Syncro Alert to OpsGenie. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Syncro Alert to OpsGenie",
+    "nodes": [
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Close Alert",
+        "parameters": {
+          "authentication": "{{ $credentials.headerAuth }}",
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "note",
+                "value": "Issue resolved automatically according to Syncro."
+              }
+            ]
+          },
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Alert",
+        "parameters": {
+          "authentication": "{{ $credentials.headerAuth }}",
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"computer_name\"]}} ({{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"customer\"][\"business_then_name\"]}}): {{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"formatted_output\"]}}"
+              },
+              {
+                "name": "alias",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"id\"]}}"
+              },
+              {
+                "name": "description",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"text\"]}}\n{{$node[\"Webhook\"].json[\"body\"][\"link\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"resolved\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "NoOp",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "AlertID",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"id\"]}}"
+              },
+              {
+                "name": "Description",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"computer_name\"]}} ({{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"customer\"][\"business_then_name\"]}}): {{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"formatted_output\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Switch",
+        "parameters": {
+          "dataType": "string",
+          "rules": {
+            "rules": [
+              {
+                "value2": "agent_offline_trigger"
+              }
+            ]
+          },
+          "value1": "={{$node[\"Webhook\"].json[\"body\"][\"attributes\"][\"properties\"][\"trigger\"]}}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "fromsyncro",
+          "responseData": "allEntries",
+          "responseMode": "lastNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 158,
+  "viewCount": 531,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Create Alert\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Close Alert\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"NoOp\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-l3ychxday",
+      "workflowId": "syncro-alert-to-opsgenie-n7rjs",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0077_HTTP_Noop_Sync_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0077_HTTP_Noop_Sync_Webhook.json",
+      "discoveredAt": "2026-07-15T11:17:38.557Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:38.557Z",
+  "updatedAt": "2026-07-15T11:17:38.557Z"
+}

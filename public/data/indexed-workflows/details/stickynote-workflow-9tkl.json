@@ -1,0 +1,1540 @@
+{
+  "id": "stickynote-workflow-h7q3w",
+  "name": "Stickynote Workflow",
+  "slug": "stickynote-workflow-9tkl",
+  "description": "Automated workflow: Stickynote Workflow. This workflow integrates 12 different services: webhook, stickyNote, httpRequest, code, switch. It contains 29 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Stickynote Workflow workflow containing 17 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "b73fed9b-d56c-4175-a310-8c09ed51acd2",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          80,
+          60
+        ],
+        "parameters": {
+          "width": 464,
+          "height": 303,
+          "content": "## Testing \n\nTesting can be done with CURL or similar.\n\nFor File posting using Form Data\ncurl -X POST \"{{ $env.WEBHOOK_URL }}\" \\\n     -H \"Content-Type: text/csv\" \\\n     --data-binary @path/to/your/file.csv\n\n\nThis can also be tested using the Test workflow"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6ed4b2cc-444f-44e2-ab91-34337acd7a9b",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1680,
+          580
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 396,
+          "height": 256,
+          "content": "## Response\nWhere possible we will be returning a binary object.\n```\nIf there is an error\n```\n{\n  \"status\": \"error\",\n  \"data\": \"error message to display\"\n}\n```"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4eff962e-e636-4704-835a-672ccd705e16",
+        "name": "Extract From File",
+        "type": "n8n-nodes-base.extractFromFile",
+        "onError": "continueErrorOutput",
+        "position": [
+          680,
+          80
+        ],
+        "parameters": {
+          "options": {},
+          "binaryPropertyName": "data0"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ccc66f1e-e000-4048-a492-b80fbf8c8fce",
+        "name": "Error Response",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "onError": "continueErrorOutput",
+        "position": [
+          1900,
+          900
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 500
+          },
+          "respondWith": "json",
+          "responseBody": "{\n  \"status\": \"error\",\n  \"data\": \"There was a problem converting your CSV. Please refresh the page and try again.\"\n}"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a7d34aba-6ded-4cc8-8866-7d4aa6ae3255",
+        "name": "Success Response",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "onError": "continueErrorOutput",
+        "position": [
+          1920,
+          220
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 200
+          },
+          "respondWith": "json",
+          "responseBody": "={\n  \"status\": \"OK\",\n  \"data\": {{ JSON.stringify($json.jsondata) }}\n}"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3484b148-4ba5-4b54-9401-44010ac31178",
+        "name": "Change Field",
+        "type": "n8n-nodes-base.set",
+        "onError": "continueErrorOutput",
+        "position": [
+          680,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b2e3bec3-221e-4f1d-b439-f75174f68ed1",
+                "name": "csv",
+                "type": "string",
+                "value": "={{ $json.body }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f35635fe-8943-486b-b5fa-4f566dd8f938",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          60,
+          40
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 2298,
+          "height": 1027,
+          "content": ""
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cede2fad-f0ee-4082-a403-81f6d8eb188e",
+        "name": "Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          340,
+          400
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 1,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "operator": {
+                        "type": "object",
+                        "operation": "notEmpty",
+                        "singleValue": true
+                      },
+                      "leftValue": "={{ $binary }}",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 1,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "8930ce1a-a4cc-4094-b08f-a23a13dec40c",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.headers['content-type'] }}",
+                      "rightValue": "text/plain"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 1,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "e3108952-daa2-425c-8c70-7d2ce0949e0c",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.headers['content-type'] }}",
+                      "rightValue": "=application/json"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a2d92aeb-25eb-4d3c-82ad-16d2124099a8",
+        "name": "Send to Error Channel",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          2380,
+          880
+        ],
+        "webhookId": "d8e1201d-cbcc-4153-a164-51d7b3e17c84",
+        "parameters": {
+          "text": ":interrobang: Error in XML to JSON tool",
+          "select": "channel",
+          "blocksUi": "={\n\t\"blocks\": [\n{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \":interrobang: Error in CSV to JSON tool\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*Time:*\\n{{ $now.format('dd/MM/yyyy HH:mm:ss') }}\\n*Execution ID:*\\n{{ $execution.id }}\\n\"\n\t\t\t},\n\t\t\t\"accessory\": {\n\t\t\t\t\"type\": \"button\",\n\t\t\t\t\"text\": {\n\t\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\t\"text\": \"Go to Error\",\n\t\t\t\t\t\"emoji\": true\n\t\t\t\t},\n\t\t\t\t\"value\": \"error\",\n\t\t\t\t\"url\": \"[insert URL here]{{ $workflow.id }}/executions/{{ $execution.id }}\",\n\t\t\t\t\"action_id\": \"button-action\",\n\t\t\t\t\"style\": \"primary\"\n\t\t\t}\n\t\t}\n\t]\n}",
+          "channelId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "C0832GBAEN4"
+          },
+          "messageType": "block",
+          "otherOptions": {},
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "typeVersion": 2.1,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b21c88d1-6f21-4ada-95ef-8ea91463e7ad",
+        "name": "Convert Raw Text To CSV",
+        "type": "n8n-nodes-base.code",
+        "onError": "continueRegularOutput",
+        "position": [
+          940,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const csvData = $input.all()[0]?.json?.csv;\n\n// Use a regex to split on either ',' or ';'\nconst lines = csvData.split(\"\\n\");\nconst headers = lines[0].split(/,|;/);\n\nconst jsonData = lines.slice(1).map((line) => {\n  // Split on ',' or ';' for each line\n  const data = line.split(/,|;/);\n  let obj = {};\n  headers.forEach((header, i) => {\n    obj[header] = data[i];\n  });\n  return obj;\n});\n\nif (jsonData.length === 0) {\n  throw new Error(\"No data to process\");\n}\n\nreturn jsonData;\n"
+        },
+        "typeVersion": 2,
+        "alwaysOutputData": true,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a9803789-0397-4f5f-9cd2-cb630f983efc",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2380,
+          40
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 700,
+          "height": 600,
+          "content": "## Sample of Raw CSV Data Send\nUse the HTTP request node below to see how to send the Raw CSV data into this workflow. Don't forget to include the \\n's "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8fb97224-706b-41de-a7ab-cbe2191436e9",
+        "name": "Check if Value",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1180,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "d8d4cfda-f384-4154-8ad2-c3eabcb8c7ce",
+                "operator": {
+                  "type": "string",
+                  "operation": "notExists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.error }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4484f424-429b-449f-85c2-dd6a135972a0",
+        "name": "Send Raw CSV",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2480,
+          200
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "body": "album, year, US_peak_chart_post\nThe White Stripes, 1999, -\nDe Stijl, 2000, -\nWhite Blood Cells, 2001, 61\nElephant, 2003, 6\nGet Behind Me Satan, 2005, 3\nIcky Thump, 2007, 2\nUnder Great White Northern Lights, 2010, 11\nLive in Mississippi, 2011, -\nLive at the Gold Dollar, 2012, -\nNine Miles from the White City, 2013, -\n",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "text/plain"
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "70a46bce-32da-4868-a960-3ee1cefbed1f",
+        "name": "POST",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          140,
+          420
+        ],
+        "webhookId": "add125c9-1591-4e1c-b68c-8032b99b6010",
+        "parameters": {
+          "path": "tool/csv-to-json",
+          "options": {
+            "binaryPropertyName": "data"
+          },
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 1.1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "116cfc2c-6e5f-4367-8c80-e1341e7d196a",
+        "name": "Aggregate",
+        "type": "n8n-nodes-base.aggregate",
+        "position": [
+          1580,
+          220
+        ],
+        "parameters": {
+          "options": {},
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "jsondata"
+        },
+        "typeVersion": 1,
+        "notes": "This aggregate node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "967dc555-2599-4fb0-b3e1-00164bae4120",
+        "name": "Aggregate1",
+        "type": "n8n-nodes-base.aggregate",
+        "position": [
+          1580,
+          360
+        ],
+        "parameters": {
+          "options": {},
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "jsondata"
+        },
+        "typeVersion": 1,
+        "notes": "This aggregate node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "51c77def-cdf7-41da-bfd1-e585f0553672",
+        "name": "Success Response2",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "onError": "continueErrorOutput",
+        "position": [
+          1900,
+          400
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 200
+          },
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json.jsondata) }}"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "ccc66f1e-e000-4048-a492-b80fbf8c8fce": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-e1f9815a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-72bf688e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-cd5f9d6a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-786fd484",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-71120fc5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-fcb7ca67",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-554689e2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-53afa17e",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a7d34aba-6ded-4cc8-8866-7d4aa6ae3255": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-17cc7f7d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-d3b1009c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-63deb05e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-f4738a8c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-4d9df08c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-3666191a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-3387bf35",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-ff32e0f3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4484f424-429b-449f-85c2-dd6a135972a0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-1a176802",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-7d0e0e95",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-9644fb20",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-184bd522",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-0c0b48d7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-99f7a3a0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-3bc34b5a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-f8d2dbf0",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "70a46bce-32da-4868-a960-3ee1cefbed1f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-571a7843",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-e9a5e12f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-5d48a157",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-de6e27f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-a67b38ac",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-256644d6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-bb3fb0f2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-47474828",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "51c77def-cdf7-41da-bfd1-e585f0553672": {
+        "main": [
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-fd8dc202",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-b9b7879a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-255d61c7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-3275b06d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-5990f9ca",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-3c093d07",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-c714b01f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-1f4c383b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4eff962e-e636-4704-835a-672ccd705e16": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4eff962e-e636-4704-835a-672ccd705e16-09797260",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a2d92aeb-25eb-4d3c-82ad-16d2124099a8": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a2d92aeb-25eb-4d3c-82ad-16d2124099a8-49719fff",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Stickynote Workflow. This workflow integrates 12 different services: webhook, stickyNote, httpRequest, code, switch. It contains 29 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-d937bd35",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.734953",
+      "updatedAt": "2025-09-29T07:07:42.735004",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stickynote Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4484f424-429b-449f-85c2-dd6a135972a0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-1a176802"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-7d0e0e95"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-9644fb20"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-184bd522"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-0c0b48d7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-99f7a3a0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-3bc34b5a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4484f424-429b-449f-85c2-dd6a135972a0-f8d2dbf0"
+            }
+          ]
+        ]
+      },
+      "4eff962e-e636-4704-835a-672ccd705e16": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4eff962e-e636-4704-835a-672ccd705e16-09797260"
+            }
+          ]
+        ]
+      },
+      "51c77def-cdf7-41da-bfd1-e585f0553672": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-fd8dc202"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-b9b7879a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-255d61c7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-3275b06d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-5990f9ca"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-3c093d07"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-c714b01f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51c77def-cdf7-41da-bfd1-e585f0553672-1f4c383b"
+            }
+          ]
+        ]
+      },
+      "70a46bce-32da-4868-a960-3ee1cefbed1f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-571a7843"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-e9a5e12f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-5d48a157"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-de6e27f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-a67b38ac"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-256644d6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-bb3fb0f2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-70a46bce-32da-4868-a960-3ee1cefbed1f-47474828"
+            }
+          ]
+        ]
+      },
+      "a2d92aeb-25eb-4d3c-82ad-16d2124099a8": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a2d92aeb-25eb-4d3c-82ad-16d2124099a8-49719fff"
+            }
+          ]
+        ]
+      },
+      "a7d34aba-6ded-4cc8-8866-7d4aa6ae3255": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-17cc7f7d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-d3b1009c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-63deb05e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-f4738a8c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-4d9df08c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-3666191a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-3387bf35"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a7d34aba-6ded-4cc8-8866-7d4aa6ae3255-ff32e0f3"
+            }
+          ]
+        ]
+      },
+      "ccc66f1e-e000-4048-a492-b80fbf8c8fce": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-e1f9815a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-72bf688e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-cd5f9d6a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-786fd484"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-71120fc5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-fcb7ca67"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-554689e2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ccc66f1e-e000-4048-a492-b80fbf8c8fce-53afa17e"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "nodes": [
+      {
+        "name": "Aggregate",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "jsondata",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1
+      },
+      {
+        "name": "Aggregate1",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "jsondata",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1
+      },
+      {
+        "name": "Change Field",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b2e3bec3-221e-4f1d-b439-f75174f68ed1",
+                "name": "csv",
+                "type": "string",
+                "value": "={{ $json.body }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.3
+      },
+      {
+        "name": "Check if Value",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "d8d4cfda-f384-4154-8ad2-c3eabcb8c7ce",
+                "leftValue": "={{ $json.error }}",
+                "operator": {
+                  "operation": "notExists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Convert Raw Text To CSV",
+        "parameters": {
+          "jsCode": "const csvData = $input.all()[0]?.json?.csv;\n\n// Use a regex to split on either ',' or ';'\nconst lines = csvData.split(\"\\n\");\nconst headers = lines[0].split(/,|;/);\n\nconst jsonData = lines.slice(1).map((line) => {\n  // Split on ',' or ';' for each line\n  const data = line.split(/,|;/);\n  let obj = {};\n  headers.forEach((header, i) => {\n    obj[header] = data[i];\n  });\n  return obj;\n});\n\nif (jsonData.length === 0) {\n  throw new Error(\"No data to process\");\n}\n\nreturn jsonData;\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Response",
+        "parameters": {
+          "options": {
+            "responseCode": 500
+          },
+          "respondWith": "json",
+          "responseBody": "{\n  \"status\": \"error\",\n  \"data\": \"There was a problem converting your CSV. Please refresh the page and try again.\"\n}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract From File",
+        "parameters": {
+          "binaryPropertyName": "data0",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "POST",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {
+            "binaryPropertyName": "data"
+          },
+          "path": "tool/csv-to-json",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Send Raw CSV",
+        "parameters": {
+          "body": "album, year, US_peak_chart_post\nThe White Stripes, 1999, -\nDe Stijl, 2000, -\nWhite Blood Cells, 2001, 61\nElephant, 2003, 6\nGet Behind Me Satan, 2005, 3\nIcky Thump, 2007, 2\nUnder Great White Northern Lights, 2010, 11\nLive in Mississippi, 2011, -\nLive at the Gold Dollar, 2012, -\nNine Miles from the White City, 2013, -\n",
+          "contentType": "raw",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "rawContentType": "text/plain",
+          "sendBody": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Send to Error Channel",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "blocksUi": "={\n\t\"blocks\": [\n{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \":interrobang: Error in CSV to JSON tool\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*Time:*\\n{{ $now.format('dd/MM/yyyy HH:mm:ss') }}\\n*Execution ID:*\\n{{ $execution.id }}\\n\"\n\t\t\t},\n\t\t\t\"accessory\": {\n\t\t\t\t\"type\": \"button\",\n\t\t\t\t\"text\": {\n\t\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\t\"text\": \"Go to Error\",\n\t\t\t\t\t\"emoji\": true\n\t\t\t\t},\n\t\t\t\t\"value\": \"error\",\n\t\t\t\t\"url\": \"[insert URL here]{{ $workflow.id }}/executions/{{ $execution.id }}\",\n\t\t\t\t\"action_id\": \"button-action\",\n\t\t\t\t\"style\": \"primary\"\n\t\t\t}\n\t\t}\n\t]\n}",
+          "channelId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "C0832GBAEN4"
+          },
+          "messageType": "block",
+          "otherOptions": {},
+          "select": "channel",
+          "text": ":interrobang: Error in XML to JSON tool"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "## Sample of Raw CSV Data Send\nUse the HTTP request node below to see how to send the Raw CSV data into this workflow. Don't forget to include the \\n's ",
+          "height": 600,
+          "width": 700
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Testing \n\nTesting can be done with CURL or similar.\n\nFor File posting using Form Data\ncurl -X POST \"{{ $env.WEBHOOK_URL }}\" \\\n     -H \"Content-Type: text/csv\" \\\n     --data-binary @path/to/your/file.csv\n\n\nThis can also be tested using the Test workflow",
+          "height": 303,
+          "width": 464
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 4,
+          "content": "## Response\nWhere possible we will be returning a binary object.\n```\nIf there is an error\n```\n{\n  \"status\": \"error\",\n  \"data\": \"error message to display\"\n}\n```",
+          "height": 256,
+          "width": 396
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 7,
+          "content": "",
+          "height": 1027,
+          "width": 2298
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Success Response",
+        "parameters": {
+          "options": {
+            "responseCode": 200
+          },
+          "respondWith": "json",
+          "responseBody": "={\n  \"status\": \"OK\",\n  \"data\": {{ JSON.stringify($json.jsondata) }}\n}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Success Response2",
+        "parameters": {
+          "options": {
+            "responseCode": 200
+          },
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json.jsondata) }}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Switch",
+        "parameters": {
+          "options": {
+            "fallbackOutput": "extra"
+          },
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $binary }}",
+                      "operator": {
+                        "operation": "notEmpty",
+                        "singleValue": true,
+                        "type": "object"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 1
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "8930ce1a-a4cc-4094-b08f-a23a13dec40c",
+                      "leftValue": "={{ $json.headers['content-type'] }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "text/plain"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 1
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "e3108952-daa2-425c-8c70-7d2ce0949e0c",
+                      "leftValue": "={{ $json.headers['content-type'] }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "=application/json"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 1
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3
+      }
+    ]
+  },
+  "nodeCount": 17,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Slack",
+    "HTTP Request",
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 189,
+  "viewCount": 808,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Slack Account",
+      "HTTP Request Account",
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Error Response\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Success Response\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"POST\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Success Response2\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract From File\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send to Error Channel\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check if Value\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Raw CSV\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Aggregate\" node (n8n-nodes-base.aggregate) and configure the action parameters, mappings, and fields.",
+      "Open the \"Aggregate1\" node (n8n-nodes-base.aggregate) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Change Field\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-3vh81ebl6",
+      "workflowId": "stickynote-workflow-h7q3w",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0686_Code_Webhook_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0686_Code_Webhook_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:16.765Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.765Z",
+  "updatedAt": "2026-07-15T11:18:16.765Z"
+}

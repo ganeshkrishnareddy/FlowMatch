@@ -1,0 +1,586 @@
+{
+  "id": "send-tts-text-to-speech-voice-calls-1stj9",
+  "name": "Send TTS (Text-to-speech) voice calls",
+  "slug": "send-tts-text-to-speech-voice-calls-ty8s",
+  "description": "Automated workflow: Send TTS (Text-to-speech) voice calls. This workflow integrates 4 different services: stickyNote, httpRequest, formTrigger, stopAndError. It contains 7 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Send TTS (Text-to-speech) voice calls workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "id": "GrGmuKzZAsCkd4bt",
+    "meta": {
+      "instanceId": "workflow-fb654503",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.369575",
+      "updatedAt": "2025-09-29T07:07:46.369595",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Send TTS (Text-to-speech) voice calls",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "2b14ce1c-5213-4684-90a6-ef8b6885f2ef",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -300,
+          -520
+        ],
+        "parameters": {
+          "width": 440,
+          "height": 180,
+          "content": "## STEP 1\n[Register here to ClickSend]({{ $env.WEBHOOK_URL }} and obtain your API Key and 2 € of free credits\n\nIn the node \"Send Voice\" create a \"Basic Auth\" with the username you registered and the API Key provided as your password"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b3931dc5-7021-4ca2-ae73-8bf670a56cb7",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -300,
+          -300
+        ],
+        "parameters": {
+          "width": 440,
+          "content": "## STEP 2\n\nSubmit the form and you will receive a call to the phone number you entered where the selected voice will tell you the content of the text you wrote."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a548f92d-199e-4cd2-ae34-742617484831",
+        "name": "Send Voice",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -40,
+          -100
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"messages\": [\n    {\n      \"source\": \"n8n\",\n      \"body\": \"{{ $json.Body }}\",\n      \"to\": \"{{ $json.To }}\",\n      \"voice\": \"{{ $json.Voice }}\",\n      \"lang\": \"{{ $json.Lang }}\",\n      \"machine_detection\": 1\n    }\n  ]\n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpBasicAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": " application/json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "UwsDe2JxT39eWIvY",
+            "name": "ClickSend API"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ffc2cbe9-6e31-4d54-8e6a-26e94ec50ef4",
+        "name": "On form submission",
+        "type": "n8n-nodes-base.formTrigger",
+        "position": [
+          -300,
+          -100
+        ],
+        "webhookId": "8bfdf9f3-9323-4295-ab96-f9852d5981d5",
+        "parameters": {
+          "options": {},
+          "formTitle": "Send Voice Message",
+          "formFields": {
+            "values": [
+              {
+                "fieldType": "textarea",
+                "fieldLabel": "Body",
+                "placeholder": "Body (max. 600 chars)",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "To",
+                "placeholder": "+39xxxxxxxxxx",
+                "requiredField": true
+              },
+              {
+                "fieldType": "dropdown",
+                "fieldLabel": "Voice",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "male"
+                    },
+                    {
+                      "option": "female"
+                    }
+                  ]
+                },
+                "requiredField": true
+              },
+              {
+                "fieldType": "dropdown",
+                "fieldLabel": "Lang",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "en-us \t"
+                    },
+                    {
+                      "option": "it-it"
+                    },
+                    {
+                      "option": "en-au"
+                    },
+                    {
+                      "option": "en-gb"
+                    },
+                    {
+                      "option": "de-de"
+                    },
+                    {
+                      "option": "es-es"
+                    },
+                    {
+                      "option": "fr-fr"
+                    },
+                    {
+                      "option": "is-is"
+                    },
+                    {
+                      "option": "da-dk"
+                    },
+                    {
+                      "option": "nl-nl"
+                    },
+                    {
+                      "option": "pl-pl"
+                    },
+                    {
+                      "option": "pt-br"
+                    },
+                    {
+                      "option": "ru-ru"
+                    }
+                  ]
+                },
+                "requiredField": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This formTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "397e0b9f-7407-47d6-b242-1b87955a701b",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -300,
+          -720
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 440,
+          "content": "## Automate text-to-speech voice calls\nThis workflow is a simple yet powerful way to automate text-to-speech voice calls using the ClickSend API. It’s ideal for notifications, reminders, or any scenario where voice communication is needed."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "1ad6da32-7197-4f64-b770-88dae8348db2",
+    "connections": {
+      "a548f92d-199e-4cd2-ae34-742617484831": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-556c3ad0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-c92ad902",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-809a06ea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-18286d98",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-328c2bfa",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-e6f29f39",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-348eb09e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-8f1b0b12",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Send TTS (Text-to-speech) voice calls. This workflow integrates 4 different services: stickyNote, httpRequest, formTrigger, stopAndError. It contains 7 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Send TTS (Text-to-speech) voice calls. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "a548f92d-199e-4cd2-ae34-742617484831": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-556c3ad0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-c92ad902"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-809a06ea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-18286d98"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-328c2bfa"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-e6f29f39"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-348eb09e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a548f92d-199e-4cd2-ae34-742617484831-8f1b0b12"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Send TTS (Text-to-speech) voice calls",
+    "nodes": [
+      {
+        "name": "On form submission",
+        "parameters": {
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Body",
+                "fieldType": "textarea",
+                "placeholder": "Body (max. 600 chars)",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "To",
+                "placeholder": "+39xxxxxxxxxx",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Voice",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "male"
+                    },
+                    {
+                      "option": "female"
+                    }
+                  ]
+                },
+                "fieldType": "dropdown",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Lang",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "en-us \t"
+                    },
+                    {
+                      "option": "it-it"
+                    },
+                    {
+                      "option": "en-au"
+                    },
+                    {
+                      "option": "en-gb"
+                    },
+                    {
+                      "option": "de-de"
+                    },
+                    {
+                      "option": "es-es"
+                    },
+                    {
+                      "option": "fr-fr"
+                    },
+                    {
+                      "option": "is-is"
+                    },
+                    {
+                      "option": "da-dk"
+                    },
+                    {
+                      "option": "nl-nl"
+                    },
+                    {
+                      "option": "pl-pl"
+                    },
+                    {
+                      "option": "pt-br"
+                    },
+                    {
+                      "option": "ru-ru"
+                    }
+                  ]
+                },
+                "fieldType": "dropdown",
+                "requiredField": true
+              }
+            ]
+          },
+          "formTitle": "Send Voice Message",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Voice",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpBasicAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": " application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"messages\": [\n    {\n      \"source\": \"n8n\",\n      \"body\": \"{{ $json.Body }}\",\n      \"to\": \"{{ $json.To }}\",\n      \"voice\": \"{{ $json.Voice }}\",\n      \"lang\": \"{{ $json.Lang }}\",\n      \"machine_detection\": 1\n    }\n  ]\n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## STEP 1\n[Register here to ClickSend]({{ $env.WEBHOOK_URL }} and obtain your API Key and 2 € of free credits\n\nIn the node \"Send Voice\" create a \"Basic Auth\" with the username you registered and the API Key provided as your password",
+          "height": 180,
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## STEP 2\n\nSubmit the form and you will receive a call to the phone number you entered where the selected voice will tell you the content of the text you wrote.",
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 3,
+          "content": "## Automate text-to-speech voice calls\nThis workflow is a simple yet powerful way to automate text-to-speech voice calls using the ClickSend API. It’s ideal for notifications, reminders, or any scenario where voice communication is needed.",
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Form Trigger"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 202,
+  "viewCount": 401,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Form Trigger Account"
+    ],
+    "requiredCredentials": [
+      "http Basic Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On form submission\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Voice\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 91,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-9ddlr6cgk",
+      "workflowId": "send-tts-text-to-speech-voice-calls-1stj9",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1481_HTTP_Form_Send_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1481_HTTP_Form_Send_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:35.531Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:35.531Z",
+  "updatedAt": "2026-07-15T11:18:35.531Z"
+}

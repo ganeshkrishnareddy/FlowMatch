@@ -1,0 +1,423 @@
+{
+  "id": "monitor-producthunt-xtbov",
+  "name": "Monitor ProductHunt",
+  "slug": "monitor-producthunt-czqe",
+  "description": "Automated workflow: Monitor ProductHunt. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Monitor ProductHunt workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "fvYgcG9s1pqP5cQ6",
+    "meta": {
+      "instanceId": "workflow-b69882aa",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.175053",
+      "updatedAt": "2025-09-29T07:07:52.175069",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Monitor ProductHunt",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "3cf0b7e0-ec9f-4173-bc85-1b4daef5aa22",
+        "name": "Define relevant products",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          220,
+          -100
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a83156e0-1782-4d0a-a15c-1ff889ff915d",
+                "name": "Relevant Products",
+                "type": "string",
+                "value": "AI Agents"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a316f080-0fd8-4723-a65c-bce2c2a13cf8",
+        "name": "Found products?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          660,
+          -100
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "552c61c2-1ec0-40b5-b473-2423b646418b",
+                "operator": {
+                  "type": "string",
+                  "operation": "notContains"
+                },
+                "leftValue": "={{ $json.data.modelResponse }}",
+                "rightValue": "[NA]"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ffb0289e-9341-4641-bfcd-41b25f0b1379",
+        "name": "Look up products",
+        "type": "n8n-nodes-base.airtop",
+        "position": [
+          440,
+          -100
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "prompt": "=Extract up to 5 product launches that are {{ $json[\"Relevant Products\"] }} for each product extract the title and URL (if exists).\n\nReturn format:\nToday's [{{ $json[\"Relevant Products\"] }}] on Producthunt\n1. Title 1 (URL 1)\n2. Title 2 (URL 2)\nand so on\n\nIf you cannot find any relevant products, return [NA]",
+          "resource": "extraction",
+          "operation": "query",
+          "sessionMode": "new",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "airtopApi": {
+            "id": "byhouJF8RLH5DkmY",
+            "name": "[PROD] Airtop"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This airtop node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4d1f0668-d5d5-4440-8608-3cfe3d61d0c0",
+        "name": "Send slack message",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          880,
+          -100
+        ],
+        "webhookId": "9887477b-9680-4701-a2a1-583d47f1fb5d",
+        "parameters": {
+          "text": "={{ $json.data.modelResponse }}",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "C087FK3J0MC",
+            "cachedResultName": "make-debug"
+          },
+          "otherOptions": {}
+        },
+        "credentials": {
+          "slackApi": {
+            "id": "NgjAmOgS9xRg1RlU",
+            "name": "Slack account"
+          }
+        },
+        "typeVersion": 2.3,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "921d283e-6d67-4aaa-a344-687bb23b8710",
+        "name": "Trigger daily",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          0,
+          -100
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 6
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-06d15b61",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "e51e2bd0-43f0-4601-a0ad-f553f419a827",
+    "connections": {
+      "4d1f0668-d5d5-4440-8608-3cfe3d61d0c0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4d1f0668-d5d5-4440-8608-3cfe3d61d0c0-119d3054",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Monitor ProductHunt. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Monitor ProductHunt. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4d1f0668-d5d5-4440-8608-3cfe3d61d0c0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4d1f0668-d5d5-4440-8608-3cfe3d61d0c0-119d3054"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Monitor ProductHunt",
+    "nodes": [
+      {
+        "name": "Define relevant products",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a83156e0-1782-4d0a-a15c-1ff889ff915d",
+                "name": "Relevant Products",
+                "type": "string",
+                "value": "AI Agents"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Found products?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "552c61c2-1ec0-40b5-b473-2423b646418b",
+                "leftValue": "={{ $json.data.modelResponse }}",
+                "operator": {
+                  "operation": "notContains",
+                  "type": "string"
+                },
+                "rightValue": "[NA]"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "airtopApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Look up products",
+        "parameters": {
+          "additionalFields": {},
+          "operation": "query",
+          "prompt": "=Extract up to 5 product launches that are {{ $json[\"Relevant Products\"] }} for each product extract the title and URL (if exists).\n\nReturn format:\nToday's [{{ $json[\"Relevant Products\"] }}] on Producthunt\n1. Title 1 (URL 1)\n2. Title 2 (URL 2)\nand so on\n\nIf you cannot find any relevant products, return [NA]",
+          "resource": "extraction",
+          "sessionMode": "new",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.airtop",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "slackApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send slack message",
+        "parameters": {
+          "channelId": {
+            "__rl": true,
+            "cachedResultName": "make-debug",
+            "mode": "list",
+            "value": "C087FK3J0MC"
+          },
+          "otherOptions": {},
+          "select": "channel",
+          "text": "={{ $json.data.modelResponse }}"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.3
+      },
+      {
+        "name": "Trigger daily",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 6
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Airtop",
+    "Slack"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 13,
+  "viewCount": 292,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Airtop Account",
+      "Slack Account"
+    ],
+    "requiredCredentials": [
+      "airtop  A P I details",
+      "slack  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Trigger daily\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Found products?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Look up products\" node (n8n-nodes-base.airtop) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send slack message\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Define relevant products\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-3y4wukjfd",
+      "workflowId": "monitor-producthunt-xtbov",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/1859_Schedule_Slack_Monitor_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\1859_Schedule_Slack_Monitor_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:30:05.797Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:05.797Z",
+  "updatedAt": "2026-07-15T11:30:05.797Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

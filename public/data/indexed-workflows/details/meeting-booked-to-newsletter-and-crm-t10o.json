@@ -1,0 +1,913 @@
+{
+  "id": "meeting-booked-to-newsletter-and-crm-jn8n0",
+  "name": "Meeting booked - to newsletter and CRM",
+  "slug": "meeting-booked-to-newsletter-and-crm-t10o",
+  "description": "Automated workflow: Meeting booked - to newsletter and CRM. This workflow integrates 8 different services: stickyNote, httpRequest, calTrigger, telegram, splitOut. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Meeting booked - to newsletter and CRM workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "xe9sXQUc7yW8P8im",
+    "meta": {
+      "instanceId": "workflow-f1e67b4f",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:57.987586",
+      "updatedAt": "2025-09-29T07:07:57.987606",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Meeting booked - to newsletter and CRM",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "715f9c0b-58a6-46b9-b732-334cc2fb3a60",
+        "name": "Split Attendees",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          -460,
+          -140
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "attendees"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "171ed51e-6277-46d3-9037-8b2722ca06d0",
+        "name": "Add users",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          200,
+          -140
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "title": "={{ $('on New Booking').item.json.eventTitle }}",
+              "length": "={{ $('on New Booking').item.json.length }}",
+              "timeZone": "={{ $json.timeZone }}",
+              "createdAt": "={{ $('on New Booking').item.json.createdAt }}",
+              "attendeeName": "={{ $json.name }}",
+              "meetingStart": "={{ $('on New Booking').item.json.startTime }}",
+              "attendeeEmail": "={{ $json.email }}"
+            },
+            "schema": [
+              {
+                "id": "createdAt",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "createdAt",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "title",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "title",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "meetingStart",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "meetingStart",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "attendeeName",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "attendeeName",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "attendeeEmail",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "attendeeEmail",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "timeZone",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "timeZone",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "length",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "length",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1SJosfoM-WZEimBQTz1mu65xiyuq9bHII0Igd1mgCcq0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Calendar bookings"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "twZdLFsI3kTnqtpG",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3b22d814-fe80-4c5b-814f-4e2666c96ca3",
+        "name": "on New Booking",
+        "type": "n8n-nodes-base.calTrigger",
+        "position": [
+          -680,
+          -140
+        ],
+        "webhookId": "0b5ccb99-8c0a-47e4-a970-403e607c89ed",
+        "parameters": {
+          "events": [
+            "BOOKING_CREATED"
+          ],
+          "options": {}
+        },
+        "credentials": {
+          "calApi": {
+            "id": "3JuO2rbGXKSX0VL9",
+            "name": "Cal account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This calTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "020e7fc5-7f72-434f-8a84-15b177237146",
+        "name": "Add subscriber",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          420,
+          -140
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "email",
+                "value": "={{ $('Split Attendees').item.json.email }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('set data').item.json.beehiivAPI }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "35678a8f-e844-484f-b7f3-7df5a80f4a2d",
+        "name": "Set Attendee",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -20,
+          -140
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "70fc23eb-95b5-43ba-9067-8d834d440684",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.name }}"
+              },
+              {
+                "id": "2aa7594d-f6fd-4437-a7b0-ad3e23b0e719",
+                "name": "email",
+                "type": "string",
+                "value": "={{ $json.email }}"
+              },
+              {
+                "id": "7a2f22da-04e1-4507-b135-1fdfdcdda77f",
+                "name": "timeZone",
+                "type": "string",
+                "value": "={{ $json.timeZone }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "678b7ca8-2ecf-44b4-a420-e40600d09a74",
+        "name": "notify in channel",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          640,
+          -140
+        ],
+        "webhookId": "7ade83ec-58fa-4b43-aa3b-93bb0d9ae712",
+        "parameters": {
+          "text": "=📅 New meeting booked\n\nEvent name: {{ $('Add users').item.json.title }}\nStart Date: {{ $('Add users').item.json.meetingStart }} UTC\nName: {{ $('Add users').item.json.attendeeName }}\nEmail: {{ $('Add users').item.json.attendeeEmail }}\nUser time zone: {{ $('Add users').item.json.timeZone }}",
+          "chatId": "={{ $('set data').item.json.chatID }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "IgrntTxsoDphh19z",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1e23785f-1a3d-4d0c-a7d1-1ebc6209d5c8",
+        "name": "set data",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -240,
+          -140
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "797d5771-b242-47f5-a0c6-dc3a1a8fb15b",
+                "name": "chatID",
+                "type": "string",
+                "value": "yourChatId"
+              },
+              {
+                "id": "1c3239e8-6fe2-48ad-9083-04d108a95aec",
+                "name": "beehiivAPI",
+                "type": "string",
+                "value": "yourAPIkey"
+              },
+              {
+                "id": "8c94a712-93a6-48de-8a27-93c5ed0e68eb",
+                "name": "publicationId",
+                "type": "string",
+                "value": "yourBeehiivPublicationId"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cf66eff2-ca4d-4e52-b476-26334a82275f",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -330,
+          -460
+        ],
+        "parameters": {
+          "width": 280,
+          "height": 480,
+          "content": "## Define your parameters\n- Find your telegram chat id to get notified in a private channel (bot must be added as admin)\n- Create an account on [Beehiiv]() and get your api key\n- Get your publication id from your newsletter which will be parsed in the \"Add subscriber\" url endpoint"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cc33ebc8-d966-4c17-ab4d-8fa6dde58c37",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1160,
+          -380
+        ],
+        "parameters": {
+          "width": 400,
+          "height": 540,
+          "content": "## How it works\nThis workflow allows you to add each meeting guest into Google Sheets, adding one row for each guest and consequently adding those users to your newsletter on Beehiiv.\n\n## Set up steps\n\n- Create an account on [Cal.com]({{ $env.WEBHOOK_URL }}\n- Create a new webhook on [Cal.com]({{ $env.WEBHOOK_URL }} and send a test event to the URL that appears in the first node. You will get test data that you can pin to set the rest of the workflow.\n- For [Beehiiv]({{ $env.WEBHOOK_URL }} you will need to get the publication id from the account plus the api key. You will find those on your account settings. Define the publication id on the \"set data\" node, together with your Telegram chat id, if you wish to notify yourself in a private channel when a new subscriber is added.\n\nEnjoy building!\n\nAitor\n[1 Node]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "64184a3c-c62a-4bb1-ae93-d7b6d22d85a2",
+    "connections": {
+      "020e7fc5-7f72-434f-8a84-15b177237146": {
+        "main": [
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-00888945",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-216304de",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-318fb403",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-57254758",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-d909775b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-cdfd455d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-caa022b7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-90ab242b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "171ed51e-6277-46d3-9037-8b2722ca06d0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-171ed51e-6277-46d3-9037-8b2722ca06d0-1a6fdf76",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "678b7ca8-2ecf-44b4-a420-e40600d09a74": {
+        "main": [
+          [
+            {
+              "node": "error-handler-678b7ca8-2ecf-44b4-a420-e40600d09a74-91d74211",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Meeting booked - to newsletter and CRM. This workflow integrates 8 different services: stickyNote, httpRequest, calTrigger, telegram, splitOut. It contains 13 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Meeting booked - to newsletter and CRM. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "020e7fc5-7f72-434f-8a84-15b177237146": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-00888945"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-216304de"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-318fb403"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-57254758"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-d909775b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-cdfd455d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-caa022b7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-020e7fc5-7f72-434f-8a84-15b177237146-90ab242b"
+            }
+          ]
+        ]
+      },
+      "171ed51e-6277-46d3-9037-8b2722ca06d0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-171ed51e-6277-46d3-9037-8b2722ca06d0-1a6fdf76"
+            }
+          ]
+        ]
+      },
+      "678b7ca8-2ecf-44b4-a420-e40600d09a74": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-678b7ca8-2ecf-44b4-a420-e40600d09a74-91d74211"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Meeting booked - to newsletter and CRM",
+    "nodes": [
+      {
+        "name": "Add subscriber",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "email",
+                "value": "={{ $('Split Attendees').item.json.email }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('set data').item.json.beehiivAPI }}"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add users",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "createdAt",
+                "id": "createdAt",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "title",
+                "id": "title",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "meetingStart",
+                "id": "meetingStart",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "attendeeName",
+                "id": "attendeeName",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "attendeeEmail",
+                "id": "attendeeEmail",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "timeZone",
+                "id": "timeZone",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "length",
+                "id": "length",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "attendeeEmail": "={{ $json.email }}",
+              "attendeeName": "={{ $json.name }}",
+              "createdAt": "={{ $('on New Booking').item.json.createdAt }}",
+              "length": "={{ $('on New Booking').item.json.length }}",
+              "meetingStart": "={{ $('on New Booking').item.json.startTime }}",
+              "timeZone": "={{ $json.timeZone }}",
+              "title": "={{ $('on New Booking').item.json.eventTitle }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Calendar bookings",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1SJosfoM-WZEimBQTz1mu65xiyuq9bHII0Igd1mgCcq0"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "notify in channel",
+        "parameters": {
+          "additionalFields": {
+            "appendAttribution": false
+          },
+          "chatId": "={{ $('set data').item.json.chatID }}",
+          "text": "=📅 New meeting booked\n\nEvent name: {{ $('Add users').item.json.title }}\nStart Date: {{ $('Add users').item.json.meetingStart }} UTC\nName: {{ $('Add users').item.json.attendeeName }}\nEmail: {{ $('Add users').item.json.attendeeEmail }}\nUser time zone: {{ $('Add users').item.json.timeZone }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "calApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "on New Booking",
+        "parameters": {
+          "events": [
+            "BOOKING_CREATED"
+          ],
+          "options": {}
+        },
+        "type": "n8n-nodes-base.calTrigger",
+        "typeVersion": 2
+      },
+      {
+        "name": "Set Attendee",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "70fc23eb-95b5-43ba-9067-8d834d440684",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.name }}"
+              },
+              {
+                "id": "2aa7594d-f6fd-4437-a7b0-ad3e23b0e719",
+                "name": "email",
+                "type": "string",
+                "value": "={{ $json.email }}"
+              },
+              {
+                "id": "7a2f22da-04e1-4507-b135-1fdfdcdda77f",
+                "name": "timeZone",
+                "type": "string",
+                "value": "={{ $json.timeZone }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "set data",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "797d5771-b242-47f5-a0c6-dc3a1a8fb15b",
+                "name": "chatID",
+                "type": "string",
+                "value": "yourChatId"
+              },
+              {
+                "id": "1c3239e8-6fe2-48ad-9083-04d108a95aec",
+                "name": "beehiivAPI",
+                "type": "string",
+                "value": "yourAPIkey"
+              },
+              {
+                "id": "8c94a712-93a6-48de-8a27-93c5ed0e68eb",
+                "name": "publicationId",
+                "type": "string",
+                "value": "yourBeehiivPublicationId"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Split Attendees",
+        "parameters": {
+          "fieldToSplitOut": "attendees",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Define your parameters\n- Find your telegram chat id to get notified in a private channel (bot must be added as admin)\n- Create an account on [Beehiiv]() and get your api key\n- Get your publication id from your newsletter which will be parsed in the \"Add subscriber\" url endpoint",
+          "height": 480,
+          "width": 280
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## How it works\nThis workflow allows you to add each meeting guest into Google Sheets, adding one row for each guest and consequently adding those users to your newsletter on Beehiiv.\n\n## Set up steps\n\n- Create an account on [Cal.com]({{ $env.WEBHOOK_URL }}\n- Create a new webhook on [Cal.com]({{ $env.WEBHOOK_URL }} and send a test event to the URL that appears in the first node. You will get test data that you can pin to set the rest of the workflow.\n- For [Beehiiv]({{ $env.WEBHOOK_URL }} you will need to get the publication id from the account plus the api key. You will find those on your account settings. Define the publication id on the \"set data\" node, together with your Telegram chat id, if you wish to notify yourself in a private channel when a new subscriber is added.\n\nEnjoy building!\n\nAitor\n[1 Node]({{ $env.WEBHOOK_URL }}",
+          "height": 540,
+          "width": 400
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets",
+    "Cal.com",
+    "HTTP Request",
+    "Telegram"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 106,
+  "viewCount": 412,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "Cal.com Account",
+      "HTTP Request Account",
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details",
+      "cal  A P I details",
+      "telegram  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"on New Booking\".",
+      "Open the \"Split Attendees\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add users\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Add subscriber\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"notify in channel\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Attendee\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"set data\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-dpki0b5e0",
+      "workflowId": "meeting-booked-to-newsletter-and-crm-jn8n0",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/2018_Telegram_Cal_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\2018_Telegram_Cal_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:58.822Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:58.822Z",
+  "updatedAt": "2026-07-15T11:30:58.822Z",
+  "category": {
+    "slug": "crm",
+    "name": "CRM"
+  },
+  "categoryId": "crm"
+}

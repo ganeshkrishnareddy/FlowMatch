@@ -1,0 +1,708 @@
+{
+  "id": "production-workflow-rwiov",
+  "name": "Production Workflow",
+  "slug": "production-workflow-mnnu",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Extract Name and Email",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          950,
+          130
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "Name",
+                "value": "={{$json[\"body\"][\"name\"]}}"
+              },
+              {
+                "name": "Email",
+                "value": "={{$json[\"body\"][\"email\"]}}"
+              }
+            ],
+            "boolean": []
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-00d3fe62"
+      },
+      {
+        "name": "Sign Up",
+        "type": "n8n-nodes-base.webhook",
+        "notes": "Example Input Data: {\"name\":\"John Doe\",\"email\":\"doe.j@northeastern.edu\"}",
+        "position": [
+          720,
+          130
+        ],
+        "webhookId": "6d60a1b4-6706-4f21-a5fb-bace13c24b53",
+        "parameters": {
+          "path": "sign-up",
+          "options": {
+            "responseData": ""
+          },
+          "httpMethod": "POST",
+          "authentication": "{{ $credentials.basicAuth }}"
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "{{ $credentials.httpBasicAuth.id }}",
+            "name": "Oasis Basic Auth Creds"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "id": "node-7e47ae02"
+      },
+      {
+        "name": "If user exists",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1560,
+          150
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [],
+            "boolean": [
+              {
+                "value1": "={{Object.keys($json).includes(\"id\") }}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 1,
+        "alwaysOutputData": false,
+        "id": "node-d59b24d4"
+      },
+      {
+        "name": "Create User",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1750,
+          240
+        ],
+        "parameters": {
+          "resource": "databasePage",
+          "databaseId": "27a30c5b-c418-4200-8f48-d7fb7b043fbe",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "Name|title",
+                "title": "={{$json[\"Name\"]}}"
+              },
+              {
+                "key": "{{ $credentials.key }}",
+                "emailValue": "={{$json[\"Email\"]}}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "Oasis Hub Production"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-db9bfe80"
+      },
+      {
+        "name": "Query for User",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1150,
+          230
+        ],
+        "parameters": {
+          "options": {
+            "filter": {
+              "singleCondition": {
+                "key": "{{ $credentials.key }}",
+                "condition": "equals",
+                "emailValue": "={{$json[\"Email\"]}}"
+              }
+            }
+          },
+          "resource": "databasePage",
+          "operation": "getAll",
+          "databaseId": "27a30c5b-c418-4200-8f48-d7fb7b043fbe"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "Oasis Hub Production"
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "id": "node-ea410b9d"
+      },
+      {
+        "name": "Query Current Semester",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          2180,
+          -30
+        ],
+        "parameters": {
+          "options": {
+            "sort": {
+              "sortValue": [
+                {
+                  "key": "{{ $credentials.key }}",
+                  "direction": "descending",
+                  "timestamp": true
+                }
+              ]
+            },
+            "filter": {
+              "singleCondition": {
+                "key": "{{ $credentials.key }}",
+                "condition": "equals",
+                "checkboxValue": true
+              }
+            }
+          },
+          "resource": "databasePage",
+          "operation": "getAll",
+          "returnAll": true,
+          "databaseId": "2003319a-bc73-423a-9378-01999b4884fb"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "Oasis Hub Production"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-b5ad55f4"
+      },
+      {
+        "name": "Select Semester ID",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2370,
+          -30
+        ],
+        "parameters": {
+          "values": {
+            "number": [],
+            "string": [
+              {
+                "name": "currentSemesterID",
+                "value": "={{$json[\"id\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-df3cf317"
+      },
+      {
+        "name": "Update Semester for User",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          3050,
+          110
+        ],
+        "parameters": {
+          "pageId": "={{$json[\"id\"]}}",
+          "resource": "databasePage",
+          "operation": "update",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "{{ $credentials.key }}",
+                "relationValue": [
+                  "={{$json[\"allSemesterIDs\"].join(',')}}"
+                ]
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "Oasis Hub Production"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-b99cfac9"
+      },
+      {
+        "name": "Merge Semester ID",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          2590,
+          110
+        ],
+        "parameters": {
+          "mode": "multiplex"
+        },
+        "typeVersion": 1,
+        "id": "node-7c993263"
+      },
+      {
+        "name": "Concatenate Semester IDs",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          2820,
+          110
+        ],
+        "parameters": {
+          "functionCode": "for (item of items) {\n  // Get the current semester ID\n  const currentSemesterID = item.json[\"currentSemesterID\"]\n  let allSemesterIDs = [currentSemesterID];\n\n  // Add semesters that the user is already associated with\n  if (item.json[\"Semesters\"]?.length > 0) {\n    allSemesterIDs = allSemesterIDs.concat(item.json[\"Semesters\"].filter(semesterID => semesterID !== currentSemesterID));\n  }\n\n  // Set allSemesterIDs which is used to update the relation\n  item.json[\"allSemesterIDs\"] = allSemesterIDs\n}\n\nreturn items;\n"
+        },
+        "typeVersion": 1,
+        "id": "node-0c9447dd"
+      },
+      {
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1340,
+          150
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Email",
+          "propertyName2": "Email"
+        },
+        "typeVersion": 1,
+        "id": "node-776f29ce"
+      },
+      {
+        "name": "Query User",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1950,
+          130
+        ],
+        "parameters": {
+          "options": {
+            "filter": {
+              "singleCondition": {
+                "key": "{{ $credentials.key }}",
+                "condition": "equals",
+                "emailValue": "={{$json[\"Email\"]}}"
+              }
+            }
+          },
+          "resource": "databasePage",
+          "operation": "getAll",
+          "returnAll": true,
+          "databaseId": "27a30c5b-c418-4200-8f48-d7fb7b043fbe"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "Oasis Hub Production"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "id": "node-fc9f87f0"
+      },
+      {
+        "id": "error-bf74c630",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-5928ee22",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.182418",
+      "updatedAt": "2025-09-29T07:07:51.182451",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "Concatenate Semester IDs",
+        "parameters": {
+          "functionCode": "for (item of items) {\n  // Get the current semester ID\n  const currentSemesterID = item.json[\"currentSemesterID\"]\n  let allSemesterIDs = [currentSemesterID];\n\n  // Add semesters that the user is already associated with\n  if (item.json[\"Semesters\"]?.length > 0) {\n    allSemesterIDs = allSemesterIDs.concat(item.json[\"Semesters\"].filter(semesterID => semesterID !== currentSemesterID));\n  }\n\n  // Set allSemesterIDs which is used to update the relation\n  item.json[\"allSemesterIDs\"] = allSemesterIDs\n}\n\nreturn items;\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create User",
+        "parameters": {
+          "databaseId": "27a30c5b-c418-4200-8f48-d7fb7b043fbe",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "Name|title",
+                "title": "={{$json[\"Name\"]}}"
+              },
+              {
+                "emailValue": "={{$json[\"Email\"]}}",
+                "key": "{{ $credentials.key }}"
+              }
+            ]
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract Name and Email",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "boolean": [],
+            "string": [
+              {
+                "name": "Name",
+                "value": "={{$json[\"body\"][\"name\"]}}"
+              },
+              {
+                "name": "Email",
+                "value": "={{$json[\"body\"][\"email\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "If user exists",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{Object.keys($json).includes(\"id\") }}",
+                "value2": true
+              }
+            ],
+            "string": []
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Email",
+          "propertyName2": "Email"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge Semester ID",
+        "parameters": {
+          "mode": "multiplex"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Query Current Semester",
+        "parameters": {
+          "databaseId": "2003319a-bc73-423a-9378-01999b4884fb",
+          "operation": "getAll",
+          "options": {
+            "filter": {
+              "singleCondition": {
+                "checkboxValue": true,
+                "condition": "equals",
+                "key": "{{ $credentials.key }}"
+              }
+            },
+            "sort": {
+              "sortValue": [
+                {
+                  "direction": "descending",
+                  "key": "{{ $credentials.key }}",
+                  "timestamp": true
+                }
+              ]
+            }
+          },
+          "resource": "databasePage",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Query for User",
+        "parameters": {
+          "databaseId": "27a30c5b-c418-4200-8f48-d7fb7b043fbe",
+          "operation": "getAll",
+          "options": {
+            "filter": {
+              "singleCondition": {
+                "condition": "equals",
+                "emailValue": "={{$json[\"Email\"]}}",
+                "key": "{{ $credentials.key }}"
+              }
+            }
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Query User",
+        "parameters": {
+          "databaseId": "27a30c5b-c418-4200-8f48-d7fb7b043fbe",
+          "operation": "getAll",
+          "options": {
+            "filter": {
+              "singleCondition": {
+                "condition": "equals",
+                "emailValue": "={{$json[\"Email\"]}}",
+                "key": "{{ $credentials.key }}"
+              }
+            }
+          },
+          "resource": "databasePage",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 1
+      },
+      {
+        "name": "Select Semester ID",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [],
+            "string": [
+              {
+                "name": "currentSemesterID",
+                "value": "={{$json[\"id\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Sign Up",
+        "parameters": {
+          "authentication": "{{ $credentials.basicAuth }}",
+          "httpMethod": "POST",
+          "options": {
+            "responseData": ""
+          },
+          "path": "sign-up"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Semester for User",
+        "parameters": {
+          "operation": "update",
+          "pageId": "={{$json[\"id\"]}}",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "{{ $credentials.key }}",
+                "relationValue": [
+                  "={{$json[\"allSemesterIDs\"].join(',')}}"
+                ]
+              }
+            ]
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Webhook",
+    "Notion"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 196,
+  "viewCount": 661,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Notion Account"
+    ],
+    "requiredCredentials": [
+      "http Basic Auth details",
+      "notion  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Sign Up\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"If user exists\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create User\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Query for User\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Query Current Semester\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Semester for User\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge Semester ID\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Concatenate Semester IDs\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Query User\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Extract Name and Email\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Select Semester ID\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-xasr04g8x",
+      "workflowId": "production-workflow-rwiov",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Notion/0141_Notion_Webhook_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Notion\\0141_Notion_Webhook_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:17:42.037Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:42.037Z",
+  "updatedAt": "2026-07-15T11:17:42.037Z"
+}

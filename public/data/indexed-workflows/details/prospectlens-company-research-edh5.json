@@ -1,0 +1,920 @@
+{
+  "id": "prospectlens-company-research-f744o",
+  "name": "ProspectLens company research",
+  "slug": "prospectlens-company-research-edh5",
+  "description": "Automated workflow: ProspectLens company research. This workflow integrates 7 different services: filter, stickyNote, httpRequest, stopAndError, manualTrigger. It contains 11 nodes and follows best practices for error handling and security.",
+  "shortDescription": "ProspectLens company research workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "id": "wwvUsosYUyMfpGbB",
+    "meta": {
+      "instanceId": "workflow-82c3e5fd",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.906539",
+      "updatedAt": "2025-09-29T07:07:44.906560",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "ProspectLens company research",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "fd68acdf-ed1e-4f69-a046-fcdaa626acca",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          720,
+          400
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d4e4875a-e41f-4248-937a-a4658c23eb5e",
+        "name": "Filter",
+        "type": "n8n-nodes-base.filter",
+        "notes": "Only process rows which have empty processed_at field",
+        "position": [
+          1160,
+          400
+        ],
+        "parameters": {
+          "options": {
+            "looseTypeValidation": true
+          },
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "5aca0836-4797-41d3-8094-f3a170e5a3c9",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.processed_at }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2
+      },
+      {
+        "id": "e12c1846-dd38-414c-8e2e-8d0834ad8668",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          880,
+          20
+        ],
+        "parameters": {
+          "width": 725,
+          "height": 316.25,
+          "content": "## Company research via Google Sheets and ProspectLens\n\nGet your API key:\n{{ $env.API_BASE_URL }}\n\nCopy Google Sheet template:\n{{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b0385041-92c4-41a4-b0e8-9f2a7cc6fd56",
+        "name": "Save company data into Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          2000,
+          380
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "data": "={{ JSON.stringify($json.data).substr(0, 2000) }}",
+              "name": "={{ $json.data.properties.title }}",
+              "funds": "={{ $json.data.info.funding_rounds_summary.funding_total.value }}",
+              "domain": "={{ $('Filter').item.json.domain }}",
+              "traffic": "={{ $json.data.info.semrush_summary.semrush_visits_latest_month }}",
+              "location": "={{ $json.data.info.semrush_location_list[0].location_identifiers[0].value }}",
+              "description": "={{ $json.data.properties.short_description }}",
+              "domain_name": "={{ $json.data.info.company_about_fields.website.hostname }}",
+              "processed_at": "={{ (new Date).toISOString()  }}",
+              "year_founded": "={{ $json.data.info.overview_fields_extended.founded_on.value }}",
+              "funding_round": "={{ $json.data.info.funding_rounds_summary.last_funding_type }}",
+              "last_funding_at": "={{ $json.data.info.funding_rounds_summary.last_funding_at }}"
+            },
+            "schema": [
+              {
+                "id": "domain",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "domain",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "name",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "name",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "description",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "description",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "processed_at",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "processed_at",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "data",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "data",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "domain_name",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "domain_name",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "traffic",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "traffic",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "location",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "location",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "funds",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "funds",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "year_founded",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "year_founded",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "funding_round",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "funding_round",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "last_funding_at",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "last_funding_at",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "row_number",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": true,
+                "required": false,
+                "displayName": "row_number",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "domain"
+            ]
+          },
+          "options": {},
+          "operation": "update",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1X2hKT8cD6fTQUdALg91EwQDCM58YNY4pHe-7rmESzlk",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8n_prospectlens"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "vowsrhMIxy2PRDbH",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.4,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e048f8d0-57c2-43ac-bedf-1a517b203df3",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "notes": "Used to keep low concurrency (1 thread)",
+        "position": [
+          1400,
+          380
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "notesInFlow": true,
+        "typeVersion": 3
+      },
+      {
+        "id": "b6898b5e-dba5-425d-8f9b-d996dcb6cff2",
+        "name": "ProspectLens API call",
+        "type": "n8n-nodes-base.httpRequest",
+        "notes": "ProspectLens API",
+        "onError": "continueErrorOutput",
+        "maxTries": 2,
+        "position": [
+          1680,
+          380
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {}
+            }
+          },
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "tcCkO83Qn399Hizf",
+            "name": "APIRoad auth"
+          }
+        },
+        "notesInFlow": true,
+        "retryOnFail": true,
+        "typeVersion": 4.2
+      },
+      {
+        "id": "4c625e34-728c-49ae-8e22-4b4a343354cb",
+        "name": "Get all rows from Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          940,
+          400
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1X2hKT8cD6fTQUdALg91EwQDCM58YNY4pHe-7rmESzlk",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8n_prospectlens"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "vowsrhMIxy2PRDbH",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.4,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "ea844f9f-c06e-4a0c-98db-a670709c2025",
+    "connections": {
+      "b6898b5e-dba5-425d-8f9b-d996dcb6cff2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-edc74dae",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-e874db6c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-5eec2d3f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-dfec4d35",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-9289e9e2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-356250dd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-d6ded6ce",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-c3fb2266",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b0385041-92c4-41a4-b0e8-9f2a7cc6fd56": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b0385041-92c4-41a4-b0e8-9f2a7cc6fd56-a85c0966",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4c625e34-728c-49ae-8e22-4b4a343354cb": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4c625e34-728c-49ae-8e22-4b4a343354cb-73f6ff08",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: ProspectLens company research. This workflow integrates 7 different services: filter, stickyNote, httpRequest, stopAndError, manualTrigger. It contains 11 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: ProspectLens company research. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4c625e34-728c-49ae-8e22-4b4a343354cb": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c625e34-728c-49ae-8e22-4b4a343354cb-73f6ff08"
+            }
+          ]
+        ]
+      },
+      "b0385041-92c4-41a4-b0e8-9f2a7cc6fd56": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b0385041-92c4-41a4-b0e8-9f2a7cc6fd56-a85c0966"
+            }
+          ]
+        ]
+      },
+      "b6898b5e-dba5-425d-8f9b-d996dcb6cff2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-edc74dae"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-e874db6c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-5eec2d3f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-dfec4d35"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-9289e9e2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-356250dd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-d6ded6ce"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6898b5e-dba5-425d-8f9b-d996dcb6cff2-c3fb2266"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "ProspectLens company research",
+    "nodes": [
+      {
+        "name": "Filter",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "5aca0836-4797-41d3-8094-f3a170e5a3c9",
+                "leftValue": "={{ $json.processed_at }}",
+                "operator": {
+                  "operation": "empty",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            }
+          },
+          "options": {
+            "looseTypeValidation": true
+          }
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get all rows from Sheets",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "n8n_prospectlens",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1X2hKT8cD6fTQUdALg91EwQDCM58YNY4pHe-7rmESzlk"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.4
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "ProspectLens API call",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {
+            "response": {
+              "response": {}
+            }
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Save company data into Sheets",
+        "parameters": {
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "domain"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "domain",
+                "id": "domain",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "name",
+                "id": "name",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "description",
+                "id": "description",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "processed_at",
+                "id": "processed_at",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "data",
+                "id": "data",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "domain_name",
+                "id": "domain_name",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "traffic",
+                "id": "traffic",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "location",
+                "id": "location",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "funds",
+                "id": "funds",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "year_founded",
+                "id": "year_founded",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "funding_round",
+                "id": "funding_round",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "last_funding_at",
+                "id": "last_funding_at",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "row_number",
+                "id": "row_number",
+                "readOnly": true,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "data": "={{ JSON.stringify($json.data).substr(0, 2000) }}",
+              "description": "={{ $json.data.properties.short_description }}",
+              "domain": "={{ $('Filter').item.json.domain }}",
+              "domain_name": "={{ $json.data.info.company_about_fields.website.hostname }}",
+              "funding_round": "={{ $json.data.info.funding_rounds_summary.last_funding_type }}",
+              "funds": "={{ $json.data.info.funding_rounds_summary.funding_total.value }}",
+              "last_funding_at": "={{ $json.data.info.funding_rounds_summary.last_funding_at }}",
+              "location": "={{ $json.data.info.semrush_location_list[0].location_identifiers[0].value }}",
+              "name": "={{ $json.data.properties.title }}",
+              "processed_at": "={{ (new Date).toISOString()  }}",
+              "traffic": "={{ $json.data.info.semrush_summary.semrush_visits_latest_month }}",
+              "year_founded": "={{ $json.data.info.overview_fields_extended.founded_on.value }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "n8n_prospectlens",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1X2hKT8cD6fTQUdALg91EwQDCM58YNY4pHe-7rmESzlk"
+          },
+          "operation": "update",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Company research via Google Sheets and ProspectLens\n\nGet your API key:\n{{ $env.API_BASE_URL }}\n\nCopy Google Sheet template:\n{{ $env.WEBHOOK_URL }}",
+          "height": 316.25,
+          "width": 725
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 151,
+  "viewCount": 482,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details",
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Filter\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Save company data into Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"ProspectLens API call\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get all rows from Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-mrtpblek7",
+      "workflowId": "prospectlens-company-research-f744o",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Filter/2006_Filter_Manual_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Filter\\2006_Filter_Manual_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:23.819Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:23.819Z",
+  "updatedAt": "2026-07-15T11:18:23.819Z"
+}

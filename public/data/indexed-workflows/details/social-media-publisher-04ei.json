@@ -1,0 +1,1225 @@
+{
+  "id": "social-media-publisher-w8eol",
+  "name": "Social Media Publisher",
+  "slug": "social-media-publisher-04ei",
+  "description": "Automated workflow: Social Media Publisher. This workflow integrates 8 different services: stickyNote, httpRequest, formTrigger, switch, set. It contains 18 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Social Media Publisher workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "id": "r1u4HOJu5j5sP27x",
+    "meta": {
+      "instanceId": "workflow-1015f64d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.043943",
+      "updatedAt": "2025-09-29T07:07:45.043951",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Social Media Publisher",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "f5050652-6170-41c6-b3c3-0f6616c9d575",
+        "name": "On form submission",
+        "type": "n8n-nodes-base.formTrigger",
+        "position": [
+          -380,
+          120
+        ],
+        "webhookId": "bb578d47-feaa-4973-96df-659089838de5",
+        "parameters": {
+          "options": {},
+          "formTitle": "Post Publisher",
+          "formFields": {
+            "values": [
+              {
+                "fieldType": "dropdown",
+                "fieldLabel": "Platform",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "instagram"
+                    },
+                    {
+                      "option": "linkedin"
+                    },
+                    {
+                      "option": "facebook"
+                    },
+                    {
+                      "option": "x"
+                    },
+                    {
+                      "option": "tiktok"
+                    },
+                    {
+                      "option": "threads"
+                    }
+                  ]
+                },
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Account",
+                "placeholder": "User Profile name set on Upload-post.com",
+                "requiredField": true
+              },
+              {
+                "fieldType": "textarea",
+                "fieldLabel": "Caption",
+                "requiredField": true
+              },
+              {
+                "fieldType": "file",
+                "fieldLabel": "Upload",
+                "multipleFiles": false,
+                "requiredField": true,
+                "acceptFileTypes": ".jpg,.mp4"
+              },
+              {
+                "fieldLabel": "Facebook Id",
+                "placeholder": "Facebook page Id (eg. 00000111122222)"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This formTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e9d8b8c9-3e40-420d-98c3-82c92f1c53c7",
+        "name": "Post photo",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          220,
+          -180
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "title",
+                "value": "={{ $json.Caption }}"
+              },
+              {
+                "name": "user",
+                "value": "={{ $json.Account }}"
+              },
+              {
+                "name": "platform[]",
+                "value": "={{ $json.Platform }}"
+              },
+              {
+                "name": "photos[]",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "=Upload"
+              },
+              {
+                "name": "facebook_id",
+                "value": "={{ $('On form submission').item.json['Facebook Id'] }}"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "DEE2XGvhGodgbAJh",
+            "name": "Upload-post.com API"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "04103be2-a1d8-4b00-942b-44e13dffa666",
+        "name": "Post video",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          220,
+          280
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "title",
+                "value": "={{ $json.Caption }}"
+              },
+              {
+                "name": "user",
+                "value": "={{ $json.Account }}"
+              },
+              {
+                "name": "platform[]",
+                "value": "={{ $json.Platform }}"
+              },
+              {
+                "name": "video",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "=Upload"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "DEE2XGvhGodgbAJh",
+            "name": "Upload-post.com API"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e7803375-20b0-4e12-80a4-b102ba48b6ba",
+        "name": "KO Video",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          880,
+          380
+        ],
+        "webhookId": "d03e4286-f252-4a35-a65e-ea8ac96222e4",
+        "parameters": {
+          "options": {},
+          "operation": "completion",
+          "completionTitle": "=Oops",
+          "completionMessage": "There was an error"
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "91f2b501-4021-4ecc-9cc3-4e804d020135",
+        "name": "OK Video",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          880,
+          180
+        ],
+        "webhookId": "d03e4286-f252-4a35-a65e-ea8ac96222e4",
+        "parameters": {
+          "options": {},
+          "operation": "completion",
+          "completionTitle": "=Congratulations!",
+          "completionMessage": "Your post has been published correctly"
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b3eead97-f995-42dc-b937-6d05f284f601",
+        "name": "KO Photo",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          880,
+          -80
+        ],
+        "webhookId": "d03e4286-f252-4a35-a65e-ea8ac96222e4",
+        "parameters": {
+          "options": {},
+          "operation": "completion",
+          "completionTitle": "=Oops",
+          "completionMessage": "There was an error"
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8ead4dfa-cb9e-4ab4-b52c-7a681876269f",
+        "name": "OK Photo",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          880,
+          -280
+        ],
+        "webhookId": "d03e4286-f252-4a35-a65e-ea8ac96222e4",
+        "parameters": {
+          "options": {},
+          "operation": "completion",
+          "completionTitle": "=Congratulations!",
+          "completionMessage": "Your post has been published correctly"
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a5fba676-4e7b-42e2-af36-e9d63458870b",
+        "name": "Success Photo?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          640,
+          -180
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "47eee8ce-0237-48f2-b67f-04021d3acda2",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.result }}\n",
+                "rightValue": "true"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "310853de-ab7e-481e-8efa-5a681f08032b",
+        "name": "Success Video?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          660,
+          280
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "47eee8ce-0237-48f2-b67f-04021d3acda2",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.result }}\n",
+                "rightValue": "true"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "81ec87fc-9298-4cd6-8a46-45ee6cb050b3",
+        "name": "Result Photo",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          440,
+          -180
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "551c5179-055a-415e-bf17-61f2a5dd2769",
+                "name": "=result",
+                "type": "string",
+                "value": "={{ $json.results[$('Video or Photo?').item.json.Platform].success.toBoolean() }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "936ac765-0e7c-411d-b70d-bdfbe8e180a6",
+        "name": "Result Video",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          440,
+          280
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "551c5179-055a-415e-bf17-61f2a5dd2769",
+                "name": "=result",
+                "type": "string",
+                "value": "={{ $json.results[$('Video or Photo?').item.json.Platform].success.toBoolean() }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3a3d66ae-7ecd-43aa-a905-10afdab753b3",
+        "name": "Video or Photo?",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          -120,
+          120
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "879af56a-8979-4d9d-9acd-6009d821f6a7",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.Upload.mimetype }}",
+                      "rightValue": "image/jpeg"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "d7ee147d-d775-4b81-b043-0873c535b400",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.Upload.mimetype }}",
+                      "rightValue": "video/mp4"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "76d1cc06-8bb5-43cd-8dcc-2da1656b0335",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -400,
+          -1020
+        ],
+        "parameters": {
+          "width": 1380,
+          "height": 680,
+          "content": "## SETTINGS\n\n- Find your API key in your [Upload-Post Manage Api Keys]({{ $env.WEBHOOK_URL }} 10 FREE uploads per month\n- Set the the \"Auth Header\":\n-- Name: Authorization\n-- Value: Apikey YOUR_API_KEY_HERE\n- Create profiles to manage your social media accounts. The \"Profile\" you choose will be used in the field \"Account\" on form submission (eg. test1 or test2).  \n\n![image]({{ $env.WEBHOOK_URL }}\n\nApr-2025: YouTube integration is currently being verified by Google, and may not work as expected.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e9b40e23-cde9-459d-b490-8adda6b9253f",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -400,
+          -1240
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 1380,
+          "height": 180,
+          "content": "## Upload video and photo on TikTok, X, Facebook, Youtube, Instagram, Threads and Linkedin\n\nSimplify your social media workflow with our powerful platform designed for content creators and marketers.\n\nUpload your video once and let Upload-Post distribute it across all your connected social media accounts effortlessly."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "ac29ff60-2d87-4646-ae63-ab543f3849de",
+    "connections": {
+      "e9d8b8c9-3e40-420d-98c3-82c92f1c53c7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-b39eb202",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-76869634",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-47ca3908",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-675955f8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-2ea73449",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-57c9489e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-ff3023b4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-d2e0ad3d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "04103be2-a1d8-4b00-942b-44e13dffa666": {
+        "main": [
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-a35f4d42",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-2a7d4c42",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-f19f89e9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-3881828d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-0c75b3b8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-c8793112",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-7c40f400",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-847cfab5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Social Media Publisher. This workflow integrates 8 different services: stickyNote, httpRequest, formTrigger, switch, set. It contains 18 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Social Media Publisher. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "04103be2-a1d8-4b00-942b-44e13dffa666": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-a35f4d42"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-2a7d4c42"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-f19f89e9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-3881828d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-0c75b3b8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-c8793112"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-7c40f400"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04103be2-a1d8-4b00-942b-44e13dffa666-847cfab5"
+            }
+          ]
+        ]
+      },
+      "e9d8b8c9-3e40-420d-98c3-82c92f1c53c7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-b39eb202"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-76869634"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-47ca3908"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-675955f8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-2ea73449"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-57c9489e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-ff3023b4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e9d8b8c9-3e40-420d-98c3-82c92f1c53c7-d2e0ad3d"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Social Media Publisher",
+    "nodes": [
+      {
+        "name": "KO Photo",
+        "parameters": {
+          "completionMessage": "There was an error",
+          "completionTitle": "=Oops",
+          "operation": "completion",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "KO Video",
+        "parameters": {
+          "completionMessage": "There was an error",
+          "completionTitle": "=Oops",
+          "operation": "completion",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "OK Photo",
+        "parameters": {
+          "completionMessage": "Your post has been published correctly",
+          "completionTitle": "=Congratulations!",
+          "operation": "completion",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "OK Video",
+        "parameters": {
+          "completionMessage": "Your post has been published correctly",
+          "completionTitle": "=Congratulations!",
+          "operation": "completion",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "On form submission",
+        "parameters": {
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Platform",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "instagram"
+                    },
+                    {
+                      "option": "linkedin"
+                    },
+                    {
+                      "option": "facebook"
+                    },
+                    {
+                      "option": "x"
+                    },
+                    {
+                      "option": "tiktok"
+                    },
+                    {
+                      "option": "threads"
+                    }
+                  ]
+                },
+                "fieldType": "dropdown",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Account",
+                "placeholder": "User Profile name set on Upload-post.com",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Caption",
+                "fieldType": "textarea",
+                "requiredField": true
+              },
+              {
+                "acceptFileTypes": ".jpg,.mp4",
+                "fieldLabel": "Upload",
+                "fieldType": "file",
+                "multipleFiles": false,
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Facebook Id",
+                "placeholder": "Facebook page Id (eg. 00000111122222)"
+              }
+            ]
+          },
+          "formTitle": "Post Publisher",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Post photo",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "title",
+                "value": "={{ $json.Caption }}"
+              },
+              {
+                "name": "user",
+                "value": "={{ $json.Account }}"
+              },
+              {
+                "name": "platform[]",
+                "value": "={{ $json.Platform }}"
+              },
+              {
+                "inputDataFieldName": "=Upload",
+                "name": "photos[]",
+                "parameterType": "formBinaryData"
+              },
+              {
+                "name": "facebook_id",
+                "value": "={{ $('On form submission').item.json['Facebook Id'] }}"
+              }
+            ]
+          },
+          "contentType": "multipart-form-data",
+          "genericAuthType": "httpHeaderAuth",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Post video",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "title",
+                "value": "={{ $json.Caption }}"
+              },
+              {
+                "name": "user",
+                "value": "={{ $json.Account }}"
+              },
+              {
+                "name": "platform[]",
+                "value": "={{ $json.Platform }}"
+              },
+              {
+                "inputDataFieldName": "=Upload",
+                "name": "video",
+                "parameterType": "formBinaryData"
+              }
+            ]
+          },
+          "contentType": "multipart-form-data",
+          "genericAuthType": "httpHeaderAuth",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Result Photo",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "551c5179-055a-415e-bf17-61f2a5dd2769",
+                "name": "=result",
+                "type": "string",
+                "value": "={{ $json.results[$('Video or Photo?').item.json.Platform].success.toBoolean() }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Result Video",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "551c5179-055a-415e-bf17-61f2a5dd2769",
+                "name": "=result",
+                "type": "string",
+                "value": "={{ $json.results[$('Video or Photo?').item.json.Platform].success.toBoolean() }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## SETTINGS\n\n- Find your API key in your [Upload-Post Manage Api Keys]({{ $env.WEBHOOK_URL }} 10 FREE uploads per month\n- Set the the \"Auth Header\":\n-- Name: Authorization\n-- Value: Apikey YOUR_API_KEY_HERE\n- Create profiles to manage your social media accounts. The \"Profile\" you choose will be used in the field \"Account\" on form submission (eg. test1 or test2).  \n\n![image]({{ $env.WEBHOOK_URL }}\n\nApr-2025: YouTube integration is currently being verified by Google, and may not work as expected.\n",
+          "height": 680,
+          "width": 1380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 3,
+          "content": "## Upload video and photo on TikTok, X, Facebook, Youtube, Instagram, Threads and Linkedin\n\nSimplify your social media workflow with our powerful platform designed for content creators and marketers.\n\nUpload your video once and let Upload-Post distribute it across all your connected social media accounts effortlessly.",
+          "height": 180,
+          "width": 1380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Success Photo?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "47eee8ce-0237-48f2-b67f-04021d3acda2",
+                "leftValue": "={{ $json.result }}\n",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "true"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Success Video?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "47eee8ce-0237-48f2-b67f-04021d3acda2",
+                "leftValue": "={{ $json.result }}\n",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "true"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Video or Photo?",
+        "parameters": {
+          "options": {},
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "879af56a-8979-4d9d-9acd-6009d821f6a7",
+                      "leftValue": "={{ $json.Upload.mimetype }}",
+                      "operator": {
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "image/jpeg"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "d7ee147d-d775-4b81-b043-0873c535b400",
+                      "leftValue": "={{ $json.Upload.mimetype }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "video/mp4"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Form Trigger",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": false,
+  "featured": true,
+  "downloadCount": 137,
+  "viewCount": 75,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Form Trigger Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On form submission\".",
+      "Open the \"Post photo\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post video\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"KO Video\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"OK Video\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"KO Photo\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"OK Photo\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"Success Photo?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Success Video?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Video or Photo?\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Result Photo\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Result Video\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 85,
+  "validationStatus": "Valid With Warnings",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-vw2iz208j",
+      "workflowId": "social-media-publisher-w8eol",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Form/1968_Form_Stickynote_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Form\\1968_Form_Stickynote_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:02.231Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:02.231Z",
+  "updatedAt": "2026-07-15T11:29:02.231Z",
+  "category": {
+    "slug": "social-media",
+    "name": "Social Media"
+  },
+  "categoryId": "social-media"
+}

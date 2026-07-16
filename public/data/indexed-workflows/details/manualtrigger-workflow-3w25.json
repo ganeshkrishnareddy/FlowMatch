@@ -1,0 +1,658 @@
+{
+  "id": "manualtrigger-workflow-5n8lt",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-3w25",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 9 different services: writeBinaryFile, itemLists, stickyNote, mySql, set. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-264dd89f",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.839316",
+      "updatedAt": "2025-09-29T07:07:48.839344",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "ef32b2b5-9739-4622-aa50-ac9e6a93c43c",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          720,
+          360
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d39d67b6-3f3c-4296-affc-cfc786b877c3",
+        "name": "Show 16 random products",
+        "type": "n8n-nodes-base.mySql",
+        "position": [
+          900,
+          360
+        ],
+        "parameters": {
+          "query": "SELECT * from products\nORDER BY RAND()\nLIMIT 16;",
+          "options": {},
+          "operation": "executeQuery"
+        },
+        "credentials": {
+          "mySql": {
+            "id": "EEPqCgKBDiRRZ3ua",
+            "name": "db4free MySQL"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This mySql node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8ca3e11c-d1b0-4ee6-94f0-b16c46b804d7",
+        "name": "Define file structure",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1120,
+          200
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "Product.Code",
+                "value": "={{ $json.productCode }}"
+              },
+              {
+                "name": "Product.Name",
+                "value": "={{ $json.productName }}"
+              },
+              {
+                "name": "Product.Line",
+                "value": "={{ $json.productLine }}"
+              },
+              {
+                "name": "Product.Scale",
+                "value": "={{ $json.productScale }}"
+              },
+              {
+                "name": "Product.Price",
+                "value": "={{ $json.MSRP }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6ee087c9-afd6-405a-b922-61aae33f5a1e",
+        "name": "Concatenate Items",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          1300,
+          200
+        ],
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "operation": "concatenateItems",
+          "destinationFieldName": "Products"
+        },
+        "typeVersion": 3,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0aadf35f-9bec-4d27-9122-2ac350f609f7",
+        "name": "Convert to XML",
+        "type": "n8n-nodes-base.xml",
+        "position": [
+          1480,
+          200
+        ],
+        "parameters": {
+          "mode": "jsonToxml",
+          "options": {
+            "headless": false
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This xml node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5eed6fe8-b7ba-483f-8362-f371e3c678af",
+        "name": "Move Binary Data",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          1680,
+          200
+        ],
+        "parameters": {
+          "mode": "jsonToBinary",
+          "options": {
+            "fileName": "simple.xml",
+            "mimeType": "text/xml",
+            "keepSource": false,
+            "useRawData": true
+          },
+          "convertAllData": false
+        },
+        "typeVersion": 1,
+        "notes": "This moveBinaryData node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eb2240a4-cccd-4a4d-a807-1e2bddb0dc89",
+        "name": "Define file structure1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1120,
+          520
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "Product.Name",
+                "value": "={{ $json.productName }}"
+              },
+              {
+                "name": "Product.Line",
+                "value": "={{ $json.productLine }}"
+              },
+              {
+                "name": "Product.Scale",
+                "value": "={{ $json.productScale }}"
+              },
+              {
+                "name": "Product.$.Price",
+                "value": "={{ $json.MSRP }}"
+              },
+              {
+                "name": "Product.$.Code",
+                "value": "={{ $json.productCode }}"
+              },
+              {
+                "name": "Product.Description",
+                "value": "={{ $json.productDescription }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "06a739b9-72fd-4d9c-9dd2-36086fafae7a",
+        "name": "Concatenate Items1",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          1300,
+          520
+        ],
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "operation": "concatenateItems",
+          "destinationFieldName": "Products"
+        },
+        "typeVersion": 3,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "082008c2-d13b-453d-87c2-f551467c6aec",
+        "name": "Convert to XML1",
+        "type": "n8n-nodes-base.xml",
+        "position": [
+          1480,
+          520
+        ],
+        "parameters": {
+          "mode": "jsonToxml",
+          "options": {
+            "attrkey": "YOUR_CREDENTIAL_HERE",
+            "headless": false
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This xml node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e66df48f-4c75-4316-910c-0eb8be0bcf9c",
+        "name": "Move Binary Data1",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          1680,
+          520
+        ],
+        "parameters": {
+          "mode": "jsonToBinary",
+          "options": {
+            "fileName": "intermediate.xml",
+            "mimeType": "text/xml",
+            "keepSource": false,
+            "useRawData": true
+          },
+          "convertAllData": false
+        },
+        "typeVersion": 1,
+        "notes": "This moveBinaryData node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1ece7a61-04d8-4d0b-aa33-1085a5732a92",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1080,
+          132
+        ],
+        "parameters": {
+          "width": 830,
+          "height": 226,
+          "content": "## Simple conversion to XML"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "89cca26f-adde-426a-8033-b66224e9b934",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1080,
+          460
+        ],
+        "parameters": {
+          "width": 830,
+          "height": 231,
+          "content": "## XML tags with attributes"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0c01e6cf-da59-460a-b1ab-6977ca88c1cc",
+        "name": "Write Binary File",
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "position": [
+          1980,
+          360
+        ],
+        "parameters": {
+          "options": {},
+          "fileName": "=/home/node/.n8n/{{ $binary.data.fileName }}"
+        },
+        "typeVersion": 1,
+        "notes": "This writeBinaryFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-71229531",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "0c01e6cf-da59-460a-b1ab-6977ca88c1cc": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0c01e6cf-da59-460a-b1ab-6977ca88c1cc-3128977e",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 9 different services: writeBinaryFile, itemLists, stickyNote, mySql, set. It contains 14 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0c01e6cf-da59-460a-b1ab-6977ca88c1cc": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0c01e6cf-da59-460a-b1ab-6977ca88c1cc-3128977e"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Concatenate Items",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "Products",
+          "operation": "concatenateItems"
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 3
+      },
+      {
+        "name": "Concatenate Items1",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "Products",
+          "operation": "concatenateItems"
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 3
+      },
+      {
+        "name": "Convert to XML",
+        "parameters": {
+          "mode": "jsonToxml",
+          "options": {
+            "headless": false
+          }
+        },
+        "type": "n8n-nodes-base.xml",
+        "typeVersion": 1
+      },
+      {
+        "name": "Convert to XML1",
+        "parameters": {
+          "mode": "jsonToxml",
+          "options": {
+            "attrkey": "YOUR_CREDENTIAL_HERE",
+            "headless": false
+          }
+        },
+        "type": "n8n-nodes-base.xml",
+        "typeVersion": 1
+      },
+      {
+        "name": "Define file structure",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "Product.Code",
+                "value": "={{ $json.productCode }}"
+              },
+              {
+                "name": "Product.Name",
+                "value": "={{ $json.productName }}"
+              },
+              {
+                "name": "Product.Line",
+                "value": "={{ $json.productLine }}"
+              },
+              {
+                "name": "Product.Scale",
+                "value": "={{ $json.productScale }}"
+              },
+              {
+                "name": "Product.Price",
+                "value": "={{ $json.MSRP }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 2
+      },
+      {
+        "name": "Define file structure1",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "Product.Name",
+                "value": "={{ $json.productName }}"
+              },
+              {
+                "name": "Product.Line",
+                "value": "={{ $json.productLine }}"
+              },
+              {
+                "name": "Product.Scale",
+                "value": "={{ $json.productScale }}"
+              },
+              {
+                "name": "Product.$.Price",
+                "value": "={{ $json.MSRP }}"
+              },
+              {
+                "name": "Product.$.Code",
+                "value": "={{ $json.productCode }}"
+              },
+              {
+                "name": "Product.Description",
+                "value": "={{ $json.productDescription }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Move Binary Data",
+        "parameters": {
+          "convertAllData": false,
+          "mode": "jsonToBinary",
+          "options": {
+            "fileName": "simple.xml",
+            "keepSource": false,
+            "mimeType": "text/xml",
+            "useRawData": true
+          }
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "name": "Move Binary Data1",
+        "parameters": {
+          "convertAllData": false,
+          "mode": "jsonToBinary",
+          "options": {
+            "fileName": "intermediate.xml",
+            "keepSource": false,
+            "mimeType": "text/xml",
+            "useRawData": true
+          }
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mySql": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Show 16 random products",
+        "parameters": {
+          "operation": "executeQuery",
+          "options": {},
+          "query": "SELECT * from products\nORDER BY RAND()\nLIMIT 16;"
+        },
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Simple conversion to XML",
+          "height": 226,
+          "width": 830
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## XML tags with attributes",
+          "height": 231,
+          "width": 830
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Write Binary File",
+        "parameters": {
+          "fileName": "=/home/node/.n8n/{{ $binary.data.fileName }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "MySQL",
+    "Itemlists",
+    "Xml",
+    "Movebinarydata"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 13,
+  "viewCount": 153,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "MySQL Account",
+      "Itemlists Account",
+      "Xml Account",
+      "Movebinarydata Account"
+    ],
+    "requiredCredentials": [
+      "my Sql details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"Show 16 random products\" node (n8n-nodes-base.mySql) and configure the action parameters, mappings, and fields.",
+      "Open the \"Concatenate Items\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Convert to XML\" node (n8n-nodes-base.xml) and configure the action parameters, mappings, and fields.",
+      "Open the \"Move Binary Data\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"Concatenate Items1\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Convert to XML1\" node (n8n-nodes-base.xml) and configure the action parameters, mappings, and fields.",
+      "Open the \"Move Binary Data1\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Write Binary File\" node (n8n-nodes-base.writeBinaryFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Define file structure\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Define file structure1\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-5pigmttme",
+      "workflowId": "manualtrigger-workflow-5n8lt",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0317_Manual_Movebinarydata_Process_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0317_Manual_Movebinarydata_Process_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:50.426Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:50.426Z",
+  "updatedAt": "2026-07-15T11:18:50.426Z"
+}

@@ -1,0 +1,411 @@
+{
+  "id": "forward-filtered-gmail-notifications-to-telegram-chat-uozql",
+  "name": "Forward Filtered Gmail Notifications to Telegram Chat",
+  "slug": "forward-filtered-gmail-notifications-to-telegram-chat-ian2",
+  "description": "Automated workflow: Forward Filtered Gmail Notifications to Telegram Chat. This workflow integrates 5 different services: stickyNote, telegram, gmailTrigger, stopAndError, if. It contains 6 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Forward Filtered Gmail Notifications to Telegram Chat workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "AvXlqUiuc1qJSwxf",
+    "meta": {
+      "instanceId": "workflow-2081a5fd",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:56.981237",
+      "updatedAt": "2025-09-29T07:07:56.981318",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Forward Filtered Gmail Notifications to Telegram Chat",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "99441348-1d5d-459f-961f-48bd593144f2",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -60,
+          0
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 1000,
+          "height": 300,
+          "content": "# Forward Filtered Gmail Notifications to Telegram Chat\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eadf565c-e753-4682-a8c2-6bc630a30a27",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -60,
+          320
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 1000,
+          "height": 200,
+          "content": "## Description :\n### This n8n workflow automatically forwards incoming Gmail emails to a Telegram chat only if the email subject contains specific keywords (like \"Urgent\" or \"Server Down\"). The workflow extracts key details such as the sender, subject, and message body, and sends them as a formatted message to a specified Telegram chat. This is useful for real-time notifications, security alerts, or monitoring important emails directly from Telegram — filtering out unnecessary emails."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bb2a78d7-91ba-4e8c-a9f1-af270a50bd8f",
+        "name": "Incoming Email Monitor",
+        "type": "n8n-nodes-base.gmailTrigger",
+        "position": [
+          20,
+          100
+        ],
+        "parameters": {
+          "filters": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "5V09QSJCeHoQoKUp",
+            "name": "SM MaryP (Gmail)"
+          }
+        },
+        "notesInFlow": false,
+        "typeVersion": 1.2,
+        "notes": "This gmailTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "addffc7b-ef58-4fb5-9275-3db6fd84f4c0",
+        "name": "Email Validation Check",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          340,
+          100
+        ],
+        "parameters": {
+          "options": {
+            "ignoreCase": false
+          },
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "or",
+            "conditions": [
+              {
+                "id": "2496d01f-dbd5-4e23-84c3-f78decb87697",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                },
+                "leftValue": "={{ $json.Subject }}",
+                "rightValue": "Urgent"
+              },
+              {
+                "id": "274e9e05-5c74-487e-851d-0ca62210cb99",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.Subject }}",
+                "rightValue": "Server Down"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e87d46b6-efc6-466f-a708-bfbf34bf001b",
+        "name": "Send Telegram Message",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          700,
+          80
+        ],
+        "webhookId": "c8f1d16f-b698-4af9-a795-9aaa277c2bf6",
+        "parameters": {
+          "text": "=From : {{ $json.From }}\nSubject :{{ $json.Subject }}\nMessage : {{ $json.snippet }}\n",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "notesInFlow": false,
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-7053c828",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "caf5eedb-4c6b-4bfa-9a0a-2d868291a83c",
+    "connections": {
+      "e87d46b6-efc6-466f-a708-bfbf34bf001b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e87d46b6-efc6-466f-a708-bfbf34bf001b-264bc36a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Forward Filtered Gmail Notifications to Telegram Chat. This workflow integrates 5 different services: stickyNote, telegram, gmailTrigger, stopAndError, if. It contains 6 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Forward Filtered Gmail Notifications to Telegram Chat. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "e87d46b6-efc6-466f-a708-bfbf34bf001b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e87d46b6-efc6-466f-a708-bfbf34bf001b-264bc36a"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Forward Filtered Gmail Notifications to Telegram Chat",
+    "nodes": [
+      {
+        "name": "Email Validation Check",
+        "parameters": {
+          "conditions": {
+            "combinator": "or",
+            "conditions": [
+              {
+                "id": "2496d01f-dbd5-4e23-84c3-f78decb87697",
+                "leftValue": "={{ $json.Subject }}",
+                "operator": {
+                  "operation": "contains",
+                  "type": "string"
+                },
+                "rightValue": "Urgent"
+              },
+              {
+                "id": "274e9e05-5c74-487e-851d-0ca62210cb99",
+                "leftValue": "={{ $json.Subject }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "Server Down"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {
+            "ignoreCase": false
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Incoming Email Monitor",
+        "parameters": {
+          "filters": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.gmailTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Send Telegram Message",
+        "parameters": {
+          "additionalFields": {
+            "appendAttribution": false
+          },
+          "text": "=From : {{ $json.From }}\nSubject :{{ $json.Subject }}\nMessage : {{ $json.snippet }}\n"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "# Forward Filtered Gmail Notifications to Telegram Chat\n",
+          "height": 300,
+          "width": 1000
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 4,
+          "content": "## Description :\n### This n8n workflow automatically forwards incoming Gmail emails to a Telegram chat only if the email subject contains specific keywords (like \"Urgent\" or \"Server Down\"). The workflow extracts key details such as the sender, subject, and message body, and sends them as a formatted message to a specified Telegram chat. This is useful for real-time notifications, security alerts, or monitoring important emails directly from Telegram — filtering out unnecessary emails.",
+          "height": 200,
+          "width": 1000
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Gmail",
+    "Telegram"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 111,
+  "viewCount": 650,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Gmail Account",
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Incoming Email Monitor\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Email Validation Check\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Telegram Message\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-v1ua0t4dw",
+      "workflowId": "forward-filtered-gmail-notifications-to-telegram-chat-uozql",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/1347_Telegram_Gmail_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\1347_Telegram_Gmail_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:30:51.077Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:51.077Z",
+  "updatedAt": "2026-07-15T11:30:51.077Z",
+  "category": {
+    "slug": "email-automation",
+    "name": "Email Automation"
+  },
+  "categoryId": "email-automation"
+}

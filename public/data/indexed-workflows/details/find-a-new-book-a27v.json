@@ -1,0 +1,660 @@
+{
+  "id": "find-a-new-book-bg4h7",
+  "name": "Find a New Book",
+  "slug": "find-a-new-book-a27v",
+  "description": "Production-ready workflow: Find a New Book. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Find a New Book workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "id": "12",
+    "name": "Find a New Book",
+    "nodes": [
+      {
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          40,
+          140
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-6118be04"
+      },
+      {
+        "name": "Every Friday at 11:00 AM",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          20,
+          330
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 11,
+                "mode": "everyWeek",
+                "weekday": "5"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-7bf1d212"
+      },
+      {
+        "name": "Set Subject",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          220,
+          330
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "subject",
+                "value": "juvenile_literature"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-7b5fe406"
+      },
+      {
+        "name": "Retrieve Book Count",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          420,
+          330
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "limit",
+                "value": "0"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-1d24eca6"
+      },
+      {
+        "name": "Check Book Count",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          620,
+          330
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$node[\"Retrieve Book Count\"].json[\"work_count\"]}}",
+                "operation": "larger"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-f64f04c1"
+      },
+      {
+        "name": "Select Random Book",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          820,
+          330
+        ],
+        "parameters": {
+          "functionCode": "var retrieve_book = 0;\nvar book_count = items[0].json.work_count;\n\nretrieve_book = Math.floor(Math.random() * book_count) + 1\n\nitems[0].json.retrieve_book = retrieve_book;\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-56af2128"
+      },
+      {
+        "name": "Retrieve Detailed Book Info",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1260,
+          330
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "limit",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-e027c8cb"
+      },
+      {
+        "name": "Retrieve Basic Book Info",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1040,
+          330
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "limit",
+                "value": "1"
+              },
+              {
+                "name": "offset",
+                "value": "={{$json[\"retrieve_book\"]}}"
+              },
+              {
+                "name": "detail",
+                "value": "true"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-64732383"
+      },
+      {
+        "name": "Book Recommendation",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1830,
+          330
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "msgSubject",
+                "value": "=Book Recommendation: {{$node[\"Create Author String\"].json[\"title\"]}}"
+              },
+              {
+                "name": "msgBody",
+                "value": "=<H2><a href=\"{{$node[\"Create Author String\"].json[\"URL\"]}}\">{{$node[\"Create Author String\"].json[\"title\"]}}</a></H2>\n<p><em>By {{$node[\"Create Author String\"].json[\"authors\"]}}</em><br>\n{{$node[\"Create Author String\"].json[\"description\"]}}</p>"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-f24b03de"
+      },
+      {
+        "name": "Filtered Book Info",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1460,
+          330
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "authors",
+                "value": "={{$node[\"Retrieve Basic Book Info\"].json[\"works\"][0][\"authors\"]}}"
+              },
+              {
+                "name": "title",
+                "value": "={{$node[\"Retrieve Basic Book Info\"].json[\"works\"][0][\"title\"]}}"
+              },
+              {
+                "name": "description",
+                "value": "={{$node[\"Retrieve Detailed Book Info\"].json[\"description\"][\"value\"]}}"
+              },
+              {
+                "name": "URL",
+                "value": "=https://openlibrary.org{{$node[\"Retrieve Basic Book Info\"].json[\"works\"][0][\"key\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-1f8772f9"
+      },
+      {
+        "name": "Create Author String",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1630,
+          330
+        ],
+        "parameters": {
+          "functionCode": "var arrAuthors = items[0].json.authors;\n\nvar arrNames = arrAuthors.map(function(author) {\n  return \"<a href=\\\"https://openlibrary.org\" + author['key'] + \"\\\">\" + author['name'] + \"</a>\";\n});\n\nvar names = arrNames.join(\", \");\n\nitems[0].json.authors = names;\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-7cb1b096"
+      },
+      {
+        "name": "Send No Book Email",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          830,
+          520
+        ],
+        "parameters": {
+          "html": "=<p>Unfortunately, there are no books available for the subject of <em>{{$node[\"Check Book Count\"].json[\"name\"]}}</em>. Please update your n8n workflow with a different subject.</p>\n\n<p>A list of all available subjects can be found at <a href=\"https://openlibrary.org/subjects\">the Open Library</a>.</p>",
+          "options": {},
+          "subject": "=Book not found in {{$node[\"Check Book Count\"].json[\"name\"]}}",
+          "toEmail": "john.doe@example.com",
+          "fromEmail": "john.doe@example.com"
+        },
+        "credentials": {
+          "smtp": "Gmail Creds"
+        },
+        "typeVersion": 1,
+        "id": "node-199641ce"
+      },
+      {
+        "name": "Send Book Email",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          2030,
+          330
+        ],
+        "parameters": {
+          "html": "={{$node[\"Book Recommendation\"].json[\"msgBody\"]}}",
+          "options": {},
+          "subject": "={{$node[\"Book Recommendation\"].json[\"msgSubject\"]}}",
+          "toEmail": "john.doe@example.com",
+          "fromEmail": "john.doe@example.com"
+        },
+        "credentials": {
+          "smtp": "Gmail Creds"
+        },
+        "typeVersion": 1,
+        "id": "node-f48e0602"
+      },
+      {
+        "id": "error-2b32e087",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-e2e805e4",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.628072",
+      "updatedAt": "2025-09-29T07:07:48.628083",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Find a New Book. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Find a New Book",
+    "nodes": [
+      {
+        "name": "Book Recommendation",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "msgSubject",
+                "value": "=Book Recommendation: {{$node[\"Create Author String\"].json[\"title\"]}}"
+              },
+              {
+                "name": "msgBody",
+                "value": "=<H2><a href=\"{{$node[\"Create Author String\"].json[\"URL\"]}}\">{{$node[\"Create Author String\"].json[\"title\"]}}</a></H2>\n<p><em>By {{$node[\"Create Author String\"].json[\"authors\"]}}</em><br>\n{{$node[\"Create Author String\"].json[\"description\"]}}</p>"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Check Book Count",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "larger",
+                "value1": "={{$node[\"Retrieve Book Count\"].json[\"work_count\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Create Author String",
+        "parameters": {
+          "functionCode": "var arrAuthors = items[0].json.authors;\n\nvar arrNames = arrAuthors.map(function(author) {\n  return \"<a href=\\\"https://openlibrary.org\" + author['key'] + \"\\\">\" + author['name'] + \"</a>\";\n});\n\nvar names = arrNames.join(\", \");\n\nitems[0].json.authors = names;\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Every Friday at 11:00 AM",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 11,
+                "mode": "everyWeek",
+                "weekday": "5"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Filtered Book Info",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "authors",
+                "value": "={{$node[\"Retrieve Basic Book Info\"].json[\"works\"][0][\"authors\"]}}"
+              },
+              {
+                "name": "title",
+                "value": "={{$node[\"Retrieve Basic Book Info\"].json[\"works\"][0][\"title\"]}}"
+              },
+              {
+                "name": "description",
+                "value": "={{$node[\"Retrieve Detailed Book Info\"].json[\"description\"][\"value\"]}}"
+              },
+              {
+                "name": "URL",
+                "value": "=https://openlibrary.org{{$node[\"Retrieve Basic Book Info\"].json[\"works\"][0][\"key\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Retrieve Basic Book Info",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "limit",
+                "value": "1"
+              },
+              {
+                "name": "offset",
+                "value": "={{$json[\"retrieve_book\"]}}"
+              },
+              {
+                "name": "detail",
+                "value": "true"
+              }
+            ]
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Retrieve Book Count",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "limit",
+                "value": "0"
+              }
+            ]
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Retrieve Detailed Book Info",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "limit",
+                "value": "1"
+              }
+            ]
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Select Random Book",
+        "parameters": {
+          "functionCode": "var retrieve_book = 0;\nvar book_count = items[0].json.work_count;\n\nretrieve_book = Math.floor(Math.random() * book_count) + 1\n\nitems[0].json.retrieve_book = retrieve_book;\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Book Email",
+        "parameters": {
+          "fromEmail": "john.doe@example.com",
+          "html": "={{$node[\"Book Recommendation\"].json[\"msgBody\"]}}",
+          "options": {},
+          "subject": "={{$node[\"Book Recommendation\"].json[\"msgSubject\"]}}",
+          "toEmail": "john.doe@example.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send No Book Email",
+        "parameters": {
+          "fromEmail": "john.doe@example.com",
+          "html": "=<p>Unfortunately, there are no books available for the subject of <em>{{$node[\"Check Book Count\"].json[\"name\"]}}</em>. Please update your n8n workflow with a different subject.</p>\n\n<p>A list of all available subjects can be found at <a href=\"https://openlibrary.org/subjects\">the Open Library</a>.</p>",
+          "options": {},
+          "subject": "=Book not found in {{$node[\"Check Book Count\"].json[\"name\"]}}",
+          "toEmail": "john.doe@example.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Subject",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "subject",
+                "value": "juvenile_literature"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Emailsend"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 137,
+  "viewCount": 750,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Emailsend Account"
+    ],
+    "requiredCredentials": [
+      "smtp details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the scheduler node \"Every Friday at 11:00 AM\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Retrieve Book Count\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check Book Count\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Select Random Book\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Retrieve Detailed Book Info\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Retrieve Basic Book Info\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Author String\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send No Book Email\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Book Email\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Subject\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Book Recommendation\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Filtered Book Info\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-y929r2xq7",
+      "workflowId": "find-a-new-book-bg4h7",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0119_Manual_Cron_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0119_Manual_Cron_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:24.025Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:24.025Z",
+  "updatedAt": "2026-07-15T11:29:24.025Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

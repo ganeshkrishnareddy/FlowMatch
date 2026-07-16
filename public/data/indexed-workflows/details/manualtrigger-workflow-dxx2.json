@@ -1,0 +1,734 @@
+{
+  "id": "manualtrigger-workflow-i3em0",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-dxx2",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 5 different services: stickyNote, httpRequest, set, stopAndError, manualTrigger. It contains 15 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-abf2c4ab",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:49.292706",
+      "updatedAt": "2025-09-29T07:07:49.292716",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "1ec0e1ad-0666-417b-b5af-b381b06e126f",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -120,
+          180
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c34a92d3-b4bd-4c2f-9fa0-66832729a31c",
+        "name": "Upload photo",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          980,
+          180
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "PUT",
+          "options": {},
+          "sendBody": true,
+          "contentType": "binaryData",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $json.access_token }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/octet-stream"
+              }
+            ]
+          },
+          "inputDataFieldName": "data"
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "49ce594c-83c7-4b47-be03-6811ebdcc57b",
+        "name": "Set config (sensitive data)",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          100,
+          180
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "399d42f3-41e0-4043-9a57-85771bf5cd07",
+                "name": "TENANT_ID",
+                "type": "string",
+                "value": "00000000-0000-0000-0000-000000000000"
+              },
+              {
+                "id": "dd63a519-3681-46c4-b122-ab379ed11c42",
+                "name": "CLIENT_ID",
+                "type": "string",
+                "value": "00000000-0000-0000-0000-000000000000"
+              },
+              {
+                "id": "4d50c934-c306-4198-853a-68198b8b84eb",
+                "name": "CLIENT_SECRET",
+                "type": "string",
+                "value": "uU~8Q~THEQLIE2TX7UsecretT2g_JCADyxBxN0bx3"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "53b78aa9-d86f-461b-bff5-bd2a63a693b5",
+        "name": "Get photo (for testing purposes)",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          540,
+          180
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a551951c-f192-4b15-accb-ca936baef9a8",
+        "name": "Set destination",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          760,
+          180
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "9f66b3f9-c161-45f4-bdc0-8cf736b53eda",
+                "name": "TARGET_FOLDER",
+                "type": "string",
+                "value": "/uploads/pictures from n8n"
+              },
+              {
+                "id": "e8584729-2746-48a0-ad80-d0308a49e195",
+                "name": "FILE_NAME",
+                "type": "string",
+                "value": "example.jpg"
+              }
+            ]
+          },
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "66129973-bf5f-4799-b676-2ee40fd2b519",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -240,
+          -220
+        ],
+        "parameters": {
+          "width": 320,
+          "height": 200,
+          "content": "## Prerequisites\n1. [Create an application user]({{ $env.WEBHOOK_URL }}\n2. Ensure the following permissions are set:\n- Sites.ReadWrite.All - for SharePoint site access\n- Files.ReadWrite.All - for file upload operations\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "43bbf2cd-3ac5-4c46-b3c0-bd6158dbe25e",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          160,
+          -280
+        ],
+        "parameters": {
+          "width": 320,
+          "height": 340,
+          "content": "## Authentication\nFor a succesful authentication it is required to provide:\n\n- TENANT_ID\n- CLIENT_ID\n- CLIENT_SECRET\n---\n## Attention!\nFor demonstration purposes and template restrictions we store these values in a 'Set' node but in production environment please ensure safety of such data via utilizing credentials, secure vault or any other safe way of storing such information."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "daa3e6b9-a9ea-4bb4-8e2d-faa516c699ea",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          620,
+          -280
+        ],
+        "parameters": {
+          "width": 440,
+          "height": 340,
+          "content": "## Set destination\nIn this step we will set the destination.\nThe destination is made of two parameters:\n\n- TARGET_FOLDER\n- FILE_NAME\n---\n### Example\nLet's say this is our desired file location:\n`{{ $env.WEBHOOK_URL }} from n8n/example.jpg`\n\nThus we will set the following:\n- TARGET_FOLDER = `/uploads/pictures from n8n`\n- FILE_NAME = `example.jpg`\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "52bd314b-6a5e-499a-904e-a7e9becbbd59",
+        "name": "Authentication",
+        "type": "n8n-nodes-base.httpRequest",
+        "notes": "Get an access token for graph API",
+        "position": [
+          320,
+          180
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "form-urlencoded",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "grant_type",
+                "value": "client_credentials"
+              },
+              {
+                "name": "client_id",
+                "value": "={{ $json.CLIENT_ID }}"
+              },
+              {
+                "name": "client_secret",
+                "value": "={{ $json.CLIENT_SECRET }}"
+              },
+              {
+                "name": "resource",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 4.2
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "c34a92d3-b4bd-4c2f-9fa0-66832729a31c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c-b085faf5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c-da0d72a2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c-a47cba1c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c-ad436ac4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "53b78aa9-d86f-461b-bff5-bd2a63a693b5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5-736d16a5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5-7ce31b86",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5-373e200f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5-7a11dd62",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "52bd314b-6a5e-499a-904e-a7e9becbbd59": {
+        "main": [
+          [
+            {
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59-156d1f2e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59-ca60bee4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59-ace8f4a3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59-fb472839",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 5 different services: stickyNote, httpRequest, set, stopAndError, manualTrigger. It contains 15 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "52bd314b-6a5e-499a-904e-a7e9becbbd59": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59-156d1f2e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59-ca60bee4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59-ace8f4a3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52bd314b-6a5e-499a-904e-a7e9becbbd59-fb472839"
+            }
+          ]
+        ]
+      },
+      "53b78aa9-d86f-461b-bff5-bd2a63a693b5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5-736d16a5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5-7ce31b86"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5-373e200f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-53b78aa9-d86f-461b-bff5-bd2a63a693b5-7a11dd62"
+            }
+          ]
+        ]
+      },
+      "c34a92d3-b4bd-4c2f-9fa0-66832729a31c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c-b085faf5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c-da0d72a2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c-a47cba1c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c34a92d3-b4bd-4c2f-9fa0-66832729a31c-ad436ac4"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Authentication",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "grant_type",
+                "value": "client_credentials"
+              },
+              {
+                "name": "client_id",
+                "value": "={{ $json.CLIENT_ID }}"
+              },
+              {
+                "name": "client_secret",
+                "value": "={{ $json.CLIENT_SECRET }}"
+              },
+              {
+                "name": "resource",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "contentType": "form-urlencoded",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Get photo (for testing purposes)",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Set config (sensitive data)",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "399d42f3-41e0-4043-9a57-85771bf5cd07",
+                "name": "TENANT_ID",
+                "type": "string",
+                "value": "00000000-0000-0000-0000-000000000000"
+              },
+              {
+                "id": "dd63a519-3681-46c4-b122-ab379ed11c42",
+                "name": "CLIENT_ID",
+                "type": "string",
+                "value": "00000000-0000-0000-0000-000000000000"
+              },
+              {
+                "id": "4d50c934-c306-4198-853a-68198b8b84eb",
+                "name": "CLIENT_SECRET",
+                "type": "string",
+                "value": "uU~8Q~THEQLIE2TX7UsecretT2g_JCADyxBxN0bx3"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Set destination",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "9f66b3f9-c161-45f4-bdc0-8cf736b53eda",
+                "name": "TARGET_FOLDER",
+                "type": "string",
+                "value": "/uploads/pictures from n8n"
+              },
+              {
+                "id": "e8584729-2746-48a0-ad80-d0308a49e195",
+                "name": "FILE_NAME",
+                "type": "string",
+                "value": "example.jpg"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Prerequisites\n1. [Create an application user]({{ $env.WEBHOOK_URL }}\n2. Ensure the following permissions are set:\n- Sites.ReadWrite.All - for SharePoint site access\n- Files.ReadWrite.All - for file upload operations\n",
+          "height": 200,
+          "width": 320
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Authentication\nFor a succesful authentication it is required to provide:\n\n- TENANT_ID\n- CLIENT_ID\n- CLIENT_SECRET\n---\n## Attention!\nFor demonstration purposes and template restrictions we store these values in a 'Set' node but in production environment please ensure safety of such data via utilizing credentials, secure vault or any other safe way of storing such information.",
+          "height": 340,
+          "width": 320
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Set destination\nIn this step we will set the destination.\nThe destination is made of two parameters:\n\n- TARGET_FOLDER\n- FILE_NAME\n---\n### Example\nLet's say this is our desired file location:\n`{{ $env.WEBHOOK_URL }} from n8n/example.jpg`\n\nThus we will set the following:\n- TARGET_FOLDER = `/uploads/pictures from n8n`\n- FILE_NAME = `example.jpg`\n",
+          "height": 340,
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Upload photo",
+        "parameters": {
+          "contentType": "binaryData",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $json.access_token }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/octet-stream"
+              }
+            ]
+          },
+          "inputDataFieldName": "data",
+          "method": "PUT",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 164,
+  "viewCount": 470,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Upload photo\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get photo (for testing purposes)\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Authentication\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set config (sensitive data)\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set destination\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-1womkvvt0",
+      "workflowId": "manualtrigger-workflow-i3em0",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0886_Manual_Stickynote_Import_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0886_Manual_Stickynote_Import_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:32.310Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:32.310Z",
+  "updatedAt": "2026-07-15T11:29:32.310Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

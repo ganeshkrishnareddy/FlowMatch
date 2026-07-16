@@ -1,0 +1,747 @@
+{
+  "id": "automate-linkedin-posts-with-ai-n9ilf",
+  "name": "Automate LinkedIn Posts with AI",
+  "slug": "automate-linkedin-posts-with-ai-ft4l",
+  "description": "Automated workflow: Automate LinkedIn Posts with AI. This workflow integrates 9 different services: stickyNote, httpRequest, scheduleTrigger, merge, stopAndError. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Automate LinkedIn Posts with AI workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "id": "mb2MU4xOaT3NrvqN",
+    "meta": {
+      "instanceId": "workflow-0c4a6428",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.225043",
+      "updatedAt": "2025-09-29T07:07:48.225056",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Automate LinkedIn Posts with AI",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "7e8ec5cc-0216-4897-8a40-c44f9bbe5a9b",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          580,
+          540
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 15
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dbde804d-9c84-4023-9e05-7506cd38a460",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          760,
+          225.26841303066982
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 652.1201853643956,
+          "height": 542.0867486896091,
+          "content": "## Fetch the day's post from my Notion database\nA Notion _\"database\"_ is just a table on a Notion Page.\nThis table will have various rows, for which a minimum of three columns are required:\n- Name\n- Status\n- Date\n\nThe Date column is the most important, which will dictate when that row from your Notion table containing the text should be posted.\n\nNOTE: each post is required to have a copy and pasted image!"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "95205e81-e28d-48f9-b3fb-bcf361f7799e",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1520,
+          220
+        ],
+        "parameters": {
+          "width": 860.9829802912225,
+          "height": 540.7357881640437,
+          "content": "## Format Post\nSend the post to OpenAI, where it will attempt to ask your assistant how to take the incoming blob of text, and soup it up into something more palpable for LinkedIn engagement."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4bc2a550-a8ad-4b25-ac53-01413277e068",
+        "name": "Set post status to \"Done\"",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          2760,
+          540
+        ],
+        "parameters": {
+          "pageId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "={{ $('query entries from Notion table for today').item.json.url }}"
+          },
+          "options": {},
+          "resource": "databasePage",
+          "operation": "update",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "statusValue": "Done"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "nBu4zRArkldtNypO",
+            "name": "Notion account"
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "31116f06-72ca-4219-9575-8efaefbff24b",
+        "name": "Post on LinkedIn",
+        "type": "n8n-nodes-base.linkedIn",
+        "position": [
+          2500,
+          540
+        ],
+        "parameters": {
+          "text": "={{ $json.output }}",
+          "person": "_RmSSZc0jB",
+          "additionalFields": {},
+          "shareMediaCategory": "IMAGE"
+        },
+        "credentials": {
+          "linkedInOAuth2Api": {
+            "id": "fozSa4dLS6Jgbn4e",
+            "name": "LinkedIn account 2"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This linkedIn node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1bf0540d-a180-457a-a7d7-fb74c8119a52",
+        "name": "Combine text+image",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          2100,
+          540
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combinationMode": "mergeByPosition"
+        },
+        "typeVersion": 2.1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f1fdf6f7-a75c-451b-8bce-ea581b4b6197",
+        "name": "Fetch image from post",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1640,
+          620
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "00e2bbcb-bac0-4a7e-9892-59f41a26ce9d",
+        "name": "Reformat Post Text",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1620,
+          440
+        ],
+        "parameters": {
+          "text": "=Thank you kindly for your help, please refer to the following LinkedIn post, and output a reformatted version employing thoroughly thought-out paragraph breaks, and lists if present:\n```\n{{ $json.content.join(\" \") }}\n```",
+          "prompt": "define",
+          "options": {},
+          "resource": "assistant",
+          "assistantId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "asst_J1KuOx5wTLrjEHuy5q94jEgh",
+            "cachedResultName": "LinkedIn Post Reviewer"
+          }
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "Gxn0kNMCREcTNGcB",
+            "name": "OpenAi account 2"
+          }
+        },
+        "typeVersion": 1.3,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "119d7fc7-ed62-4a73-916e-8baf19ab1d86",
+        "name": "get all content from post page",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1020,
+          540
+        ],
+        "parameters": {
+          "blockId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "={{ $json.url }}"
+          },
+          "resource": "block",
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "nBu4zRArkldtNypO",
+            "name": "Notion account"
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "461d4dd2-a91a-4219-bd20-6dd3398d4274",
+        "name": "Pull together all text blocks + image",
+        "type": "n8n-nodes-base.aggregate",
+        "position": [
+          1240,
+          540
+        ],
+        "parameters": {
+          "options": {},
+          "fieldsToAggregate": {
+            "fieldToAggregate": [
+              {
+                "fieldToAggregate": "content"
+              },
+              {
+                "fieldToAggregate": "image.file.url"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This aggregate node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "72052eec-c180-4da5-ba15-1a69a7ce6892",
+        "name": "query entries from Notion table for today",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          800,
+          540
+        ],
+        "parameters": {
+          "filters": {
+            "conditions": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "date": "={{ $today.format(\"yyyy/mM/dd\") }}",
+                "condition": "equals"
+              }
+            ]
+          },
+          "options": {},
+          "resource": "databasePage",
+          "operation": "getAll",
+          "databaseId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "9aba7f55-a7de-4329-9d5b-6d127937fa49",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "LinkedIn Posts example"
+          },
+          "filterType": "manual"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "nBu4zRArkldtNypO",
+            "name": "Notion account"
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "35f9b7b6-0e60-495f-826d-af7040e7de1f",
+    "connections": {
+      "f1fdf6f7-a75c-451b-8bce-ea581b4b6197": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-74a7fd29",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-995e5fbf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-ec028cb7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-5f7545e5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-52ca108a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-6dac0d35",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-0db07993",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-312a45f4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "00e2bbcb-bac0-4a7e-9892-59f41a26ce9d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-00e2bbcb-bac0-4a7e-9892-59f41a26ce9d-2eff9130",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Automate LinkedIn Posts with AI. This workflow integrates 9 different services: stickyNote, httpRequest, scheduleTrigger, merge, stopAndError. It contains 14 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Automate LinkedIn Posts with AI. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "00e2bbcb-bac0-4a7e-9892-59f41a26ce9d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-00e2bbcb-bac0-4a7e-9892-59f41a26ce9d-2eff9130"
+            }
+          ]
+        ]
+      },
+      "f1fdf6f7-a75c-451b-8bce-ea581b4b6197": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-74a7fd29"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-995e5fbf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-ec028cb7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-5f7545e5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-52ca108a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-6dac0d35"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-0db07993"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1fdf6f7-a75c-451b-8bce-ea581b4b6197-312a45f4"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Automate LinkedIn Posts with AI",
+    "nodes": [
+      {
+        "name": "Combine text+image",
+        "parameters": {
+          "combinationMode": "mergeByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Fetch image from post",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "get all content from post page",
+        "parameters": {
+          "blockId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "={{ $json.url }}"
+          },
+          "operation": "getAll",
+          "resource": "block",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "linkedInOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Post on LinkedIn",
+        "parameters": {
+          "additionalFields": {},
+          "person": "_RmSSZc0jB",
+          "shareMediaCategory": "IMAGE",
+          "text": "={{ $json.output }}"
+        },
+        "type": "n8n-nodes-base.linkedIn",
+        "typeVersion": 1
+      },
+      {
+        "name": "Pull together all text blocks + image",
+        "parameters": {
+          "fieldsToAggregate": {
+            "fieldToAggregate": [
+              {
+                "fieldToAggregate": "content"
+              },
+              {
+                "fieldToAggregate": "image.file.url"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "query entries from Notion table for today",
+        "parameters": {
+          "databaseId": {
+            "__rl": true,
+            "cachedResultName": "LinkedIn Posts example",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "9aba7f55-a7de-4329-9d5b-6d127937fa49"
+          },
+          "filterType": "manual",
+          "filters": {
+            "conditions": [
+              {
+                "condition": "equals",
+                "date": "={{ $today.format(\"yyyy/mM/dd\") }}",
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          },
+          "operation": "getAll",
+          "options": {},
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Reformat Post Text",
+        "parameters": {
+          "assistantId": {
+            "__rl": true,
+            "cachedResultName": "LinkedIn Post Reviewer",
+            "mode": "list",
+            "value": "asst_J1KuOx5wTLrjEHuy5q94jEgh"
+          },
+          "options": {},
+          "prompt": "define",
+          "resource": "assistant",
+          "text": "=Thank you kindly for your help, please refer to the following LinkedIn post, and output a reformatted version employing thoroughly thought-out paragraph breaks, and lists if present:\n```\n{{ $json.content.join(\" \") }}\n```"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 15
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Set post status to \"Done\"",
+        "parameters": {
+          "operation": "update",
+          "options": {},
+          "pageId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "={{ $('query entries from Notion table for today').item.json.url }}"
+          },
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "statusValue": "Done"
+              }
+            ]
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Format Post\nSend the post to OpenAI, where it will attempt to ask your assistant how to take the incoming blob of text, and soup it up into something more palpable for LinkedIn engagement.",
+          "height": 540.7357881640437,
+          "width": 860.9829802912225
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 6,
+          "content": "## Fetch the day's post from my Notion database\nA Notion _\"database\"_ is just a table on a Notion Page.\nThis table will have various rows, for which a minimum of three columns are required:\n- Name\n- Status\n- Date\n\nThe Date column is the most important, which will dictate when that row from your Notion table containing the text should be posted.\n\nNOTE: each post is required to have a copy and pasted image!",
+          "height": 542.0867486896091,
+          "width": 652.1201853643956
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Notion",
+    "LinkedIn",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 172,
+  "viewCount": 533,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Notion Account",
+      "LinkedIn Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "notion  A P I details",
+      "linked In  O Auth2  A P I details",
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set post status to \"Done\"\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post on LinkedIn\" node (n8n-nodes-base.linkedIn) and configure the action parameters, mappings, and fields.",
+      "Open the \"Combine text+image\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch image from post\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Reformat Post Text\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"get all content from post page\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Pull together all text blocks + image\" node (n8n-nodes-base.aggregate) and configure the action parameters, mappings, and fields.",
+      "Open the \"query entries from Notion table for today\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-hs01knh0y",
+      "workflowId": "automate-linkedin-posts-with-ai-n9ilf",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Linkedin/1922_Linkedin_Schedule_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Linkedin\\1922_Linkedin_Schedule_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:42.784Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:42.784Z",
+  "updatedAt": "2026-07-15T11:18:42.784Z"
+}

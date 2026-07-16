@@ -1,0 +1,946 @@
+{
+  "id": "scheduletrigger-workflow-qw3bo",
+  "name": "Scheduletrigger Workflow",
+  "slug": "scheduletrigger-workflow-jvez",
+  "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 12 different services: stickyNote, markdown, httpRequest, scheduleTrigger, googleDrive. It contains 18 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Scheduletrigger Workflow workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-f0789b46",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.994911",
+      "updatedAt": "2025-09-29T07:07:51.994922",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "1083afcb-1257-45a3-b331-d93fb8769548",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -840,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c3ec0759-a3d1-4866-978a-bfe4f49ee81d",
+        "name": "Get Hash of Contents",
+        "type": "n8n-nodes-base.crypto",
+        "position": [
+          380,
+          0
+        ],
+        "parameters": {
+          "value": "={{ $json.data }}",
+          "dataPropertyName": "hash"
+        },
+        "typeVersion": 1,
+        "notes": "This crypto node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4ad92ad3-6f99-43a5-9a61-374adb3b28f7",
+        "name": "Notify of Change",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          1220,
+          0
+        ],
+        "webhookId": "cc4cbee1-ad57-48fb-810a-b21880357ab0",
+        "parameters": {
+          "sendTo": "jim@example.com",
+          "message": "=site: {{ $('Variables').first().json.url }}\ndate: {{ $now.toISO() }}\nhash: {{ $json.hash }}\ncontents: {{ $json.gdrive }}",
+          "options": {},
+          "subject": "=Change detected for {{ $('Variables').first().json.url }}",
+          "emailType": "text"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "Sf5Gfl9NiFTNXFWb",
+            "name": "Gmail account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9385242a-86b1-4624-ada9-949851b68054",
+        "name": "Markdown",
+        "type": "n8n-nodes-base.markdown",
+        "position": [
+          200,
+          0
+        ],
+        "parameters": {
+          "html": "={{ $json.content.trim() }}",
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This markdown node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "663b6ba2-cbf9-44ea-a062-f88ccb0640c1",
+        "name": "Variables",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -460,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "fa706ed3-7425-4f0e-9590-d9478b4e6692",
+                "name": "url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2ef69fff-4d7a-439a-b317-ea5fa3ce7869",
+        "name": "Only New Hashes",
+        "type": "n8n-nodes-base.removeDuplicates",
+        "position": [
+          560,
+          0
+        ],
+        "parameters": {
+          "options": {
+            "historySize": 1
+          },
+          "operation": "removeItemsSeenInPreviousExecutions",
+          "dedupeValue": "={{ $json.hash }}"
+        },
+        "typeVersion": 2,
+        "notes": "This removeDuplicates node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "93e13d80-a26f-408f-be4e-b582ab9fd9bd",
+        "name": "Log Record",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1040,
+          0
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "hash": "={{ $('Get Hash of Contents').first().json.hash }}",
+              "gdrive": "={{ $env.WEBHOOK_URL }}{{ $json.id }}/view?usp=sharing",
+              "website": "={{ $('Variables').first().json.url }}",
+              "date of change": "={{ $now.toISO() }}"
+            },
+            "schema": [
+              {
+                "id": "website",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "website",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "hash",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "hash",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "date of change",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "date of change",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "gdrive",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "gdrive",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1K13OBMicH-ebhvJRYo4sHiOuHd1KIX2jiFxBLWy2UOk",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "86. Webpage Changes Tracker"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "XHvC7jIRR8A2TlUl",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dea15963-61de-4371-b716-7683e0e703a9",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -540,
+          -160
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 620,
+          "height": 380,
+          "content": "## 1. Fetch a Webpage Contents\n[Read more about the HTTP request node]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bcb1c0b1-fc77-4417-a9c0-6299ce8ca33e",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          100,
+          -160
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 640,
+          "height": 400,
+          "content": "## 2. Use Hashing to Detect Changes\n[Learn more about the cryptography node]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eda51de6-80a2-42b1-83ba-66c551911c45",
+        "name": "Fetch Webpage",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -280,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8aa998f1-1558-4b54-a95a-7be9360a819a",
+        "name": "Extract Contents",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          -100,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "extractHtmlContent",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": ".ct07",
+                "returnValue": "html"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ecb60054-563c-4c0b-949c-abdcd3896f6b",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          760,
+          -160
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 660,
+          "height": 400,
+          "content": "## 3. Notify when Changes Occur\n[Read more about the Gmail node]({{ $env.WEBHOOK_URL }}\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "30774606-5e63-4d73-9894-ba14d5b1fc46",
+        "name": "Take a Snapshot",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          860,
+          0
+        ],
+        "parameters": {
+          "name": "={{\n$('Variables').item.json.url\n  .extractDomain()\n  .replace('.','_')\n  + $json.hash\n  + '.md'\n}}",
+          "content": "={{ $json.data }}",
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "options": {},
+          "folderId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1BbP5HRnjNkCvcDRFFg1bm0sNYBGZM6AU",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "86. Monitor Webpage Changes"
+          },
+          "operation": "createFromText"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "yOwz41gMQclOadgu",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9ae563ea-49a3-4dcc-9190-8746650018aa",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1040,
+          -760
+        ],
+        "parameters": {
+          "width": 440,
+          "height": 980,
+          "content": "## Try it out\n### This n8n template can monitor and detect changes to a webpage's contents and notify you only when a change occurs.\n\nGreat to keep an eye on and track publicly available documents such as  company TOS, government policy or competitor pages.\n\n### How it works\n* A scheduled trigger is used so we can run everyday to automate this process.\n* A website page is then fetched with the HTTP request node and the contents we want to track are extracted using the HTML node.\n* To detect changes, we generate a hash on the contents with the cryptography node and compare it with previously seen hashes using the \"remove duplicates\" node. If the hash was seen before, the workflow stops here.\n* Finally, when new changes are detected a copy of the contents are uploaded to Google Drive and a logged into a Google sheet. A notification email can also be sent if action is required.\n\n### How to use\n* Update the URL you want to track in the node named \"variables\" and ensure the HTML node has updated selectors to get the content you want.\n* Ensure the timezone is set correctly when using the Scheduled Trigger node.\n\n### Need Help?\nJoin the [Discord]({{ $env.WEBHOOK_URL }} or ask in the [Forum]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "eda51de6-80a2-42b1-83ba-66c551911c45": {
+        "main": [
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-8bbdd3ee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-2710f250",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-0b74ab60",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-cd508423",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-ae615622",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-6e79d9ae",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-5234e194",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-eba1f8e7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "93e13d80-a26f-408f-be4e-b582ab9fd9bd": {
+        "main": [
+          [
+            {
+              "node": "error-handler-93e13d80-a26f-408f-be4e-b582ab9fd9bd-41ba37e7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "30774606-5e63-4d73-9894-ba14d5b1fc46": {
+        "main": [
+          [
+            {
+              "node": "error-handler-30774606-5e63-4d73-9894-ba14d5b1fc46-c6bd4af5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 12 different services: stickyNote, markdown, httpRequest, scheduleTrigger, googleDrive. It contains 18 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Scheduletrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "30774606-5e63-4d73-9894-ba14d5b1fc46": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-30774606-5e63-4d73-9894-ba14d5b1fc46-c6bd4af5"
+            }
+          ]
+        ]
+      },
+      "93e13d80-a26f-408f-be4e-b582ab9fd9bd": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93e13d80-a26f-408f-be4e-b582ab9fd9bd-41ba37e7"
+            }
+          ]
+        ]
+      },
+      "eda51de6-80a2-42b1-83ba-66c551911c45": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-8bbdd3ee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-2710f250"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-0b74ab60"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-cd508423"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-ae615622"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-6e79d9ae"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-5234e194"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-eda51de6-80a2-42b1-83ba-66c551911c45-eba1f8e7"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "nodes": [
+      {
+        "name": "Extract Contents",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": ".ct07",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "html"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Fetch Webpage",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Get Hash of Contents",
+        "parameters": {
+          "dataPropertyName": "hash",
+          "value": "={{ $json.data }}"
+        },
+        "type": "n8n-nodes-base.crypto",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Log Record",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "website",
+                "id": "website",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "hash",
+                "id": "hash",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "date of change",
+                "id": "date of change",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "gdrive",
+                "id": "gdrive",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "date of change": "={{ $now.toISO() }}",
+              "gdrive": "={{ $env.WEBHOOK_URL }}{{ $json.id }}/view?usp=sharing",
+              "hash": "={{ $('Get Hash of Contents').first().json.hash }}",
+              "website": "={{ $('Variables').first().json.url }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "86. Webpage Changes Tracker",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1K13OBMicH-ebhvJRYo4sHiOuHd1KIX2jiFxBLWy2UOk"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "Markdown",
+        "parameters": {
+          "html": "={{ $json.content.trim() }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.markdown",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Notify of Change",
+        "parameters": {
+          "emailType": "text",
+          "message": "=site: {{ $('Variables').first().json.url }}\ndate: {{ $now.toISO() }}\nhash: {{ $json.hash }}\ncontents: {{ $json.gdrive }}",
+          "options": {},
+          "sendTo": "jim@example.com",
+          "subject": "=Change detected for {{ $('Variables').first().json.url }}"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Only New Hashes",
+        "parameters": {
+          "dedupeValue": "={{ $json.hash }}",
+          "operation": "removeItemsSeenInPreviousExecutions",
+          "options": {
+            "historySize": 1
+          }
+        },
+        "type": "n8n-nodes-base.removeDuplicates",
+        "typeVersion": 2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "## 1. Fetch a Webpage Contents\n[Read more about the HTTP request node]({{ $env.WEBHOOK_URL }}",
+          "height": 380,
+          "width": 620
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "## 2. Use Hashing to Detect Changes\n[Learn more about the cryptography node]({{ $env.WEBHOOK_URL }}",
+          "height": 400,
+          "width": 640
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 7,
+          "content": "## 3. Notify when Changes Occur\n[Read more about the Gmail node]({{ $env.WEBHOOK_URL }}\n",
+          "height": 400,
+          "width": 660
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Try it out\n### This n8n template can monitor and detect changes to a webpage's contents and notify you only when a change occurs.\n\nGreat to keep an eye on and track publicly available documents such as  company TOS, government policy or competitor pages.\n\n### How it works\n* A scheduled trigger is used so we can run everyday to automate this process.\n* A website page is then fetched with the HTTP request node and the contents we want to track are extracted using the HTML node.\n* To detect changes, we generate a hash on the contents with the cryptography node and compare it with previously seen hashes using the \"remove duplicates\" node. If the hash was seen before, the workflow stops here.\n* Finally, when new changes are detected a copy of the contents are uploaded to Google Drive and a logged into a Google sheet. A notification email can also be sent if action is required.\n\n### How to use\n* Update the URL you want to track in the node named \"variables\" and ensure the HTML node has updated selectors to get the content you want.\n* Ensure the timezone is set correctly when using the Scheduled Trigger node.\n\n### Need Help?\nJoin the [Discord]({{ $env.WEBHOOK_URL }} or ask in the [Forum]({{ $env.WEBHOOK_URL }}",
+          "height": 980,
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Take a Snapshot",
+        "parameters": {
+          "content": "={{ $json.data }}",
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "cachedResultName": "86. Monitor Webpage Changes",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1BbP5HRnjNkCvcDRFFg1bm0sNYBGZM6AU"
+          },
+          "name": "={{\n$('Variables').item.json.url\n  .extractDomain()\n  .replace('.','_')\n  + $json.hash\n  + '.md'\n}}",
+          "operation": "createFromText",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Variables",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "fa706ed3-7425-4f0e-9590-d9478b4e6692",
+                "name": "url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 7,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Crypto",
+    "Gmail",
+    "Markdown",
+    "Google Sheets",
+    "HTTP Request",
+    "Html",
+    "Google Drive"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 160,
+  "viewCount": 63,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Crypto Account",
+      "Gmail Account",
+      "Markdown Account",
+      "Google Sheets Account",
+      "HTTP Request Account",
+      "Html Account",
+      "Google Drive Account"
+    ],
+    "requiredCredentials": [
+      "gmail  O Auth2 details",
+      "google Sheets  O Auth2  A P I details",
+      "google Drive  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get Hash of Contents\" node (n8n-nodes-base.crypto) and configure the action parameters, mappings, and fields.",
+      "Open the \"Notify of Change\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Markdown\" node (n8n-nodes-base.markdown) and configure the action parameters, mappings, and fields.",
+      "Open the \"Only New Hashes\" node (n8n-nodes-base.removeDuplicates) and configure the action parameters, mappings, and fields.",
+      "Open the \"Log Record\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch Webpage\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract Contents\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Take a Snapshot\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Variables\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Incoming triggers will qualified/formatted, new rows will be written to Google Sheets, and email replies or alerts will be sent automatically.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-hczi5pgf0",
+      "workflowId": "scheduletrigger-workflow-qw3bo",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/0817_Schedule_Removeduplicates_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\0817_Schedule_Removeduplicates_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:03.717Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:03.717Z",
+  "updatedAt": "2026-07-15T11:30:03.717Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

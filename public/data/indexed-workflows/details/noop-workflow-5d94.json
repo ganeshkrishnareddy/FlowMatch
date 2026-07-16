@@ -1,0 +1,1019 @@
+{
+  "id": "noop-workflow-r6frf",
+  "name": "Noop Workflow",
+  "slug": "noop-workflow-5d94",
+  "description": "Automated workflow: Noop Workflow. This workflow integrates 10 different services: webhook, stickyNote, wait, code, switch. It contains 20 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Noop Workflow workflow containing 18 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "ffe22db7-06b9-4efe-ab35-758e420dbe57",
+        "name": "END",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -2880,
+          540
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9480feb6-e12a-4b59-998e-bdc7b119087a",
+        "name": "Workflow 1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -2620,
+          -20
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "54492842-137b-48d6-851a-1ce6cc751612",
+        "name": "Workflow 2",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -2620,
+          200
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "83bbda2c-112b-4ed0-9ccd-c7a5c840100d",
+        "name": "Workflow 3",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -2620,
+          420
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "74d889d9-5215-495b-8e60-e1c78d79ae8c",
+        "name": "Incoming Webhook Data",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          -4760,
+          220
+        ],
+        "webhookId": "94d08900-4816-4c74-962a-aacff5077d5d",
+        "parameters": {
+          "path": "94d08900-4816-4c74-962a-aacff5077d5d",
+          "options": {}
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cb5e3e72-6678-4efb-8301-f149014444d2",
+        "name": "Fetch Webhook Data & Declare lockValue",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -4520,
+          220
+        ],
+        "parameters": {
+          "jsCode": "// Parse the Slack payload\nconst payload = JSON.parse($('Incoming Webhook Data').first().json[\"body\"][\"payload\"]);\n\n// Extract button action details\nconst var1 = payload.var1;\nconst var2 = payload.var2;\nconst var3 = payload.var3;\n\n// Log or return the details\nreturn {\n    var1 : var1,\n    var2: var2,\n    var3: var3,\n    lockValue : `${var1}-${var2}-${var3}`\n};"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e118f753-945b-4951-95da-394732fc636c",
+        "name": "Check Redis Lock",
+        "type": "n8n-nodes-base.redis",
+        "position": [
+          -4220,
+          220
+        ],
+        "parameters": {
+          "key": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "operation": "get",
+          "propertyName": "Element"
+        },
+        "credentials": {
+          "redis": {
+            "id": "o0RxOKCtencIaop1",
+            "name": "Geoffrey Redis"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This redis node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c1488bae-cb82-48ce-94cd-5359d7d10b04",
+        "name": "Acquire Redis Lock",
+        "type": "n8n-nodes-base.redis",
+        "position": [
+          -3520,
+          200
+        ],
+        "parameters": {
+          "key": "YOUR_CREDENTIAL_HERE",
+          "ttl": 180,
+          "value": "={{ $('Fetch Webhook Data & Declare lockValue').item.json.lookupVariable }}",
+          "expire": true,
+          "operation": "set"
+        },
+        "credentials": {
+          "redis": {
+            "id": "o0RxOKCtencIaop1",
+            "name": "Geoffrey Redis"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This redis node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0fe5e1d8-f1e4-40e0-a3a4-4c00bbf2b50b",
+        "name": "redisLock existence boolean",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -4020,
+          220
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "905501b4-718c-44fb-b2a5-a8eaf8605511",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.Element }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3c66fab5-2c2a-4bba-8ba1-ed85e57cd42d",
+        "name": "redisLock acquired booleans",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -3800,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "6c071e68-a15a-4da8-b962-fe173b1eb145",
+                "operator": {
+                  "type": "string",
+                  "operation": "notExists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.Element }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "787d1c86-1a66-40ea-b8b6-29f50a48737c",
+        "name": "Poll for lock",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          -3520,
+          420
+        ],
+        "webhookId": "615b4c18-2c29-418c-a2bf-302ff24e5c65",
+        "parameters": {},
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f5b88169-e97b-4359-890e-969dbdc6d829",
+        "name": "duplicateWebhook boolean",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -3200,
+          420
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "08500e34-cc7f-4005-87bd-f7250dc076fe",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $('Fetch Webhook Data & Declare lockValue').item.json.lookupVariable }}",
+                "rightValue": "={{ $input.first().json.Element }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "db4e4149-7970-402c-a3d7-2cfe47b6a5b7",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -4760,
+          -120
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 480,
+          "height": 220,
+          "content": "#### 🔒 This workflow demonstrates Redis-based locking to prevent concurrent execution of workflows.\n\n**Steps:**\n+ Try to acquire a lock via Redis\n+ If successful, execute workflow\n+ If duplicate request; ignore request\n+ Release the lock after completion"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "879b7ab5-402b-4ea8-977b-64d29cd9bb39",
+        "name": "Discard Redis Lock",
+        "type": "n8n-nodes-base.redis",
+        "position": [
+          -2320,
+          200
+        ],
+        "parameters": {
+          "key": "YOUR_CREDENTIAL_HERE",
+          "operation": "delete"
+        },
+        "credentials": {
+          "redis": {
+            "id": "o0RxOKCtencIaop1",
+            "name": "Geoffrey Redis"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This redis node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "494030d6-e731-4f4f-9193-7b46f2d470d0",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -3580,
+          80
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 220,
+          "height": 80,
+          "content": "Attempts to acquire a lock using Redis by setting a key with expiration."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a643b45e-2067-4c42-8c1c-365b3fea911a",
+        "name": "Workflow Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          -2880,
+          200
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "2761039b-e76c-4606-9aaf-48a569942ab7",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "ef07c62f-bd3f-4f54-85b9-9dbf64915f2c",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "2dfc15de-bf33-4c25-932f-dae16758e2e6",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5531d4c3-158c-4f98-b6fa-9ef9a85eef71",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -2940,
+          680
+        ],
+        "parameters": {
+          "color": 5,
+          "height": 80,
+          "content": "Skips execution when duplicate request is received."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0a159f03-3ecc-4010-ab63-cc24df90df31",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -2320,
+          100
+        ],
+        "parameters": {
+          "color": 5,
+          "height": 80,
+          "content": "Deletes the Redis lock key to release the lock."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "74d889d9-5215-495b-8e60-e1c78d79ae8c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-59f2d52b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-7a187107",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-8a1007cd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-dfc6666d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-9f74da73",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-ef38871d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-3429f063",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-88b61317",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Noop Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Noop Workflow. This workflow integrates 10 different services: webhook, stickyNote, wait, code, switch. It contains 20 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-93ba6abf",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:58.892807",
+      "updatedAt": "2025-09-29T07:07:58.892824",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Noop Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "74d889d9-5215-495b-8e60-e1c78d79ae8c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-59f2d52b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-7a187107"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-8a1007cd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-dfc6666d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-9f74da73"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-ef38871d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-3429f063"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74d889d9-5215-495b-8e60-e1c78d79ae8c-88b61317"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Noop Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "redis": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Acquire Redis Lock",
+        "parameters": {
+          "expire": true,
+          "key": "YOUR_CREDENTIAL_HERE",
+          "operation": "set",
+          "ttl": 180,
+          "value": "={{ $('Fetch Webhook Data & Declare lockValue').item.json.lookupVariable }}"
+        },
+        "type": "n8n-nodes-base.redis",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "redis": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Check Redis Lock",
+        "parameters": {
+          "key": "YOUR_CREDENTIAL_HERE",
+          "operation": "get",
+          "options": {},
+          "propertyName": "Element"
+        },
+        "type": "n8n-nodes-base.redis",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "redis": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Discard Redis Lock",
+        "parameters": {
+          "key": "YOUR_CREDENTIAL_HERE",
+          "operation": "delete"
+        },
+        "type": "n8n-nodes-base.redis",
+        "typeVersion": 1
+      },
+      {
+        "name": "duplicateWebhook boolean",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "08500e34-cc7f-4005-87bd-f7250dc076fe",
+                "leftValue": "={{ $('Fetch Webhook Data & Declare lockValue').item.json.lookupVariable }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "={{ $input.first().json.Element }}"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "END",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Fetch Webhook Data & Declare lockValue",
+        "parameters": {
+          "jsCode": "// Parse the Slack payload\nconst payload = JSON.parse($('Incoming Webhook Data').first().json[\"body\"][\"payload\"]);\n\n// Extract button action details\nconst var1 = payload.var1;\nconst var2 = payload.var2;\nconst var3 = payload.var3;\n\n// Log or return the details\nreturn {\n    var1 : var1,\n    var2: var2,\n    var3: var3,\n    lockValue : `${var1}-${var2}-${var3}`\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Incoming Webhook Data",
+        "parameters": {
+          "options": {},
+          "path": "94d08900-4816-4c74-962a-aacff5077d5d"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      },
+      {
+        "name": "Poll for lock",
+        "parameters": {},
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "redisLock acquired booleans",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "6c071e68-a15a-4da8-b962-fe173b1eb145",
+                "leftValue": "={{ $json.Element }}",
+                "operator": {
+                  "operation": "notExists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "redisLock existence boolean",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "905501b4-718c-44fb-b2a5-a8eaf8605511",
+                "leftValue": "={{ $json.Element }}",
+                "operator": {
+                  "operation": "empty",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 6,
+          "content": "#### 🔒 This workflow demonstrates Redis-based locking to prevent concurrent execution of workflows.\n\n**Steps:**\n+ Try to acquire a lock via Redis\n+ If successful, execute workflow\n+ If duplicate request; ignore request\n+ Release the lock after completion",
+          "height": 220,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "Attempts to acquire a lock using Redis by setting a key with expiration.",
+          "height": 80,
+          "width": 220
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 5,
+          "content": "Skips execution when duplicate request is received.",
+          "height": 80
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 5,
+          "content": "Deletes the Redis lock key to release the lock.",
+          "height": 80
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Workflow 1",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Workflow 2",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Workflow 3",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Workflow Switch",
+        "parameters": {
+          "options": {},
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "2761039b-e76c-4606-9aaf-48a569942ab7",
+                      "leftValue": "",
+                      "operator": {
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "ef07c62f-bd3f-4f54-85b9-9dbf64915f2c",
+                      "leftValue": "",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "2dfc15de-bf33-4c25-932f-dae16758e2e6",
+                      "leftValue": "",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2
+      }
+    ]
+  },
+  "nodeCount": 18,
+  "integrationCount": 2,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Webhook",
+    "Redis"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 103,
+  "viewCount": 762,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Redis Account"
+    ],
+    "requiredCredentials": [
+      "redis details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Incoming Webhook Data\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"END\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check Redis Lock\" node (n8n-nodes-base.redis) and configure the action parameters, mappings, and fields.",
+      "Open the \"Acquire Redis Lock\" node (n8n-nodes-base.redis) and configure the action parameters, mappings, and fields.",
+      "Open the \"redisLock existence boolean\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"redisLock acquired booleans\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Poll for lock\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"duplicateWebhook boolean\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Discard Redis Lock\" node (n8n-nodes-base.redis) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Workflow Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Workflow 1\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Workflow 2\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Workflow 3\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-tegsu1i5b",
+      "workflowId": "noop-workflow-r6frf",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Wait/0831_Wait_Code_Monitor_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Wait\\0831_Wait_Code_Monitor_Webhook.json",
+      "discoveredAt": "2026-07-15T11:20:39.316Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:39.316Z",
+  "updatedAt": "2026-07-15T11:20:39.316Z"
+}

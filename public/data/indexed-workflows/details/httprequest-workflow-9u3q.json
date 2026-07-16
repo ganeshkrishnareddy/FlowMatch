@@ -1,0 +1,1232 @@
+{
+  "id": "httprequest-workflow-ed9r5",
+  "name": "Httprequest Workflow",
+  "slug": "httprequest-workflow-9u3q",
+  "description": "Automated workflow: Httprequest Workflow. This workflow integrates 13 different services: convertToFile, stickyNote, httpRequest, wait, splitInBatches. It contains 31 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Httprequest Workflow workflow containing 19 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "6aa059e4-e78f-4bbd-a707-994a39840f97",
+        "name": "Create Session",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -520,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "identifier",
+                "value": "youruser.bsky.social"
+              },
+              {
+                "name": "password",
+                "value": "your-app-passord-here"
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "143e37b0-de79-4329-99a2-51484c9609a8",
+        "name": "List followers",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -280,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            },
+            "pagination": {
+              "pagination": {
+                "parameters": {
+                  "parameters": [
+                    {
+                      "name": "cursor",
+                      "value": "={{ $response.body.cursor }}"
+                    }
+                  ]
+                },
+                "maxRequests": 2,
+                "requestInterval": 250,
+                "limitPagesFetched": true
+              }
+            }
+          },
+          "sendQuery": true,
+          "sendHeaders": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "actor",
+                "value": "={{ $json.did }}"
+              },
+              {
+                "name": "limit",
+                "value": "100"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $item(\"0\").$node[\"Create Session\"].json[\"accessJwt\"] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f1436a63-a23f-4082-9209-12c21a26ad91",
+        "name": "Convert to File",
+        "type": "n8n-nodes-base.convertToFile",
+        "position": [
+          100,
+          620
+        ],
+        "parameters": {
+          "options": {
+            "fileName": "followers-basuracero.json"
+          },
+          "operation": "toJson"
+        },
+        "typeVersion": 1.1,
+        "notes": "This convertToFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f8beea47-6f36-4dfb-b2e7-bf94adb63e66",
+        "name": "Extract from File",
+        "type": "n8n-nodes-base.extractFromFile",
+        "position": [
+          100,
+          240
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "fromJson"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "41658372-3054-4909-850b-3bffd1b1b79c",
+        "name": "Split Out",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          520,
+          240
+        ],
+        "parameters": {
+          "options": {
+            "destinationFieldName": "did"
+          },
+          "fieldToSplitOut": "newDids"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c94aa8e9-06db-4b24-a20a-5615b7129023",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          740,
+          240
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4d1c6a2f-3acd-4783-96d4-693ced06fd97",
+        "name": "Wait",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          -100,
+          620
+        ],
+        "webhookId": "b1608475-db84-4f23-acd6-d003f5094afd",
+        "parameters": {},
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e4125cb8-8eb5-4cf0-b00d-e7ce4ec8236e",
+        "name": "Find new followers",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          280,
+          240
+        ],
+        "parameters": {
+          "jsCode": "// Datos de entrada\nconst listFollowers = $('List followers').all()[0].json.followers;\nconst extractFromFile = $('Extract from File').all()[0].json.data[0].followers;\n\n// Verificar que tenemos acceso a los datos\nconsole.log('listFollowers length:', Array.isArray(listFollowers) ? listFollowers.length : 'no es array');\nconsole.log('extractFromFile length:', Array.isArray(extractFromFile) ? extractFromFile.length : 'no es array');\n\n// Mostrar algunos ejemplos de cada lista\nconsole.log('Ejemplo de listFollowers:', listFollowers?.slice(0, 2));\nconsole.log('Ejemplo de extractFromFile:', extractFromFile?.slice(0, 2));\n\n// Crear conjunto de DIDs del archivo extraído\nconst existingDids = new Set(extractFromFile?.map(item => item.did) || []);\nconsole.log('DIDs existentes:', Array.from(existingDids).slice(0, 5));\n\n// Filtrar listFollowers\nconst newFollowers = listFollowers?.filter(follower => !existingDids.has(follower.did)) || [];\n\nreturn {\n  json: {\n    debug: {\n      listFollowersCount: listFollowers?.length || 0,\n      extractFromFileCount: extractFromFile?.length || 0,\n      existingDidsCount: existingDids.size,\n      newFollowersCount: newFollowers.length\n    },\n    newFollowers,\n    newDids: newFollowers.map(follower => follower.did),\n    count: newFollowers.length\n  }\n}"
+        },
+        "typeVersion": 2,
+        "alwaysOutputData": true,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a28accb5-ee47-431f-83e4-376425e9899e",
+        "name": "Read followers from file",
+        "type": "n8n-nodes-base.readWriteFile",
+        "position": [
+          -80,
+          240
+        ],
+        "parameters": {
+          "options": {},
+          "fileSelector": "=followers-{{ $('Create Session').item.json.handle }}.json"
+        },
+        "typeVersion": 1,
+        "notes": "This readWriteFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "aa2ab5e1-eb6f-4657-9a9a-66417ffa421e",
+        "name": "Save followers to file",
+        "type": "n8n-nodes-base.readWriteFile",
+        "position": [
+          280,
+          620
+        ],
+        "parameters": {
+          "options": {
+            "append": false
+          },
+          "fileName": "=followers-{{ $('Create Session').item.json.handle }}.json",
+          "operation": "write"
+        },
+        "typeVersion": 1,
+        "notes": "This readWriteFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9a4fb5e5-f2f6-4aa1-846e-8d6460ad7765",
+        "name": "Define welcome message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          980,
+          260
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "afe7fe9b-3bd4-4429-afe9-81e5fe934e07",
+                "name": "text",
+                "type": "string",
+                "value": "Hello, thanks for your follow. You can read more about my over my site:"
+              },
+              {
+                "id": "97590cd1-9d85-442b-baa3-bad849ff9be0",
+                "name": "link",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "594ce66f-acbd-4c31-806c-382aa9a98ed0",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          920,
+          160
+        ],
+        "parameters": {
+          "width": 230,
+          "height": 266,
+          "content": "### 2. Define your welcome message and link here"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c24a7971-11a7-4164-9f2d-78335264f250",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          220,
+          460
+        ],
+        "parameters": {
+          "width": 231,
+          "height": 338,
+          "content": "### 3. **Important** \n\nYou need to manually run \"Save followers to file\" once before the first time so you populate your list of existing followers"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c6e766cf-a118-4db0-8e3c-32662c40737b",
+        "name": "Send message",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1360,
+          260
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"convoId\" : \"{{ $json.convo.id }}\",\n  \"message\" : {\n    \"text\" : \"{{ $('Define welcome message').item.json.text }}\\n\\n{{ $('Define welcome message').item.json.link }}\",\n    \"facets\" : [\n     {\n      \"index\" : {\n        \"byteStart\": {{ $('Define welcome message').item.json.text.length }},\n        \"byteEnd\": {{ $('Define welcome message').item.json.text.length + 3 + $('Define welcome message').item.json.link.length}}\n      },\n      \"features\": [\n          {\n            \"$type\": \"app.bsky.richtext.facet#link\",\n            \"uri\": \"{{ $('Define welcome message').item.json.link }}\"\n          }\n        ]\n      }\n    ]\n  }\n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $item(\"0\").$node[\"Create Session\"].json[\"accessJwt\"] }}"
+              },
+              {
+                "name": "Atproto-Proxy",
+                "value": "did:web:api.bsky.chat#bsky_chat"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "33aa7e0c-58fe-4527-a94e-49bec0e06325",
+        "name": "Get conversation ID",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1200,
+          260
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendQuery": true,
+          "sendHeaders": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "members",
+                "value": "={{ $('Split Out').item.json.did }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $item(\"0\").$node[\"Create Session\"].json[\"accessJwt\"] }}"
+              },
+              {
+                "name": "Atproto-Proxy",
+                "value": "did:web:api.bsky.chat#bsky_chat"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "066f1d0d-319a-4676-9c0a-5b00d206ffd2",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -40,
+          -100
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 479,
+          "height": 307,
+          "content": "## Send a welcome private message to your new BlueSky followers\n\nThis flow will save your current followers in a file and check for new ones on the next execution, sending them the Defined message an link as a private message.\n\nOnce messages are sent, the new list of followers will be saved into the file.\n\n**Important: Follow the yellow notes in order before enabling the full flow for the first time**"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a61e301e-a0ca-48e9-9a46-05975662aa90",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -560,
+          40
+        ],
+        "parameters": {
+          "width": 181,
+          "height": 364,
+          "content": "### 1. Define your Bluesky user and app password first\n\nThe App password should have access to private messages"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1b1dcd74-7a71-49e4-99e8-c079b692aca5",
+        "name": "Each 60 minutes",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -720,
+          240
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 60
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6acf153c-cdc6-42c1-85f9-2692c8777eef",
+        "name": "No Operation, do nothing",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          520,
+          620
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "6aa059e4-e78f-4bbd-a707-994a39840f97": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97-a4722bf5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97-17725b9a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97-25d117c6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97-e2069468",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "143e37b0-de79-4329-99a2-51484c9609a8": {
+        "main": [
+          [
+            {
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8-4e0bd3d7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8-23e35120",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8-b8a95e99",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8-4aae11e7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "c6e766cf-a118-4db0-8e3c-32662c40737b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b-f5efc52d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b-55873bda",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b-f7554e49",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b-0f2e7d62",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "33aa7e0c-58fe-4527-a94e-49bec0e06325": {
+        "main": [
+          [
+            {
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325-1a9a6c54",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325-e1239e8f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325-903b52bc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325-7fd95fc6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f1436a63-a23f-4082-9209-12c21a26ad91": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f1436a63-a23f-4082-9209-12c21a26ad91-fb6fa157",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f8beea47-6f36-4dfb-b2e7-bf94adb63e66": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f8beea47-6f36-4dfb-b2e7-bf94adb63e66-ed9aab5d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a28accb5-ee47-431f-83e4-376425e9899e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a28accb5-ee47-431f-83e4-376425e9899e-123c4737",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "aa2ab5e1-eb6f-4657-9a9a-66417ffa421e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-aa2ab5e1-eb6f-4657-9a9a-66417ffa421e-d8b032b0",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Httprequest Workflow. This workflow integrates 13 different services: convertToFile, stickyNote, httpRequest, wait, splitInBatches. It contains 31 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-5f7a32e6",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:58.740586",
+      "updatedAt": "2025-09-29T07:07:58.740619",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Httprequest Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "143e37b0-de79-4329-99a2-51484c9609a8": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8-4e0bd3d7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8-23e35120"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8-b8a95e99"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-143e37b0-de79-4329-99a2-51484c9609a8-4aae11e7"
+            }
+          ]
+        ]
+      },
+      "33aa7e0c-58fe-4527-a94e-49bec0e06325": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325-1a9a6c54"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325-e1239e8f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325-903b52bc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-33aa7e0c-58fe-4527-a94e-49bec0e06325-7fd95fc6"
+            }
+          ]
+        ]
+      },
+      "6aa059e4-e78f-4bbd-a707-994a39840f97": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97-a4722bf5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97-17725b9a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97-25d117c6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6aa059e4-e78f-4bbd-a707-994a39840f97-e2069468"
+            }
+          ]
+        ]
+      },
+      "a28accb5-ee47-431f-83e4-376425e9899e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a28accb5-ee47-431f-83e4-376425e9899e-123c4737"
+            }
+          ]
+        ]
+      },
+      "aa2ab5e1-eb6f-4657-9a9a-66417ffa421e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-aa2ab5e1-eb6f-4657-9a9a-66417ffa421e-d8b032b0"
+            }
+          ]
+        ]
+      },
+      "c6e766cf-a118-4db0-8e3c-32662c40737b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b-f5efc52d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b-55873bda"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b-f7554e49"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6e766cf-a118-4db0-8e3c-32662c40737b-0f2e7d62"
+            }
+          ]
+        ]
+      },
+      "f1436a63-a23f-4082-9209-12c21a26ad91": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1436a63-a23f-4082-9209-12c21a26ad91-fb6fa157"
+            }
+          ]
+        ]
+      },
+      "f8beea47-6f36-4dfb-b2e7-bf94adb63e66": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f8beea47-6f36-4dfb-b2e7-bf94adb63e66-ed9aab5d"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "nodes": [
+      {
+        "name": "Convert to File",
+        "parameters": {
+          "operation": "toJson",
+          "options": {
+            "fileName": "followers-basuracero.json"
+          }
+        },
+        "type": "n8n-nodes-base.convertToFile",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Create Session",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "identifier",
+                "value": "youruser.bsky.social"
+              },
+              {
+                "name": "password",
+                "value": "your-app-passord-here"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Define welcome message",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "afe7fe9b-3bd4-4429-afe9-81e5fe934e07",
+                "name": "text",
+                "type": "string",
+                "value": "Hello, thanks for your follow. You can read more about my over my site:"
+              },
+              {
+                "id": "97590cd1-9d85-442b-baa3-bad849ff9be0",
+                "name": "link",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Each 60 minutes",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 60
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Extract from File",
+        "parameters": {
+          "operation": "fromJson",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "Find new followers",
+        "parameters": {
+          "jsCode": "// Datos de entrada\nconst listFollowers = $('List followers').all()[0].json.followers;\nconst extractFromFile = $('Extract from File').all()[0].json.data[0].followers;\n\n// Verificar que tenemos acceso a los datos\nconsole.log('listFollowers length:', Array.isArray(listFollowers) ? listFollowers.length : 'no es array');\nconsole.log('extractFromFile length:', Array.isArray(extractFromFile) ? extractFromFile.length : 'no es array');\n\n// Mostrar algunos ejemplos de cada lista\nconsole.log('Ejemplo de listFollowers:', listFollowers?.slice(0, 2));\nconsole.log('Ejemplo de extractFromFile:', extractFromFile?.slice(0, 2));\n\n// Crear conjunto de DIDs del archivo extraído\nconst existingDids = new Set(extractFromFile?.map(item => item.did) || []);\nconsole.log('DIDs existentes:', Array.from(existingDids).slice(0, 5));\n\n// Filtrar listFollowers\nconst newFollowers = listFollowers?.filter(follower => !existingDids.has(follower.did)) || [];\n\nreturn {\n  json: {\n    debug: {\n      listFollowersCount: listFollowers?.length || 0,\n      extractFromFileCount: extractFromFile?.length || 0,\n      existingDidsCount: existingDids.size,\n      newFollowersCount: newFollowers.length\n    },\n    newFollowers,\n    newDids: newFollowers.map(follower => follower.did),\n    count: newFollowers.length\n  }\n}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get conversation ID",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $item(\"0\").$node[\"Create Session\"].json[\"accessJwt\"] }}"
+              },
+              {
+                "name": "Atproto-Proxy",
+                "value": "did:web:api.bsky.chat#bsky_chat"
+              }
+            ]
+          },
+          "options": {},
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "members",
+                "value": "={{ $('Split Out').item.json.did }}"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "List followers",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $item(\"0\").$node[\"Create Session\"].json[\"accessJwt\"] }}"
+              }
+            ]
+          },
+          "options": {
+            "pagination": {
+              "pagination": {
+                "limitPagesFetched": true,
+                "maxRequests": 2,
+                "parameters": {
+                  "parameters": [
+                    {
+                      "name": "cursor",
+                      "value": "={{ $response.body.cursor }}"
+                    }
+                  ]
+                },
+                "requestInterval": 250
+              }
+            },
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          },
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "actor",
+                "value": "={{ $json.did }}"
+              },
+              {
+                "name": "limit",
+                "value": "100"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "No Operation, do nothing",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Read followers from file",
+        "parameters": {
+          "fileSelector": "=followers-{{ $('Create Session').item.json.handle }}.json",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "Save followers to file",
+        "parameters": {
+          "fileName": "=followers-{{ $('Create Session').item.json.handle }}.json",
+          "operation": "write",
+          "options": {
+            "append": false
+          }
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "Send message",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $item(\"0\").$node[\"Create Session\"].json[\"accessJwt\"] }}"
+              },
+              {
+                "name": "Atproto-Proxy",
+                "value": "did:web:api.bsky.chat#bsky_chat"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"convoId\" : \"{{ $json.convo.id }}\",\n  \"message\" : {\n    \"text\" : \"{{ $('Define welcome message').item.json.text }}\\n\\n{{ $('Define welcome message').item.json.link }}\",\n    \"facets\" : [\n     {\n      \"index\" : {\n        \"byteStart\": {{ $('Define welcome message').item.json.text.length }},\n        \"byteEnd\": {{ $('Define welcome message').item.json.text.length + 3 + $('Define welcome message').item.json.link.length}}\n      },\n      \"features\": [\n          {\n            \"$type\": \"app.bsky.richtext.facet#link\",\n            \"uri\": \"{{ $('Define welcome message').item.json.link }}\"\n          }\n        ]\n      }\n    ]\n  }\n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Split Out",
+        "parameters": {
+          "fieldToSplitOut": "newDids",
+          "options": {
+            "destinationFieldName": "did"
+          }
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 5,
+          "content": "## Send a welcome private message to your new BlueSky followers\n\nThis flow will save your current followers in a file and check for new ones on the next execution, sending them the Defined message an link as a private message.\n\nOnce messages are sent, the new list of followers will be saved into the file.\n\n**Important: Follow the yellow notes in order before enabling the full flow for the first time**",
+          "height": 307,
+          "width": 479
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "### 1. Define your Bluesky user and app password first\n\nThe App password should have access to private messages",
+          "height": 364,
+          "width": 181
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "### 2. Define your welcome message and link here",
+          "height": 266,
+          "width": 230
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "### 3. **Important** \n\nYou need to manually run \"Save followers to file\" once before the first time so you populate your list of existing followers",
+          "height": 338,
+          "width": 231
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wait",
+        "parameters": {},
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 19,
+  "integrationCount": 2,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Readwritefile"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 29,
+  "viewCount": 85,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Readwritefile Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Each 60 minutes\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Create Session\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"List followers\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Convert to File\" node (n8n-nodes-base.convertToFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract from File\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Read followers from file\" node (n8n-nodes-base.readWriteFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Save followers to file\" node (n8n-nodes-base.readWriteFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send message\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get conversation ID\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"No Operation, do nothing\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Define welcome message\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 91,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-hzvekb0mj",
+      "workflowId": "httprequest-workflow-ed9r5",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Wait/0640_Wait_Splitout_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Wait\\0640_Wait_Splitout_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:31:07.701Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:31:07.701Z",
+  "updatedAt": "2026-07-15T11:31:07.701Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

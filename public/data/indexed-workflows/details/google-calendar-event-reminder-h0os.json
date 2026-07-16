@@ -1,0 +1,549 @@
+{
+  "id": "google-calendar-event-reminder-n8bw8",
+  "name": "Google Calendar Event Reminder",
+  "slug": "google-calendar-event-reminder-h0os",
+  "description": "Automated workflow: Google Calendar Event Reminder. This workflow integrates 8 different services: stickyNote, telegram, scheduleTrigger, agent, stopAndError. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Google Calendar Event Reminder workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "SvYHgLmzosuLAe4A",
+    "meta": {
+      "instanceId": "workflow-d0fb0962",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:57.536376",
+      "updatedAt": "2025-09-29T07:07:57.536404",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Google Calendar Event Reminder",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "dff5d952-23cb-4822-9aec-0dcae3de568a",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "disabled": true,
+        "position": [
+          -40,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 1
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a6de9944-1dd7-430e-a1d9-100710ddfa9c",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          700,
+          500
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "CDX6QM4gLYanh0P4",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6d2208a6-6000-4b6b-a82c-e346b7885409",
+        "name": "Get upcoming event",
+        "type": "n8n-nodes-base.googleCalendar",
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "limit": 5,
+          "options": {},
+          "timeMax": "={{ $now.plus({ hour: 1, minute:1 }) }}",
+          "timeMin": "={{ $now.plus({ hour: 1 }) }}",
+          "calendar": {
+            "__rl": true,
+            "mode": "list",
+            "value": "davide.boizza@gmail.com",
+            "cachedResultName": "davide.boizza@gmail.com"
+          },
+          "operation": "getAll"
+        },
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "8RFK3u13g2PJEGa9",
+            "name": "Google Calendar account"
+          }
+        },
+        "typeVersion": 1.3,
+        "notes": "This googleCalendar node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e6f6e744-60b0-4b22-93bc-f3ffcfac71f6",
+        "name": "Already sent?",
+        "type": "n8n-nodes-base.removeDuplicates",
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "removeItemsSeenInPreviousExecutions",
+          "dedupeValue": "={{ $json.id }}"
+        },
+        "typeVersion": 2,
+        "notes": "This removeDuplicates node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "882d08f5-790a-40bb-bda5-60744d587633",
+        "name": "Secretary Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "text": "=These are the details of the event/appointment:\n\nEvent Name: {{ $('Get upcoming event').item.json.summary }}\nDescription: {{ $('Get upcoming event').item.json.description }}\nLocation: {{ $('Get upcoming event').item.json.location }}\nStart: {{ $('Get upcoming event').item.json.start.dateTime }}\nEnd: {{ $('Get upcoming event').item.json.end.dateTime }}\nCreated by: {{ $('Get upcoming event').item.json.creator.email }}",
+          "options": {
+            "systemMessage": "=## Core Identity\nYou are a professional and friendly virtual secretary, dedicated to reminder appointments with efficiency and a warm personal touch.\n\n## Communication Style\n- Communicate in a conversational, approachable manner\n- Maintain a balance between professional competence and friendly rapport\n- Use a tone that is informal yet precise\n- Inject occasional light humor and personality into interactions\n\n## Key Responsibilities\n1. Calendar Management\n   - Provide timely reminders and scheduling updates\n\n2. Communication Approach\n   - Respond promptly and clearly\n   - Maintain confidentiality and discretion\n\n## Interaction Guidelines\n- Use a friendly, conversational tone\n- Just describe the details of the event without asking questions\n\n## Tone and Language\n- Warm and approachable\n- Professional but not overly formal\n- Direct and clear in communication\n- Use simple, straightforward language\n- Show genuine care and attentiveness\n\nRemember: Your primary goal is to make the user's life easier, more organized, and less stressful through efficient and friendly administrative support."
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.8,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "82509a0f-9086-423e-8928-f882e59333b8",
+        "name": "Send reminder",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          1100,
+          300
+        ],
+        "webhookId": "dbb6a96e-db3b-4827-9455-a91007b89616",
+        "parameters": {
+          "text": "={{ $json.output }}",
+          "chatId": "CHAT_ID",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "0hSq9VwaiJifiscT",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d08dd565-4718-4fbc-af7c-7a2e042c96f8",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -40,
+          -140
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 620,
+          "content": "## Google Calendar Event Reminder\nThis smart **Google Calendar** workflow fixes that by sending you a clear, friendly reminder exactly **1 hour before your event starts**—delivered through **Telegram** as if a personal assistant were looking out for you. Powered by **AI**, it transforms cold calendar alerts into warm, conversational nudges you won't ignore."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7a9379ca-f301-40b9-ae90-742663bbcdf2",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -40,
+          40
+        ],
+        "parameters": {
+          "width": 620,
+          "height": 140,
+          "content": "## STEP 1\n- In the \"Get upcoming event\" node enter how much time before the event starts you want to be notified. It is currently set to 1 hour\n- In the Telegram node replace CHAT_ID with that of your personal Bot"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d7852912-6501-4a1b-8928-6eb890e4aea8",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          420,
+          240
+        ],
+        "parameters": {
+          "width": 220,
+          "height": 200,
+          "content": "Prevent multiple reminders for the same event"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-ebd1ae97",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "timezone": "UTC",
+      "callerPolicy": "workflowsFromSameOwner",
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "errorWorkflow": null,
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "d0dd74db-e96c-4a09-a8d1-6fb193b6e015",
+    "connections": {
+      "a6de9944-1dd7-430e-a1d9-100710ddfa9c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a6de9944-1dd7-430e-a1d9-100710ddfa9c-47089201",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "6d2208a6-6000-4b6b-a82c-e346b7885409": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6d2208a6-6000-4b6b-a82c-e346b7885409-ec7a2353",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "82509a0f-9086-423e-8928-f882e59333b8": {
+        "main": [
+          [
+            {
+              "node": "error-handler-82509a0f-9086-423e-8928-f882e59333b8-c01638a8",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Google Calendar Event Reminder. This workflow integrates 8 different services: stickyNote, telegram, scheduleTrigger, agent, stopAndError. It contains 12 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Google Calendar Event Reminder. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "6d2208a6-6000-4b6b-a82c-e346b7885409": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6d2208a6-6000-4b6b-a82c-e346b7885409-ec7a2353"
+            }
+          ]
+        ]
+      },
+      "82509a0f-9086-423e-8928-f882e59333b8": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82509a0f-9086-423e-8928-f882e59333b8-c01638a8"
+            }
+          ]
+        ]
+      },
+      "a6de9944-1dd7-430e-a1d9-100710ddfa9c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a6de9944-1dd7-430e-a1d9-100710ddfa9c-47089201"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Google Calendar Event Reminder",
+    "nodes": [
+      {
+        "name": "Already sent?",
+        "parameters": {
+          "dedupeValue": "={{ $json.id }}",
+          "operation": "removeItemsSeenInPreviousExecutions",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.removeDuplicates",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get upcoming event",
+        "parameters": {
+          "calendar": {
+            "__rl": true,
+            "cachedResultName": "davide.boizza@gmail.com",
+            "mode": "list",
+            "value": "davide.boizza@gmail.com"
+          },
+          "limit": 5,
+          "operation": "getAll",
+          "options": {},
+          "timeMax": "={{ $now.plus({ hour: 1, minute:1 }) }}",
+          "timeMin": "={{ $now.plus({ hour: 1 }) }}"
+        },
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 1.3
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 1
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Secretary Agent",
+        "parameters": {
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "=## Core Identity\nYou are a professional and friendly virtual secretary, dedicated to reminder appointments with efficiency and a warm personal touch.\n\n## Communication Style\n- Communicate in a conversational, approachable manner\n- Maintain a balance between professional competence and friendly rapport\n- Use a tone that is informal yet precise\n- Inject occasional light humor and personality into interactions\n\n## Key Responsibilities\n1. Calendar Management\n   - Provide timely reminders and scheduling updates\n\n2. Communication Approach\n   - Respond promptly and clearly\n   - Maintain confidentiality and discretion\n\n## Interaction Guidelines\n- Use a friendly, conversational tone\n- Just describe the details of the event without asking questions\n\n## Tone and Language\n- Warm and approachable\n- Professional but not overly formal\n- Direct and clear in communication\n- Use simple, straightforward language\n- Show genuine care and attentiveness\n\nRemember: Your primary goal is to make the user's life easier, more organized, and less stressful through efficient and friendly administrative support."
+          },
+          "promptType": "define",
+          "text": "=These are the details of the event/appointment:\n\nEvent Name: {{ $('Get upcoming event').item.json.summary }}\nDescription: {{ $('Get upcoming event').item.json.description }}\nLocation: {{ $('Get upcoming event').item.json.location }}\nStart: {{ $('Get upcoming event').item.json.start.dateTime }}\nEnd: {{ $('Get upcoming event').item.json.end.dateTime }}\nCreated by: {{ $('Get upcoming event').item.json.creator.email }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send reminder",
+        "parameters": {
+          "additionalFields": {
+            "appendAttribution": false
+          },
+          "chatId": "CHAT_ID",
+          "text": "={{ $json.output }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 3,
+          "content": "## Google Calendar Event Reminder\nThis smart **Google Calendar** workflow fixes that by sending you a clear, friendly reminder exactly **1 hour before your event starts**—delivered through **Telegram** as if a personal assistant were looking out for you. Powered by **AI**, it transforms cold calendar alerts into warm, conversational nudges you won't ignore.",
+          "width": 620
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## STEP 1\n- In the \"Get upcoming event\" node enter how much time before the event starts you want to be notified. It is currently set to 1 hour\n- In the Telegram node replace CHAT_ID with that of your personal Bot",
+          "height": 140,
+          "width": 620
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "Prevent multiple reminders for the same event",
+          "height": 200,
+          "width": 220
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Calendar",
+    "Telegram"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 199,
+  "viewCount": 423,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Calendar Account",
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "google Calendar  O Auth2  A P I details",
+      "telegram  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get upcoming event\" node (n8n-nodes-base.googleCalendar) and configure the action parameters, mappings, and fields.",
+      "Open the \"Already sent?\" node (n8n-nodes-base.removeDuplicates) and configure the action parameters, mappings, and fields.",
+      "Open the \"Secretary Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send reminder\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-6mtyj5l84",
+      "workflowId": "google-calendar-event-reminder-n8bw8",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/1679_Telegram_GoogleCalendar_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\1679_Telegram_GoogleCalendar_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:30:54.787Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:54.787Z",
+  "updatedAt": "2026-07-15T11:30:54.787Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

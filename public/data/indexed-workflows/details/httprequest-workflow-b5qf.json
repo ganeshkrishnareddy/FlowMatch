@@ -1,0 +1,460 @@
+{
+  "id": "httprequest-workflow-7jjlt",
+  "name": "Httprequest Workflow",
+  "slug": "httprequest-workflow-b5qf",
+  "description": "Automated workflow: Httprequest Workflow. This workflow integrates 7 different services: stickyNote, httpRequest, code, scheduleTrigger, stopAndError. It contains 10 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Httprequest Workflow workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-f3007870",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.559010",
+      "updatedAt": "2025-09-29T07:07:42.559023",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "8a36e8d4-a3bf-44e1-894a-db00bad99151",
+        "name": "Fetch Github Repo Releases",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          880,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "alwaysOutputData": false,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4803248b-3ff7-4994-a105-3d8ef68bd45d",
+        "name": "Daily Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          380,
+          240
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0b2122d7-18cf-49b8-b10e-a8132df8ceb9",
+        "name": "RepoConfig",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          620,
+          240
+        ],
+        "parameters": {
+          "jsCode": "return [\n  {\n    \"github-org\": \"n8n-io\",\n    \"github-repo\": \"n8n\"\n  },\n  {\n    \"github-org\": \"home-assistant\",\n    \"github-repo\": \"core\"\n  }\n];"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "60918b67-76bb-4c9e-bc84-845d59fced76",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          540,
+          100
+        ],
+        "parameters": {
+          "width": 269,
+          "height": 278,
+          "content": "### Setup repos here to check releases for.\n\nAdd a new json object to the array setting the org and repo, these will be used by the following nodes"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "66fbb663-cd52-471c-be8b-4175f754d02d",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1300,
+          120
+        ],
+        "parameters": {
+          "height": 254,
+          "content": "### Setup Slack notification\n\nUpdate this node to customise your Slack notification"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9b04cdd2-e369-4862-b376-9945e93c0aaf",
+        "name": "Wether Release is new",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1080,
+          240
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "014670a7-6f9e-466c-a403-24ad4e230dff",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "after"
+                },
+                "leftValue": "={{ $json.published_at.toDateTime() }}",
+                "rightValue": "={{ DateTime.utc().minus(1, 'days') }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4ad55bb4-89d2-4f1d-bcb5-fe60aa4f8c79",
+        "name": "Send Message",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          1380,
+          220
+        ],
+        "parameters": {
+          "text": "=:tada: New release for *{{ $('RepoConfig').item.json[\"github-repo\"] }}* - {{ $('Fetch Github Repo Releases').item.json[\"name\"] }}\n\n{{ $json.body.slice(0, 500) }}\n\n{{ $('Fetch Github Repo Releases').item.json[\"url\"] }}",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "mode": "name",
+            "value": "#dk-test"
+          },
+          "otherOptions": {
+            "mrkdwn": true
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "8a36e8d4-a3bf-44e1-894a-db00bad99151": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151-5f7a9aa1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151-a1e671ef",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151-d014d62e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151-65cb84c9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4ad55bb4-89d2-4f1d-bcb5-fe60aa4f8c79": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4ad55bb4-89d2-4f1d-bcb5-fe60aa4f8c79-221b666d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Httprequest Workflow. This workflow integrates 7 different services: stickyNote, httpRequest, code, scheduleTrigger, stopAndError. It contains 10 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Httprequest Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4ad55bb4-89d2-4f1d-bcb5-fe60aa4f8c79": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4ad55bb4-89d2-4f1d-bcb5-fe60aa4f8c79-221b666d"
+            }
+          ]
+        ]
+      },
+      "8a36e8d4-a3bf-44e1-894a-db00bad99151": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151-5f7a9aa1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151-a1e671ef"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151-d014d62e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8a36e8d4-a3bf-44e1-894a-db00bad99151-65cb84c9"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "nodes": [
+      {
+        "name": "Daily Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Fetch Github Repo Releases",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "RepoConfig",
+        "parameters": {
+          "jsCode": "return [\n  {\n    \"github-org\": \"n8n-io\",\n    \"github-repo\": \"n8n\"\n  },\n  {\n    \"github-org\": \"home-assistant\",\n    \"github-repo\": \"core\"\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Send Message",
+        "parameters": {
+          "channelId": {
+            "__rl": true,
+            "mode": "name",
+            "value": "#dk-test"
+          },
+          "otherOptions": {
+            "mrkdwn": true
+          },
+          "select": "channel",
+          "text": "=:tada: New release for *{{ $('RepoConfig').item.json[\"github-repo\"] }}* - {{ $('Fetch Github Repo Releases').item.json[\"name\"] }}\n\n{{ $json.body.slice(0, 500) }}\n\n{{ $('Fetch Github Repo Releases').item.json[\"url\"] }}"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "### Setup repos here to check releases for.\n\nAdd a new json object to the array setting the org and repo, these will be used by the following nodes",
+          "height": 278,
+          "width": 269
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "### Setup Slack notification\n\nUpdate this node to customise your Slack notification",
+          "height": 254
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wether Release is new",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "014670a7-6f9e-466c-a403-24ad4e230dff",
+                "leftValue": "={{ $json.published_at.toDateTime() }}",
+                "operator": {
+                  "operation": "after",
+                  "type": "dateTime"
+                },
+                "rightValue": "={{ DateTime.utc().minus(1, 'days') }}"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Slack"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 67,
+  "viewCount": 420,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Slack Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Daily Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Fetch Github Repo Releases\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wether Release is new\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Message\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-2a3bvtjpc",
+      "workflowId": "httprequest-workflow-7jjlt",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0546_Code_Schedule_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0546_Code_Schedule_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:18:16.581Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.581Z",
+  "updatedAt": "2026-07-15T11:18:16.581Z"
+}

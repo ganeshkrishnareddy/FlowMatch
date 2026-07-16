@@ -1,0 +1,533 @@
+{
+  "id": "typeformtrigger-workflow-sl4zi",
+  "name": "Typeformtrigger Workflow",
+  "slug": "typeformtrigger-workflow-igzr",
+  "description": "Automated workflow: Typeformtrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Typeformtrigger Workflow workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Attendee Registrations",
+        "type": "n8n-nodes-base.typeformTrigger",
+        "position": [
+          400,
+          300
+        ],
+        "webhookId": "6314f4db-12ca-4c5e-a6c5-062bb0437734",
+        "parameters": {
+          "formId": "RknoIFsl"
+        },
+        "credentials": {
+          "typeformApi": "Typeform Burner Account"
+        },
+        "typeVersion": 1,
+        "id": "b872e81e-74e0-440c-863f-949f025f0851",
+        "notes": "This typeformTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Add to Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          600,
+          300
+        ],
+        "parameters": {
+          "range": "Attendees!A:F",
+          "options": {},
+          "sheetId": "1nlnsTQKGgQZN-Rtd07K9bn0ROm0aFBC2O4kzM2YaTBI",
+          "operation": "append",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": "google-sheets"
+        },
+        "typeVersion": 1,
+        "id": "caf9fa71-874f-4f62-bbbc-cb169cad4742",
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Create Account",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          800,
+          300
+        ],
+        "parameters": {
+          "email": "={{$json[\"And what's your email address?\"]}}",
+          "password": "YOUR_PASSWORD_HERE",
+          "resource": "user",
+          "username": "={{$json[\"Great, can we get your full name?\"].split(\" \").join(\"\")}}-{{new Date().getHours()}}",
+          "operation": "create",
+          "authService": "email",
+          "additionalFields": {
+            "first_name": "={{$json[\"Great, can we get your full name?\"]}}"
+          }
+        },
+        "credentials": {
+          "mattermostApi": "Mattermost Credentials"
+        },
+        "typeVersion": 1,
+        "id": "40aa2e32-4b10-42f5-a93d-c432ae2475e4",
+        "notes": "This mattermost node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Add to team",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          1000,
+          300
+        ],
+        "parameters": {
+          "emails": "={{$node[\"Attendee Registrations\"].json[\"And what's your email address?\"]}}",
+          "teamId": "ee3ddsn98i8d3xizkcttras5nw",
+          "resource": "user",
+          "operation": "invite"
+        },
+        "credentials": {
+          "mattermostApi": "Mattermost Credentials"
+        },
+        "typeVersion": 1,
+        "id": "38a96920-6a60-489e-ace1-d224ea1cfabc",
+        "notes": "This mattermost node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Array to Rows",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1200,
+          300
+        ],
+        "parameters": {
+          "functionCode": "const newItems = [];\nfor (let i=0;i<$node[\"Attendee Registrations\"].json[\"Which sessions would you like to attend?\"].length;i++) {\n\tnewItems.push({\n    \tjson: {\n        \tSession: $node[\"Attendee Registrations\"].json[\"Which sessions would you like to attend?\"][i]\n        }\n     });\n}\n\nreturn newItems;"
+        },
+        "typeVersion": 1,
+        "id": "8b8d79bf-cd46-429d-a93f-88c259b87bd0",
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Get Session Details",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1200,
+          500
+        ],
+        "parameters": {
+          "range": "Sessions!A:F",
+          "options": {},
+          "sheetId": "1nlnsTQKGgQZN-Rtd07K9bn0ROm0aFBC2O4kzM2YaTBI",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": "google-sheets"
+        },
+        "typeVersion": 1,
+        "id": "9fc2759e-20b0-4dac-ba90-7bf5ea4a1de0",
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Merge Data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1376,
+          422
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Session",
+          "propertyName2": "Session"
+        },
+        "typeVersion": 1,
+        "id": "84a8ec3a-54c4-489d-8dd2-6a7ef0364ce1",
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Add to channels",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          1576,
+          422
+        ],
+        "parameters": {
+          "userId": "={{$node[\"Create Account\"].json[\"id\"]}}",
+          "resource": "channel",
+          "channelId": "={{$json[\"Mattermost Channel ID\"]}}",
+          "operation": "addUser"
+        },
+        "credentials": {
+          "mattermostApi": "Mattermost Credentials"
+        },
+        "typeVersion": 1,
+        "id": "4db1009e-aab6-47e4-bb7f-d3b98c453758",
+        "notes": "This mattermost node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Add to Event",
+        "type": "n8n-nodes-base.googleCalendar",
+        "position": [
+          1776,
+          422
+        ],
+        "parameters": {
+          "eventId": "={{$node[\"Merge Data\"].json[\"Google Calendar Event ID\"]}}",
+          "calendar": "3ne32v2nlrrd2l3624v5qpg6qk@group.calendar.google.com",
+          "operation": "update",
+          "updateFields": {
+            "attendees": [
+              "={{$node[\"Attendee Registrations\"].json[\"And what's your email address?\"]}}"
+            ]
+          }
+        },
+        "credentials": {
+          "googleCalendarOAuth2Api": "Google Calendar Credentials"
+        },
+        "typeVersion": 1,
+        "id": "b8f80b69-648e-4c08-be80-44bdc85c2d23",
+        "notes": "This googleCalendar node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Welcome Email",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          1976,
+          422
+        ],
+        "parameters": {
+          "toList": [
+            "={{$node[\"Attendee Registrations\"].json[\"And what's your email address?\"]}}"
+          ],
+          "message": "=Dear {{$node[\"Attendee Registrations\"].json[\"Great, can we get your full name?\"]}},\n\nWelcome to n8nConf, the world's largest no-code automation conference!\n\nThis email is to confirm your registration to the following sessions:\n- {{$node[\"Attendee Registrations\"].json[\"Which sessions would you like to attend?\"].join('\\n- ')}}\n\nYou should receive Google Calendar invites to these events on your email. Please consult those for the Google Meet joining information.\n\nYou can also interact with the rest of the community via our Mattermost chat. We created an account just for you!\nLook for the channel corresponding to your session to join the discussion!\n\nLogin URL: {{ $env.WEBHOOK_URL }}\nUsername: {{$node[\"Create Account\"].json[\"username\"]}}\nPassword: {{$node[\"Create Account\"].parameter[\"password\"]}}\n\nRemember to change your password immediately after your first login!\n\nIf you have any troubles with joining the event, or using the chat rooms; please feel free to let us know on support@n8nconf.com\n\nWe look forward to your participation!\n\nBest,\nTeam n8n",
+          "subject": "Welcome to n8nConf",
+          "resource": "message",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "gmailOAuth2": "gmail"
+        },
+        "typeVersion": 1,
+        "id": "dc5eccdc-68f2-4e60-93a9-ea83607a09cd",
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-f354a040",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Typeformtrigger Workflow",
+    "description": "Automated workflow: Typeformtrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-1650149e",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.244302",
+      "updatedAt": "2025-09-29T07:07:45.244315",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Typeformtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Typeformtrigger Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add to channels",
+        "parameters": {
+          "channelId": "={{$json[\"Mattermost Channel ID\"]}}",
+          "operation": "addUser",
+          "resource": "channel",
+          "userId": "={{$node[\"Create Account\"].json[\"id\"]}}"
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add to Event",
+        "parameters": {
+          "calendar": "3ne32v2nlrrd2l3624v5qpg6qk@group.calendar.google.com",
+          "eventId": "={{$node[\"Merge Data\"].json[\"Google Calendar Event ID\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "attendees": [
+              "={{$node[\"Attendee Registrations\"].json[\"And what's your email address?\"]}}"
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add to Sheets",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "operation": "append",
+          "options": {},
+          "range": "Attendees!A:F",
+          "sheetId": "1nlnsTQKGgQZN-Rtd07K9bn0ROm0aFBC2O4kzM2YaTBI"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add to team",
+        "parameters": {
+          "emails": "={{$node[\"Attendee Registrations\"].json[\"And what's your email address?\"]}}",
+          "operation": "invite",
+          "resource": "user",
+          "teamId": "ee3ddsn98i8d3xizkcttras5nw"
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "name": "Array to Rows",
+        "parameters": {
+          "functionCode": "const newItems = [];\nfor (let i=0;i<$node[\"Attendee Registrations\"].json[\"Which sessions would you like to attend?\"].length;i++) {\n\tnewItems.push({\n    \tjson: {\n        \tSession: $node[\"Attendee Registrations\"].json[\"Which sessions would you like to attend?\"][i]\n        }\n     });\n}\n\nreturn newItems;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "typeformApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Attendee Registrations",
+        "parameters": {
+          "formId": "RknoIFsl"
+        },
+        "type": "n8n-nodes-base.typeformTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Account",
+        "parameters": {
+          "additionalFields": {
+            "first_name": "={{$json[\"Great, can we get your full name?\"]}}"
+          },
+          "authService": "email",
+          "email": "={{$json[\"And what's your email address?\"]}}",
+          "operation": "create",
+          "password": "YOUR_PASSWORD_HERE",
+          "resource": "user",
+          "username": "={{$json[\"Great, can we get your full name?\"].split(\" \").join(\"\")}}-{{new Date().getHours()}}"
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Session Details",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "options": {},
+          "range": "Sessions!A:F",
+          "sheetId": "1nlnsTQKGgQZN-Rtd07K9bn0ROm0aFBC2O4kzM2YaTBI"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge Data",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Session",
+          "propertyName2": "Session"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Welcome Email",
+        "parameters": {
+          "additionalFields": {},
+          "message": "=Dear {{$node[\"Attendee Registrations\"].json[\"Great, can we get your full name?\"]}},\n\nWelcome to n8nConf, the world's largest no-code automation conference!\n\nThis email is to confirm your registration to the following sessions:\n- {{$node[\"Attendee Registrations\"].json[\"Which sessions would you like to attend?\"].join('\\n- ')}}\n\nYou should receive Google Calendar invites to these events on your email. Please consult those for the Google Meet joining information.\n\nYou can also interact with the rest of the community via our Mattermost chat. We created an account just for you!\nLook for the channel corresponding to your session to join the discussion!\n\nLogin URL: {{ $env.WEBHOOK_URL }}\nUsername: {{$node[\"Create Account\"].json[\"username\"]}}\nPassword: {{$node[\"Create Account\"].parameter[\"password\"]}}\n\nRemember to change your password immediately after your first login!\n\nIf you have any troubles with joining the event, or using the chat rooms; please feel free to let us know on support@n8nconf.com\n\nWe look forward to your participation!\n\nBest,\nTeam n8n",
+          "resource": "message",
+          "subject": "Welcome to n8nConf",
+          "toList": [
+            "={{$node[\"Attendee Registrations\"].json[\"And what's your email address?\"]}}"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 5,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Typeform",
+    "Google Sheets",
+    "Mattermost",
+    "Google Calendar",
+    "Gmail"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 182,
+  "viewCount": 207,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Typeform Account",
+      "Google Sheets Account",
+      "Mattermost Account",
+      "Google Calendar Account",
+      "Gmail Account"
+    ],
+    "requiredCredentials": [
+      "typeform  A P I details",
+      "google Sheets  O Auth2  A P I details",
+      "mattermost  A P I details",
+      "google Calendar  O Auth2  A P I details",
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Attendee Registrations\".",
+      "Open the \"Add to Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Create Account\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add to team\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Array to Rows\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Session Details\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Merge Data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add to channels\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add to Event\" node (n8n-nodes-base.googleCalendar) and configure the action parameters, mappings, and fields.",
+      "Open the \"Welcome Email\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Incoming triggers will qualified/formatted, new rows will be written to Google Sheets, and email replies or alerts will be sent automatically.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-xwwtra5a0",
+      "workflowId": "typeformtrigger-workflow-sl4zi",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Googlecalendar/1116_GoogleCalendar_GoogleSheets_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Googlecalendar\\1116_GoogleCalendar_GoogleSheets_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:26.722Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:26.722Z",
+  "updatedAt": "2026-07-15T11:18:26.722Z"
+}

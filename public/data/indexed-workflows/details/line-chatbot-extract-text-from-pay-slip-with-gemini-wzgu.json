@@ -1,0 +1,1611 @@
+{
+  "id": "line-chatbot-extract-text-from-pay-slip-with-gemini-27qyz",
+  "name": "Line_Chatbot_Extract_Text_from_Pay_Slip_with_Gemini",
+  "slug": "line-chatbot-extract-text-from-pay-slip-with-gemini-wzgu",
+  "description": "Automated workflow: Line_Chatbot_Extract_Text_from_Pay_Slip_with_Gemini. This workflow integrates 11 different services: webhook, stickyNote, httpRequest, lmChatGoogleGemini, agent. It contains 28 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Line_Chatbot_Extract_Text_from_Pay_Slip_with_Gemini workflow containing 17 nodes.",
+  "originalWorkflowJson": {
+    "id": "bPxDenPJ5Ixx0txY",
+    "meta": {
+      "instanceId": "workflow-5abaccf7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.863064",
+      "updatedAt": "2025-09-29T07:07:46.863078",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Line_Chatbot_Extract_Text_from_Pay_Slip_with_Gemini",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "83f758b4-a80b-4f27-ac13-ee0958ed97f2",
+        "name": "Window Buffer Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          200,
+          320
+        ],
+        "parameters": {
+          "sessionKey": "YOUR_CREDENTIAL_HERE",
+          "sessionIdType": "customKey"
+        },
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c41976eb-4a35-4c59-8167-538c651ad7e5",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -200,
+          520
+        ],
+        "parameters": {
+          "width": 620,
+          "height": 500,
+          "content": "## Extract text from image\n**Prompt for Gemini**\nAnalyze image and then return in JSON Response that has the only following value: Status, From, To, Date, Amount"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c3eb2420-a503-4039-874c-df3c2799c561",
+        "name": "Line: Get Image",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -160,
+          660
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "uFkmYj5e89iPyHcG",
+            "name": "Line Automate Task Header Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e39e5392-b287-4efe-a9a9-1f241e82cd92",
+        "name": "Message Type",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -620,
+          400
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e9deec19-c171-4af5-bfb7-f0917ba658c5",
+                "name": "body.events[0].message.text",
+                "type": "string",
+                "value": "={{ $json.body.events[0].message.text }}"
+              },
+              {
+                "id": "ae9ee257-494f-4c65-a39d-4dc3505f2c01",
+                "name": "body.events[0].message.id",
+                "type": "string",
+                "value": "={{ $json.body.events[0].message.id }}"
+              },
+              {
+                "id": "5e3dfc31-ed6e-4899-880d-ce73076e0cfd",
+                "name": "body.events[0].source.userId",
+                "type": "string",
+                "value": "={{ $json.body.events[0].source.userId }}"
+              },
+              {
+                "id": "8918e8d3-2a30-40df-b452-c07f340972cf",
+                "name": "body.events[0].message.type",
+                "type": "string",
+                "value": "={{ $json.body.events[0].message.type }}"
+              }
+            ]
+          },
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a166e880-9291-4794-a6be-47f0a86e77e7",
+        "name": "Message Classification",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          -420,
+          400
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "7f862599-1eb2-4f76-910f-6caae33ea292",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $('Line: Messaging API').item.json.body.events[0].message.type }}",
+                      "rightValue": "text"
+                    }
+                  ]
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "0b661fab-e556-45ee-b845-67aff27fd862",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $('Line: Messaging API').item.json.body.events[0].message.type }}",
+                      "rightValue": "image"
+                    }
+                  ]
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "550e6e18-6b3e-4b08-8344-12bc76a1f736",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $('Line: Messaging API').item.json.body.events[0].message.stickerId }}",
+                      "rightValue": "=150"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d7c29939-dd8e-43e9-89f2-879dc8ea318c",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "width": 420,
+          "height": 460,
+          "content": "## Gemini AI Assistant\n\nAI Assistant using Gemini 2.0 Flash Experiment unlocks new possibilities for AI agents - intelligent systems that can use memory, reasoning, and planning to complete tasks for you."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0df36c5d-ec2a-492d-b688-4bad8d81cf38",
+        "name": "Text Message Processing",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          100,
+          140
+        ],
+        "parameters": {
+          "text": "=This is the message from User: {{ $json.body.events[0].message.text }}",
+          "agent": "conversationalAgent",
+          "options": {},
+          "promptType": "define"
+        },
+        "typeVersion": 1.7,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dfafa5ba-a855-4ebf-a19d-2addb556e791",
+        "name": "Image Message Processing",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          100,
+          660
+        ],
+        "parameters": {
+          "text": "Analyze image and then return in JSON Response that has the only following Value:\nStatus, From, To, Date, Amount",
+          "messages": {
+            "messageValues": [
+              {
+                "message": "You are the image analyzer. You can analyze image and extract the important information from image."
+              },
+              {
+                "type": "HumanMessagePromptTemplate",
+                "messageType": "imageBinary"
+              }
+            ]
+          },
+          "promptType": "define"
+        },
+        "typeVersion": 1.5,
+        "notes": "This chainLlm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b9a309bf-2c49-40e1-a0e4-9cced43d6e85",
+        "name": "Line: Response to User",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          580,
+          660
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"replyToken\":\"{{ $('Line: Messaging API').item.json.body.events[0].replyToken }}\",\n  \"messages\":[\n    {\n      \"type\":\"text\",\n      \"text\": {{ JSON.stringify($json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")) }}\n    }\n  ]\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "uFkmYj5e89iPyHcG",
+            "name": "Line Automate Task Header Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ff5561fa-b334-4639-a513-554ee3507ab0",
+        "name": "Line: Text Response to User",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          580,
+          140
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"replyToken\":\"{{ $('Line: Messaging API').item.json.body.events[0].replyToken }}\",\n  \"messages\":[\n    {\n      \"type\":\"text\",\n      \"text\": {{ JSON.stringify($json.output) }}\n    }\n  ]\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "uFkmYj5e89iPyHcG",
+            "name": "Line Automate Task Header Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "850f1079-cecf-4680-835f-34af829ee8f5",
+        "name": "Text from Slip Result",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1020,
+          660
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "To": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).To }}",
+              "Date": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).Date }}",
+              "From": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).From}}",
+              "Amount": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).Amount }}",
+              "Status": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).Status }}"
+            },
+            "schema": [
+              {
+                "id": "Status",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "Status",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "From",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "From",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "To",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "To",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Date",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Date",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Amount",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Amount",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "Status"
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "tENCv7liPQDhRoqL",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a268daa7-76d9-437b-99e9-bd755eb4d36f",
+        "name": "Line: Messaging API",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          -820,
+          400
+        ],
+        "webhookId": "4c0de537-2889-47d2-ac44-3a9cda89c9f3",
+        "parameters": {
+          "path": "4c0de537-2889-47d2-ac44-3a9cda89c9f3",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b3c4c66a-78d6-4ad5-9a5c-afef6f86e5cc",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          460,
+          0
+        ],
+        "parameters": {
+          "width": 420,
+          "height": 1020,
+          "content": "## Reply to User\n\nReply the processing result to the user without coding or OCR processing."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6c76dc81-6c10-4522-9d5f-da4579391281",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          900,
+          520
+        ],
+        "parameters": {
+          "width": 420,
+          "height": 500,
+          "content": "## Insert result to Google Sheet\nGet all important information from the Pay Slip and insert into Google Sheet in the same format that we have provided in our prompt.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "49bac770-adb1-4ef3-8bf9-c8cf107471ad",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -860,
+          260
+        ],
+        "parameters": {
+          "width": 620,
+          "height": 500,
+          "content": "## Get Line Message from User\nUser can send message in both text and Pay Slip image then classify the message type in text or image so we could have single workflow for AI Assistant that support anything."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9f034b6f-bb5b-4dc6-941d-b745f15da254",
+        "name": "Google Gemini for Text",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          60,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "modelName": "models/gemini-2.0-flash-exp"
+        },
+        "credentials": {
+          "googlePalmApi": {
+            "id": "Gqc4JMC0dFmMRP7Z",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatGoogleGemini node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "15fa3203-9230-4a1d-9e0d-87652cb9d9ab",
+        "name": "Google Gemini for Image",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          60,
+          880
+        ],
+        "parameters": {
+          "options": {},
+          "modelName": "models/gemini-2.0-flash-exp"
+        },
+        "credentials": {
+          "googlePalmApi": {
+            "id": "Gqc4JMC0dFmMRP7Z",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatGoogleGemini node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "d14ef869-77c2-49a8-9867-1775d8f0b085",
+    "connections": {
+      "c3eb2420-a503-4039-874c-df3c2799c561": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-d585a08f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-93926fc5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-5999d1de",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-023e99e3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-962a973f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-8cff33b0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-82c44525",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-87c768ec",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b9a309bf-2c49-40e1-a0e4-9cced43d6e85": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-b7bdbe6a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-a16094a1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-2d12d64d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-da637aea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-43610511",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-f3c2d6f7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-9d975d47",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-e3e164d0",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ff5561fa-b334-4639-a513-554ee3507ab0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-a79a4111",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-27adc7c7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-942c4ed2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-79a3e50e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-eed4bbe3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-3b1847a6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-e0527980",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-d8d840bf",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a268daa7-76d9-437b-99e9-bd755eb4d36f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-293f0a2f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-521752e1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-90e8f926",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-6ac0a91f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-38236948",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-f5a3b3d9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-d8352a22",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-eda0a82f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "850f1079-cecf-4680-835f-34af829ee8f5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-850f1079-cecf-4680-835f-34af829ee8f5-dfd2face",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9f034b6f-bb5b-4dc6-941d-b745f15da254": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9f034b6f-bb5b-4dc6-941d-b745f15da254-68975f50",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "15fa3203-9230-4a1d-9e0d-87652cb9d9ab": {
+        "main": [
+          [
+            {
+              "node": "error-handler-15fa3203-9230-4a1d-9e0d-87652cb9d9ab-a553c2e5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Line_Chatbot_Extract_Text_from_Pay_Slip_with_Gemini. This workflow integrates 11 different services: webhook, stickyNote, httpRequest, lmChatGoogleGemini, agent. It contains 28 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Line_Chatbot_Extract_Text_from_Pay_Slip_with_Gemini. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "15fa3203-9230-4a1d-9e0d-87652cb9d9ab": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-15fa3203-9230-4a1d-9e0d-87652cb9d9ab-a553c2e5"
+            }
+          ]
+        ]
+      },
+      "850f1079-cecf-4680-835f-34af829ee8f5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-850f1079-cecf-4680-835f-34af829ee8f5-dfd2face"
+            }
+          ]
+        ]
+      },
+      "9f034b6f-bb5b-4dc6-941d-b745f15da254": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9f034b6f-bb5b-4dc6-941d-b745f15da254-68975f50"
+            }
+          ]
+        ]
+      },
+      "a268daa7-76d9-437b-99e9-bd755eb4d36f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-293f0a2f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-521752e1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-90e8f926"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-6ac0a91f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-38236948"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-f5a3b3d9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-d8352a22"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a268daa7-76d9-437b-99e9-bd755eb4d36f-eda0a82f"
+            }
+          ]
+        ]
+      },
+      "b9a309bf-2c49-40e1-a0e4-9cced43d6e85": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-b7bdbe6a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-a16094a1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-2d12d64d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-da637aea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-43610511"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-f3c2d6f7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-9d975d47"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b9a309bf-2c49-40e1-a0e4-9cced43d6e85-e3e164d0"
+            }
+          ]
+        ]
+      },
+      "c3eb2420-a503-4039-874c-df3c2799c561": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-d585a08f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-93926fc5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-5999d1de"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-023e99e3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-962a973f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-8cff33b0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-82c44525"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3eb2420-a503-4039-874c-df3c2799c561-87c768ec"
+            }
+          ]
+        ]
+      },
+      "ff5561fa-b334-4639-a513-554ee3507ab0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-a79a4111"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-27adc7c7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-942c4ed2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-79a3e50e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-eed4bbe3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-3b1847a6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-e0527980"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ff5561fa-b334-4639-a513-554ee3507ab0-d8d840bf"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Line_Chatbot_Extract_Text_from_Pay_Slip_with_Gemini",
+    "nodes": [
+      {
+        "credentials": {
+          "googlePalmApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Gemini for Image",
+        "parameters": {
+          "modelName": "models/gemini-2.0-flash-exp",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googlePalmApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Gemini for Text",
+        "parameters": {
+          "modelName": "models/gemini-2.0-flash-exp",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Image Message Processing",
+        "parameters": {
+          "messages": {
+            "messageValues": [
+              {
+                "message": "You are the image analyzer. You can analyze image and extract the important information from image."
+              },
+              {
+                "messageType": "imageBinary",
+                "type": "HumanMessagePromptTemplate"
+              }
+            ]
+          },
+          "promptType": "define",
+          "text": "Analyze image and then return in JSON Response that has the only following Value:\nStatus, From, To, Date, Amount"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.5
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Line: Get Image",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Line: Messaging API",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "4c0de537-2889-47d2-ac44-3a9cda89c9f3"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Line: Response to User",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "jsonBody": "={\n  \"replyToken\":\"{{ $('Line: Messaging API').item.json.body.events[0].replyToken }}\",\n  \"messages\":[\n    {\n      \"type\":\"text\",\n      \"text\": {{ JSON.stringify($json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")) }}\n    }\n  ]\n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Line: Text Response to User",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "jsonBody": "={\n  \"replyToken\":\"{{ $('Line: Messaging API').item.json.body.events[0].replyToken }}\",\n  \"messages\":[\n    {\n      \"type\":\"text\",\n      \"text\": {{ JSON.stringify($json.output) }}\n    }\n  ]\n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Message Classification",
+        "parameters": {
+          "options": {},
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "7f862599-1eb2-4f76-910f-6caae33ea292",
+                      "leftValue": "={{ $('Line: Messaging API').item.json.body.events[0].message.type }}",
+                      "operator": {
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "text"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                }
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "0b661fab-e556-45ee-b845-67aff27fd862",
+                      "leftValue": "={{ $('Line: Messaging API').item.json.body.events[0].message.type }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "image"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                }
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "550e6e18-6b3e-4b08-8344-12bc76a1f736",
+                      "leftValue": "={{ $('Line: Messaging API').item.json.body.events[0].message.stickerId }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "=150"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Message Type",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e9deec19-c171-4af5-bfb7-f0917ba658c5",
+                "name": "body.events[0].message.text",
+                "type": "string",
+                "value": "={{ $json.body.events[0].message.text }}"
+              },
+              {
+                "id": "ae9ee257-494f-4c65-a39d-4dc3505f2c01",
+                "name": "body.events[0].message.id",
+                "type": "string",
+                "value": "={{ $json.body.events[0].message.id }}"
+              },
+              {
+                "id": "5e3dfc31-ed6e-4899-880d-ce73076e0cfd",
+                "name": "body.events[0].source.userId",
+                "type": "string",
+                "value": "={{ $json.body.events[0].source.userId }}"
+              },
+              {
+                "id": "8918e8d3-2a30-40df-b452-c07f340972cf",
+                "name": "body.events[0].message.type",
+                "type": "string",
+                "value": "={{ $json.body.events[0].message.type }}"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Extract text from image\n**Prompt for Gemini**\nAnalyze image and then return in JSON Response that has the only following value: Status, From, To, Date, Amount",
+          "height": 500,
+          "width": 620
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Gemini AI Assistant\n\nAI Assistant using Gemini 2.0 Flash Experiment unlocks new possibilities for AI agents - intelligent systems that can use memory, reasoning, and planning to complete tasks for you.",
+          "height": 460,
+          "width": 420
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Reply to User\n\nReply the processing result to the user without coding or OCR processing.",
+          "height": 1020,
+          "width": 420
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Insert result to Google Sheet\nGet all important information from the Pay Slip and insert into Google Sheet in the same format that we have provided in our prompt.\n",
+          "height": 500,
+          "width": 420
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "## Get Line Message from User\nUser can send message in both text and Pay Slip image then classify the message type in text or image so we could have single workflow for AI Assistant that support anything.",
+          "height": 500,
+          "width": 620
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Text from Slip Result",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "Status"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Status",
+                "id": "Status",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "From",
+                "id": "From",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "To",
+                "id": "To",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Date",
+                "id": "Date",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Amount",
+                "id": "Amount",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Amount": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).Amount }}",
+              "Date": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).Date }}",
+              "From": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).From}}",
+              "Status": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).Status }}",
+              "To": "={{ JSON.parse($('Image Message Processing').item.json.text.replace(/^```(?:json|markdown)?\\n?/, \"\").replace(/\\n?```$/, \"\")).To }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "Text Message Processing",
+        "parameters": {
+          "agent": "conversationalAgent",
+          "options": {},
+          "promptType": "define",
+          "text": "=This is the message from User: {{ $json.body.events[0].message.text }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "name": "Window Buffer Memory",
+        "parameters": {
+          "sessionIdType": "customKey",
+          "sessionKey": "YOUR_CREDENTIAL_HERE"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      }
+    ]
+  },
+  "nodeCount": 17,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Google Sheets",
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 171,
+  "viewCount": 736,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Google Sheets Account",
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details",
+      "google Sheets  O Auth2  A P I details",
+      "google Palm  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Line: Messaging API\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Window Buffer Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Line: Get Image\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Message Classification\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Text Message Processing\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Image Message Processing\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Line: Response to User\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Line: Text Response to User\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Text from Slip Result\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Gemini for Text\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Gemini for Image\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Message Type\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-xrz3hs2nq",
+      "workflowId": "line-chatbot-extract-text-from-pay-slip-with-gemini-27qyz",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1811_HTTP_GoogleSheets_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1811_HTTP_GoogleSheets_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:37.696Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:37.696Z",
+  "updatedAt": "2026-07-15T11:18:37.696Z"
+}

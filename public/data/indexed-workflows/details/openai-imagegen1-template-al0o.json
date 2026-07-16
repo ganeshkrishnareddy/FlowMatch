@@ -1,0 +1,561 @@
+{
+  "id": "openai-imagegen1-template-6tyb9",
+  "name": "OpenAI ImageGen1 Template",
+  "slug": "openai-imagegen1-template-al0o",
+  "description": "Automated workflow: OpenAI ImageGen1 Template. This workflow integrates 6 different services: convertToFile, stickyNote, httpRequest, set, stopAndError. It contains 9 nodes and follows best practices for error handling and security.",
+  "shortDescription": "OpenAI ImageGen1 Template workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "id": "81aN6oJGMho5kCvQ",
+    "meta": {
+      "instanceId": "workflow-23f129c2",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.242036",
+      "updatedAt": "2025-09-29T07:07:46.242054",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "OpenAI ImageGen1 Template",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "trigger-ef33187a",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "179754ad-eae5-447a-b225-46145370e79b",
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -440,
+          80
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "image",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "data0"
+              },
+              {
+                "name": "prompt",
+                "value": "={{ $('When chat message received').item.json.chatInput }}"
+              },
+              {
+                "name": "model",
+                "value": "gpt-image-1"
+              },
+              {
+                "name": "n",
+                "value": "1"
+              },
+              {
+                "name": "size",
+                "value": "1024x1024"
+              },
+              {
+                "name": "quality",
+                "value": "high"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $json.openAIKey }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0aca28af-1325-4391-bee6-3ab636c34f6a",
+        "name": "Convert to File",
+        "type": "n8n-nodes-base.convertToFile",
+        "position": [
+          -220,
+          80
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "toBinary",
+          "sourceProperty": "data[0].b64_json"
+        },
+        "typeVersion": 1.1,
+        "notes": "This convertToFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7bc8dbf1-eb81-4f9b-9563-7ae568034221",
+        "name": "When chat message received",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -860,
+          80
+        ],
+        "webhookId": "449bbfbc-0523-406f-94a2-089bca9d7295",
+        "parameters": {
+          "options": {
+            "allowFileUploads": true,
+            "allowedFilesMimeTypes": "*"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This chatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "79b3e008-758c-4c24-adac-eb514fedf2c8",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -820,
+          -440
+        ],
+        "parameters": {
+          "width": 660,
+          "height": 460,
+          "content": "### 🖼️ Edit Images with the **OpenAI ImageGen v1** API\n\n1. **Verify Your Organization**  \n   Log in to the OpenAI Platform and confirm your org is verified:  \n   [OpenAI Settings → Organization]({{ $env.WEBHOOK_URL }}\n\n2. **Add Your API Key**  \n   In the n8n credentials, paste a valid **OpenAI secret key** into the `API_KEY` field.\n\n3. **Run “Open Chat”**  \n   Trigger the **`Open Chat`** node, supply your **text prompt** and **source image**, then execute.\n\n4. **Preview & Automate**  \n   The new image appears in the **`Convert to File`** node. From here you can:  \n   - Send it by email  \n   - Push to S3, Supabase, or any storage  \n   - Post straight to Slack, Discord, etc.\n\n> *Tip — chain additional n8n nodes to watermark, resize, or schedule social-media posts automatically.*\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8b75f205-dcfb-4c43-b8bf-942419b96633",
+        "name": "API KEY",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -640,
+          80
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b943d609-b213-4531-912f-e721db4d2cc7",
+                "name": "openAIKey",
+                "type": "string",
+                "value": "sk-proj-..."
+              }
+            ]
+          },
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fb19daaf-a425-4d0c-9141-fefee17be117",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          40,
+          -440
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 660,
+          "height": 1380,
+          "content": "[![AI-Image Cash Machine – banner]({{ $env.WEBHOOK_URL }}]({{ $env.WEBHOOK_URL }}\n\n\n\n### This is just the core of our bigger ⭐ AI Image Cash Machine Template ⭐\n\n## 🚀 Launch Your **AI-Image Cash Machine** This Weekend\n\n**Customizable · Beginner Friendly**\n\n💸 **Special Summer Deal — 10 % off with code `SUMMER25` (just €5+)**\n\n[Grab the template on Gumroad →]({{ $env.WEBHOOK_URL }}\n\n---\n\n### Why You’ll Love It\n- **Plug-and-Play App** – Next.js front-end on Vercel, wired to Supabase, Stripe, n8n & OpenAI  \n- **No-Code Automation** – drag-drop n8n workflow delivers images instantly after payment  \n- **Built-In Payments** – Stripe keys + webhooks included, start charging the moment you deploy  \n- **Scalable Storage** – private Supabase bucket keeps every customer image secure  \n- **Own the Source** – MIT license lets you tweak, brand, even resell without lock-in  \n\n> **Try it live:** **Pixarify Online** – see the template in action!  \n\n---\n\n### What’s Inside\n- Production-ready **frontend UI** (Next.js + Tailwind)  \n- Pre-configured **n8n backend** triggered by Stripe webhook  \n- Step-by-step **PDF setup guide**  \n- Sample environment file (`.env.example`)  \n\n---\n\n### 3-Step Fast-Track Setup\n1. **Clone the repo** & run `vercel deploy` — live site in 5 min  \n2. **Paste your Stripe + OpenAI keys**  \n3. **Activate the n8n workflow** — start selling AI images immediately  \n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "6e7f19b0-042a-4c63-9375-36d62290eb3e",
+    "connections": {
+      "179754ad-eae5-447a-b225-46145370e79b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-c9aee1a7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-deedf5cd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-5f243bcc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-ef0aa754",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-a89c28f5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-3fe972e5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-81c2d476",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-4077ce54",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "0aca28af-1325-4391-bee6-3ab636c34f6a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0aca28af-1325-4391-bee6-3ab636c34f6a-2b97302a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: OpenAI ImageGen1 Template. This workflow integrates 6 different services: convertToFile, stickyNote, httpRequest, set, stopAndError. It contains 9 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: OpenAI ImageGen1 Template. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0aca28af-1325-4391-bee6-3ab636c34f6a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0aca28af-1325-4391-bee6-3ab636c34f6a-2b97302a"
+            }
+          ]
+        ]
+      },
+      "179754ad-eae5-447a-b225-46145370e79b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-c9aee1a7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-deedf5cd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-5f243bcc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-ef0aa754"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-a89c28f5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-3fe972e5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-81c2d476"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-179754ad-eae5-447a-b225-46145370e79b-4077ce54"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "OpenAI ImageGen1 Template",
+    "nodes": [
+      {
+        "name": "API KEY",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b943d609-b213-4531-912f-e721db4d2cc7",
+                "name": "openAIKey",
+                "type": "string",
+                "value": "sk-proj-..."
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Convert to File",
+        "parameters": {
+          "operation": "toBinary",
+          "options": {},
+          "sourceProperty": "data[0].b64_json"
+        },
+        "type": "n8n-nodes-base.convertToFile",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "HTTP Request",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "inputDataFieldName": "data0",
+                "name": "image",
+                "parameterType": "formBinaryData"
+              },
+              {
+                "name": "prompt",
+                "value": "={{ $('When chat message received').item.json.chatInput }}"
+              },
+              {
+                "name": "model",
+                "value": "gpt-image-1"
+              },
+              {
+                "name": "n",
+                "value": "1"
+              },
+              {
+                "name": "size",
+                "value": "1024x1024"
+              },
+              {
+                "name": "quality",
+                "value": "high"
+              }
+            ]
+          },
+          "contentType": "multipart-form-data",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $json.openAIKey }}"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "### 🖼️ Edit Images with the **OpenAI ImageGen v1** API\n\n1. **Verify Your Organization**  \n   Log in to the OpenAI Platform and confirm your org is verified:  \n   [OpenAI Settings → Organization]({{ $env.WEBHOOK_URL }}\n\n2. **Add Your API Key**  \n   In the n8n credentials, paste a valid **OpenAI secret key** into the `API_KEY` field.\n\n3. **Run “Open Chat”**  \n   Trigger the **`Open Chat`** node, supply your **text prompt** and **source image**, then execute.\n\n4. **Preview & Automate**  \n   The new image appears in the **`Convert to File`** node. From here you can:  \n   - Send it by email  \n   - Push to S3, Supabase, or any storage  \n   - Post straight to Slack, Discord, etc.\n\n> *Tip — chain additional n8n nodes to watermark, resize, or schedule social-media posts automatically.*\n",
+          "height": 460,
+          "width": 660
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "[![AI-Image Cash Machine – banner]({{ $env.WEBHOOK_URL }}]({{ $env.WEBHOOK_URL }}\n\n\n\n### This is just the core of our bigger ⭐ AI Image Cash Machine Template ⭐\n\n## 🚀 Launch Your **AI-Image Cash Machine** This Weekend\n\n**Customizable · Beginner Friendly**\n\n💸 **Special Summer Deal — 10 % off with code `SUMMER25` (just €5+)**\n\n[Grab the template on Gumroad →]({{ $env.WEBHOOK_URL }}\n\n---\n\n### Why You’ll Love It\n- **Plug-and-Play App** – Next.js front-end on Vercel, wired to Supabase, Stripe, n8n & OpenAI  \n- **No-Code Automation** – drag-drop n8n workflow delivers images instantly after payment  \n- **Built-In Payments** – Stripe keys + webhooks included, start charging the moment you deploy  \n- **Scalable Storage** – private Supabase bucket keeps every customer image secure  \n- **Own the Source** – MIT license lets you tweak, brand, even resell without lock-in  \n\n> **Try it live:** **Pixarify Online** – see the template in action!  \n\n---\n\n### What’s Inside\n- Production-ready **frontend UI** (Next.js + Tailwind)  \n- Pre-configured **n8n backend** triggered by Stripe webhook  \n- Step-by-step **PDF setup guide**  \n- Sample environment file (`.env.example`)  \n\n---\n\n### 3-Step Fast-Track Setup\n1. **Clone the repo** & run `vercel deploy` — live site in 5 min  \n2. **Paste your Stripe + OpenAI keys**  \n3. **Activate the n8n workflow** — start selling AI images immediately  \n\n",
+          "height": 1380,
+          "width": 660
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When chat message received",
+        "parameters": {
+          "options": {
+            "allowFileUploads": true,
+            "allowedFilesMimeTypes": "*"
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 115,
+  "viewCount": 365,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Convert to File\" node (n8n-nodes-base.convertToFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"When chat message received\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"API KEY\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-y8a6j9sao",
+      "workflowId": "openai-imagegen1-template-6tyb9",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1152_HTTP_Stickynote_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1152_HTTP_Stickynote_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:34.415Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:34.415Z",
+  "updatedAt": "2026-07-15T11:18:34.415Z"
+}

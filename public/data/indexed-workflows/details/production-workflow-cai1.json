@@ -1,0 +1,664 @@
+{
+  "id": "production-workflow-ki1nc",
+  "name": "Production Workflow",
+  "slug": "production-workflow-cai1",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 17 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Receive Slash Command",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          240,
+          100
+        ],
+        "webhookId": "3c0d3820-5896-41c5-83bf-1cd5e956c32c",
+        "parameters": {
+          "path": "3c0d3820-5896-41c5-83bf-1cd5e956c32c",
+          "options": {},
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 1,
+        "id": "node-edd36b96"
+      },
+      {
+        "name": "Reject",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          680,
+          200
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 403
+          },
+          "respondWith": "noData"
+        },
+        "typeVersion": 1,
+        "id": "node-05b6b58b"
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          680,
+          0
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "operation",
+                "value": "={{$json[\"body\"][\"text\"].split(\" \")[0].toLowerCase()}}"
+              },
+              {
+                "name": "email",
+                "value": "={{$json[\"body\"][\"text\"].split(\" \")[1].toLowerCase()}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-4f943ad7"
+      },
+      {
+        "name": "Read Command",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          900,
+          0
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "delete"
+              }
+            ]
+          },
+          "value1": "={{$json[\"operation\"]}}",
+          "dataType": "string",
+          "fallbackOutput": 3
+        },
+        "typeVersion": 1,
+        "id": "node-7a71bd8a"
+      },
+      {
+        "name": "Wrong Command Error",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1120,
+          100
+        ],
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "{\n  \"text\": \"Sorry, I didn't understand your command. You can request data deletion like so: `/gdpr delete <email>`.\"\n}"
+        },
+        "typeVersion": 1,
+        "id": "node-4815a5c7"
+      },
+      {
+        "name": "Acknowledge",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1340,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "{\n  \"text\": \"On it!\"\n}"
+        },
+        "typeVersion": 1,
+        "id": "node-08b206fd"
+      },
+      {
+        "name": "Empty Email?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1120,
+          -100
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json[\"email\"]}}",
+                "operation": "isEmpty"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-1d6fb41e"
+      },
+      {
+        "name": "Missing Email Error",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1340,
+          -200
+        ],
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "{\n  \"text\": \"It looks like the user email address is missing. You can request data deletion like so: `/gdpr delete <email>`.\"\n}"
+        },
+        "typeVersion": 1,
+        "id": "node-98333de1"
+      },
+      {
+        "name": "Valid Token?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          460,
+          100
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json[\"body\"][\"token\"]}}",
+                "value2": "foo"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-9cde3bb2"
+      },
+      {
+        "name": "Paddle Data Deletion",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "position": [
+          1560,
+          0
+        ],
+        "parameters": {
+          "workflowId": "1231"
+        },
+        "typeVersion": 1,
+        "id": "node-cc5347fc"
+      },
+      {
+        "name": "Customer.io Data Deletion",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "position": [
+          1780,
+          0
+        ],
+        "parameters": {
+          "workflowId": "1237"
+        },
+        "typeVersion": 1,
+        "id": "node-c80f3fc8"
+      },
+      {
+        "name": "Zendesk Data Deletion",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "position": [
+          2000,
+          0
+        ],
+        "parameters": {
+          "workflowId": "1240"
+        },
+        "typeVersion": 1,
+        "id": "node-1f946e15"
+      },
+      {
+        "name": "Airtable",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1780,
+          200
+        ],
+        "parameters": {
+          "table": "Log",
+          "options": {},
+          "operation": "append",
+          "application": "app3wAXUUwalhapFV"
+        },
+        "credentials": {
+          "airtableApi": {
+            "id": "{{ $credentials.airtableApi.id }}",
+            "name": "mutedjam@n8n.io"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-791840a2"
+      },
+      {
+        "name": "Prepare Log Entry",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1340,
+          200
+        ],
+        "parameters": {
+          "functionCode": "let deletion_nodes = [\n  'Paddle Data Deletion',\n  'Customer.io Data Deletion',\n  'Zendesk Data Deletion'\n]\n\nconst deletion_results = deletion_nodes.map(node_name => $items(node_name)[0].json);\nconst deletion_success = deletion_results.filter(json => json.success == true).length == deletion_nodes.length;\n\nreturn [{\n  json: {\n    Result: deletion_success ? 'Done' : 'Error',\n    Notes: deletion_results.map(json => json.service + ': ' + json.message).join('\\n'),\n    Processed: new Date().toISOString()\n  }\n}];"
+        },
+        "typeVersion": 1,
+        "id": "node-c389aec5"
+      },
+      {
+        "name": "Crypto",
+        "type": "n8n-nodes-base.crypto",
+        "position": [
+          1560,
+          200
+        ],
+        "parameters": {
+          "type": "SHA256",
+          "value": "={{$node[\"Set\"].json[\"email\"]}}",
+          "dataPropertyName": "Email Hash"
+        },
+        "typeVersion": 1,
+        "id": "node-705040c0"
+      },
+      {
+        "name": "Respond to Slack",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2000,
+          200
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "responseFormat": "string",
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "text",
+                "value": "=GDPR data deletion process finished.\nStatus: {{$node[\"Prepare Log Entry\"].json[\"Result\"] == \"Done\" ? \":white_check_mark: OK\" : \":x: Error\"}}\nLog: <https://airtable.com/app3wAXUUwalhapFV/tbljkxW55l2Gq7Fzq/viwOJdJM1taITEaPr/{{$node[\"Airtable\"].json[\"id\"]}}?blocks=hide|View in Airtable>"
+              },
+              {
+                "name": "delete_original",
+                "value": "true"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-da3252ec"
+      },
+      {
+        "id": "error-1749c682",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-fa3526ea",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:08:00.075574",
+      "updatedAt": "2025-09-29T07:08:00.075593",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "Acknowledge",
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "{\n  \"text\": \"On it!\"\n}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Airtable",
+        "parameters": {
+          "application": "app3wAXUUwalhapFV",
+          "operation": "append",
+          "options": {},
+          "table": "Log"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "name": "Crypto",
+        "parameters": {
+          "dataPropertyName": "Email Hash",
+          "type": "SHA256",
+          "value": "={{$node[\"Set\"].json[\"email\"]}}"
+        },
+        "type": "n8n-nodes-base.crypto",
+        "typeVersion": 1
+      },
+      {
+        "name": "Customer.io Data Deletion",
+        "parameters": {
+          "workflowId": "1237"
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1
+      },
+      {
+        "name": "Empty Email?",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "isEmpty",
+                "value1": "={{$json[\"email\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Missing Email Error",
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "{\n  \"text\": \"It looks like the user email address is missing. You can request data deletion like so: `/gdpr delete <email>`.\"\n}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Paddle Data Deletion",
+        "parameters": {
+          "workflowId": "1231"
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1
+      },
+      {
+        "name": "Prepare Log Entry",
+        "parameters": {
+          "functionCode": "let deletion_nodes = [\n  'Paddle Data Deletion',\n  'Customer.io Data Deletion',\n  'Zendesk Data Deletion'\n]\n\nconst deletion_results = deletion_nodes.map(node_name => $items(node_name)[0].json);\nconst deletion_success = deletion_results.filter(json => json.success == true).length == deletion_nodes.length;\n\nreturn [{\n  json: {\n    Result: deletion_success ? 'Done' : 'Error',\n    Notes: deletion_results.map(json => json.service + ': ' + json.message).join('\\n'),\n    Processed: new Date().toISOString()\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Read Command",
+        "parameters": {
+          "dataType": "string",
+          "fallbackOutput": 3,
+          "rules": {
+            "rules": [
+              {
+                "value2": "delete"
+              }
+            ]
+          },
+          "value1": "={{$json[\"operation\"]}}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      },
+      {
+        "name": "Receive Slash Command",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "3c0d3820-5896-41c5-83bf-1cd5e956c32c",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Reject",
+        "parameters": {
+          "options": {
+            "responseCode": 403
+          },
+          "respondWith": "noData"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Respond to Slack",
+        "parameters": {
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "text",
+                "value": "=GDPR data deletion process finished.\nStatus: {{$node[\"Prepare Log Entry\"].json[\"Result\"] == \"Done\" ? \":white_check_mark: OK\" : \":x: Error\"}}\nLog: <https://airtable.com/app3wAXUUwalhapFV/tbljkxW55l2Gq7Fzq/viwOJdJM1taITEaPr/{{$node[\"Airtable\"].json[\"id\"]}}?blocks=hide|View in Airtable>"
+              },
+              {
+                "name": "delete_original",
+                "value": "true"
+              }
+            ]
+          },
+          "options": {},
+          "requestMethod": "POST",
+          "responseFormat": "string",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "operation",
+                "value": "={{$json[\"body\"][\"text\"].split(\" \")[0].toLowerCase()}}"
+              },
+              {
+                "name": "email",
+                "value": "={{$json[\"body\"][\"text\"].split(\" \")[1].toLowerCase()}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Valid Token?",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json[\"body\"][\"token\"]}}",
+                "value2": "foo"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wrong Command Error",
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "{\n  \"text\": \"Sorry, I didn't understand your command. You can request data deletion like so: `/gdpr delete <email>`.\"\n}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Zendesk Data Deletion",
+        "parameters": {
+          "workflowId": "1240"
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 17,
+  "integrationCount": 4,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Webhook",
+    "Airtable",
+    "Crypto",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 78,
+  "viewCount": 744,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Airtable Account",
+      "Crypto Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "airtable  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Receive Slash Command\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Reject\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Wrong Command Error\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Acknowledge\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Missing Email Error\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Read Command\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Empty Email?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Valid Token?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Paddle Data Deletion\" node (n8n-nodes-base.executeWorkflow) and configure the action parameters, mappings, and fields.",
+      "Open the \"Customer.io Data Deletion\" node (n8n-nodes-base.executeWorkflow) and configure the action parameters, mappings, and fields.",
+      "Open the \"Zendesk Data Deletion\" node (n8n-nodes-base.executeWorkflow) and configure the action parameters, mappings, and fields.",
+      "Open the \"Airtable\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Prepare Log Entry\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Crypto\" node (n8n-nodes-base.crypto) and configure the action parameters, mappings, and fields.",
+      "Open the \"Respond to Slack\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-nupirt4er",
+      "workflowId": "production-workflow-ki1nc",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Webhook/0165_Webhook_Respondtowebhook_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Webhook\\0165_Webhook_Respondtowebhook_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:17:44.252Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:44.252Z",
+  "updatedAt": "2026-07-15T11:17:44.252Z"
+}

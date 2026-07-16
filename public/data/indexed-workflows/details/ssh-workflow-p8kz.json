@@ -1,0 +1,489 @@
+{
+  "id": "ssh-workflow-7d1mx",
+  "name": "Ssh Workflow",
+  "slug": "ssh-workflow-p8kz",
+  "description": "Automated workflow: Ssh Workflow. This workflow integrates 7 different services: stickyNote, code, scheduleTrigger, ssh, stopAndError. It contains 8 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Ssh Workflow workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "4ca55c6e-cf2e-4239-82a9-88d0a201e761",
+        "name": "List upgradable packages",
+        "type": "n8n-nodes-base.ssh",
+        "notes": "apt list --upgradable",
+        "position": [
+          -280,
+          0
+        ],
+        "parameters": {
+          "command": "apt list --upgradable"
+        },
+        "credentials": {
+          "sshPassword": {
+            "id": "Ps31IKTeseWFlA0g",
+            "name": "SSH Password account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "alwaysOutputData": false
+      },
+      {
+        "id": "ae1f0a55-31aa-494b-baa6-822dc606188e",
+        "name": "Send Email through SMTP",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          380,
+          0
+        ],
+        "webhookId": "8073c571-b36f-4330-a510-ca2ff2924fbf",
+        "parameters": {
+          "html": "=The following packages can be updated on your server:\n\n{{ $json.htmlList }}\n\nPlease login and perform upgrade.",
+          "options": {},
+          "subject": "Server needs updates",
+          "toEmail": "change.me@example.com",
+          "fromEmail": "change.me@example.com"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "uiNePdJaDng5a43S",
+            "name": "SMTP account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e1d76671-d94c-40d5-9364-623db9319f11",
+        "name": "Run workflow every day",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -540,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ec4d722a-b88c-42da-971c-28ad5774596d",
+        "name": "Format as HTML list",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -60,
+          0
+        ],
+        "parameters": {
+          "jsCode": "function formatStdoutAsHtmlList(stdoutData) {\n\n    // Split the stdout into lines and map to HTML list items\n    const htmlListItems = stdoutData.split('\\n').map((line) => {\n        if (line.trim() && line !== \"Listing...\") { // Optionally skip empty lines or headers\n            return `<li>${line.trim()}</li>`;\n        }\n    }).filter(item => item); // Remove any undefined items due to empty lines or skipped headers\n\n    // Wrap the list items in a <ul> tag\n    const htmlList = `<ul>${htmlListItems.join('')}</ul>`;\n\n    // Return the formatted HTML list as part of an object\n    return { \"htmlList\": htmlList };\n}\n\nreturn formatStdoutAsHtmlList($input.first().json.stdout);"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6f14eb02-c505-4f83-a5bb-68094e763fd9",
+        "name": "Check if there are updates",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          140,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "db66d892-26fb-406c-a0ac-2e4b8a60310a",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                },
+                "leftValue": "={{ $json.htmlList }}",
+                "rightValue": "<ul></ul>"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3924c696-5b0e-4ae2-b2e2-435fed344028",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -740,
+          -180
+        ],
+        "parameters": {
+          "width": 300,
+          "content": "## VPS upgrade notify \nThis workflow will everyday check if server has upgradable packages and inform you by email if there is."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bb8ade2a-4ffe-4c79-91eb-55af568eb1b1",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          380,
+          -180
+        ],
+        "parameters": {
+          "width": 300,
+          "content": "## Update email addresses\nUpdate From and To email addresses in this node to receive notifications"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "ae1f0a55-31aa-494b-baa6-822dc606188e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-977b3163",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-472c967e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-ba860746",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-9d7653ee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-1c19482a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-591025a5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-16caf0e9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-093f8db1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Ssh Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Ssh Workflow. This workflow integrates 7 different services: stickyNote, code, scheduleTrigger, ssh, stopAndError. It contains 8 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-64e52cbd",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.825931",
+      "updatedAt": "2025-09-29T07:07:42.825953",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Ssh Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "ae1f0a55-31aa-494b-baa6-822dc606188e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-977b3163"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-472c967e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-ba860746"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-9d7653ee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-1c19482a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-591025a5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-16caf0e9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae1f0a55-31aa-494b-baa6-822dc606188e-093f8db1"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Ssh Workflow",
+    "nodes": [
+      {
+        "name": "Check if there are updates",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "db66d892-26fb-406c-a0ac-2e4b8a60310a",
+                "leftValue": "={{ $json.htmlList }}",
+                "operator": {
+                  "operation": "notEquals",
+                  "type": "string"
+                },
+                "rightValue": "<ul></ul>"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Format as HTML list",
+        "parameters": {
+          "jsCode": "function formatStdoutAsHtmlList(stdoutData) {\n\n    // Split the stdout into lines and map to HTML list items\n    const htmlListItems = stdoutData.split('\\n').map((line) => {\n        if (line.trim() && line !== \"Listing...\") { // Optionally skip empty lines or headers\n            return `<li>${line.trim()}</li>`;\n        }\n    }).filter(item => item); // Remove any undefined items due to empty lines or skipped headers\n\n    // Wrap the list items in a <ul> tag\n    const htmlList = `<ul>${htmlListItems.join('')}</ul>`;\n\n    // Return the formatted HTML list as part of an object\n    return { \"htmlList\": htmlList };\n}\n\nreturn formatStdoutAsHtmlList($input.first().json.stdout);"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "sshPassword": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "List upgradable packages",
+        "parameters": {
+          "command": "apt list --upgradable"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1
+      },
+      {
+        "name": "Run workflow every day",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email through SMTP",
+        "parameters": {
+          "fromEmail": "change.me@example.com",
+          "html": "=The following packages can be updated on your server:\n\n{{ $json.htmlList }}\n\nPlease login and perform upgrade.",
+          "options": {},
+          "subject": "Server needs updates",
+          "toEmail": "change.me@example.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## VPS upgrade notify \nThis workflow will everyday check if server has upgradable packages and inform you by email if there is.",
+          "width": 300
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Update email addresses\nUpdate From and To email addresses in this node to receive notifications",
+          "width": 300
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Ssh",
+    "Emailsend"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 205,
+  "viewCount": 479,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Ssh Account",
+      "Emailsend Account"
+    ],
+    "requiredCredentials": [
+      "ssh Password details",
+      "smtp details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Run workflow every day\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"List upgradable packages\" node (n8n-nodes-base.ssh) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Email through SMTP\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check if there are updates\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-yisut5afv",
+      "workflowId": "ssh-workflow-7d1mx",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0726_Code_Schedule_Update_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0726_Code_Schedule_Update_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:18:16.890Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.890Z",
+  "updatedAt": "2026-07-15T11:18:16.890Z"
+}

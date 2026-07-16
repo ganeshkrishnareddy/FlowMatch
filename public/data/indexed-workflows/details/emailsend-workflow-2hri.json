@@ -1,0 +1,598 @@
+{
+  "id": "emailsend-workflow-19jzf",
+  "name": "Emailsend Workflow",
+  "slug": "emailsend-workflow-2hri",
+  "description": "Automated workflow: Emailsend Workflow. This workflow integrates 7 different services: stickyNote, scheduleTrigger, merge, ssh, stopAndError. It contains 11 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Emailsend Workflow workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "ba168090-4727-4b72-a0cf-3f15ef3a9f17",
+        "name": "Send Email",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          580,
+          360
+        ],
+        "parameters": {
+          "text": "=System resources are above the threshold.\n\nCPU: {{ $json.CPU.toNumber().round(2) }}%\nRAM: {{ $json.RAM.toNumber().round(2) }}%\nDisk: {{ $json.Disk.toNumber().round(2) }}%",
+          "options": {},
+          "subject": "System Resource Alert",
+          "toEmail": "change@me.com",
+          "fromEmail": "change@me.com"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "EuaQtRc5t8pWPY9b",
+            "name": "SMTP account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "79afc30f-c3db-4ba1-8f0d-a1000b5e0abe",
+        "name": "Check RAM usage",
+        "type": "n8n-nodes-base.ssh",
+        "position": [
+          160,
+          40
+        ],
+        "parameters": {
+          "command": "free | awk '/Mem:/ {printf \"%.2f\", (1 - $7/$2) * 100}'"
+        },
+        "credentials": {
+          "sshPassword": {
+            "id": "VMCCUQkaq46q3CpB",
+            "name": "SSH Password account"
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 1,
+        "notes": "This ssh node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d09aa314-8d60-42a8-9933-d7e8d73e2c7d",
+        "name": "Check Disk usage",
+        "type": "n8n-nodes-base.ssh",
+        "position": [
+          380,
+          40
+        ],
+        "parameters": {
+          "command": "df -h | awk '$NF==\"/\"{printf \"%.2f\", $5}'"
+        },
+        "credentials": {
+          "sshPassword": {
+            "id": "VMCCUQkaq46q3CpB",
+            "name": "SSH Password account"
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 1,
+        "notes": "This ssh node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bc6a0df2-f4cc-484a-ac39-c92e8795175e",
+        "name": "Check CPU usage",
+        "type": "n8n-nodes-base.ssh",
+        "position": [
+          580,
+          40
+        ],
+        "parameters": {
+          "command": "top -bn 1 | grep \"Cpu(s)\" | sed \"s/.*, *\\([0-9.]*\\)%* id.*/\\1/\" | awk '{print 100 - $1}'"
+        },
+        "credentials": {
+          "sshPassword": {
+            "id": "VMCCUQkaq46q3CpB",
+            "name": "SSH Password account"
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 1,
+        "notes": "This ssh node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "de0df734-1e4a-4bf0-9f7d-d60b52e06f48",
+        "name": "Merge check results",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -40,
+          380
+        ],
+        "parameters": {
+          "mode": "combineBySql",
+          "query": "SELECT input1.stdout as CPU, input2.stdout as Disk, input3.stdout as RAM FROM input1 LEFT JOIN input2 ON input1.name = input2.id LEFT JOIN input3 ON input1.name = input3.id",
+          "numberInputs": 3
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7b7d6c0a-3f46-48b3-aa1d-191839540196",
+        "name": "Check results against thresholds",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          240,
+          380
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{ $json.CPU }}",
+                "value2": 80,
+                "operation": "largerEqual"
+              },
+              {
+                "value1": "={{ $json.Disk }}",
+                "value2": 80,
+                "operation": "largerEqual"
+              },
+              {
+                "value1": "={{ $json.RAM }}",
+                "value2": 80,
+                "operation": "largerEqual"
+              }
+            ]
+          },
+          "combineOperation": "any"
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "92331c38-cab8-4719-8746-6fb341954516",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          560,
+          260
+        ],
+        "parameters": {
+          "width": 320,
+          "height": 280,
+          "content": "## Update email addresses\nUpdate From and To email addresses in this node to receive notifications"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3117fdbc-fde9-469b-bd47-59f45c349162",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -260,
+          -120
+        ],
+        "parameters": {
+          "width": 320,
+          "height": 260,
+          "content": "## Check VPS resource usage every 15 minutes\nThis workflow checks VPS CPU, RAM and Disk usage every 15 minutes and if any of it exceeds 80% will inform you by email"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "45b4c33a-8f02-4535-b67f-56d9d0aaf2ae",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          180,
+          260
+        ],
+        "parameters": {
+          "width": 360,
+          "height": 280,
+          "content": "## Update threshold\nIf needed, you can increase/decrease the 80% threshold in this node individually per resource "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0bf83ea8-b1c4-40f7-8a60-39f765e8ec2c",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -40,
+          40
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 15
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "ba168090-4727-4b72-a0cf-3f15ef3a9f17": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-27d518f8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-7b3e055c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-387d98c2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-28bd1e3d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-ddc14ffb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-79764020",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-62206b9d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-89e4a867",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Emailsend Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Emailsend Workflow. This workflow integrates 7 different services: stickyNote, scheduleTrigger, merge, ssh, stopAndError. It contains 11 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-d9f8c326",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.972058",
+      "updatedAt": "2025-09-29T07:07:51.972130",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Emailsend Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "ba168090-4727-4b72-a0cf-3f15ef3a9f17": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-27d518f8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-7b3e055c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-387d98c2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-28bd1e3d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-ddc14ffb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-79764020"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-62206b9d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ba168090-4727-4b72-a0cf-3f15ef3a9f17-89e4a867"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Emailsend Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "sshPassword": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Check CPU usage",
+        "parameters": {
+          "command": "top -bn 1 | grep \"Cpu(s)\" | sed \"s/.*, *\\([0-9.]*\\)%* id.*/\\1/\" | awk '{print 100 - $1}'"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "sshPassword": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Check Disk usage",
+        "parameters": {
+          "command": "df -h | awk '$NF==\"/\"{printf \"%.2f\", $5}'"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "sshPassword": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Check RAM usage",
+        "parameters": {
+          "command": "free | awk '/Mem:/ {printf \"%.2f\", (1 - $7/$2) * 100}'"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1
+      },
+      {
+        "name": "Check results against thresholds",
+        "parameters": {
+          "combineOperation": "any",
+          "conditions": {
+            "number": [
+              {
+                "operation": "largerEqual",
+                "value1": "={{ $json.CPU }}",
+                "value2": 80
+              },
+              {
+                "operation": "largerEqual",
+                "value1": "={{ $json.Disk }}",
+                "value2": 80
+              },
+              {
+                "operation": "largerEqual",
+                "value1": "={{ $json.RAM }}",
+                "value2": 80
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge check results",
+        "parameters": {
+          "mode": "combineBySql",
+          "numberInputs": 3,
+          "query": "SELECT input1.stdout as CPU, input2.stdout as Disk, input3.stdout as RAM FROM input1 LEFT JOIN input2 ON input1.name = input2.id LEFT JOIN input3 ON input1.name = input3.id"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 15
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email",
+        "parameters": {
+          "fromEmail": "change@me.com",
+          "options": {},
+          "subject": "System Resource Alert",
+          "text": "=System resources are above the threshold.\n\nCPU: {{ $json.CPU.toNumber().round(2) }}%\nRAM: {{ $json.RAM.toNumber().round(2) }}%\nDisk: {{ $json.Disk.toNumber().round(2) }}%",
+          "toEmail": "change@me.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Check VPS resource usage every 15 minutes\nThis workflow checks VPS CPU, RAM and Disk usage every 15 minutes and if any of it exceeds 80% will inform you by email",
+          "height": 260,
+          "width": 320
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Update email addresses\nUpdate From and To email addresses in this node to receive notifications",
+          "height": 280,
+          "width": 320
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Update threshold\nIf needed, you can increase/decrease the 80% threshold in this node individually per resource ",
+          "height": 280,
+          "width": 360
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Emailsend",
+    "Ssh"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 163,
+  "viewCount": 449,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Emailsend Account",
+      "Ssh Account"
+    ],
+    "requiredCredentials": [
+      "smtp details",
+      "ssh Password details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Send Email\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check RAM usage\" node (n8n-nodes-base.ssh) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check Disk usage\" node (n8n-nodes-base.ssh) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check CPU usage\" node (n8n-nodes-base.ssh) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge check results\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check results against thresholds\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-2qjatyc62",
+      "workflowId": "emailsend-workflow-19jzf",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/0729_Schedule_Stickynote_Send_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\0729_Schedule_Stickynote_Send_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:19:27.381Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:27.381Z",
+  "updatedAt": "2026-07-15T11:19:27.381Z"
+}

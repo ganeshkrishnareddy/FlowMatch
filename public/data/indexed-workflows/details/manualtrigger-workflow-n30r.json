@@ -1,0 +1,672 @@
+{
+  "id": "manualtrigger-workflow-q00x1",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-n30r",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 6 different services: stickyNote, httpRequest, airtable, stopAndError, manualTrigger. It contains 8 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-a8769afb",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:49.025637",
+      "updatedAt": "2025-09-29T07:07:49.025649",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "b9962fd6-af11-4a3a-935c-c168ac85eaa1",
+        "name": "When clicking \"Test workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          80,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2ba3fe3a-e4c5-4014-8cb2-80716f18b222",
+        "name": "Get records",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          300,
+          300
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appkkDhXu7vZCFspD",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8n test"
+          },
+          "limit": 10,
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tblMdmUiSTBrvrLq3",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "SEO meta title & desc"
+          },
+          "options": {},
+          "operation": "search",
+          "returnAll": false,
+          "filterByFormula": "=AND(url != \"\", {title tag} = \"\", {meta desc} = \"\")"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "yw6pm1U4Hw8kKDhu",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0f26bb3c-f2cc-476b-b1af-3d4cd98463ce",
+        "name": "Get url content",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          500,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3c67c390-5144-44cb-8618-d7e7e6c6cae5",
+        "name": "Extract title tag and meta description",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          700,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "extractHtmlContent",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "title"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "attribute": "content",
+                "cssSelector": "meta[name=\"description\"]",
+                "returnValue": "attribute"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7028b7af-0959-4ed5-bc54-fceb2e224976",
+        "name": "Update original record",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          940,
+          300
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appkkDhXu7vZCFspD",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8n test"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tblMdmUiSTBrvrLq3",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "SEO meta title & desc"
+          },
+          "columns": {
+            "value": {
+              "id": "={{ $('Get records').item.json.id }}",
+              "meta desc": "={{ $json.metaDesc }}",
+              "title tag": "={{ $json.titleTag }}"
+            },
+            "schema": [
+              {
+                "id": "id",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": true,
+                "required": false,
+                "displayName": "id",
+                "defaultMatch": true
+              },
+              {
+                "id": "url",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "url",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "title tag",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "title tag",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "meta desc",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "meta desc",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Created",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": true,
+                "required": false,
+                "displayName": "Created",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Calculation",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": true,
+                "required": false,
+                "displayName": "Calculation",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "id"
+            ]
+          },
+          "options": {},
+          "operation": "update"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "yw6pm1U4Hw8kKDhu",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5b518969-553e-462f-ad4f-eb07e9b17eef",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          140,
+          -60
+        ],
+        "parameters": {
+          "width": 862.7929292929296,
+          "height": 316.6010101010099,
+          "content": "## How to use the workflow\n1. Set a Base in Airtable with a table with the following structure:\n  `url`, `title tag`, `meta desc`\n2. Connect Airtable to the nodes and, with the following formula, get all the records that miss `title tag` and `meta desc`.\n3. Put a bunch of url in the table in the field `url` and let the workflow work.\n\n## Extra\n\n* You can also calculate the length for title tag and meta desc using formula field inside Airtable. This is the formula:\n  `LEN({title tag})` or `LEN({meta desc})`\n* You can automate the process calling a Webhook from Airtable. For this, you need an Airtable paid plan."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "0f26bb3c-f2cc-476b-b1af-3d4cd98463ce": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-5b6e9b5e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-96e818e7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-24ad2931",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-f258b1cf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-d6b48e79",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-3597bb33",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-840f10b6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-bb527ceb",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 6 different services: stickyNote, httpRequest, airtable, stopAndError, manualTrigger. It contains 8 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0f26bb3c-f2cc-476b-b1af-3d4cd98463ce": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-5b6e9b5e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-96e818e7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-24ad2931"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-f258b1cf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-d6b48e79"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-3597bb33"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-840f10b6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0f26bb3c-f2cc-476b-b1af-3d4cd98463ce-bb527ceb"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Extract title tag and meta description",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "title",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "attribute": "content",
+                "cssSelector": "meta[name=\"description\"]",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "attribute"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get records",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "n8n test",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "appkkDhXu7vZCFspD"
+          },
+          "filterByFormula": "=AND(url != \"\", {title tag} = \"\", {meta desc} = \"\")",
+          "limit": 10,
+          "operation": "search",
+          "options": {},
+          "returnAll": false,
+          "table": {
+            "__rl": true,
+            "cachedResultName": "SEO meta title & desc",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tblMdmUiSTBrvrLq3"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get url content",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## How to use the workflow\n1. Set a Base in Airtable with a table with the following structure:\n  `url`, `title tag`, `meta desc`\n2. Connect Airtable to the nodes and, with the following formula, get all the records that miss `title tag` and `meta desc`.\n3. Put a bunch of url in the table in the field `url` and let the workflow work.\n\n## Extra\n\n* You can also calculate the length for title tag and meta desc using formula field inside Airtable. This is the formula:\n  `LEN({title tag})` or `LEN({meta desc})`\n* You can automate the process calling a Webhook from Airtable. For this, you need an Airtable paid plan.",
+          "height": 316.6010101010099,
+          "width": 862.7929292929296
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update original record",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "n8n test",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "appkkDhXu7vZCFspD"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "id"
+            ],
+            "schema": [
+              {
+                "defaultMatch": true,
+                "display": true,
+                "displayName": "id",
+                "id": "id",
+                "readOnly": true,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "url",
+                "id": "url",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "title tag",
+                "id": "title tag",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "meta desc",
+                "id": "meta desc",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Created",
+                "id": "Created",
+                "readOnly": true,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Calculation",
+                "id": "Calculation",
+                "readOnly": true,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "id": "={{ $('Get records').item.json.id }}",
+              "meta desc": "={{ $json.metaDesc }}",
+              "title tag": "={{ $json.titleTag }}"
+            }
+          },
+          "operation": "update",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "SEO meta title & desc",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tblMdmUiSTBrvrLq3"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "name": "When clicking \"Test workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Airtable",
+    "HTTP Request",
+    "Html"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 42,
+  "viewCount": 203,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Airtable Account",
+      "HTTP Request Account",
+      "Html Account"
+    ],
+    "requiredCredentials": [
+      "airtable Token  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Test workflow\"\".",
+      "Open the \"Get records\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get url content\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract title tag and meta description\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update original record\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-q49abjutd",
+      "workflowId": "manualtrigger-workflow-q00x1",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0495_Manual_HTTP_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0495_Manual_HTTP_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:52.401Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:52.401Z",
+  "updatedAt": "2026-07-15T11:18:52.401Z"
+}

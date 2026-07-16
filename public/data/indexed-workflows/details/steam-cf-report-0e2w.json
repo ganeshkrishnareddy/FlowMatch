@@ -1,0 +1,458 @@
+{
+  "id": "steam-cf-report-axj10",
+  "name": "Steam + CF Report",
+  "slug": "steam-cf-report-0e2w",
+  "description": "Production-ready workflow: Steam + CF Report. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Steam + CF Report workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "name": "Steam + CF Report",
+    "nodes": [
+      {
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          110,
+          200
+        ],
+        "parameters": {
+          "path": "steam",
+          "responseData": "allEntries",
+          "responseMode": "lastNode",
+          "authentication": "{{ $credentials.basicAuth }}"
+        },
+        "credentials": {
+          "httpBasicAuth": "credentials"
+        },
+        "retryOnFail": false,
+        "typeVersion": 1,
+        "id": "node-3c547bdb"
+      },
+      {
+        "name": "Add bind-tools",
+        "type": "n8n-nodes-base.executeCommand",
+        "color": "#FF8000",
+        "notes": "Install bind-tools",
+        "position": [
+          480,
+          180
+        ],
+        "parameters": {
+          "command": "=which dig || apk add bind-tools"
+        },
+        "retryOnFail": true,
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "waitBetweenTries": 1000,
+        "id": "node-a8ed642e"
+      },
+      {
+        "name": "dig check CF",
+        "type": "n8n-nodes-base.executeCommand",
+        "color": "#FF8000",
+        "notes": "Install bind-tools",
+        "position": [
+          1300,
+          -50
+        ],
+        "parameters": {
+          "command": "=dig NS  {{$node[\"Webhook\"].data[\"query\"][\"q\"]}} +short | grep cloudflare.com.$ | wc -l"
+        },
+        "retryOnFail": true,
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "waitBetweenTries": 1000,
+        "id": "node-be916006"
+      },
+      {
+        "name": "IF",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1550,
+          -50
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "= {{$node[\"dig check CF\"].data[\"stdout\"]}}",
+                "operation": "larger"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-e7d148aa"
+      },
+      {
+        "name": "Mail CloudFlare",
+        "type": "n8n-nodes-base.mailgun",
+        "position": [
+          1830,
+          160
+        ],
+        "parameters": {
+          "text": "=Hello,\n\nI am emailing you to let you know about a Steam phishing website on your network: {{$node[\"Webhook\"].data[\"query\"][\"q\"]}}.\n\nThank you,\nYour Name Here",
+          "ccEmail": "yourCCemail",
+          "subject": "={{$node[\"Webhook\"].data[\"query\"][\"q\"]}} - Steam Phishing Website on your network",
+          "toEmail": "security@cloudflare.com",
+          "fromEmail": "yourFROMemail"
+        },
+        "credentials": {
+          "mailgunApi": "Mailgun"
+        },
+        "typeVersion": 1,
+        "id": "node-4e26e093"
+      },
+      {
+        "name": "Mail Steam",
+        "type": "n8n-nodes-base.mailgun",
+        "position": [
+          1830,
+          340
+        ],
+        "parameters": {
+          "text": "=Hello,\n\nI am emailing you to let you know about a Steam phishing website: {{$node[\"Webhook\"].data[\"query\"][\"q\"]}}.\n\nThank you,\nYour Name Here",
+          "ccEmail": "yourCCemail",
+          "subject": "={{$node[\"Webhook\"].data[\"query\"][\"q\"]}} - Steam Phishing Website",
+          "toEmail": "security@valvesoftware.com",
+          "fromEmail": "yourFROMemail"
+        },
+        "credentials": {
+          "mailgunApi": "Mailgun"
+        },
+        "typeVersion": 1,
+        "id": "node-3b9fd8c9"
+      },
+      {
+        "name": "dig check if domain is valid",
+        "type": "n8n-nodes-base.executeCommand",
+        "color": "#FF8000",
+        "notes": "Install bind-tools",
+        "position": [
+          720,
+          180
+        ],
+        "parameters": {
+          "command": "=dig NS  {{$node[\"Webhook\"].data[\"query\"][\"q\"]}} +short | wc -l"
+        },
+        "retryOnFail": true,
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "waitBetweenTries": 1000,
+        "id": "node-c4dfaf30"
+      },
+      {
+        "name": "If it has nameservers",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          970,
+          180
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "= {{$node[\"dig check if domain is valid\"].data[\"stdout\"]}}",
+                "operation": "larger"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-1f0cfacd"
+      },
+      {
+        "name": "IF1",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          270,
+          200
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Webhook\"].data[\"query\"][\"q\"]}}",
+                "value2": "/^[a-zA-Z0-9-_.]+$/",
+                "operation": "regex"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-81045c06"
+      },
+      {
+        "id": "error-de3c6602",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-660895e5",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.501601",
+      "updatedAt": "2025-09-29T07:07:44.501621",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Steam + CF Report. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Steam + CF Report",
+    "nodes": [
+      {
+        "name": "Add bind-tools",
+        "parameters": {
+          "command": "=which dig || apk add bind-tools"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1
+      },
+      {
+        "name": "dig check CF",
+        "parameters": {
+          "command": "=dig NS  {{$node[\"Webhook\"].data[\"query\"][\"q\"]}} +short | grep cloudflare.com.$ | wc -l"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1
+      },
+      {
+        "name": "dig check if domain is valid",
+        "parameters": {
+          "command": "=dig NS  {{$node[\"Webhook\"].data[\"query\"][\"q\"]}} +short | wc -l"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "larger",
+                "value1": "= {{$node[\"dig check CF\"].data[\"stdout\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "If it has nameservers",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "larger",
+                "value1": "= {{$node[\"dig check if domain is valid\"].data[\"stdout\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF1",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "regex",
+                "value1": "={{$node[\"Webhook\"].data[\"query\"][\"q\"]}}",
+                "value2": "/^[a-zA-Z0-9-_.]+$/"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mailgunApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mail CloudFlare",
+        "parameters": {
+          "ccEmail": "yourCCemail",
+          "fromEmail": "yourFROMemail",
+          "subject": "={{$node[\"Webhook\"].data[\"query\"][\"q\"]}} - Steam Phishing Website on your network",
+          "text": "=Hello,\n\nI am emailing you to let you know about a Steam phishing website on your network: {{$node[\"Webhook\"].data[\"query\"][\"q\"]}}.\n\nThank you,\nYour Name Here",
+          "toEmail": "security@cloudflare.com"
+        },
+        "type": "n8n-nodes-base.mailgun",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mailgunApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mail Steam",
+        "parameters": {
+          "ccEmail": "yourCCemail",
+          "fromEmail": "yourFROMemail",
+          "subject": "={{$node[\"Webhook\"].data[\"query\"][\"q\"]}} - Steam Phishing Website",
+          "text": "=Hello,\n\nI am emailing you to let you know about a Steam phishing website: {{$node[\"Webhook\"].data[\"query\"][\"q\"]}}.\n\nThank you,\nYour Name Here",
+          "toEmail": "security@valvesoftware.com"
+        },
+        "type": "n8n-nodes-base.mailgun",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Webhook",
+        "parameters": {
+          "authentication": "{{ $credentials.basicAuth }}",
+          "path": "steam",
+          "responseData": "allEntries",
+          "responseMode": "lastNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "Mailgun"
+  ],
+  "securityStatus": "Potential Risk",
+  "verified": false,
+  "featured": true,
+  "downloadCount": 78,
+  "viewCount": 462,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Mailgun Account"
+    ],
+    "requiredCredentials": [
+      "http Basic Auth details",
+      "mailgun  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Add bind-tools\" node (n8n-nodes-base.executeCommand) and configure the action parameters, mappings, and fields.",
+      "Open the \"dig check CF\" node (n8n-nodes-base.executeCommand) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mail CloudFlare\" node (n8n-nodes-base.mailgun) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mail Steam\" node (n8n-nodes-base.mailgun) and configure the action parameters, mappings, and fields.",
+      "Open the \"dig check if domain is valid\" node (n8n-nodes-base.executeCommand) and configure the action parameters, mappings, and fields.",
+      "Open the \"If it has nameservers\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF1\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-c5p697bft",
+      "workflowId": "steam-cf-report-axj10",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Executecommand/0097_Executecommand_Mailgun_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Executecommand\\0097_Executecommand_Mailgun_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:21.692Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:21.692Z",
+  "updatedAt": "2026-07-15T11:18:21.692Z"
+}

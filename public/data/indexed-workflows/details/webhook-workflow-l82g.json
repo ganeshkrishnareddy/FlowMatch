@@ -1,0 +1,607 @@
+{
+  "id": "webhook-workflow-waptu",
+  "name": "Webhook Workflow",
+  "slug": "webhook-workflow-l82g",
+  "description": "Automated workflow: Webhook Workflow. This workflow integrates 5 different services: webhook, stickyNote, grist, stopAndError, if. It contains 9 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Webhook Workflow workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-10bf43dc",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.590003",
+      "updatedAt": "2025-09-29T07:07:45.590013",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "93eba4f0-218d-47d3-a55f-09d490d5e0bb",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          100,
+          320
+        ],
+        "webhookId": "03e24572-a381-455e-a5b8-ae697647f7d4",
+        "parameters": {
+          "path": "03e24572-a381-455e-a5b8-ae697647f7d4",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1.1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e2c8d43e-79f9-45a4-9d6d-37e8768e7f81",
+        "name": "Create Row",
+        "type": "n8n-nodes-base.grist",
+        "position": [
+          940,
+          240
+        ],
+        "parameters": {
+          "docId": "",
+          "tableId": "",
+          "operation": "create",
+          "fieldsToSend": {
+            "properties": [
+              {
+                "fieldId": "Source",
+                "fieldValue": "={{ $json.body[0].id }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "gristApi": {
+            "id": "{{ $credentials.gristApi.id }}",
+            "name": "Grist"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This grist node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1e6e741e-2890-4e08-a97a-efae1812d507",
+        "name": "Confirmed?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          300,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "df1c1dba-dc96-42e9-86ee-8ccd4c82b048",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.body[0].Confirmed }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c6b1b482-6121-4484-b524-bc3e7e175fe8",
+        "name": "get existing",
+        "type": "n8n-nodes-base.grist",
+        "position": [
+          560,
+          160
+        ],
+        "parameters": {
+          "docId": "",
+          "tableId": "",
+          "additionalOptions": {
+            "filter": {
+              "filterProperties": [
+                {
+                  "field": "Source",
+                  "values": "={{ $json.body[0].id }}"
+                }
+              ]
+            }
+          }
+        },
+        "credentials": {
+          "gristApi": {
+            "id": "{{ $credentials.gristApi.id }}",
+            "name": "Grist"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This grist node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a52e000c-73ef-4f2d-811d-cbcaf45e2b75",
+        "name": "has existing?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          700,
+          160
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "6f08b500-956e-493c-abbe-845b5352110c",
+                "operator": {
+                  "type": "object",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fe609754-3dd6-4bbd-932a-a30f7d100911",
+        "name": "Confirmation-based",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          460,
+          420
+        ],
+        "parameters": {
+          "width": 346.820338983051,
+          "height": 144.13559322033893,
+          "content": "## Confirmation-based\nIn the source table there is a boolean column \"Confirmed\" that will trigger the transfer.\nThis way there is a manual check involved & it's a conscious step to trigger the workflow."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "edb074f6-b264-45ec-87e2-cf91063ca63b",
+        "name": "Runs once",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          900,
+          60
+        ],
+        "parameters": {
+          "width": 253.74915254237288,
+          "height": 139.9050847457627,
+          "content": "## Runs once\nIf the destination table already contains an entry, **we will not re-create/update** it (as it might've already been changed manually)\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {
+      "Webhook": [
+        {
+          "body": [
+            {
+              "id": 2,
+              "Datum": 1712275200,
+              "Confirmed": true,
+              "manualSort": 2
+            }
+          ],
+          "query": {},
+          "params": {},
+          "headers": {
+            "host": "wh.n8n.zt.ax",
+            "accept": "*/*",
+            "x-real-ip": "52.2.246.35",
+            "user-agent": "node-fetch/1.0 (+{{ $env.WEBHOOK_URL }}",
+            "content-type": "application/json",
+            "content-length": "1097",
+            "accept-encoding": "gzip,deflate",
+            "x-forwarded-for": "52.2.246.35",
+            "x-forwarded-host": "wh.n8n.zt.ax",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "5d1c8421e216"
+          }
+        }
+      ]
+    },
+    "connections": {
+      "93eba4f0-218d-47d3-a55f-09d490d5e0bb": {
+        "main": [
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-d4f177f1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-be7a3c8f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-3f003cb8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-7d037a76",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-e2c49b9e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-2ad4dc7c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-9195aa48",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-a2c98cfd",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Webhook Workflow. This workflow integrates 5 different services: webhook, stickyNote, grist, stopAndError, if. It contains 9 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Webhook Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "93eba4f0-218d-47d3-a55f-09d490d5e0bb": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-d4f177f1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-be7a3c8f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-3f003cb8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-7d037a76"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-e2c49b9e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-2ad4dc7c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-9195aa48"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-93eba4f0-218d-47d3-a55f-09d490d5e0bb-a2c98cfd"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "nodes": [
+      {
+        "name": "Confirmation-based",
+        "parameters": {
+          "content": "## Confirmation-based\nIn the source table there is a boolean column \"Confirmed\" that will trigger the transfer.\nThis way there is a manual check involved & it's a conscious step to trigger the workflow.",
+          "height": 144.13559322033893,
+          "width": 346.820338983051
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Confirmed?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "df1c1dba-dc96-42e9-86ee-8ccd4c82b048",
+                "leftValue": "={{ $json.body[0].Confirmed }}",
+                "operator": {
+                  "operation": "true",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "gristApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Row",
+        "parameters": {
+          "docId": "",
+          "fieldsToSend": {
+            "properties": [
+              {
+                "fieldId": "Source",
+                "fieldValue": "={{ $json.body[0].id }}"
+              }
+            ]
+          },
+          "operation": "create",
+          "tableId": ""
+        },
+        "type": "n8n-nodes-base.grist",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gristApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "get existing",
+        "parameters": {
+          "additionalOptions": {
+            "filter": {
+              "filterProperties": [
+                {
+                  "field": "Source",
+                  "values": "={{ $json.body[0].id }}"
+                }
+              ]
+            }
+          },
+          "docId": "",
+          "tableId": ""
+        },
+        "type": "n8n-nodes-base.grist",
+        "typeVersion": 1
+      },
+      {
+        "name": "has existing?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "6f08b500-956e-493c-abbe-845b5352110c",
+                "leftValue": "={{ $json }}",
+                "operator": {
+                  "operation": "notEmpty",
+                  "singleValue": true,
+                  "type": "object"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "Runs once",
+        "parameters": {
+          "content": "## Runs once\nIf the destination table already contains an entry, **we will not re-create/update** it (as it might've already been changed manually)\n",
+          "height": 139.9050847457627,
+          "width": 253.74915254237288
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "03e24572-a381-455e-a5b8-ae697647f7d4"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "Grist"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 106,
+  "viewCount": 620,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Grist Account"
+    ],
+    "requiredCredentials": [
+      "grist  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Create Row\" node (n8n-nodes-base.grist) and configure the action parameters, mappings, and fields.",
+      "Open the \"Confirmed?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"get existing\" node (n8n-nodes-base.grist) and configure the action parameters, mappings, and fields.",
+      "Open the \"has existing?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Confirmation-based\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Runs once\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-u9yply3ek",
+      "workflowId": "webhook-workflow-waptu",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Grist/0479_Grist_Stickynote_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Grist\\0479_Grist_Stickynote_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:29.286Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:29.286Z",
+  "updatedAt": "2026-07-15T11:18:29.286Z"
+}

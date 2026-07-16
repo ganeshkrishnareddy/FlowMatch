@@ -1,0 +1,446 @@
+{
+  "id": "mongodb-agent-2mmv7",
+  "name": "MongoDB Agent",
+  "slug": "mongodb-agent-noq1",
+  "description": "Automated workflow: MongoDB Agent. This workflow integrates 8 different services: stickyNote, agent, mongoDbTool, stopAndError, lmChatOpenAi. It contains 9 nodes and follows best practices for error handling and security.",
+  "shortDescription": "MongoDB Agent workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "22PddLUgcjSJbT1w",
+    "meta": {
+      "instanceId": "workflow-a08d2974",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.996768",
+      "updatedAt": "2025-09-29T07:07:50.996778",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "MongoDB Agent",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "trigger-4ca88aaa",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "d8c07efe-eca0-48cb-80e6-ea8117073c5f",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1300,
+          560
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "TreGPMKr9hrtCvVp",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "636de178-7b68-429a-9371-41cf2a950076",
+        "name": "MongoDBAggregate",
+        "type": "n8n-nodes-base.mongoDbTool",
+        "position": [
+          1640,
+          540
+        ],
+        "parameters": {
+          "query": "={{   $fromAI(\"pipeline\", \"The MongoDB pipeline to execute\" , \"string\" , [{\"$match\" : { \"rating\" : 5 }  }])}}",
+          "operation": "aggregate",
+          "collection": "movies",
+          "descriptionType": "manual",
+          "toolDescription": "Get from AI the MongoDB Aggregation pipeline to get context based on the provided pipeline, the document structure of the documents is : {\n  \"plot\": \"A group of bandits stage a brazen train hold-up, only to find a determined posse hot on their heels.\",\n  \"genres\": [\n    \"Short\",\n    \"Western\"\n  ],\n  \"runtime\": 11,\n  \"cast\": [\n    \"A.C. Abadie\",\n    \"Gilbert M. 'Broncho Billy' Anderson\",\n    ...\n  ],\n  \"poster\": \"...jpg\",\n  \"title\": \"The Great Train Robbery\",\n  \"fullplot\": \"Among the earliest existing films in American cinema - notable as the ...\",\n  \"languages\": [\n    \"English\"\n  ],\n  \"released\": \"date\"\n  },\n  \"directors\": [\n    \"Edwin S. Porter\"\n  ],\n  \"rated\": \"TV-G\",\n  \"awards\": {\n    \"wins\": 1,\n    \"nominations\": 0,\n    \"text\": \"1 win.\"\n  },\n  \"lastupdated\": \"2015-08-13 00:27:59.177000000\",\n  \"year\": 1903,\n  \"imdb\": {\n    \"rating\": 7.4,"
+        },
+        "credentials": {
+          "mongoDb": {
+            "id": "8xGgiXzf2o0L4a0y",
+            "name": "MongoDB account"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This mongoDbTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e0f248dc-22b7-40a2-a00e-6298b51e4470",
+        "name": "Window Buffer Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1500,
+          540
+        ],
+        "parameters": {
+          "contextWindowLength": 10
+        },
+        "typeVersion": 1.2,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "da27ee52-43db-4818-9844-3c0a064bf958",
+        "name": "When chat message received",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1160,
+          400
+        ],
+        "webhookId": "0730df2d-2f90-45e0-83dc-609668260fda",
+        "parameters": {
+          "mode": "webhook",
+          "public": true,
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This chatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9ad79da9-3145-44be-9026-e37b0e856f5d",
+        "name": "insertFavorite",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1860,
+          520
+        ],
+        "parameters": {
+          "name": "insertFavorites",
+          "workflowId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "6QuKnOrpusQVu66Q",
+            "cachedResultName": "insertMongoDB"
+          },
+          "description": "=Use this tool only to add favorites with the structure of {\"title\"  : \"recieved title\"  }"
+        },
+        "typeVersion": 1.2,
+        "notes": "This toolWorkflow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4d7713d1-d2ad-48bf-971b-b86195e161ca",
+        "name": "AI Agent - Movie Recommendation",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1380,
+          300
+        ],
+        "parameters": {
+          "text": "=Assistant for best movies context, you have tools to search using \"MongoDBAggregate\" and you need to provide a MongoDB aggregation pipeline code array as a \"query\" input param. User input and request: {{ $json.chatInput }}. Only when a user confirms a favorite movie use the insert favorite using the \"insertFavorite\" workflow tool of to insertFavorite as { \"title\" : \"<TITLE>\" }.",
+          "options": {},
+          "promptType": "define"
+        },
+        "typeVersion": 1.7,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2eac8aed-9677-4d89-bd76-456637f5b979",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          880,
+          300
+        ],
+        "parameters": {
+          "width": 216.0875923062025,
+          "height": 499.89779507612025,
+          "content": "## AI Agent powered by OpenAI and MongoDB \n\nThis flow is designed to work as an AI autonomous agent that can get chat messages, query data from MongoDB using the aggregation framework.\n\nFollowing by augmenting the results from the sample movies collection and allowing storing my favorite movies back to the database using an \"insert\" flow. "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4d8130fe-4aed-4e09-9c1d-60fb9ac1a500",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1300,
+          720
+        ],
+        "parameters": {
+          "content": "## Process\n\nThe message is being processed by the \"Chat Model\" and the correct tool is used according to the message. "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-274539ee",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "879aab24-6346-435f-8fd4-3fca856ba64c",
+    "connections": {
+      "d8c07efe-eca0-48cb-80e6-ea8117073c5f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d8c07efe-eca0-48cb-80e6-ea8117073c5f-b87d9f57",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: MongoDB Agent. This workflow integrates 8 different services: stickyNote, agent, mongoDbTool, stopAndError, lmChatOpenAi. It contains 9 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: MongoDB Agent. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "d8c07efe-eca0-48cb-80e6-ea8117073c5f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8c07efe-eca0-48cb-80e6-ea8117073c5f-b87d9f57"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "MongoDB Agent",
+    "nodes": [
+      {
+        "name": "AI Agent - Movie Recommendation",
+        "parameters": {
+          "options": {},
+          "promptType": "define",
+          "text": "=Assistant for best movies context, you have tools to search using \"MongoDBAggregate\" and you need to provide a MongoDB aggregation pipeline code array as a \"query\" input param. User input and request: {{ $json.chatInput }}. Only when a user confirms a favorite movie use the insert favorite using the \"insertFavorite\" workflow tool of to insertFavorite as { \"title\" : \"<TITLE>\" }."
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "insertFavorite",
+        "parameters": {
+          "description": "=Use this tool only to add favorites with the structure of {\"title\"  : \"recieved title\"  }",
+          "name": "insertFavorites",
+          "workflowId": {
+            "__rl": true,
+            "cachedResultName": "insertMongoDB",
+            "mode": "list",
+            "value": "6QuKnOrpusQVu66Q"
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mongoDb": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "MongoDBAggregate",
+        "parameters": {
+          "collection": "movies",
+          "descriptionType": "manual",
+          "operation": "aggregate",
+          "query": "={{   $fromAI(\"pipeline\", \"The MongoDB pipeline to execute\" , \"string\" , [{\"$match\" : { \"rating\" : 5 }  }])}}",
+          "toolDescription": "Get from AI the MongoDB Aggregation pipeline to get context based on the provided pipeline, the document structure of the documents is : {\n  \"plot\": \"A group of bandits stage a brazen train hold-up, only to find a determined posse hot on their heels.\",\n  \"genres\": [\n    \"Short\",\n    \"Western\"\n  ],\n  \"runtime\": 11,\n  \"cast\": [\n    \"A.C. Abadie\",\n    \"Gilbert M. 'Broncho Billy' Anderson\",\n    ...\n  ],\n  \"poster\": \"...jpg\",\n  \"title\": \"The Great Train Robbery\",\n  \"fullplot\": \"Among the earliest existing films in American cinema - notable as the ...\",\n  \"languages\": [\n    \"English\"\n  ],\n  \"released\": \"date\"\n  },\n  \"directors\": [\n    \"Edwin S. Porter\"\n  ],\n  \"rated\": \"TV-G\",\n  \"awards\": {\n    \"wins\": 1,\n    \"nominations\": 0,\n    \"text\": \"1 win.\"\n  },\n  \"lastupdated\": \"2015-08-13 00:27:59.177000000\",\n  \"year\": 1903,\n  \"imdb\": {\n    \"rating\": 7.4,"
+        },
+        "type": "n8n-nodes-base.mongoDbTool",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## AI Agent powered by OpenAI and MongoDB \n\nThis flow is designed to work as an AI autonomous agent that can get chat messages, query data from MongoDB using the aggregation framework.\n\nFollowing by augmenting the results from the sample movies collection and allowing storing my favorite movies back to the database using an \"insert\" flow. ",
+          "height": 499.89779507612025,
+          "width": 216.0875923062025
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Process\n\nThe message is being processed by the \"Chat Model\" and the correct tool is used according to the message. "
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When chat message received",
+        "parameters": {
+          "mode": "webhook",
+          "options": {
+            "allowedOrigins": "*"
+          },
+          "public": true
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Window Buffer Memory",
+        "parameters": {
+          "contextWindowLength": 10
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "MongoDB"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 43,
+  "viewCount": 336,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "MongoDB Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "mongo Db details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"MongoDBAggregate\" node (n8n-nodes-base.mongoDbTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Window Buffer Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"When chat message received\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"insertFavorite\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"AI Agent - Movie Recommendation\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-663rkt1cj",
+      "workflowId": "mongodb-agent-2mmv7",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Mongodbtool/0511_Mongodbtool_Stickynote_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Mongodbtool\\0511_Mongodbtool_Stickynote_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:50.622Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:50.622Z",
+  "updatedAt": "2026-07-15T11:29:50.622Z",
+  "category": {
+    "slug": "ai-automation",
+    "name": "AI Automation"
+  },
+  "categoryId": "ai-automation"
+}

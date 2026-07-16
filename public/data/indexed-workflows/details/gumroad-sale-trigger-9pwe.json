@@ -1,0 +1,705 @@
+{
+  "id": "gumroad-sale-trigger-setiv",
+  "name": "Gumroad sale trigger",
+  "slug": "gumroad-sale-trigger-9pwe",
+  "description": "Automated workflow: Gumroad sale trigger. This workflow integrates 6 different services: stickyNote, httpRequest, stopAndError, mailerLite, googleSheets. It contains 11 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Gumroad sale trigger workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": "06v55r6E13Wfvo66",
+    "meta": {
+      "instanceId": "workflow-9e8c0e46",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.397543",
+      "updatedAt": "2025-09-29T07:07:48.400956",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Gumroad sale trigger",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "789f1dec-d2d2-4e09-9530-719d354d259c",
+        "name": "Assign to group",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          140,
+          -280
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "mailerLiteApi": {
+            "id": "i9V49FSxbwJhAGfI",
+            "name": "Mailer Lite account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "53c0df02-5571-485c-91ce-6be2f62fd6d6",
+        "name": "Gumroad Sale Trigger",
+        "type": "n8n-nodes-base.gumroadTrigger",
+        "position": [
+          -520,
+          -280
+        ],
+        "webhookId": "06a01b99-cbf1-4694-8502-94ac51670ba4",
+        "parameters": {
+          "resource": "sale"
+        },
+        "credentials": {
+          "gumroadApi": {
+            "id": "wgjGSvLjsRBJImsQ",
+            "name": "Gumroad account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This gumroadTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ee782134-e2d4-4f8b-a9d9-a09a919577ab",
+        "name": "append row in CRM",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          480,
+          -280
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "date": "={{ $('Gumroad Sale Trigger').item.json.sale_timestamp }}",
+              "email": "={{ $('Gumroad Sale Trigger').item.json.email }}",
+              "country": "={{ $('Gumroad Sale Trigger').item.json.ip_country }}",
+              "product name": "={{ $('Gumroad Sale Trigger').item.json.product_name }}"
+            },
+            "schema": [
+              {
+                "id": "date",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "date",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "product name",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "product name",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "email",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "email",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "country",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "country",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1XYMstoZ4j3O5T-UYz21ky7P5bkUtzYXQGYCQTRVWCI4",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Gumroad sales CRM"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "Ou2SgvNZctBeYWT5",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "98ff519b-3065-4c6b-bdeb-2d9095e3f52a",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -680,
+          -540
+        ],
+        "parameters": {
+          "width": 460,
+          "height": 460,
+          "content": "## Trigger on a new Gumroad sale\n### Requirements\n- A [Gumroad]() account\n- A product listed. We used ours [here]({{ $env.WEBHOOK_URL }}\n- Head to Settings > Advanced, and create a new application\n\n### Set up\n- Paste your access token on this Gumroad sale trigger"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f5ccfe9f-c56c-4394-bebf-1f7438a0dcdf",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -140,
+          -660
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 480,
+          "height": 580,
+          "content": "## Connection to [MailerLite]({{ $env.WEBHOOK_URL }} newsletter \n### Requirements\n- A [Mailerlite]({{ $env.WEBHOOK_URL }} account\n- A subscriber group created\n- Generate a new API from the Integrations menu\n\n### Set up\n- You will first need to create the subscriber with a simple Mailer lite node\n- In the second node call the endpoint to [assign that same subscriber to the group]({{ $env.WEBHOOK_URL }} you created manually on Mailerlite. For example, we named the group \"Gumroad\"\n- To get the group id, we ran a node that calls the [\"list groups\" endpoint]({{ $env.WEBHOOK_URL }} and we appended it to the url.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e4cea86a-494f-4c3c-9743-3e8eca461a04",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          420,
+          -460
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 480,
+          "height": 380,
+          "content": "## Load into CRM\n### Requirements\n- Set up your api and credentials for Google Sheets. You can find the n8n docs [here]({{ $env.WEBHOOK_URL }}\n- Append the row to your table with your desired data collected previously"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e81b7ae0-510e-454e-82ff-6d42bde9e81a",
+        "name": "add subscriber to MailerLite",
+        "type": "n8n-nodes-base.mailerLite",
+        "position": [
+          -60,
+          -280
+        ],
+        "parameters": {
+          "email": "={{ $json.email }}",
+          "additionalFields": {
+            "customFieldsUi": {
+              "customFieldsValues": [
+                {
+                  "value": "={{ $json.ip_country }}",
+                  "fieldId": "country"
+                }
+              ]
+            }
+          }
+        },
+        "credentials": {
+          "mailerLiteApi": {
+            "id": "i9V49FSxbwJhAGfI",
+            "name": "Mailer Lite account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This mailerLite node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9cc00d13-81d9-4584-9066-4b00b2ff7a47",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -160,
+          -60
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 520,
+          "height": 180,
+          "content": "## Why assign the subscriber to a group? \nIn [MailerLite]({{ $env.WEBHOOK_URL }} you can set up an automation that when a new subscriber is added into a group, a new email sequence begins, which allows you to send multiple emails to this user at a specific frequency.\n\nThis is a very powerful feature to funnel users to engage with your products or services."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "3b94b27b-05cc-4996-9f1f-33ba7c3632ae",
+    "connections": {
+      "789f1dec-d2d2-4e09-9530-719d354d259c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-ae4ba372",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-29661e86",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-f3edbbe4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-e080b8ff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-e082db3f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-cd4197a9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-59f532f0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-17bc39df",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ee782134-e2d4-4f8b-a9d9-a09a919577ab": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ee782134-e2d4-4f8b-a9d9-a09a919577ab-38c4d39b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Gumroad sale trigger. This workflow integrates 6 different services: stickyNote, httpRequest, stopAndError, mailerLite, googleSheets. It contains 11 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Gumroad sale trigger. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "789f1dec-d2d2-4e09-9530-719d354d259c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-ae4ba372"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-29661e86"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-f3edbbe4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-e080b8ff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-e082db3f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-cd4197a9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-59f532f0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-789f1dec-d2d2-4e09-9530-719d354d259c-17bc39df"
+            }
+          ]
+        ]
+      },
+      "ee782134-e2d4-4f8b-a9d9-a09a919577ab": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee782134-e2d4-4f8b-a9d9-a09a919577ab-38c4d39b"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Gumroad sale trigger",
+    "nodes": [
+      {
+        "credentials": {
+          "mailerLiteApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "add subscriber to MailerLite",
+        "parameters": {
+          "additionalFields": {
+            "customFieldsUi": {
+              "customFieldsValues": [
+                {
+                  "fieldId": "country",
+                  "value": "={{ $json.ip_country }}"
+                }
+              ]
+            }
+          },
+          "email": "={{ $json.email }}"
+        },
+        "type": "n8n-nodes-base.mailerLite",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "append row in CRM",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "date",
+                "id": "date",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "product name",
+                "id": "product name",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "email",
+                "id": "email",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "country",
+                "id": "country",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "country": "={{ $('Gumroad Sale Trigger').item.json.ip_country }}",
+              "date": "={{ $('Gumroad Sale Trigger').item.json.sale_timestamp }}",
+              "email": "={{ $('Gumroad Sale Trigger').item.json.email }}",
+              "product name": "={{ $('Gumroad Sale Trigger').item.json.product_name }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Gumroad sales CRM",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1XYMstoZ4j3O5T-UYz21ky7P5bkUtzYXQGYCQTRVWCI4"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "mailerLiteApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Assign to group",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "gumroadApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Gumroad Sale Trigger",
+        "parameters": {
+          "resource": "sale"
+        },
+        "type": "n8n-nodes-base.gumroadTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Trigger on a new Gumroad sale\n### Requirements\n- A [Gumroad]() account\n- A product listed. We used ours [here]({{ $env.WEBHOOK_URL }}\n- Head to Settings > Advanced, and create a new application\n\n### Set up\n- Paste your access token on this Gumroad sale trigger",
+          "height": 460,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 4,
+          "content": "## Connection to [MailerLite]({{ $env.WEBHOOK_URL }} newsletter \n### Requirements\n- A [Mailerlite]({{ $env.WEBHOOK_URL }} account\n- A subscriber group created\n- Generate a new API from the Integrations menu\n\n### Set up\n- You will first need to create the subscriber with a simple Mailer lite node\n- In the second node call the endpoint to [assign that same subscriber to the group]({{ $env.WEBHOOK_URL }} you created manually on Mailerlite. For example, we named the group \"Gumroad\"\n- To get the group id, we ran a node that calls the [\"list groups\" endpoint]({{ $env.WEBHOOK_URL }} and we appended it to the url.\n",
+          "height": 580,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "## Load into CRM\n### Requirements\n- Set up your api and credentials for Google Sheets. You can find the n8n docs [here]({{ $env.WEBHOOK_URL }}\n- Append the row to your table with your desired data collected previously",
+          "height": 380,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 5,
+          "content": "## Why assign the subscriber to a group? \nIn [MailerLite]({{ $env.WEBHOOK_URL }} you can set up an automation that when a new subscriber is added into a group, a new email sequence begins, which allows you to send multiple emails to this user at a specific frequency.\n\nThis is a very powerful feature to funnel users to engage with your products or services.",
+          "height": 180,
+          "width": 520
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Gumroad",
+    "Google Sheets",
+    "Mailerlite"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 206,
+  "viewCount": 242,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Gumroad Account",
+      "Google Sheets Account",
+      "Mailerlite Account"
+    ],
+    "requiredCredentials": [
+      "mailer Lite  A P I details",
+      "gumroad  A P I details",
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Gumroad Sale Trigger\".",
+      "Open the \"Assign to group\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"append row in CRM\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"add subscriber to MailerLite\" node (n8n-nodes-base.mailerLite) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-yp4bcggle",
+      "workflowId": "gumroad-sale-trigger-setiv",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Mailerlite/1874_Mailerlite_Gumroad_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Mailerlite\\1874_Mailerlite_Gumroad_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:43.672Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:43.672Z",
+  "updatedAt": "2026-07-15T11:18:43.672Z"
+}

@@ -1,0 +1,713 @@
+{
+  "id": "set-workflow-r30ak",
+  "name": "Set Workflow",
+  "slug": "set-workflow-1qh2",
+  "description": "Automated workflow: Set Workflow. This workflow integrates 9 different services: mongoDb, httpRequest, stickyNote, scheduleTrigger, merge. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Set Workflow workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-e02bce91",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.976746",
+      "updatedAt": "2025-09-29T07:07:51.976764",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "140f236c-8946-4ca8-b18f-0af99107b15c",
+        "name": "Assign parameters",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          300,
+          80
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b836ba12-262a-4fed-a31d-9e2f6514137a",
+                "name": "startUrls",
+                "type": "array",
+                "value": "=[\n    {\n      \"url\": \"{{ $env.WEBHOOK_URL }}\",\n      \"method\": \"GET\"\n    },\n{\n            \"url\": \"{{ $env.WEBHOOK_URL }}\",\n            \"method\": \"GET\"\n        }\n  ]"
+              },
+              {
+                "id": "5f7ba5cc-a8fc-4f67-9feb-6243d08462f9",
+                "name": "proxyCountryCode",
+                "type": "string",
+                "value": "FR"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d1863b34-d35f-477c-bb94-8a77ff08b51d",
+        "name": "Query For Upwork Job Posts",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          520,
+          80
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "startUrls",
+                "value": "={{ $json.startUrls }}"
+              },
+              {
+                "name": "proxyCountryCode",
+                "value": "={{ $json.proxyCountryCode }}"
+              }
+            ]
+          },
+          "genericAuthType": "httpQueryAuth"
+        },
+        "credentials": {
+          "httpQueryAuth": {
+            "id": "WajVMGJs8zYL5VdP",
+            "name": "Query Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a923af43-f417-470c-af97-2a50dc0c0d79",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -100,
+          80
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 10
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "26322972-4ecd-4f8e-a1fc-81607a911c22",
+        "name": "If Working Hours",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          80,
+          80
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "795a6d51-0ea0-4493-bc1e-a1807a2cbd77",
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                },
+                "leftValue": "={{ $json.Hour }}",
+                "rightValue": 2
+              },
+              {
+                "id": "f9ba101d-226d-4d6a-aab8-62229762a046",
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                },
+                "leftValue": "={{ $json.Hour }}",
+                "rightValue": 15
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d68cb363-df1f-4601-b194-c1dc044b0c6a",
+        "name": "Find Existing Entries",
+        "type": "n8n-nodes-base.mongoDb",
+        "position": [
+          720,
+          -40
+        ],
+        "parameters": {
+          "query": "={\n  \"title\": \"{{ $json.title }}\",\n  \"budget\": \"{{ $json.budget }}\"\n}\n",
+          "options": {},
+          "collection": "n8n"
+        },
+        "credentials": {
+          "mongoDb": {
+            "id": "aXU1Q0utjxwEpfEk",
+            "name": "MongoDB account"
+          }
+        },
+        "typeVersion": 1.1,
+        "alwaysOutputData": false,
+        "notes": "This mongoDb node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "82a6a26a-9fd5-4ce5-986f-e0aeb0c43fcc",
+        "name": "Output New Entries",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          940,
+          80
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "joinMode": "keepNonMatches",
+          "fieldsToMatchString": "title, budget"
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "361603e9-d173-42e2-a170-de08725ffd24",
+        "name": "Add New Entries To MongoDB",
+        "type": "n8n-nodes-base.mongoDb",
+        "position": [
+          1160,
+          -40
+        ],
+        "parameters": {
+          "fields": "title,link,paymentType,budget,projectLength,shortBio,skills,publishedDate,normalizedDate,searchUrl",
+          "options": {},
+          "operation": "insert",
+          "collection": "n8n"
+        },
+        "credentials": {
+          "mongoDb": {
+            "id": "aXU1Q0utjxwEpfEk",
+            "name": "MongoDB account"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This mongoDb node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e13787c6-f3e5-4bad-afcc-b1c3387a866c",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          220,
+          -240
+        ],
+        "parameters": {
+          "height": 260,
+          "content": "## Setup\n1. Add MongoDB, Slack credentials\n2. Add a query auth credential where the key='token' and the value being your apify token\n3. Modify the 'Assign parameters' node to include the Upwork URLs you want to query for"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bc83acf0-b28b-48ff-bcb1-695404f30282",
+        "name": "Send message in #general",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          1160,
+          200
+        ],
+        "webhookId": "7b8d0119-c115-4ed3-9d2d-ea8d58edfae6",
+        "parameters": {
+          "text": "=Job Title : {{ $json.title }}\nPublished : {{ $json.publishedDate }}\nLink : {{ $json.link }}\nPayment Type: {{ $json.paymentType }}\nBudget: {{ $json.budget }}\nSkills: {{ $json.skills }}\nBio: {{ $json.shortBio }}",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "mode": "name",
+            "value": "#general"
+          },
+          "otherOptions": {}
+        },
+        "credentials": {
+          "slackApi": {
+            "id": "nilit1oFWL3xhyvx",
+            "name": "Slack account"
+          }
+        },
+        "typeVersion": 2.3,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "d1863b34-d35f-477c-bb94-8a77ff08b51d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-49d353c5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-c9618bf6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-c1092b35",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-15cd81b2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-557f9dcb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-9b333e19",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-12106732",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-c8a44532",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "bc83acf0-b28b-48ff-bcb1-695404f30282": {
+        "main": [
+          [
+            {
+              "node": "error-handler-bc83acf0-b28b-48ff-bcb1-695404f30282-222e4a09",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Set Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Set Workflow. This workflow integrates 9 different services: mongoDb, httpRequest, stickyNote, scheduleTrigger, merge. It contains 12 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Set Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "bc83acf0-b28b-48ff-bcb1-695404f30282": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc83acf0-b28b-48ff-bcb1-695404f30282-222e4a09"
+            }
+          ]
+        ]
+      },
+      "d1863b34-d35f-477c-bb94-8a77ff08b51d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-49d353c5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-c9618bf6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-c1092b35"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-15cd81b2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-557f9dcb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-9b333e19"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-12106732"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1863b34-d35f-477c-bb94-8a77ff08b51d-c8a44532"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Set Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "mongoDb": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add New Entries To MongoDB",
+        "parameters": {
+          "collection": "n8n",
+          "fields": "title,link,paymentType,budget,projectLength,shortBio,skills,publishedDate,normalizedDate,searchUrl",
+          "operation": "insert",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.mongoDb",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Assign parameters",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b836ba12-262a-4fed-a31d-9e2f6514137a",
+                "name": "startUrls",
+                "type": "array",
+                "value": "=[\n    {\n      \"url\": \"{{ $env.WEBHOOK_URL }}\",\n      \"method\": \"GET\"\n    },\n{\n            \"url\": \"{{ $env.WEBHOOK_URL }}\",\n            \"method\": \"GET\"\n        }\n  ]"
+              },
+              {
+                "id": "5f7ba5cc-a8fc-4f67-9feb-6243d08462f9",
+                "name": "proxyCountryCode",
+                "type": "string",
+                "value": "FR"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "mongoDb": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Find Existing Entries",
+        "parameters": {
+          "collection": "n8n",
+          "options": {},
+          "query": "={\n  \"title\": \"{{ $json.title }}\",\n  \"budget\": \"{{ $json.budget }}\"\n}\n"
+        },
+        "type": "n8n-nodes-base.mongoDb",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "If Working Hours",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "795a6d51-0ea0-4493-bc1e-a1807a2cbd77",
+                "leftValue": "={{ $json.Hour }}",
+                "operator": {
+                  "operation": "gt",
+                  "type": "number"
+                },
+                "rightValue": 2
+              },
+              {
+                "id": "f9ba101d-226d-4d6a-aab8-62229762a046",
+                "leftValue": "={{ $json.Hour }}",
+                "operator": {
+                  "operation": "lt",
+                  "type": "number"
+                },
+                "rightValue": 15
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Output New Entries",
+        "parameters": {
+          "fieldsToMatchString": "title, budget",
+          "joinMode": "keepNonMatches",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "httpQueryAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Query For Upwork Job Posts",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "startUrls",
+                "value": "={{ $json.startUrls }}"
+              },
+              {
+                "name": "proxyCountryCode",
+                "value": "={{ $json.proxyCountryCode }}"
+              }
+            ]
+          },
+          "genericAuthType": "httpQueryAuth",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "slackApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send message in #general",
+        "parameters": {
+          "channelId": {
+            "__rl": true,
+            "mode": "name",
+            "value": "#general"
+          },
+          "otherOptions": {},
+          "select": "channel",
+          "text": "=Job Title : {{ $json.title }}\nPublished : {{ $json.publishedDate }}\nLink : {{ $json.link }}\nPayment Type: {{ $json.paymentType }}\nBudget: {{ $json.budget }}\nSkills: {{ $json.skills }}\nBio: {{ $json.shortBio }}"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Setup\n1. Add MongoDB, Slack credentials\n2. Add a query auth credential where the key='token' and the value being your apify token\n3. Modify the 'Assign parameters' node to include the Upwork URLs you want to query for",
+          "height": 260
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request",
+    "MongoDB",
+    "Slack"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 74,
+  "viewCount": 685,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "MongoDB Account",
+      "Slack Account"
+    ],
+    "requiredCredentials": [
+      "http Query Auth details",
+      "mongo Db details",
+      "slack  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Query For Upwork Job Posts\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Working Hours\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Find Existing Entries\" node (n8n-nodes-base.mongoDb) and configure the action parameters, mappings, and fields.",
+      "Open the \"Output New Entries\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add New Entries To MongoDB\" node (n8n-nodes-base.mongoDb) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send message in #general\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Locate the Set/Edit fields node \"Assign parameters\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-6765bxjsa",
+      "workflowId": "set-workflow-r30ak",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/0711_Schedule_Slack_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\0711_Schedule_Slack_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:30:03.296Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:03.296Z",
+  "updatedAt": "2026-07-15T11:30:03.296Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

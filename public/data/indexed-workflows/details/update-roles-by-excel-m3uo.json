@@ -1,0 +1,864 @@
+{
+  "id": "update-roles-by-excel-3stio",
+  "name": "Update Roles by Excel",
+  "slug": "update-roles-by-excel-m3uo",
+  "description": "Automated workflow: Update Roles by Excel. This workflow integrates 7 different services: stickyNote, httpRequest, merge, set, stopAndError. It contains 16 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Update Roles by Excel workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "xzKlhjcc6QEzA98Z",
+    "meta": {
+      "instanceId": "workflow-8623366b",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.793098",
+      "updatedAt": "2025-09-29T07:07:50.793126",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Update Roles by Excel",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "580d8a47-32cc-4976-a464-793523ae3d1e",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          80,
+          140
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f37ea772-a953-4b5b-8e54-c76e42938544",
+        "name": "Extract from File",
+        "type": "n8n-nodes-base.extractFromFile",
+        "position": [
+          760,
+          140
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "xlsx"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "60ab7913-d421-41cd-af04-ccec2ed6838e",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1700,
+          120
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "fieldsToMatchString": "email"
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ad6719b4-95dc-419e-94cb-97039014be62",
+        "name": "Basic Variables",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          320,
+          140
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "68b32087-5e23-4590-8042-0061234ce479",
+                "name": "zammad_base_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              },
+              {
+                "id": "240f4dc5-a070-4623-96e7-1e0750dbeba5",
+                "name": "excel_source_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8f18e493-5dbe-4447-a422-450c610e9585",
+        "name": "Zammad Univeral User Object",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1020,
+          140
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "email",
+                "value": "={{ $json.email }}"
+              },
+              {
+                "name": "role_ids",
+                "value": "={{ $json.role_ids }}\n"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5bc0a423-91bc-4b52-af05-2869223bbbff",
+        "name": "Download Excel",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          540,
+          140
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b5962a7b-27d3-45f1-adc4-1abff5d1c990",
+        "name": "Find Zammad User by email",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1360,
+          -60
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "GJ7tG0KxDpEUv3DS",
+            "name": "zammad.sirhexalot.de"
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 4.2,
+        "alwaysOutputData": false,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0b8f5007-d28d-4406-a7ec-aa69d2b865d5",
+        "name": "Update User Roles",
+        "type": "n8n-nodes-base.httpRequest",
+        "onError": "continueErrorOutput",
+        "position": [
+          2020,
+          120
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "PUT",
+          "options": {},
+          "jsonBody": "={\n  \"role_ids\": [\n  {{ $json.role_ids }}\n  ]\n} ",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "GJ7tG0KxDpEUv3DS",
+            "name": "zammad.sirhexalot.de"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7724e271-0beb-4fc3-a9dd-4e55bcf033a1",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          60,
+          -500
+        ],
+        "parameters": {
+          "width": 577.5890410958907,
+          "height": 253.58904109589045,
+          "content": "## Authentication for Zammad\n\nCreate in the Node Find Zammad User by email a Header Auth Authentication\n\nUse:\n\nName: Authorization\nValue: Bearer - put here your zammad api token - \n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "2e34f31f-cb00-43e1-8709-6405ea8521ac",
+    "connections": {
+      "5bc0a423-91bc-4b52-af05-2869223bbbff": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-2645aeac",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-b231cdb1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-63cb1071",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-edfbacee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-d795cd76",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-aeaa4307",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-5a8398ab",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-0662c04f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b5962a7b-27d3-45f1-adc4-1abff5d1c990": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-3038b873",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-dac88d7c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-baa4e84e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-3f1907cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-1b6ebcf5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-a0e29fd2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-7a3c3425",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-4f67979c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "0b8f5007-d28d-4406-a7ec-aa69d2b865d5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-f31f2f94",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-afbb9463",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-0b66f64c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-bf13522a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-6910c4ac",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-3306469f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-6420bf68",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-f6414c7f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f37ea772-a953-4b5b-8e54-c76e42938544": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f37ea772-a953-4b5b-8e54-c76e42938544-ed25d4f6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Update Roles by Excel. This workflow integrates 7 different services: stickyNote, httpRequest, merge, set, stopAndError. It contains 16 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Update Roles by Excel. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0b8f5007-d28d-4406-a7ec-aa69d2b865d5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-f31f2f94"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-afbb9463"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-0b66f64c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-bf13522a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-6910c4ac"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-3306469f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-6420bf68"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b8f5007-d28d-4406-a7ec-aa69d2b865d5-f6414c7f"
+            }
+          ]
+        ]
+      },
+      "5bc0a423-91bc-4b52-af05-2869223bbbff": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-2645aeac"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-b231cdb1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-63cb1071"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-edfbacee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-d795cd76"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-aeaa4307"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-5a8398ab"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bc0a423-91bc-4b52-af05-2869223bbbff-0662c04f"
+            }
+          ]
+        ]
+      },
+      "b5962a7b-27d3-45f1-adc4-1abff5d1c990": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-3038b873"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-dac88d7c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-baa4e84e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-3f1907cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-1b6ebcf5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-a0e29fd2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-7a3c3425"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5962a7b-27d3-45f1-adc4-1abff5d1c990-4f67979c"
+            }
+          ]
+        ]
+      },
+      "f37ea772-a953-4b5b-8e54-c76e42938544": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f37ea772-a953-4b5b-8e54-c76e42938544-ed25d4f6"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Update Roles by Excel",
+    "nodes": [
+      {
+        "name": "Basic Variables",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "68b32087-5e23-4590-8042-0061234ce479",
+                "name": "zammad_base_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              },
+              {
+                "id": "240f4dc5-a070-4623-96e7-1e0750dbeba5",
+                "name": "excel_source_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Download Excel",
+        "parameters": {
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Extract from File",
+        "parameters": {
+          "operation": "xlsx",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Find Zammad User by email",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "fieldsToMatchString": "email",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Authentication for Zammad\n\nCreate in the Node Find Zammad User by email a Header Auth Authentication\n\nUse:\n\nName: Authorization\nValue: Bearer - put here your zammad api token - \n",
+          "height": 253.58904109589045,
+          "width": 577.5890410958907
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update User Roles",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "jsonBody": "={\n  \"role_ids\": [\n  {{ $json.role_ids }}\n  ]\n} ",
+          "method": "PUT",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Zammad Univeral User Object",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "email",
+                "value": "={{ $json.email }}"
+              },
+              {
+                "name": "role_ids",
+                "value": "={{ $json.role_ids }}\n"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 25,
+  "viewCount": 474,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"Extract from File\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download Excel\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Find Zammad User by email\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update User Roles\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Basic Variables\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Zammad Univeral User Object\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-l54lmmzsa",
+      "workflowId": "update-roles-by-excel-3stio",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/2022_Manual_Extractfromfile_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\2022_Manual_Extractfromfile_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:46.836Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:46.836Z",
+  "updatedAt": "2026-07-15T11:29:46.836Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

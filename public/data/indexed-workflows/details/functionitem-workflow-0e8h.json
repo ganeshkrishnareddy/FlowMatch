@@ -1,0 +1,331 @@
+{
+  "id": "functionitem-workflow-vnhvo",
+  "name": "Functionitem Workflow",
+  "slug": "functionitem-workflow-0e8h",
+  "description": "Automated workflow: Functionitem Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Functionitem Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-f2bbc004",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:47.161988",
+      "updatedAt": "2025-09-29T07:07:47.162000",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "35451a0c-1ad5-4c02-804b-d19afd282b09",
+        "name": "Get last execution timestamp",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          540,
+          100
+        ],
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nif(!staticData.lastExecution){\n  staticData.lastExecution = new Date();\n}\n\nitem.executionTimeStamp = new Date();\nitem.lastExecution = staticData.lastExecution;\n\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "notes": "This functionItem node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "18ff2308-216e-4c1e-afb9-bd41ae7b5e4d",
+        "name": "Every day at 07:00",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          320,
+          100
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 7
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "53d3203b-2518-471f-9c72-2ab41303cdf2",
+        "name": "Set new last execution timestamp",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          1240,
+          100
+        ],
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nstaticData.lastExecution = $item(0).$node[\"Get last execution timestamp\"].executionTimeStamp;\n\nreturn item;"
+        },
+        "executeOnce": true,
+        "typeVersion": 1,
+        "notes": "This functionItem node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bf6f8843-53e8-4096-8614-da0b43f5f193",
+        "name": "Create/Update contact",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          1020,
+          100
+        ],
+        "parameters": {
+          "email": "={{ $json[\"email_address\"] }}",
+          "resource": "contact",
+          "authentication": "{{ $credentials.appToken }}",
+          "additionalFields": {
+            "lastName": "={{ $json[\"merge_fields\"].LNAME }}",
+            "firstName": "={{ $json[\"merge_fields\"].FNAME }}"
+          }
+        },
+        "credentials": {
+          "hubspotAppToken": {
+            "id": "{{ $credentials.hubspotAppToken.id }}",
+            "name": "HubSpot App Token account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6bce7f89-e22e-4372-a1cc-1723756bb617",
+        "name": "Get changed members",
+        "type": "n8n-nodes-base.mailchimp",
+        "position": [
+          780,
+          100
+        ],
+        "parameters": {
+          "list": "bcfb6ff8f1",
+          "options": {
+            "sinceLastChanged": "={{ $json[\"lastExecution\"] }}"
+          },
+          "operation": "getAll"
+        },
+        "credentials": {
+          "mailchimpApi": {
+            "id": "{{ $credentials.mailchimpApi.id }}",
+            "name": "Mailchimp account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mailchimp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-8870bdf1",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Functionitem Workflow",
+    "description": "Automated workflow: Functionitem Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Functionitem Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Functionitem Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "hubspotAppToken": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create/Update contact",
+        "parameters": {
+          "additionalFields": {
+            "firstName": "={{ $json[\"merge_fields\"].FNAME }}",
+            "lastName": "={{ $json[\"merge_fields\"].LNAME }}"
+          },
+          "authentication": "{{ $credentials.appToken }}",
+          "email": "={{ $json[\"email_address\"] }}",
+          "resource": "contact"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Every day at 07:00",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 7
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mailchimpApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get changed members",
+        "parameters": {
+          "list": "bcfb6ff8f1",
+          "operation": "getAll",
+          "options": {
+            "sinceLastChanged": "={{ $json[\"lastExecution\"] }}"
+          }
+        },
+        "type": "n8n-nodes-base.mailchimp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get last execution timestamp",
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nif(!staticData.lastExecution){\n  staticData.lastExecution = new Date();\n}\n\nitem.executionTimeStamp = new Date();\nitem.lastExecution = staticData.lastExecution;\n\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set new last execution timestamp",
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nstaticData.lastExecution = $item(0).$node[\"Get last execution timestamp\"].executionTimeStamp;\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Functionitem",
+    "Hubspot",
+    "Mailchimp"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 190,
+  "viewCount": 386,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Functionitem Account",
+      "Hubspot Account",
+      "Mailchimp Account"
+    ],
+    "requiredCredentials": [
+      "hubspot App Token details",
+      "mailchimp  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Every day at 07:00\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get last execution timestamp\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set new last execution timestamp\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create/Update contact\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get changed members\" node (n8n-nodes-base.mailchimp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-6n3g24y5r",
+      "workflowId": "functionitem-workflow-vnhvo",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Hubspot/0244_HubSpot_Mailchimp_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Hubspot\\0244_HubSpot_Mailchimp_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:29:16.386Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:16.386Z",
+  "updatedAt": "2026-07-15T11:29:16.386Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

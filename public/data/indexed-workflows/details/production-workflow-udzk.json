@@ -1,0 +1,589 @@
+{
+  "id": "production-workflow-qf5cm",
+  "name": "Production Workflow",
+  "slug": "production-workflow-udzk",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          260,
+          210
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-f13300bb"
+      },
+      {
+        "name": "Fetch new followers",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          460,
+          210
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.headerAuth }}"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "{{ $credentials.httpHeaderAuth.id }}",
+            "name": "Twitter Token"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-91160cea"
+      },
+      {
+        "name": "Item Lists",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          660,
+          210
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "data"
+        },
+        "typeVersion": 1,
+        "id": "node-310cca91"
+      },
+      {
+        "name": "Function",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1660,
+          210
+        ],
+        "parameters": {
+          "functionCode": "const binary = {};\nfor (let i=0; i < items.length; i++) {\n  binary[`data${i}`] = items[i].binary.avatar;\n}\n\nreturn [\n  {\n    json: {\n      numIcons: items.length,\n    },\n    binary,\n  }\n];\n"
+        },
+        "typeVersion": 1,
+        "id": "node-274759c0"
+      },
+      {
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1910,
+          110
+        ],
+        "parameters": {
+          "mode": "mergeByIndex"
+        },
+        "typeVersion": 1,
+        "id": "node-67553dab"
+      },
+      {
+        "name": "Fetching images",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          860,
+          210
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "responseFormat": "file",
+          "dataPropertyName": "avatar"
+        },
+        "typeVersion": 1,
+        "id": "node-3cf6f24a"
+      },
+      {
+        "name": "Fetch bg",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1660,
+          -40
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "responseFormat": "file",
+          "dataPropertyName": "bg"
+        },
+        "typeVersion": 1,
+        "id": "node-b8ee9c12"
+      },
+      {
+        "name": "Resize",
+        "type": "n8n-nodes-base.editImage",
+        "position": [
+          1060,
+          210
+        ],
+        "parameters": {
+          "width": 200,
+          "height": 200,
+          "options": {},
+          "operation": "resize",
+          "dataPropertyName": "avatar"
+        },
+        "typeVersion": 1,
+        "id": "node-5afaf43e"
+      },
+      {
+        "name": "Crop",
+        "type": "n8n-nodes-base.editImage",
+        "position": [
+          1260,
+          210
+        ],
+        "parameters": {
+          "options": {
+            "format": "png"
+          },
+          "operation": "multiStep",
+          "operations": {
+            "operations": [
+              {
+                "width": 200,
+                "height": 200,
+                "operation": "create",
+                "backgroundColor": "#000000ff"
+              },
+              {
+                "color": "#ffffff00",
+                "operation": "draw",
+                "primitive": "circle",
+                "endPositionX": 25,
+                "endPositionY": 50,
+                "startPositionX": 100,
+                "startPositionY": 100
+              },
+              {
+                "operator": "In",
+                "operation": "composite",
+                "dataPropertyNameComposite": "avatar"
+              }
+            ]
+          },
+          "dataPropertyName": "avatar"
+        },
+        "typeVersion": 1,
+        "id": "node-7fdc25f5"
+      },
+      {
+        "name": "Edit Image",
+        "type": "n8n-nodes-base.editImage",
+        "position": [
+          2110,
+          110
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "multiStep",
+          "operations": {
+            "operations": [
+              {
+                "operation": "composite",
+                "positionX": 1000,
+                "positionY": 375,
+                "dataPropertyNameComposite": "data0"
+              },
+              {
+                "operation": "composite",
+                "positionX": 1100,
+                "positionY": 375,
+                "dataPropertyNameComposite": "data1"
+              },
+              {
+                "operation": "composite",
+                "positionX": 1200,
+                "positionY": 375,
+                "dataPropertyNameComposite": "data2"
+              }
+            ]
+          },
+          "dataPropertyName": "bg"
+        },
+        "typeVersion": 1,
+        "id": "node-1c47e477"
+      },
+      {
+        "name": "Resize1",
+        "type": "n8n-nodes-base.editImage",
+        "position": [
+          1450,
+          210
+        ],
+        "parameters": {
+          "width": 75,
+          "height": 75,
+          "options": {},
+          "operation": "resize",
+          "dataPropertyName": "avatar"
+        },
+        "typeVersion": 1,
+        "id": "node-bcb448a0"
+      },
+      {
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2310,
+          110
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "bodyContentType": "multipart-form-data"
+          },
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.oAuth1 }}",
+          "jsonParameters": true,
+          "sendBinaryData": true,
+          "binaryPropertyName": "banner:bg"
+        },
+        "credentials": {
+          "oAuth1Api": {
+            "id": "{{ $credentials.oAuth1Api.id }}",
+            "name": "Twitter OAuth1.0"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-9ff8142a"
+      },
+      {
+        "id": "error-541a43ce",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-6704cdce",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.642012",
+      "updatedAt": "2025-09-29T07:07:48.642028",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "Crop",
+        "parameters": {
+          "dataPropertyName": "avatar",
+          "operation": "multiStep",
+          "operations": {
+            "operations": [
+              {
+                "backgroundColor": "#000000ff",
+                "height": 200,
+                "operation": "create",
+                "width": 200
+              },
+              {
+                "color": "#ffffff00",
+                "endPositionX": 25,
+                "endPositionY": 50,
+                "operation": "draw",
+                "primitive": "circle",
+                "startPositionX": 100,
+                "startPositionY": 100
+              },
+              {
+                "dataPropertyNameComposite": "avatar",
+                "operation": "composite",
+                "operator": "In"
+              }
+            ]
+          },
+          "options": {
+            "format": "png"
+          }
+        },
+        "type": "n8n-nodes-base.editImage",
+        "typeVersion": 1
+      },
+      {
+        "name": "Edit Image",
+        "parameters": {
+          "dataPropertyName": "bg",
+          "operation": "multiStep",
+          "operations": {
+            "operations": [
+              {
+                "dataPropertyNameComposite": "data0",
+                "operation": "composite",
+                "positionX": 1000,
+                "positionY": 375
+              },
+              {
+                "dataPropertyNameComposite": "data1",
+                "operation": "composite",
+                "positionX": 1100,
+                "positionY": 375
+              },
+              {
+                "dataPropertyNameComposite": "data2",
+                "operation": "composite",
+                "positionX": 1200,
+                "positionY": 375
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.editImage",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Fetch bg",
+        "parameters": {
+          "dataPropertyName": "bg",
+          "options": {},
+          "responseFormat": "file",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Fetch new followers",
+        "parameters": {
+          "authentication": "{{ $credentials.headerAuth }}",
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Fetching images",
+        "parameters": {
+          "dataPropertyName": "avatar",
+          "options": {},
+          "responseFormat": "file",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Function",
+        "parameters": {
+          "functionCode": "const binary = {};\nfor (let i=0; i < items.length; i++) {\n  binary[`data${i}`] = items[i].binary.avatar;\n}\n\nreturn [\n  {\n    json: {\n      numIcons: items.length,\n    },\n    binary,\n  }\n];\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "oAuth1Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "HTTP Request",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth1 }}",
+          "binaryPropertyName": "banner:bg",
+          "jsonParameters": true,
+          "options": {
+            "bodyContentType": "multipart-form-data"
+          },
+          "requestMethod": "POST",
+          "sendBinaryData": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Item Lists",
+        "parameters": {
+          "fieldToSplitOut": "data",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "mode": "mergeByIndex"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Resize",
+        "parameters": {
+          "dataPropertyName": "avatar",
+          "height": 200,
+          "operation": "resize",
+          "options": {},
+          "width": 200
+        },
+        "type": "n8n-nodes-base.editImage",
+        "typeVersion": 1
+      },
+      {
+        "name": "Resize1",
+        "parameters": {
+          "dataPropertyName": "avatar",
+          "height": 75,
+          "operation": "resize",
+          "options": {},
+          "width": 75
+        },
+        "type": "n8n-nodes-base.editImage",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Itemlists",
+    "Editimage"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 52,
+  "viewCount": 687,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Itemlists Account",
+      "Editimage Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details",
+      "o Auth1  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the \"Fetch new followers\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Item Lists\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Function\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetching images\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch bg\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Resize\" node (n8n-nodes-base.editImage) and configure the action parameters, mappings, and fields.",
+      "Open the \"Crop\" node (n8n-nodes-base.editImage) and configure the action parameters, mappings, and fields.",
+      "Open the \"Edit Image\" node (n8n-nodes-base.editImage) and configure the action parameters, mappings, and fields.",
+      "Open the \"Resize1\" node (n8n-nodes-base.editImage) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-d9csbjnxl",
+      "workflowId": "production-workflow-qf5cm",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0137_Manual_Editimage_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0137_Manual_Editimage_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:47.096Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:47.096Z",
+  "updatedAt": "2026-07-15T11:18:47.096Z"
+}

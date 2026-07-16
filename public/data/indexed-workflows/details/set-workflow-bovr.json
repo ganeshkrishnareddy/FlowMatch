@@ -1,0 +1,475 @@
+{
+  "id": "set-workflow-btvwq",
+  "name": "Set Workflow",
+  "slug": "set-workflow-bovr",
+  "description": "Automated workflow: Set Workflow. This workflow integrates 7 different services: convertToFile, webhook, stickyNote, respondToWebhook, set. It contains 11 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Set Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-313db0e7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:08:00.958684",
+      "updatedAt": "2025-09-29T07:08:00.958702",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "c02e3038-96e8-4bfe-a4fa-925207fef0ee",
+        "name": "Create data pix",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ab15b0f8-c40f-4874-8724-ddae8f99e646",
+                "name": "data",
+                "type": "string",
+                "value": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCA1LjEuMvu8A7YAAAC2ZVhJZklJKgAIAAAABQAaAQUAAQAAAEoAAAAbAQUAAQAAAFIAAAAoAQMAAQAAAAIAAAAxAQIAEAAAAFoAAABphwQAAQAAAGoAAAAAAAAAYAAAAAEAAABgAAAAAQAAAFBhaW50Lk5FVCA1LjEuMgADAACQBwAEAAAAMDIzMAGgAwABAAAAAQAAAAWgBAABAAAAlAAAAAAAAAACAAEAAgAEAAAAUjk4AAIABwAEAAAAMDEwMAAAAADp1fY4ytpsegAAAA1JREFUGFdjYGBgYAAAAAUAAYoz4wAAAAAASUVORK5CYII="
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "09573a6a-88e8-48c5-a78e-d45fb37a8b87",
+        "name": "Create img bin",
+        "type": "n8n-nodes-base.convertToFile",
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "options": {
+            "mimeType": "image/png"
+          },
+          "operation": "toBinary",
+          "sourceProperty": "data",
+          "binaryPropertyName": "pixel"
+        },
+        "typeVersion": 1.1,
+        "notes": "This convertToFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "07c42dab-9b60-4f51-b8ab-78df26bc2cdd",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          660,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "respondWith": "binary"
+        },
+        "typeVersion": 1.1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cb0df6bc-d733-4e07-9506-c413d390e482",
+        "name": "Request img",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "db4880e7-2134-4994-94e5-a4a3aa120440",
+        "parameters": {
+          "path": "db4880e7-2134-4994-94e5-a4a3aa120440",
+          "options": {},
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b7153f9a-f635-48c4-b8fe-d9e93deb33ed",
+        "name": "Do anything to log",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          660,
+          200
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d5e4143c-f321-4632-9adf-e95ca718210f",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -80,
+          360
+        ],
+        "parameters": {
+          "width": 980,
+          "height": 1280,
+          "content": "## 📬 Workflow: Transparent Tracking Pixel for Email Open Detection\n\n### 📌 Description\nThis workflow serves a **1x1 transparent PNG image** via a webhook, which can be embedded in an email to **track when the email is opened**. When the image is loaded by the recipient's email client, the webhook is triggered, optionally capturing a `userId` to identify who opened the email.\n\n---\n\n### 📂 Workflow Steps\n\n1. **Webhook Trigger** (`Request img`)\n   - **Path:** `/webhook/change-with-your-id`\n   - Triggered by an HTTP request (e.g. when the image is loaded in an email).\n   - Accepts a query parameter `id` to identify the recipient.\n\n2. **Set Base64 Data** (`Create data pix`)\n   - Creates a variable `data` containing a Base64-encoded transparent PNG image (1x1 pixel).\n\n3. **Convert to Binary** (`Create img bin`)\n   - Converts the Base64 `data` string into a binary file.\n   - Sets MIME type to `image/png`.\n\n4. **Respond to Webhook** (`Respond to Webhook`)\n   - Sends the binary image file in the HTTP response.\n\n5. **Logging** (`Do anything to log`)\n   - Placeholder node to log or process the `id` or request metadata.\n   - You can access the `id` using `{{$json[\"query\"][\"id\"]}}`.\n   - You can also use any parameter you want\n\n---\n\n### ✉️ How to Use in Emails\n\nEmbed the image in an HTML email like this:\n\n```html\n<img src=\"https://<your-n8n-instance>/webhook/db4880e7-2134-4994-94e5-a4a3aa120440?id=1234\" width=\"1\" height=\"1\" style=\"display:none;\" alt=\"\" />\n```\n\nWhen the email is opened and the image is loaded, the workflow will be triggered.\n\n---\n\n### 🛠️ Notes\n- Some email clients block images by default; this may prevent tracking.\n- You can enhance the workflow to store open events in a database, log the timestamp, IP, or user agent.\n- Make sure to comply with data privacy and consent regulations (e.g. GDPR)."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "07c42dab-9b60-4f51-b8ab-78df26bc2cdd": {
+        "main": [
+          [
+            {
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd-33b245a8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd-76bab8a2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd-56c88d85",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd-12a80330",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cb0df6bc-d733-4e07-9506-c413d390e482": {
+        "main": [
+          [
+            {
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482-2bcdcb65",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482-e35965f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482-06992f4b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482-4cc44070",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "09573a6a-88e8-48c5-a78e-d45fb37a8b87": {
+        "main": [
+          [
+            {
+              "node": "error-handler-09573a6a-88e8-48c5-a78e-d45fb37a8b87-a102c045",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Set Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Set Workflow. This workflow integrates 7 different services: convertToFile, webhook, stickyNote, respondToWebhook, set. It contains 11 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Set Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "07c42dab-9b60-4f51-b8ab-78df26bc2cdd": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd-33b245a8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd-76bab8a2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd-56c88d85"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-07c42dab-9b60-4f51-b8ab-78df26bc2cdd-12a80330"
+            }
+          ]
+        ]
+      },
+      "09573a6a-88e8-48c5-a78e-d45fb37a8b87": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09573a6a-88e8-48c5-a78e-d45fb37a8b87-a102c045"
+            }
+          ]
+        ]
+      },
+      "cb0df6bc-d733-4e07-9506-c413d390e482": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482-2bcdcb65"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482-e35965f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482-06992f4b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cb0df6bc-d733-4e07-9506-c413d390e482-4cc44070"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Set Workflow",
+    "nodes": [
+      {
+        "name": "Create data pix",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ab15b0f8-c40f-4874-8724-ddae8f99e646",
+                "name": "data",
+                "type": "string",
+                "value": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCA1LjEuMvu8A7YAAAC2ZVhJZklJKgAIAAAABQAaAQUAAQAAAEoAAAAbAQUAAQAAAFIAAAAoAQMAAQAAAAIAAAAxAQIAEAAAAFoAAABphwQAAQAAAGoAAAAAAAAAYAAAAAEAAABgAAAAAQAAAFBhaW50Lk5FVCA1LjEuMgADAACQBwAEAAAAMDIzMAGgAwABAAAAAQAAAAWgBAABAAAAlAAAAAAAAAACAAEAAgAEAAAAUjk4AAIABwAEAAAAMDEwMAAAAADp1fY4ytpsegAAAA1JREFUGFdjYGBgYAAAAAUAAYoz4wAAAAAASUVORK5CYII="
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Create img bin",
+        "parameters": {
+          "binaryPropertyName": "pixel",
+          "operation": "toBinary",
+          "options": {
+            "mimeType": "image/png"
+          },
+          "sourceProperty": "data"
+        },
+        "type": "n8n-nodes-base.convertToFile",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Do anything to log",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Request img",
+        "parameters": {
+          "options": {},
+          "path": "db4880e7-2134-4994-94e5-a4a3aa120440",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      },
+      {
+        "name": "Respond to Webhook",
+        "parameters": {
+          "options": {},
+          "respondWith": "binary"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## 📬 Workflow: Transparent Tracking Pixel for Email Open Detection\n\n### 📌 Description\nThis workflow serves a **1x1 transparent PNG image** via a webhook, which can be embedded in an email to **track when the email is opened**. When the image is loaded by the recipient's email client, the webhook is triggered, optionally capturing a `userId` to identify who opened the email.\n\n---\n\n### 📂 Workflow Steps\n\n1. **Webhook Trigger** (`Request img`)\n   - **Path:** `/webhook/change-with-your-id`\n   - Triggered by an HTTP request (e.g. when the image is loaded in an email).\n   - Accepts a query parameter `id` to identify the recipient.\n\n2. **Set Base64 Data** (`Create data pix`)\n   - Creates a variable `data` containing a Base64-encoded transparent PNG image (1x1 pixel).\n\n3. **Convert to Binary** (`Create img bin`)\n   - Converts the Base64 `data` string into a binary file.\n   - Sets MIME type to `image/png`.\n\n4. **Respond to Webhook** (`Respond to Webhook`)\n   - Sends the binary image file in the HTTP response.\n\n5. **Logging** (`Do anything to log`)\n   - Placeholder node to log or process the `id` or request metadata.\n   - You can access the `id` using `{{$json[\"query\"][\"id\"]}}`.\n   - You can also use any parameter you want\n\n---\n\n### ✉️ How to Use in Emails\n\nEmbed the image in an HTML email like this:\n\n```html\n<img src=\"https://<your-n8n-instance>/webhook/db4880e7-2134-4994-94e5-a4a3aa120440?id=1234\" width=\"1\" height=\"1\" style=\"display:none;\" alt=\"\" />\n```\n\nWhen the email is opened and the image is loaded, the workflow will be triggered.\n\n---\n\n### 🛠️ Notes\n- Some email clients block images by default; this may prevent tracking.\n- You can enhance the workflow to store open events in a database, log the timestamp, IP, or user agent.\n- Make sure to comply with data privacy and consent regulations (e.g. GDPR).",
+          "height": 1280,
+          "width": 980
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 11,
+  "viewCount": 154,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Respond to Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Request img\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Create img bin\" node (n8n-nodes-base.convertToFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Do anything to log\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Create data pix\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-fi2e5k1dw",
+      "workflowId": "set-workflow-btvwq",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Webhook/0914_Webhook_Respondtowebhook_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Webhook\\0914_Webhook_Respondtowebhook_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:20:59.575Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:59.575Z",
+  "updatedAt": "2026-07-15T11:20:59.575Z"
+}

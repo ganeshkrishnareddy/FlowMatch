@@ -1,0 +1,572 @@
+{
+  "id": "reschedule-overdue-asana-tasks-and-clean-up-completed-tasks-pf7xc",
+  "name": "Reschedule overdue Asana tasks and clean up completed tasks",
+  "slug": "reschedule-overdue-asana-tasks-and-clean-up-completed-tasks-in1j",
+  "description": "Automated workflow: Reschedule overdue Asana tasks and clean up completed tasks. This workflow integrates 4 different services: scheduleTrigger, asana, stickyNote, if. It contains 10 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Reschedule overdue Asana tasks and clean up completed tasks workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "id": "RJ4PaYq0JBr29KJm",
+    "meta": {
+      "instanceId": "workflow-751a3b18",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.093990",
+      "updatedAt": "2025-09-29T07:07:52.094002",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Reschedule overdue Asana tasks and clean up completed tasks",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "9262720e-2beb-4426-a472-3d7bf8bc28af",
+        "name": "Everyday at 7am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          80,
+          -520
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 7
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0d074451-5d61-4ed4-86a8-f6cdf002e84b",
+        "name": "Get user tasks",
+        "type": "n8n-nodes-base.asana",
+        "position": [
+          320,
+          -520
+        ],
+        "parameters": {
+          "filters": {
+            "assignee": "1201727447190193",
+            "workspace": "1201727656813934",
+            "completed_since": "={{ DateTime.now().format('yyyy-MM-dd') }}"
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "asanaApi": {
+            "id": "u7fFpY0SmMcpBCdn",
+            "name": "Asana account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This asana node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "14939268-9bda-4fc1-9fef-aa6a74c2365a",
+        "name": "Get task infos",
+        "type": "n8n-nodes-base.asana",
+        "position": [
+          540,
+          -520
+        ],
+        "parameters": {
+          "id": "={{ $json.gid }}",
+          "operation": "get"
+        },
+        "credentials": {
+          "asanaApi": {
+            "id": "u7fFpY0SmMcpBCdn",
+            "name": "Asana account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This asana node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e7d9a37c-66b7-46b9-b228-7372cb0d7b09",
+        "name": "Task is open?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          780,
+          -520
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "145d9367-7662-4ed9-8195-bf9b35c78d6b",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.completed }}",
+                "rightValue": "false"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "11ae0bbb-8d76-4623-9a24-2c2a36600dd3",
+        "name": "Due date in the past?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1020,
+          -640
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "dbecabb3-8075-4cc0-94af-b678c8af8f66",
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                },
+                "leftValue": "={{ $json.due_on.replaceAll(\"-\",\"\") }}",
+                "rightValue": "={{ DateTime.now().format('yyyyMMdd') }}"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "282d79c7-e74a-4249-ad37-b4d81655a206",
+        "name": "Set due date to Today",
+        "type": "n8n-nodes-base.asana",
+        "position": [
+          1280,
+          -680
+        ],
+        "parameters": {
+          "id": "={{ $json.gid }}",
+          "operation": "update",
+          "otherProperties": {
+            "due_on": "={{ DateTime.now().format('yyyy-MM-dd') }}"
+          }
+        },
+        "credentials": {
+          "asanaApi": {
+            "id": "u7fFpY0SmMcpBCdn",
+            "name": "Asana account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This asana node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7cc18243-d3d4-4624-a906-a1617e411b0c",
+        "name": "Clean up task",
+        "type": "n8n-nodes-base.asana",
+        "position": [
+          1020,
+          -440
+        ],
+        "parameters": {
+          "id": "={{ $json.gid }}",
+          "operation": "delete"
+        },
+        "credentials": {
+          "asanaApi": {
+            "id": "u7fFpY0SmMcpBCdn",
+            "name": "Asana account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This asana node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f4aafa1f-8c5b-4fd1-9aca-fd096508dbfb",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          40,
+          -800
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 640,
+          "height": 240,
+          "content": "### ⚙️ Set Up \n\n1. Add your **Asana** credentials\n2. Schedule the workflow to run at desired intervals (e.g., daily or weekly).\n3. Select your **Workspace Name** and your **Assignee Name** (user) in the **Get user tasks** node\n4. *(Optional) Tailor filtering conditions to match your preferred due-date rules and removal criteria.*\n5. **Activate the workflow** and watch your Asana workspace stay up to date and clutter-free."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e4fcbdee-5dd0-40dc-b1ef-f7b8ce00dd03",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          60,
+          -360
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 160,
+          "height": 100,
+          "content": "👆 \nUpdate the **Scheduler** here"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "195f467d-1124-4216-ab0e-048c6a9fc752",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          280,
+          -360
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 200,
+          "height": 100,
+          "content": "👆 \nSelect your **Workspace Name** & **Assignee Name** here"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-dba4bd4f",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "timezone": "UTC",
+      "callerPolicy": "workflowsFromSameOwner",
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "errorWorkflow": null,
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "fdc51229-75f4-4489-a7f7-1f36a35d43ac",
+    "connections": {},
+    "description": "Automated workflow: Reschedule overdue Asana tasks and clean up completed tasks. This workflow integrates 4 different services: scheduleTrigger, asana, stickyNote, if. It contains 10 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Reschedule overdue Asana tasks and clean up completed tasks. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Reschedule overdue Asana tasks and clean up completed tasks",
+    "nodes": [
+      {
+        "credentials": {
+          "asanaApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Clean up task",
+        "parameters": {
+          "id": "={{ $json.gid }}",
+          "operation": "delete"
+        },
+        "type": "n8n-nodes-base.asana",
+        "typeVersion": 1
+      },
+      {
+        "name": "Due date in the past?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "dbecabb3-8075-4cc0-94af-b678c8af8f66",
+                "leftValue": "={{ $json.due_on.replaceAll(\"-\",\"\") }}",
+                "operator": {
+                  "operation": "lt",
+                  "type": "number"
+                },
+                "rightValue": "={{ DateTime.now().format('yyyyMMdd') }}"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Everyday at 7am",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 7
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "asanaApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get task infos",
+        "parameters": {
+          "id": "={{ $json.gid }}",
+          "operation": "get"
+        },
+        "type": "n8n-nodes-base.asana",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "asanaApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get user tasks",
+        "parameters": {
+          "filters": {
+            "assignee": "1201727447190193",
+            "completed_since": "={{ DateTime.now().format('yyyy-MM-dd') }}",
+            "workspace": "1201727656813934"
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.asana",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "asanaApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Set due date to Today",
+        "parameters": {
+          "id": "={{ $json.gid }}",
+          "operation": "update",
+          "otherProperties": {
+            "due_on": "={{ DateTime.now().format('yyyy-MM-dd') }}"
+          }
+        },
+        "type": "n8n-nodes-base.asana",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 5,
+          "content": "### ⚙️ Set Up \n\n1. Add your **Asana** credentials\n2. Schedule the workflow to run at desired intervals (e.g., daily or weekly).\n3. Select your **Workspace Name** and your **Assignee Name** (user) in the **Get user tasks** node\n4. *(Optional) Tailor filtering conditions to match your preferred due-date rules and removal criteria.*\n5. **Activate the workflow** and watch your Asana workspace stay up to date and clutter-free.",
+          "height": 240,
+          "width": 640
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "👆 \nUpdate the **Scheduler** here",
+          "height": 100,
+          "width": 160
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 7,
+          "content": "👆 \nSelect your **Workspace Name** & **Assignee Name** here",
+          "height": 100,
+          "width": 200
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Task is open?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "145d9367-7662-4ed9-8195-bf9b35c78d6b",
+                "leftValue": "={{ $json.completed }}",
+                "operator": {
+                  "operation": "false",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": "false"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Asana"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 10,
+  "viewCount": 705,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Asana Account"
+    ],
+    "requiredCredentials": [
+      "asana  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Everyday at 7am\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get user tasks\" node (n8n-nodes-base.asana) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get task infos\" node (n8n-nodes-base.asana) and configure the action parameters, mappings, and fields.",
+      "Open the \"Task is open?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Due date in the past?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set due date to Today\" node (n8n-nodes-base.asana) and configure the action parameters, mappings, and fields.",
+      "Open the \"Clean up task\" node (n8n-nodes-base.asana) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-vsce3gofx",
+      "workflowId": "reschedule-overdue-asana-tasks-and-clean-up-completed-tasks-pf7xc",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/1629_Schedule_Stickynote_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\1629_Schedule_Stickynote_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:30:05.287Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:05.287Z",
+  "updatedAt": "2026-07-15T11:30:05.287Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

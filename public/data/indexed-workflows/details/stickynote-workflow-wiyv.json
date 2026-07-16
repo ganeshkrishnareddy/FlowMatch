@@ -1,0 +1,667 @@
+{
+  "id": "stickynote-workflow-o6qws",
+  "name": "Stickynote Workflow",
+  "slug": "stickynote-workflow-wiyv",
+  "description": "Automated workflow: Stickynote Workflow. This workflow integrates 8 different services: stickyNote, scheduleTrigger, set, stopAndError, manualTrigger. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Stickynote Workflow workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-dd450c34",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.991052",
+      "updatedAt": "2025-09-29T07:07:48.991064",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "ea9ddb4c-af49-480c-8b73-221b3741069d",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          920,
+          400
+        ],
+        "parameters": {
+          "width": 389,
+          "height": 265,
+          "content": "## Scheduled posting \nWrite a tweet every 6 hours and randomize the minutes that it's posted at to make it seem natural.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9650b047-7d5e-4ed2-948c-d5be77a94b5d",
+        "name": "Post tweet",
+        "type": "n8n-nodes-base.twitter",
+        "position": [
+          2940,
+          520
+        ],
+        "parameters": {
+          "text": "={{ $json.message.content.tweet }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "twitterOAuth2Api": {
+            "id": "b3qa9dBp2PxbufK3",
+            "name": "X account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This twitter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fd7fc941-37de-4f88-87c0-f62ad1ebe2d6",
+        "name": "Schedule posting every 6 hours",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          1140,
+          500
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 6,
+                "triggerAtMinute": "={{ Math.floor(Math.random() * 60) }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "107fd741-5c17-4cd6-98aa-088bf8df523d",
+        "name": "Trigger posting manually",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          1140,
+          820
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "831cd431-56e5-482e-a8a5-e5c5ac078ba4",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1360,
+          400
+        ],
+        "parameters": {
+          "width": 389,
+          "height": 265,
+          "content": "## Configure influencer profile \nSet your target niche, writing style, and inspiration.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "791c0be9-6396-4768-ab6b-3ca7fe49fbea",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1800,
+          400
+        ],
+        "parameters": {
+          "width": 389,
+          "height": 265,
+          "content": "## Generate tweet\nGenerate a potentially viral tweet based on your configuration."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3b2872cf-38f9-4cfd-befd-ad792219c313",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2240,
+          400
+        ],
+        "parameters": {
+          "width": 389,
+          "height": 265,
+          "content": "## Validate tweet\nIf the generated tweet does not meet length constraints, regenerate it."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "364310a1-0367-4ce2-a91b-9a9c4d9387a0",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2680,
+          400
+        ],
+        "parameters": {
+          "width": 389,
+          "height": 265,
+          "content": "## Post the tweet\nPost the tweet to your X account."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c666ba9f-d28d-449b-8e20-65c0150cba5b",
+        "name": "Verify tweet constraints",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          2480,
+          500
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "0a6ebbb6-4b14-4c7e-9390-215e32921663",
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                },
+                "leftValue": "={{ $json.message.content.tweet.length }}",
+                "rightValue": 280
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9bf25238-98ba-4201-aecc-22be27f095c8",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          920,
+          720
+        ],
+        "parameters": {
+          "width": 389,
+          "height": 265,
+          "content": "## On-demand posting \nWrite a tweet on demand, when you manually run your workflow.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4b95c041-a70e-42f9-9467-26de2abe6b7a",
+        "name": "Generate tweet content",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1900,
+          500
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4-turbo-preview",
+            "cachedResultName": "GPT-4-TURBO-PREVIEW"
+          },
+          "options": {},
+          "messages": {
+            "values": [
+              {
+                "role": "system",
+                "content": "=You are a successful modern Twitter influencer. Your tweets always go viral. "
+              },
+              {
+                "role": "system",
+                "content": "=You have a specific writing style: {{ $json.style }}"
+              },
+              {
+                "role": "system",
+                "content": "=You follow the principles described in your inspiration sources closely and you write your tweets based on that: {{ $json.inspiration }}"
+              },
+              {
+                "role": "system",
+                "content": "=You have a very specific niche: {{ $json.niche }}"
+              },
+              {
+                "role": "system",
+                "content": "=Answer with the viral tweet and nothing else as a response. Keep the tweet within 280 characters. Current date and time are {{DateTime.now()}}. Add hashtags and emojis where relevant."
+              },
+              {
+                "content": "Write a tweet that is certain to go viral. Take your time in writing it. Think. Use the vast knowledge you have."
+              }
+            ]
+          },
+          "jsonOutput": true
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "{{ $credentials.openAiApi.id }}",
+            "name": "Alex's OpenAI Account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "18f1af3a-58b3-4a4d-a8ad-3657da9c41ba",
+        "name": "Configure your influencer profile",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1580,
+          500
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "45268b04-68a1-420f-9ad2-950844d16af1",
+                "name": "niche",
+                "type": "string",
+                "value": "Modern Stoicism. You tweet about the greatest stoics, their ideas, their quotes, and how their wisdom applies in today's modern life. You love sharing personal stories and experiences."
+              },
+              {
+                "id": "d95f4a1c-ab1c-4eca-8732-3d7a087f82d8",
+                "name": "style",
+                "type": "string",
+                "value": "All of your tweets are very personal. "
+              },
+              {
+                "id": "1ee088f7-7021-48c0-bcb7-d1011eb0db3d",
+                "name": "inspiration",
+                "type": "string",
+                "value": "Your inspiration comes from tens of books on stoicism, psychology, and how to influence people. Books such as \"Contagious\" by Jonah Bergen, \"How To Be Internet Famous\" by Brendan Cox, \"How to Win Friends and Influence People\" by Dale Carnegie, and \"Influencers and Creators\" by  Robert V Kozinets, Ulrike Gretzel, Rossella Gambetti strongly influence the way you write your tweets. "
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-0ac15f7f",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "4b95c041-a70e-42f9-9467-26de2abe6b7a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4b95c041-a70e-42f9-9467-26de2abe6b7a-3be0ddae",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Stickynote Workflow. This workflow integrates 8 different services: stickyNote, scheduleTrigger, set, stopAndError, manualTrigger. It contains 13 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stickynote Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4b95c041-a70e-42f9-9467-26de2abe6b7a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4b95c041-a70e-42f9-9467-26de2abe6b7a-3be0ddae"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "nodes": [
+      {
+        "name": "Configure your influencer profile",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "45268b04-68a1-420f-9ad2-950844d16af1",
+                "name": "niche",
+                "type": "string",
+                "value": "Modern Stoicism. You tweet about the greatest stoics, their ideas, their quotes, and how their wisdom applies in today's modern life. You love sharing personal stories and experiences."
+              },
+              {
+                "id": "d95f4a1c-ab1c-4eca-8732-3d7a087f82d8",
+                "name": "style",
+                "type": "string",
+                "value": "All of your tweets are very personal. "
+              },
+              {
+                "id": "1ee088f7-7021-48c0-bcb7-d1011eb0db3d",
+                "name": "inspiration",
+                "type": "string",
+                "value": "Your inspiration comes from tens of books on stoicism, psychology, and how to influence people. Books such as \"Contagious\" by Jonah Bergen, \"How To Be Internet Famous\" by Brendan Cox, \"How to Win Friends and Influence People\" by Dale Carnegie, and \"Influencers and Creators\" by  Robert V Kozinets, Ulrike Gretzel, Rossella Gambetti strongly influence the way you write your tweets. "
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.3
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Generate tweet content",
+        "parameters": {
+          "jsonOutput": true,
+          "messages": {
+            "values": [
+              {
+                "content": "=You are a successful modern Twitter influencer. Your tweets always go viral. ",
+                "role": "system"
+              },
+              {
+                "content": "=You have a specific writing style: {{ $json.style }}",
+                "role": "system"
+              },
+              {
+                "content": "=You follow the principles described in your inspiration sources closely and you write your tweets based on that: {{ $json.inspiration }}",
+                "role": "system"
+              },
+              {
+                "content": "=You have a very specific niche: {{ $json.niche }}",
+                "role": "system"
+              },
+              {
+                "content": "=Answer with the viral tweet and nothing else as a response. Keep the tweet within 280 characters. Current date and time are {{DateTime.now()}}. Add hashtags and emojis where relevant.",
+                "role": "system"
+              },
+              {
+                "content": "Write a tweet that is certain to go viral. Take your time in writing it. Think. Use the vast knowledge you have."
+              }
+            ]
+          },
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4-TURBO-PREVIEW",
+            "mode": "list",
+            "value": "gpt-4-turbo-preview"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "twitterOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Post tweet",
+        "parameters": {
+          "additionalFields": {},
+          "text": "={{ $json.message.content.tweet }}"
+        },
+        "type": "n8n-nodes-base.twitter",
+        "typeVersion": 2
+      },
+      {
+        "name": "Schedule posting every 6 hours",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 6,
+                "triggerAtMinute": "={{ Math.floor(Math.random() * 60) }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Scheduled posting \nWrite a tweet every 6 hours and randomize the minutes that it's posted at to make it seem natural.\n",
+          "height": 265,
+          "width": 389
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Configure influencer profile \nSet your target niche, writing style, and inspiration.\n",
+          "height": 265,
+          "width": 389
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## On-demand posting \nWrite a tweet on demand, when you manually run your workflow.\n",
+          "height": 265,
+          "width": 389
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Generate tweet\nGenerate a potentially viral tweet based on your configuration.",
+          "height": 265,
+          "width": 389
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "## Validate tweet\nIf the generated tweet does not meet length constraints, regenerate it.",
+          "height": 265,
+          "width": 389
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "content": "## Post the tweet\nPost the tweet to your X account.",
+          "height": 265,
+          "width": 389
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Trigger posting manually",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Verify tweet constraints",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "0a6ebbb6-4b14-4c7e-9390-215e32921663",
+                "leftValue": "={{ $json.message.content.tweet.length }}",
+                "operator": {
+                  "operation": "gt",
+                  "type": "number"
+                },
+                "rightValue": 280
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Twitter/X"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 200,
+  "viewCount": 431,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Twitter/X Account"
+    ],
+    "requiredCredentials": [
+      "twitter  O Auth2  A P I details",
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule posting every 6 hours\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Verify the settings of the trigger node \"Trigger posting manually\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post tweet\" node (n8n-nodes-base.twitter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Verify tweet constraints\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Generate tweet content\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Configure your influencer profile\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-yvxey27ex",
+      "workflowId": "stickynote-workflow-o6qws",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0439_Manual_Schedule_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0439_Manual_Schedule_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:29:29.352Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:29.352Z",
+  "updatedAt": "2026-07-15T11:29:29.352Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

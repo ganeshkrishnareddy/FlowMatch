@@ -1,0 +1,441 @@
+{
+  "id": "exponential-backoff-for-google-apis-u1iv0",
+  "name": "Exponential Backoff for Google APIs",
+  "slug": "exponential-backoff-for-google-apis-qva2",
+  "description": "Automated workflow: Exponential Backoff for Google APIs. This workflow integrates 8 different services: stickyNote, wait, code, stopAndError, manualTrigger. It contains 9 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Exponential Backoff for Google APIs workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "2NhqmUqW3KruEkaE",
+    "meta": {
+      "instanceId": "workflow-b66f9786",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:55.424212",
+      "updatedAt": "2025-09-29T07:07:55.424224",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Exponential Backoff for Google APIs",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "5d6b1730-33c5-401c-b73f-2b7ea8eedfe3",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -580,
+          -80
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6726b630-597c-46cf-8839-75cd80108f2f",
+        "name": "Exponential Backoff",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          160,
+          120
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Define the retry count (coming from a previous node or set manually)\nconst retryCount = $json[\"retryCount\"] || 0;  // If not present, default to 0\nconst maxRetries = 5;  // Define the maximum number of retries\nconst initialDelay = 1;  // Initial delay in seconds (1 second)\n\n// If the retry count is less than the max retries, calculate the delay\nif (retryCount < maxRetries) {\n    const currentDelayInSeconds = initialDelay * Math.pow(2, retryCount);  // Exponential backoff delay in seconds\n    \n    // Log the delay time for debugging\n    console.log(`Waiting for ${currentDelayInSeconds} seconds before retry...`);\n    \n    return {\n        json: {\n            retryCount: retryCount + 1,  // Increment retry count\n            waitTimeInSeconds: currentDelayInSeconds, // Pass the delay time in seconds\n            status: 'retrying',\n        }\n    };\n} else {\n    // If max retries are exceeded, return a failure response\n    return {\n        json: {\n            error: 'Max retries exceeded',\n            retryCount: retryCount,\n            status: 'failed'\n        }\n    };\n}\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "605b8ff0-aa19-42dd-8dbb-aa12380ac4bc",
+        "name": "Stop and Error",
+        "type": "n8n-nodes-base.stopAndError",
+        "position": [
+          760,
+          120
+        ],
+        "parameters": {
+          "errorMessage": "Google Sheets API Limit has been triggered and the workflow has stopped"
+        },
+        "typeVersion": 1,
+        "notes": "This stopAndError node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "97818e8b-e0cc-4a49-8797-43e02535740f",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          -360,
+          -80
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0583eabd-bd97-4330-8a38-b2aed3a90c37",
+        "name": "Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "onError": "continueErrorOutput",
+        "position": [
+          -120,
+          20
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          },
+          "authentication": "{{ $credentials.serviceAccount }}"
+        },
+        "credentials": {
+          "googleApi": {
+            "id": "lm7dPHYumCy6sP6k",
+            "name": "AlexK1919 Google Service"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0d8023f8-f7ac-4303-b18e-821690cc9f94",
+        "name": "Wait",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          360,
+          120
+        ],
+        "webhookId": "f1651aa1-6497-4496-9e07-240dcf1852f3",
+        "parameters": {
+          "amount": "={{ $json[\"waitTime\"] }}"
+        },
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "72e0001e-f99b-4d57-9006-4a4dd5d3d8d5",
+        "name": "Check Max Retries",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          560,
+          120
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "51e191cb-af20-423b-9303-8523caa4ae0d",
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                },
+                "leftValue": "={{ $('Exponential Backoff').item.json[\"retryCount\"] }}",
+                "rightValue": 10
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2ea14bb0-4313-4595-811d-729ca6d37420",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          100,
+          -80
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 820,
+          "height": 460,
+          "content": "# Exponential Backoff for Google APIs \n## Connect these nodes to any Google API node such as the Google Sheets node example in this workflow"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-31d8d3e1",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "729e3a54-6238-4e4c-833e-8e37dba16dbb",
+    "connections": {
+      "0583eabd-bd97-4330-8a38-b2aed3a90c37": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0583eabd-bd97-4330-8a38-b2aed3a90c37-b221ef17",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Exponential Backoff for Google APIs. This workflow integrates 8 different services: stickyNote, wait, code, stopAndError, manualTrigger. It contains 9 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Exponential Backoff for Google APIs. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0583eabd-bd97-4330-8a38-b2aed3a90c37": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0583eabd-bd97-4330-8a38-b2aed3a90c37-b221ef17"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Exponential Backoff for Google APIs",
+    "nodes": [
+      {
+        "name": "Check Max Retries",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "51e191cb-af20-423b-9303-8523caa4ae0d",
+                "leftValue": "={{ $('Exponential Backoff').item.json[\"retryCount\"] }}",
+                "operator": {
+                  "operation": "gt",
+                  "type": "number"
+                },
+                "rightValue": 10
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Exponential Backoff",
+        "parameters": {
+          "jsCode": "// Define the retry count (coming from a previous node or set manually)\nconst retryCount = $json[\"retryCount\"] || 0;  // If not present, default to 0\nconst maxRetries = 5;  // Define the maximum number of retries\nconst initialDelay = 1;  // Initial delay in seconds (1 second)\n\n// If the retry count is less than the max retries, calculate the delay\nif (retryCount < maxRetries) {\n    const currentDelayInSeconds = initialDelay * Math.pow(2, retryCount);  // Exponential backoff delay in seconds\n    \n    // Log the delay time for debugging\n    console.log(`Waiting for ${currentDelayInSeconds} seconds before retry...`);\n    \n    return {\n        json: {\n            retryCount: retryCount + 1,  // Increment retry count\n            waitTimeInSeconds: currentDelayInSeconds, // Pass the delay time in seconds\n            status: 'retrying',\n        }\n    };\n} else {\n    // If max retries are exceeded, return a failure response\n    return {\n        json: {\n            error: 'Max retries exceeded',\n            retryCount: retryCount,\n            status: 'failed'\n        }\n    };\n}\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Sheets",
+        "parameters": {
+          "authentication": "{{ $credentials.serviceAccount }}",
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Sheet1"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 3,
+          "content": "# Exponential Backoff for Google APIs \n## Connect these nodes to any Google API node such as the Google Sheets node example in this workflow",
+          "height": 460,
+          "width": 820
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Stop and Error",
+        "parameters": {
+          "errorMessage": "Google Sheets API Limit has been triggered and the workflow has stopped"
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wait",
+        "parameters": {
+          "amount": "={{ $json[\"waitTime\"] }}"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 104,
+  "viewCount": 738,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "google  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Stop and Error\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Wait\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check Max Retries\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-1vt9vpced",
+      "workflowId": "exponential-backoff-for-google-apis-u1iv0",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stopanderror/0743_Stopanderror_Wait_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stopanderror\\0743_Stopanderror_Wait_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:20:06.419Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:06.419Z",
+  "updatedAt": "2026-07-15T11:20:06.419Z"
+}

@@ -1,0 +1,786 @@
+{
+  "id": "scheduletrigger-workflow-pxisk",
+  "name": "Scheduletrigger Workflow",
+  "slug": "scheduletrigger-workflow-hlja",
+  "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 7 different services: stickyNote, httpRequest, code, scheduleTrigger, set. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Scheduletrigger Workflow workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "396bb28b-e40d-4bea-aa80-4abd04db045a",
+        "name": "Friday 8pm",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          100,
+          120
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  5
+                ],
+                "triggerAtHour": 20
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "993f0d31-5639-4cea-b2f8-d1a41ecdeb83",
+        "name": "Create Meal Plan",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1080,
+          120
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          },
+          "jsonBody": "={{ $json }}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oVwF1hVdy3Srvi9P",
+            "name": "Mealie Header Auth"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ad53512d-7246-49f4-a86b-f258b7c1c47e",
+        "name": "When clicking \"Test workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          100,
+          320
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c0d1d7e0-9411-4e6a-871a-0374b8a9f5db",
+        "name": "Get Recipes",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          640,
+          120
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendQuery": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "perPage",
+                "value": "100"
+              },
+              {
+                "name": "categories",
+                "value": "={{ $json.mealieCategoryId }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oVwF1hVdy3Srvi9P",
+            "name": "Mealie Header Auth"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2f9757fc-77f5-4bda-ae2e-7088ea5c114d",
+        "name": "Config",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          380,
+          120
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cd2665dd-b505-41e4-936d-cfa2de7bd09b",
+                "name": "numberOfRecipes",
+                "type": "number",
+                "value": 5
+              },
+              {
+                "id": "e09da5c5-3f0d-4cd3-909d-e3df2888abde",
+                "name": "offsetPlanDays",
+                "type": "number",
+                "value": 3
+              },
+              {
+                "id": "80e95139-83df-45ae-99a0-fc50d3e9475f",
+                "name": "mealieCategoryId",
+                "type": "string",
+                "value": "6ec172b7-a87d-4877-8fe3-34cecc20f2c5"
+              },
+              {
+                "id": "f511e874-c373-4648-9e49-120367474d6d",
+                "name": "mealieBaseUrl",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fed805ea-0580-444d-8312-a68b25e91bbd",
+        "name": "Generate Random Items",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          860,
+          120
+        ],
+        "parameters": {
+          "jsCode": "const numberOfRecipes = $('Config').first().json.numberOfRecipes;\nconst offsetPlanDays = $('Config').first().json.offsetPlanDays;\nconst items = $input.first().json.items;\n\nlet planFirstDate = new Date();\nplanFirstDate.setDate(planFirstDate.getDate() + offsetPlanDays);\n\nconst recipeList = [];\nconst randomNums = [];\nlet currentItem = 0;\n\nwhile (recipeList.length < numberOfRecipes) {\n  const randomNum = Math.floor(Math.random() * Math.floor(items.length));\n\n  if (!randomNums.includes(randomNum)) {\n    const thisRecipe = items[randomNum];\n\n    const newDate = new Date(planFirstDate);\n    newDate.setDate(planFirstDate.getDate() + currentItem);\n  \n    const planDate = [\n      newDate.getFullYear(),\n      ('0' + (newDate.getMonth() + 1)).slice(-2),\n      ('0' + newDate.getDate()).slice(-2)\n    ].join('-');\n  \n    const planDay = {\n      \"date\": planDate,\n      \"entryType\": \"dinner\",\n      \"recipeId\": thisRecipe.id,\n      \"name\": thisRecipe.name\n    };\n\n    currentItem++;\n    recipeList.push(planDay);\n    randomNums.push(randomNum);\n  }\n}\n\nreturn recipeList;"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f440ce9d-cc27-4982-a0bd-b0ce2e5217d9",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          40,
+          -60
+        ],
+        "parameters": {
+          "color": 4,
+          "height": 340,
+          "content": "## Trigger\nSet the trigger to run when you like"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2bac2f08-2969-4f47-9fce-0e7de416cd09",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          280,
+          -60
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 300,
+          "height": 340,
+          "content": "## Update this Config\nSet the base Url of your Mealie instance\nSet number of recipes to generate and number of days to offset the plan (0 will start today).\nGrab a category id from Mealie (or leave blank for all categories)"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a2850e39-c25f-4210-8f9e-a657c0c63bf5",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          40,
+          -280
+        ],
+        "parameters": {
+          "width": 540,
+          "height": 220,
+          "content": "## Get started\n* Set up a credential for your Mealie API token\n* Apply the credential to the 2 Http request nodes\n* Set schedule trigger and desired config"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "20d7301c-8946-45c3-8f5f-fbe2fc80cf37",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          580,
+          -60
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 660,
+          "height": 340,
+          "content": "## Workflow logic\n* Get all recipes from Mealie (within category if supplied)\n* Randomly pick out the number set in the config\n* Create dinner meal plans for the upcoming days"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "993f0d31-5639-4cea-b2f8-d1a41ecdeb83": {
+        "main": [
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-3673e275",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-5fd7135b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-86eed3e7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-6605f994",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-9b17eb40",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-d15f35be",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-91e6b118",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-10baeb4a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "c0d1d7e0-9411-4e6a-871a-0374b8a9f5db": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-0ffb318c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-e46023c0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-586659eb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-47708970",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-89504d91",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-54611be6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-ed0107eb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-13231e99",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 7 different services: stickyNote, httpRequest, code, scheduleTrigger, set. It contains 14 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-32a3cfd5",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.637726",
+      "updatedAt": "2025-09-29T07:07:42.637737",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Scheduletrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "993f0d31-5639-4cea-b2f8-d1a41ecdeb83": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-3673e275"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-5fd7135b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-86eed3e7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-6605f994"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-9b17eb40"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-d15f35be"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-91e6b118"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-993f0d31-5639-4cea-b2f8-d1a41ecdeb83-10baeb4a"
+            }
+          ]
+        ]
+      },
+      "c0d1d7e0-9411-4e6a-871a-0374b8a9f5db": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-0ffb318c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-e46023c0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-586659eb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-47708970"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-89504d91"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-54611be6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-ed0107eb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c0d1d7e0-9411-4e6a-871a-0374b8a9f5db-13231e99"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "nodes": [
+      {
+        "name": "Config",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cd2665dd-b505-41e4-936d-cfa2de7bd09b",
+                "name": "numberOfRecipes",
+                "type": "number",
+                "value": 5
+              },
+              {
+                "id": "e09da5c5-3f0d-4cd3-909d-e3df2888abde",
+                "name": "offsetPlanDays",
+                "type": "number",
+                "value": 3
+              },
+              {
+                "id": "80e95139-83df-45ae-99a0-fc50d3e9475f",
+                "name": "mealieCategoryId",
+                "type": "string",
+                "value": "6ec172b7-a87d-4877-8fe3-34cecc20f2c5"
+              },
+              {
+                "id": "f511e874-c373-4648-9e49-120367474d6d",
+                "name": "mealieBaseUrl",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Meal Plan",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "jsonBody": "={{ $json }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Friday 8pm",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  5
+                ],
+                "triggerAtHour": 20
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Generate Random Items",
+        "parameters": {
+          "jsCode": "const numberOfRecipes = $('Config').first().json.numberOfRecipes;\nconst offsetPlanDays = $('Config').first().json.offsetPlanDays;\nconst items = $input.first().json.items;\n\nlet planFirstDate = new Date();\nplanFirstDate.setDate(planFirstDate.getDate() + offsetPlanDays);\n\nconst recipeList = [];\nconst randomNums = [];\nlet currentItem = 0;\n\nwhile (recipeList.length < numberOfRecipes) {\n  const randomNum = Math.floor(Math.random() * Math.floor(items.length));\n\n  if (!randomNums.includes(randomNum)) {\n    const thisRecipe = items[randomNum];\n\n    const newDate = new Date(planFirstDate);\n    newDate.setDate(planFirstDate.getDate() + currentItem);\n  \n    const planDate = [\n      newDate.getFullYear(),\n      ('0' + (newDate.getMonth() + 1)).slice(-2),\n      ('0' + newDate.getDate()).slice(-2)\n    ].join('-');\n  \n    const planDay = {\n      \"date\": planDate,\n      \"entryType\": \"dinner\",\n      \"recipeId\": thisRecipe.id,\n      \"name\": thisRecipe.name\n    };\n\n    currentItem++;\n    recipeList.push(planDay);\n    randomNums.push(randomNum);\n  }\n}\n\nreturn recipeList;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Recipes",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {},
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "perPage",
+                "value": "100"
+              },
+              {
+                "name": "categories",
+                "value": "={{ $json.mealieCategoryId }}"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "## Trigger\nSet the trigger to run when you like",
+          "height": 340
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "## Update this Config\nSet the base Url of your Mealie instance\nSet number of recipes to generate and number of days to offset the plan (0 will start today).\nGrab a category id from Mealie (or leave blank for all categories)",
+          "height": 340,
+          "width": 300
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Get started\n* Set up a credential for your Mealie API token\n* Apply the credential to the 2 Http request nodes\n* Set schedule trigger and desired config",
+          "height": 220,
+          "width": 540
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 7,
+          "content": "## Workflow logic\n* Get all recipes from Mealie (within category if supplied)\n* Randomly pick out the number set in the config\n* Create dinner meal plans for the upcoming days",
+          "height": 340,
+          "width": 660
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking \"Test workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 121,
+  "viewCount": 301,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Friday 8pm\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Verify the settings of the trigger node \"When clicking \"Test workflow\"\".",
+      "Open the \"Create Meal Plan\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Recipes\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Config\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-7zi8sslc6",
+      "workflowId": "scheduletrigger-workflow-pxisk",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0651_Code_Schedule_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0651_Code_Schedule_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:28:54.087Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:54.087Z",
+  "updatedAt": "2026-07-15T11:28:54.087Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

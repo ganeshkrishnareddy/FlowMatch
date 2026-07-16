@@ -1,0 +1,814 @@
+{
+  "id": "upload-post-images-n88wu",
+  "name": "upload-post images",
+  "slug": "upload-post-images-89nu",
+  "description": "Automated workflow: upload-post images. This workflow integrates 6 different services: stickyNote, httpRequest, code, merge, stopAndError. It contains 18 nodes and follows best practices for error handling and security.",
+  "shortDescription": "upload-post images workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "ra8MrqshnzXPy55O",
+    "meta": {
+      "instanceId": "workflow-2232e36f",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:47.033869",
+      "updatedAt": "2025-09-29T07:07:47.033887",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "upload-post images",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "7d899b35-ae00-418a-b890-e318f6d61f7a",
+        "name": "POST TO INSTAGRAM1",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          820,
+          -220
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "title",
+                "value": "title-ig"
+              },
+              {
+                "name": "user",
+                "value": "user_name"
+              },
+              {
+                "name": "platform[]",
+                "value": "instagram"
+              },
+              {
+                "name": "photos[]",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "=photo1"
+              },
+              {
+                "name": "photos[]",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "photo2"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Apikey api"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "025c1aa3-acf2-4211-93e1-9df2182bbf07",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -840,
+          -360
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 1880,
+          "height": 660,
+          "content": "# POST : to Instagram"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7a98a200-3c96-45f8-a4d2-860c74d81c1f",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          220,
+          -120
+        ],
+        "parameters": {},
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d7bd532e-b07a-43f8-9ceb-c4dad685734d",
+        "name": "Change name to photo1",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -100,
+          -220
+        ],
+        "parameters": {
+          "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 1}`]: buffer\n    }\n  };\n});\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f5efe3ce-c8b9-445a-8667-fefc3dc36545",
+        "name": "Change name to photo2",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -100,
+          -20
+        ],
+        "parameters": {
+          "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 2}`]: buffer\n    }\n  };\n});\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4901b1f3-12e7-4f7d-b87a-5582d2319237",
+        "name": "Send as 1 merged file",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          520,
+          -120
+        ],
+        "parameters": {
+          "jsCode": "// Merge all incoming items (each with one binary photoX) into one item\nconst mergedItem = {\n  json: {},\n  binary: {}\n};\n\nfor (const item of items) {\n  // Copy every binary field from each item into mergedItem.binary\n  for (const [key, bin] of Object.entries(item.binary || {})) {\n    mergedItem.binary[key] = bin;\n  }\n}\n\n// Return a single-item array\nreturn [mergedItem];\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "34a88bd7-6302-4f22-aec0-d4318beceffa",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -760,
+          -120
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e710233a-e408-4718-9d1d-3a373fad33b8",
+        "name": "POST TO TIKTOK",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          820,
+          -20
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "title",
+                "value": "title-ig"
+              },
+              {
+                "name": "user",
+                "value": "user_name"
+              },
+              {
+                "name": "platform[]",
+                "value": "tiktok"
+              },
+              {
+                "name": "photos[]",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "=photo1"
+              },
+              {
+                "name": "photos[]",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "photo2"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Apikey api"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "000f92e8-64df-4ebd-a608-d5b0d2e1a5c4",
+        "name": "Get Image 1",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -420,
+          -220
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c",
+        "name": "Get Image 2",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -420,
+          -20
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "d79c90a0-bb65-45b1-9d1b-c6af98f8480b",
+    "connections": {
+      "7d899b35-ae00-418a-b890-e318f6d61f7a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a-f2d10e5e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a-65bba7f0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a-7e62fc88",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a-d0f77b63",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e710233a-e408-4718-9d1d-3a373fad33b8": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8-e0646634",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8-e7c18ab0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8-5a9571ac",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8-b1debb2b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "000f92e8-64df-4ebd-a608-d5b0d2e1a5c4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4-e29baeec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4-cd8ecf91",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4-9dbdcfb2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4-c56dc553",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c-c9fb9321",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c-6206cd68",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c-e01c0f36",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c-7ac0e3e4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: upload-post images. This workflow integrates 6 different services: stickyNote, httpRequest, code, merge, stopAndError. It contains 18 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: upload-post images. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "000f92e8-64df-4ebd-a608-d5b0d2e1a5c4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4-e29baeec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4-cd8ecf91"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4-9dbdcfb2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-000f92e8-64df-4ebd-a608-d5b0d2e1a5c4-c56dc553"
+            }
+          ]
+        ]
+      },
+      "7d899b35-ae00-418a-b890-e318f6d61f7a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a-f2d10e5e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a-65bba7f0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a-7e62fc88"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7d899b35-ae00-418a-b890-e318f6d61f7a-d0f77b63"
+            }
+          ]
+        ]
+      },
+      "e710233a-e408-4718-9d1d-3a373fad33b8": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8-e0646634"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8-e7c18ab0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8-5a9571ac"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e710233a-e408-4718-9d1d-3a373fad33b8-b1debb2b"
+            }
+          ]
+        ]
+      },
+      "f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c-c9fb9321"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c-6206cd68"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c-e01c0f36"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f15f5cd5-9ca5-4ab7-bc66-32f7a3ec1e0c-7ac0e3e4"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "upload-post images",
+    "nodes": [
+      {
+        "name": "Change name to photo1",
+        "parameters": {
+          "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 1}`]: buffer\n    }\n  };\n});\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Change name to photo2",
+        "parameters": {
+          "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 2}`]: buffer\n    }\n  };\n});\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get Image 1",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Get Image 2",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Merge",
+        "parameters": {},
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "POST TO INSTAGRAM1",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "title",
+                "value": "title-ig"
+              },
+              {
+                "name": "user",
+                "value": "user_name"
+              },
+              {
+                "name": "platform[]",
+                "value": "instagram"
+              },
+              {
+                "inputDataFieldName": "=photo1",
+                "name": "photos[]",
+                "parameterType": "formBinaryData"
+              },
+              {
+                "inputDataFieldName": "photo2",
+                "name": "photos[]",
+                "parameterType": "formBinaryData"
+              }
+            ]
+          },
+          "contentType": "multipart-form-data",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Apikey api"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "POST TO TIKTOK",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "title",
+                "value": "title-ig"
+              },
+              {
+                "name": "user",
+                "value": "user_name"
+              },
+              {
+                "name": "platform[]",
+                "value": "tiktok"
+              },
+              {
+                "inputDataFieldName": "=photo1",
+                "name": "photos[]",
+                "parameterType": "formBinaryData"
+              },
+              {
+                "inputDataFieldName": "photo2",
+                "name": "photos[]",
+                "parameterType": "formBinaryData"
+              }
+            ]
+          },
+          "contentType": "multipart-form-data",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Apikey api"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Send as 1 merged file",
+        "parameters": {
+          "jsCode": "// Merge all incoming items (each with one binary photoX) into one item\nconst mergedItem = {\n  json: {},\n  binary: {}\n};\n\nfor (const item of items) {\n  // Copy every binary field from each item into mergedItem.binary\n  for (const [key, bin] of Object.entries(item.binary || {})) {\n    mergedItem.binary[key] = bin;\n  }\n}\n\n// Return a single-item array\nreturn [mergedItem];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "color": 6,
+          "content": "# POST : to Instagram",
+          "height": 660,
+          "width": 1880
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 14,
+  "viewCount": 540,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"POST TO INSTAGRAM1\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"POST TO TIKTOK\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Image 1\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Image 2\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-hjksckk2n",
+      "workflowId": "upload-post-images-n88wu",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1973_HTTP_Manual_Import_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1973_HTTP_Manual_Import_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:15.841Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:15.841Z",
+  "updatedAt": "2026-07-15T11:29:15.841Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

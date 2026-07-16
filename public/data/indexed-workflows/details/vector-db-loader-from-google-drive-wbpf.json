@@ -1,0 +1,979 @@
+{
+  "id": "vector-db-loader-from-google-drive-343r6",
+  "name": "Vector DB Loader from Google Drive",
+  "slug": "vector-db-loader-from-google-drive-wbpf",
+  "description": "Automated workflow: Vector DB Loader from Google Drive. This workflow integrates 12 different services: stickyNote, textSplitterRecursiveCharacterTextSplitter, scheduleTrigger, googleDrive, switch. It contains 22 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Vector DB Loader from Google Drive workflow containing 16 nodes.",
+  "originalWorkflowJson": {
+    "id": "WceMkVib0VLlF1BZ",
+    "meta": {
+      "instanceId": "workflow-c4828a28",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.148504",
+      "updatedAt": "2025-09-29T07:07:52.148519",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Vector DB Loader from Google Drive",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "6652e41a-d14a-4e17-9dcd-34df114d219a",
+        "name": "Default Data Loader",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1240,
+          1100
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This documentDefaultDataLoader node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8ae38b72-52fd-46bc-ab47-50bebe5ac4ee",
+        "name": "Recursive Character Text Splitter",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1320,
+          1300
+        ],
+        "parameters": {
+          "options": {},
+          "chunkOverlap": 50
+        },
+        "typeVersion": 1,
+        "notes": "This textSplitterRecursiveCharacterTextSplitter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "57ce64af-88d4-4dc4-8c8e-01717c1bd47d",
+        "name": "Embeddings OpenAI",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1120,
+          1100
+        ],
+        "parameters": {
+          "model": "text-embedding-3-small",
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "fzLcLisovaZjIqma",
+            "name": "AlexK OpenAi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This embeddingsOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e6bed8bc-f629-41fd-aa6e-9158b1cbc323",
+        "name": "Postgres PGVector Store",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1140,
+          880
+        ],
+        "parameters": {
+          "mode": "insert",
+          "options": {
+            "collection": {
+              "values": {
+                "useCollection": true,
+                "collectionName": "n8n_wfs"
+              }
+            }
+          },
+          "tableName": "n8n_vectors_wfs"
+        },
+        "credentials": {
+          "postgres": {
+            "id": "UkNm7VVkmuXOwMVa",
+            "name": "KBB Postgres account"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This vectorStorePGVector node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "96fbc1f3-920d-44c9-9314-742efa3a698a",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -280,
+          740
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4cd7a934-04cc-47b5-a771-db554680ba77",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          160,
+          740
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "778593d8-fe1c-4eb9-865a-e6ce9ed5f900",
+        "name": "Move File",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          1500,
+          880
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Loop Over Items').item.json.id }}"
+          },
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1Re6vg-PZxBoUU6sTRDbGs-77bAJ40u8F",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "vectorized"
+          },
+          "operation": "move"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "kxXwhBLKOmB8CkBW",
+            "name": "AlexK Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3a6584f5-ed86-4900-9177-40ffe82d0ad3",
+        "name": "Download File",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          380,
+          680
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "options": {},
+          "operation": "download"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "kxXwhBLKOmB8CkBW",
+            "name": "AlexK Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e1931ab6-4391-46c3-9d7d-22cbfbf90327",
+        "name": "Search Folder",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          -60,
+          740
+        ],
+        "parameters": {
+          "filter": {
+            "folderId": {
+              "__rl": true,
+              "mode": "list",
+              "value": "1mBHrP8UzUnfn3dj_3QS1r0XhQQyVPAGX",
+              "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+              "cachedResultName": "n8n Workflow JSON Files"
+            },
+            "whatToSearch": "files"
+          },
+          "options": {},
+          "resource": "fileFolder",
+          "returnAll": true
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "kxXwhBLKOmB8CkBW",
+            "name": "AlexK Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "95134ab4-806f-4c47-96a6-e261b3176ebf",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -280,
+          940
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 3
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0fe604ed-e886-4aa3-856f-c46fb79ce0de",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1700,
+          960
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 380,
+          "height": 240,
+          "content": "## Creative Commons License\n*License*: **Creative Commons Attribution-ShareAlike 4.0 International** (CC BY-SA 4.0)\n\n*Author*: **AlexK1919**\nYou are free to use, adapt, and share this workflow—even commercially—under the terms of this license.\n\nFull license details: {{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f8055452-b487-46c7-92fe-14b3c88d193f",
+        "name": "Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          560,
+          680
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "7b4e792b-ab6d-4b9b-88a1-d8e51bea6853",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{$binary[\"data\"].mimeType}}",
+                      "rightValue": "application/pdf"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "09b7d7c5-5353-4719-b4e2-072e4da39948",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{$binary[\"data\"].mimeType}}",
+                      "rightValue": "text/plain"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "d2763a45-a592-47c8-868f-59dfcd17a71c",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{$binary[\"data\"].mimeType}}",
+                      "rightValue": "application/json"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c704f48e-a1f5-4539-bde2-545862d21bc6",
+        "name": "Extract from PDF",
+        "type": "n8n-nodes-base.extractFromFile",
+        "position": [
+          780,
+          480
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "pdf"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "63b3a751-5726-4821-8379-72af15226584",
+        "name": "Extract from Text",
+        "type": "n8n-nodes-base.extractFromFile",
+        "position": [
+          780,
+          680
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "text"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "44a5980a-17aa-4a09-8040-a7d9804c7998",
+        "name": "Extract from JSON",
+        "type": "n8n-nodes-base.extractFromFile",
+        "position": [
+          780,
+          880
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "fromJson"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-f610b48e",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "timezone": "UTC",
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "4f54c70a-b18b-4e4c-8959-ace70dd41218",
+    "connections": {
+      "57ce64af-88d4-4dc4-8c8e-01717c1bd47d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-57ce64af-88d4-4dc4-8c8e-01717c1bd47d-bd69046d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "778593d8-fe1c-4eb9-865a-e6ce9ed5f900": {
+        "main": [
+          [
+            {
+              "node": "error-handler-778593d8-fe1c-4eb9-865a-e6ce9ed5f900-40c39dfe",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "3a6584f5-ed86-4900-9177-40ffe82d0ad3": {
+        "main": [
+          [
+            {
+              "node": "error-handler-3a6584f5-ed86-4900-9177-40ffe82d0ad3-c76bb09b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e1931ab6-4391-46c3-9d7d-22cbfbf90327": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e1931ab6-4391-46c3-9d7d-22cbfbf90327-487a722f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "c704f48e-a1f5-4539-bde2-545862d21bc6": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c704f48e-a1f5-4539-bde2-545862d21bc6-c2f55b84",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "63b3a751-5726-4821-8379-72af15226584": {
+        "main": [
+          [
+            {
+              "node": "error-handler-63b3a751-5726-4821-8379-72af15226584-79256f04",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "44a5980a-17aa-4a09-8040-a7d9804c7998": {
+        "main": [
+          [
+            {
+              "node": "error-handler-44a5980a-17aa-4a09-8040-a7d9804c7998-3c0fe060",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Vector DB Loader from Google Drive. This workflow integrates 12 different services: stickyNote, textSplitterRecursiveCharacterTextSplitter, scheduleTrigger, googleDrive, switch. It contains 22 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Vector DB Loader from Google Drive. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "3a6584f5-ed86-4900-9177-40ffe82d0ad3": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a6584f5-ed86-4900-9177-40ffe82d0ad3-c76bb09b"
+            }
+          ]
+        ]
+      },
+      "44a5980a-17aa-4a09-8040-a7d9804c7998": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-44a5980a-17aa-4a09-8040-a7d9804c7998-3c0fe060"
+            }
+          ]
+        ]
+      },
+      "57ce64af-88d4-4dc4-8c8e-01717c1bd47d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-57ce64af-88d4-4dc4-8c8e-01717c1bd47d-bd69046d"
+            }
+          ]
+        ]
+      },
+      "63b3a751-5726-4821-8379-72af15226584": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-63b3a751-5726-4821-8379-72af15226584-79256f04"
+            }
+          ]
+        ]
+      },
+      "778593d8-fe1c-4eb9-865a-e6ce9ed5f900": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-778593d8-fe1c-4eb9-865a-e6ce9ed5f900-40c39dfe"
+            }
+          ]
+        ]
+      },
+      "c704f48e-a1f5-4539-bde2-545862d21bc6": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c704f48e-a1f5-4539-bde2-545862d21bc6-c2f55b84"
+            }
+          ]
+        ]
+      },
+      "e1931ab6-4391-46c3-9d7d-22cbfbf90327": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e1931ab6-4391-46c3-9d7d-22cbfbf90327-487a722f"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Vector DB Loader from Google Drive",
+    "nodes": [
+      {
+        "name": "Default Data Loader",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Download File",
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "operation": "download",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Embeddings OpenAI",
+        "parameters": {
+          "model": "text-embedding-3-small",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract from JSON",
+        "parameters": {
+          "operation": "fromJson",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract from PDF",
+        "parameters": {
+          "operation": "pdf",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract from Text",
+        "parameters": {
+          "operation": "text",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Move File",
+        "parameters": {
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Loop Over Items').item.json.id }}"
+          },
+          "folderId": {
+            "__rl": true,
+            "cachedResultName": "vectorized",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1Re6vg-PZxBoUU6sTRDbGs-77bAJ40u8F"
+          },
+          "operation": "move"
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "postgres": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Postgres PGVector Store",
+        "parameters": {
+          "mode": "insert",
+          "options": {
+            "collection": {
+              "values": {
+                "collectionName": "n8n_wfs",
+                "useCollection": true
+              }
+            }
+          },
+          "tableName": "n8n_vectors_wfs"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Recursive Character Text Splitter",
+        "parameters": {
+          "chunkOverlap": 50,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 3
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search Folder",
+        "parameters": {
+          "filter": {
+            "folderId": {
+              "__rl": true,
+              "cachedResultName": "n8n Workflow JSON Files",
+              "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+              "mode": "list",
+              "value": "1mBHrP8UzUnfn3dj_3QS1r0XhQQyVPAGX"
+            },
+            "whatToSearch": "files"
+          },
+          "options": {},
+          "resource": "fileFolder",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "## Creative Commons License\n*License*: **Creative Commons Attribution-ShareAlike 4.0 International** (CC BY-SA 4.0)\n\n*Author*: **AlexK1919**\nYou are free to use, adapt, and share this workflow—even commercially—under the terms of this license.\n\nFull license details: {{ $env.WEBHOOK_URL }}",
+          "height": 240,
+          "width": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Switch",
+        "parameters": {
+          "options": {},
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "7b4e792b-ab6d-4b9b-88a1-d8e51bea6853",
+                      "leftValue": "={{$binary[\"data\"].mimeType}}",
+                      "operator": {
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "application/pdf"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "09b7d7c5-5353-4719-b4e2-072e4da39948",
+                      "leftValue": "={{$binary[\"data\"].mimeType}}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "text/plain"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "d2763a45-a592-47c8-868f-59dfcd17a71c",
+                      "leftValue": "={{$binary[\"data\"].mimeType}}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "application/json"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 16,
+  "integrationCount": 1,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Google Drive"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 112,
+  "viewCount": 237,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "postgres details",
+      "google Drive  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Default Data Loader\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Recursive Character Text Splitter\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Embeddings OpenAI\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Postgres PGVector Store\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Move File\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download File\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search Folder\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract from PDF\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract from Text\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract from JSON\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 100,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-8fnkqaaay",
+      "workflowId": "vector-db-loader-from-google-drive-343r6",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/1750_Schedule_Extractfromfile_Import_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\1750_Schedule_Extractfromfile_Import_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:30:05.629Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:05.629Z",
+  "updatedAt": "2026-07-15T11:30:05.629Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

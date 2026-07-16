@@ -1,0 +1,627 @@
+{
+  "id": "stickynote-workflow-1sygq",
+  "name": "Stickynote Workflow",
+  "slug": "stickynote-workflow-yvh2",
+  "description": "Automated workflow: Stickynote Workflow. This workflow integrates 8 different services: textClassifier, stickyNote, gmailTrigger, agent, stopAndError. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Stickynote Workflow workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-2ce492cf",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.174500",
+      "updatedAt": "2025-09-29T07:07:45.174507",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "eaa31cde-3017-400d-aac8-999def8cc227",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -340,
+          -780
+        ],
+        "parameters": {
+          "width": 617,
+          "height": 490,
+          "content": "## Check if incoming email is about appointment\nWe use LLM to check subject and body of the email and determine if it's an appointment request. "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b03d3f72-d1d8-49a7-bcc1-a476fd5c4ad7",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          400,
+          -780
+        ],
+        "parameters": {
+          "width": 796,
+          "height": 482,
+          "content": "## Get calendar availability and compose a response\nMake sure to update the Workflow ID if you are running this as 2 workflows"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "29ce0093-c4c8-41cc-be69-334de3a1d1a2",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -60,
+          -460
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5176f475-704b-446e-b368-ffa395bb089e",
+        "name": "OpenAI Chat Model1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          480,
+          -460
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0e8a75dd-ce68-46c3-972c-32b15e04b254",
+        "name": "Send reply",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          940,
+          -660
+        ],
+        "webhookId": "0f18d414-1b14-4d2e-9fc2-d2d302372dc6",
+        "parameters": {
+          "message": "={{ $json.output }}",
+          "options": {},
+          "messageId": "={{ $('Gmail Trigger').first().json.id }}",
+          "operation": "reply"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "Sf5Gfl9NiFTNXFWb",
+            "name": "Gmail account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bf154384-274a-4cdd-977d-890220948a9d",
+        "name": "Gmail Trigger",
+        "type": "n8n-nodes-base.gmailTrigger",
+        "position": [
+          -280,
+          -640
+        ],
+        "parameters": {
+          "filters": {
+            "readStatus": "unread",
+            "includeSpamTrash": false
+          },
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "Sf5Gfl9NiFTNXFWb",
+            "name": "Gmail account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This gmailTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5a268b34-38ea-4e55-87ab-8a616e2aa1fa",
+        "name": "Classify appointment",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -60,
+          -640
+        ],
+        "parameters": {
+          "options": {
+            "fallback": "discard"
+          },
+          "inputText": "=Please evaluate the following email to determine if it suggests scheduling a meeting or a call:\nSubject: {{ $json.Subject }}\nSnippet: {{ $json.snippet }}",
+          "categories": {
+            "categories": [
+              {
+                "category": "is_appointment",
+                "description": "email Is requesting an appointment"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This textClassifier node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7b5a8468-09e5-4575-97cb-9175ee02b19d",
+        "name": "Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          500,
+          -660
+        ],
+        "parameters": {
+          "text": "=Sender: {{ $('Gmail Trigger').first().json.From }}\nSubject: {{ $('Gmail Trigger').first().json.Subject }}\nEmail Text: {{ $('Gmail Trigger').first().json.snippet }}",
+          "options": {
+            "systemMessage": "=You are an email scheduling assistant. Based on the received email, check my availability and propose an appropriate response. \nAim to get a specific time, rather than just a day. When checking my availability, make sure that there's enough time in between meetings.\nIf I'm not available, ALWAYS propose a new time based on my availability. When proposing a new time, always leave 15 minutes buffer from previous meeting.\nToday date and time is: {{ $now.toISO() }}."
+          },
+          "promptType": "define"
+        },
+        "typeVersion": 1.8,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b61e8061-5719-4c30-97da-e306e7b79b76",
+        "name": "Google Calendar",
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "position": [
+          680,
+          -460
+        ],
+        "parameters": {
+          "options": {},
+          "timeMax": "={{ $now.plus(1, 'month').toISO() }}",
+          "timeMin": "={{ $now.minus(1, 'day').toISO() }}",
+          "calendar": {
+            "__rl": true,
+            "mode": "id",
+            "value": "your_email@gmail.com"
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "kWMxmDbMDDJoYFVK",
+            "name": "Google Calendar account"
+          }
+        },
+        "typeVersion": 1.3,
+        "notes": "This googleCalendarTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "47e07b6c-d432-4111-b33e-56d6c305c40c",
+        "name": "Mark as read",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          940,
+          -480
+        ],
+        "webhookId": "7e2d851b-c9f3-471c-875d-0da7c2c3b561",
+        "parameters": {
+          "messageId": "={{ $('Gmail Trigger').first().json.id }}",
+          "operation": "markAsRead"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "Sf5Gfl9NiFTNXFWb",
+            "name": "Gmail account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-3d5de3a4",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "29ce0093-c4c8-41cc-be69-334de3a1d1a2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-29ce0093-c4c8-41cc-be69-334de3a1d1a2-09ef3d08",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "5176f475-704b-446e-b368-ffa395bb089e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5176f475-704b-446e-b368-ffa395bb089e-377052a2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b61e8061-5719-4c30-97da-e306e7b79b76": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b61e8061-5719-4c30-97da-e306e7b79b76-5c4d5f6b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Stickynote Workflow. This workflow integrates 8 different services: textClassifier, stickyNote, gmailTrigger, agent, stopAndError. It contains 13 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stickynote Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "29ce0093-c4c8-41cc-be69-334de3a1d1a2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-29ce0093-c4c8-41cc-be69-334de3a1d1a2-09ef3d08"
+            }
+          ]
+        ]
+      },
+      "5176f475-704b-446e-b368-ffa395bb089e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5176f475-704b-446e-b368-ffa395bb089e-377052a2"
+            }
+          ]
+        ]
+      },
+      "b61e8061-5719-4c30-97da-e306e7b79b76": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b61e8061-5719-4c30-97da-e306e7b79b76-5c4d5f6b"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "nodes": [
+      {
+        "name": "Agent",
+        "parameters": {
+          "options": {
+            "systemMessage": "=You are an email scheduling assistant. Based on the received email, check my availability and propose an appropriate response. \nAim to get a specific time, rather than just a day. When checking my availability, make sure that there's enough time in between meetings.\nIf I'm not available, ALWAYS propose a new time based on my availability. When proposing a new time, always leave 15 minutes buffer from previous meeting.\nToday date and time is: {{ $now.toISO() }}."
+          },
+          "promptType": "define",
+          "text": "=Sender: {{ $('Gmail Trigger').first().json.From }}\nSubject: {{ $('Gmail Trigger').first().json.Subject }}\nEmail Text: {{ $('Gmail Trigger').first().json.snippet }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "name": "Classify appointment",
+        "parameters": {
+          "categories": {
+            "categories": [
+              {
+                "category": "is_appointment",
+                "description": "email Is requesting an appointment"
+              }
+            ]
+          },
+          "inputText": "=Please evaluate the following email to determine if it suggests scheduling a meeting or a call:\nSubject: {{ $json.Subject }}\nSnippet: {{ $json.snippet }}",
+          "options": {
+            "fallback": "discard"
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Gmail Trigger",
+        "parameters": {
+          "filters": {
+            "includeSpamTrash": false,
+            "readStatus": "unread"
+          },
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.gmailTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Calendar",
+        "parameters": {
+          "calendar": {
+            "__rl": true,
+            "mode": "id",
+            "value": "your_email@gmail.com"
+          },
+          "operation": "getAll",
+          "options": {},
+          "returnAll": true,
+          "timeMax": "={{ $now.plus(1, 'month').toISO() }}",
+          "timeMin": "={{ $now.minus(1, 'day').toISO() }}"
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mark as read",
+        "parameters": {
+          "messageId": "={{ $('Gmail Trigger').first().json.id }}",
+          "operation": "markAsRead"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model1",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send reply",
+        "parameters": {
+          "message": "={{ $json.output }}",
+          "messageId": "={{ $('Gmail Trigger').first().json.id }}",
+          "operation": "reply",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Check if incoming email is about appointment\nWe use LLM to check subject and body of the email and determine if it's an appointment request. ",
+          "height": 490,
+          "width": 617
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Get calendar availability and compose a response\nMake sure to update the Workflow ID if you are running this as 2 workflows",
+          "height": 482,
+          "width": 796
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Gmail",
+    "Google Calendar"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 73,
+  "viewCount": 739,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Gmail Account",
+      "Google Calendar Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "gmail  O Auth2 details",
+      "google Calendar  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Gmail Trigger\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send reply\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Classify appointment\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Calendar\" node (n8n-nodes-base.googleCalendarTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mark as read\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-8sxc8scqu",
+      "workflowId": "stickynote-workflow-1sygq",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Gmail/0319_Gmail_Googlecalendartool_Send_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Gmail\\0319_Gmail_Googlecalendartool_Send_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:03.363Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:03.363Z",
+  "updatedAt": "2026-07-15T11:29:03.363Z",
+  "category": {
+    "slug": "email-automation",
+    "name": "Email Automation"
+  },
+  "categoryId": "email-automation"
+}

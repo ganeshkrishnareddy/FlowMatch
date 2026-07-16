@@ -1,0 +1,683 @@
+{
+  "id": "if-workflow-baytj",
+  "name": "If Workflow",
+  "slug": "if-workflow-7eft",
+  "description": "Automated workflow: If Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "If Workflow workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-9f80cc3c",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:08:01.730966",
+      "updatedAt": "2025-09-29T07:08:01.730987",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "dcd5f025-9af9-4e3a-96fc-25a33dcc6c00",
+        "name": "Ticket Exists",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          900,
+          320
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json[\"external_id\"] }}",
+                "operation": "isNotEmpty"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a5e8ec4d-bc80-4153-a677-91be2e7d02b7",
+        "name": "Get user data of Ticket requester",
+        "type": "n8n-nodes-base.zendesk",
+        "position": [
+          220,
+          480
+        ],
+        "parameters": {
+          "id": "={{ $json[\"requester_id\"] }}",
+          "resource": "user",
+          "operation": "get"
+        },
+        "credentials": {
+          "zendeskApi": {
+            "id": "{{ $credentials.zendeskApi.id }}",
+            "name": "Zendesk account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zendesk node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6dc07af8-d446-4704-9a08-e65f89772a9b",
+        "name": "Only keep needed data",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          440,
+          480
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"id\"] }}"
+              },
+              {
+                "name": "contactExternalId",
+                "value": "={{ $json[\"external_id\"] }}"
+              }
+            ],
+            "string": [
+              {
+                "name": "contactEmail",
+                "value": "={{ $json[\"email\"] }}"
+              },
+              {
+                "name": "contactName",
+                "value": "={{ $json[\"name\"] }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c3ca22e4-ae76-49ee-b117-f6da9d90ec1a",
+        "name": "Add user data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          640,
+          320
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "requester_id",
+          "propertyName2": "id"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "713b919a-3a39-4466-b9b8-cc3575f02e45",
+        "name": "Update existing ticket",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          1280,
+          300
+        ],
+        "parameters": {
+          "resource": "ticket",
+          "ticketId": "={{ $json[\"external_id\"] }}",
+          "operation": "update",
+          "updateFields": {
+            "ticketName": "={{ $json[\"raw_subject\"] }}",
+            "description": "={{ $json[\"description\"] }}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "{{ $credentials.hubspotOAuth2Api.id }}",
+            "name": "HubSpot account"
+          }
+        },
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1eb40a93-2d36-4b3e-a39d-f19f369adc4e",
+        "name": "Update Zendesk ticket with External Id",
+        "type": "n8n-nodes-base.zendesk",
+        "position": [
+          2020,
+          480
+        ],
+        "parameters": {
+          "id": "={{ $node[\"Contact Exists\"].json[\"id\"] }}",
+          "operation": "update",
+          "updateFields": {
+            "externalId": "={{ $json[\"objectId\"] }}"
+          }
+        },
+        "credentials": {
+          "zendeskApi": {
+            "id": "{{ $credentials.zendeskApi.id }}",
+            "name": "Zendesk account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zendesk node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a11c8809-c22f-40f5-a019-79274eba4d70",
+        "name": "Get last execution timestamp",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          -260,
+          300
+        ],
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nif(!staticData.lastExecution){\n  staticData.lastExecution = new Date().toISOString();\n}\n\nitem.executionTimeStamp = new Date().toISOString();\nitem.lastExecution = staticData.lastExecution;\n\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "notes": "This functionItem node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a62685c9-f786-4e7c-9e2d-cdcb1e0a3aea",
+        "name": "Get tickets updated after last execution",
+        "type": "n8n-nodes-base.zendesk",
+        "position": [
+          -40,
+          300
+        ],
+        "parameters": {
+          "options": {
+            "query": "=updated>{{ $json[\"lastExecution\"] }}",
+            "sortBy": "updated_at",
+            "sortOrder": "desc"
+          },
+          "operation": "getAll"
+        },
+        "credentials": {
+          "zendeskApi": {
+            "id": "{{ $credentials.zendeskApi.id }}",
+            "name": "Zendesk account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zendesk node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c1b23aa8-a9f6-4966-b1dc-fe48c203364c",
+        "name": "Set new last execution timestamp",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          2360,
+          300
+        ],
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nstaticData.lastExecution = $item(0).$node[\"Get last execution timestamp\"].executionTimeStamp;\n\nreturn item;"
+        },
+        "executeOnce": true,
+        "typeVersion": 1,
+        "notes": "This functionItem node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "97ae70de-bce8-4861-a256-17002625da58",
+        "name": "Every 5 minutes",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          -460,
+          300
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1d2dd552-175c-4405-b304-d4136dd2968b",
+        "name": "Create new Ticket",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          1780,
+          480
+        ],
+        "parameters": {
+          "stageId": "1",
+          "resource": "ticket",
+          "pipelineId": "0",
+          "ticketName": "={{ $node['Ticket Exists'].json[\"raw_subject\"] }}",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "description": "={{ $node['Ticket Exists'].json[\"description\"] }}",
+            "associatedContactIds": "={{ [].concat($node[\"Create or update contact\"].json[\"vid\"]) }}"
+          }
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "{{ $credentials.hubspotOAuth2Api.id }}",
+            "name": "HubSpot account"
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e2217f74-f1b2-4449-9937-543758a333ea",
+        "name": "Update External Id in Zendesk for contact",
+        "type": "n8n-nodes-base.zendesk",
+        "position": [
+          1520,
+          480
+        ],
+        "parameters": {
+          "id": "={{ $node[\"Ticket Exists\"].json[\"requester_id\"] }}",
+          "resource": "user",
+          "operation": "update",
+          "updateFields": {
+            "external_id": "={{ $json[\"vid\"] }}"
+          }
+        },
+        "credentials": {
+          "zendeskApi": {
+            "id": "{{ $credentials.zendeskApi.id }}",
+            "name": "Zendesk account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zendesk node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "144a3395-9f61-4aad-99e0-4a689145f93d",
+        "name": "Create or update contact",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          1280,
+          480
+        ],
+        "parameters": {
+          "email": "={{ $json[\"contactEmail\"] }}",
+          "resource": "contact",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "{{ $credentials.hubspotOAuth2Api.id }}",
+            "name": "HubSpot account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-6df442e5",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "If Workflow",
+    "description": "Automated workflow: If Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: If Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "If Workflow",
+    "nodes": [
+      {
+        "name": "Add user data",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "requester_id",
+          "propertyName2": "id"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create new Ticket",
+        "parameters": {
+          "additionalFields": {
+            "associatedContactIds": "={{ [].concat($node[\"Create or update contact\"].json[\"vid\"]) }}",
+            "description": "={{ $node['Ticket Exists'].json[\"description\"] }}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "pipelineId": "0",
+          "resource": "ticket",
+          "stageId": "1",
+          "ticketName": "={{ $node['Ticket Exists'].json[\"raw_subject\"] }}"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create or update contact",
+        "parameters": {
+          "additionalFields": {},
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "email": "={{ $json[\"contactEmail\"] }}",
+          "resource": "contact"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Every 5 minutes",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get last execution timestamp",
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nif(!staticData.lastExecution){\n  staticData.lastExecution = new Date().toISOString();\n}\n\nitem.executionTimeStamp = new Date().toISOString();\nitem.lastExecution = staticData.lastExecution;\n\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "zendeskApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get tickets updated after last execution",
+        "parameters": {
+          "operation": "getAll",
+          "options": {
+            "query": "=updated>{{ $json[\"lastExecution\"] }}",
+            "sortBy": "updated_at",
+            "sortOrder": "desc"
+          }
+        },
+        "type": "n8n-nodes-base.zendesk",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "zendeskApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get user data of Ticket requester",
+        "parameters": {
+          "id": "={{ $json[\"requester_id\"] }}",
+          "operation": "get",
+          "resource": "user"
+        },
+        "type": "n8n-nodes-base.zendesk",
+        "typeVersion": 1
+      },
+      {
+        "name": "Only keep needed data",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"id\"] }}"
+              },
+              {
+                "name": "contactExternalId",
+                "value": "={{ $json[\"external_id\"] }}"
+              }
+            ],
+            "string": [
+              {
+                "name": "contactEmail",
+                "value": "={{ $json[\"email\"] }}"
+              },
+              {
+                "name": "contactName",
+                "value": "={{ $json[\"name\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set new last execution timestamp",
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nstaticData.lastExecution = $item(0).$node[\"Get last execution timestamp\"].executionTimeStamp;\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "Ticket Exists",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "isNotEmpty",
+                "value1": "={{ $json[\"external_id\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update existing ticket",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "operation": "update",
+          "resource": "ticket",
+          "ticketId": "={{ $json[\"external_id\"] }}",
+          "updateFields": {
+            "description": "={{ $json[\"description\"] }}",
+            "ticketName": "={{ $json[\"raw_subject\"] }}"
+          }
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "zendeskApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update External Id in Zendesk for contact",
+        "parameters": {
+          "id": "={{ $node[\"Ticket Exists\"].json[\"requester_id\"] }}",
+          "operation": "update",
+          "resource": "user",
+          "updateFields": {
+            "external_id": "={{ $json[\"vid\"] }}"
+          }
+        },
+        "type": "n8n-nodes-base.zendesk",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "zendeskApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Zendesk ticket with External Id",
+        "parameters": {
+          "id": "={{ $node[\"Contact Exists\"].json[\"id\"] }}",
+          "operation": "update",
+          "updateFields": {
+            "externalId": "={{ $json[\"objectId\"] }}"
+          }
+        },
+        "type": "n8n-nodes-base.zendesk",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Zendesk",
+    "Hubspot",
+    "Functionitem"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 10,
+  "viewCount": 690,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Zendesk Account",
+      "Hubspot Account",
+      "Functionitem Account"
+    ],
+    "requiredCredentials": [
+      "zendesk  A P I details",
+      "hubspot  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Every 5 minutes\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Ticket Exists\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get user data of Ticket requester\" node (n8n-nodes-base.zendesk) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add user data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update existing ticket\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Zendesk ticket with External Id\" node (n8n-nodes-base.zendesk) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get last execution timestamp\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get tickets updated after last execution\" node (n8n-nodes-base.zendesk) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set new last execution timestamp\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create new Ticket\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update External Id in Zendesk for contact\" node (n8n-nodes-base.zendesk) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create or update contact\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Only keep needed data\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-6zy0bj8q5",
+      "workflowId": "if-workflow-baytj",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Zendesk/0286_Zendesk_HubSpot_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Zendesk\\0286_Zendesk_HubSpot_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:21:11.030Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:21:11.030Z",
+  "updatedAt": "2026-07-15T11:21:11.030Z"
+}

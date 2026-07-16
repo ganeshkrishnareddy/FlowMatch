@@ -1,0 +1,886 @@
+{
+  "id": "monday-get-full-item-lyeqo",
+  "name": "MONDAY GET FULL ITEM",
+  "slug": "monday-get-full-item-npej",
+  "description": "Automated workflow: MONDAY GET FULL ITEM. This workflow integrates 9 different services: stickyNote, code, splitOut, merge, set. It contains 26 nodes and follows best practices for error handling and security.",
+  "shortDescription": "MONDAY GET FULL ITEM workflow containing 27 nodes.",
+  "originalWorkflowJson": {
+    "id": "ZdGZh4qmOqTQe1oq",
+    "meta": {
+      "instanceId": "workflow-e7151e5d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.007371",
+      "updatedAt": "2025-09-29T07:07:51.007384",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "MONDAY GET FULL ITEM",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "20299349-bc2c-4aa8-b083-db31cb9aa278",
+        "name": "GET ALL COLUMNS",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1840,
+          -600
+        ],
+        "parameters": {
+          "jsCode": "function createColumnValuesArray(data) {\n  const result = {};\n  data.forEach(item => {\n    const name = item.id;\n    result[name] = item;\n  });\n\n  return result;\n}\n\ncolumns = $input.last().json.column_values\ndata1 = { \"name\" : $input.last().json.name, \"id\" : $input.last().json.id }\ndata2 = createColumnValuesArray(columns)\n\nconst combinedData = { \"item\" : data1, columnValuesById: data2}\n\nreturn (combinedData)\n\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "04c2550e-41d8-46f4-a131-2ea99dd4258a",
+        "name": "GET ALL RELATIONS",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1860,
+          -220
+        ],
+        "parameters": {
+          "jsCode": "var data = $input.last().json.columnValuesById;\ni = 0;\nrelations = [];\nfor (var key in data) {\n    if (data[key].type == \"board_relation\") {\n      relations[i] = data[key];\n      i++\n    }\n}\n\nreturn relations;\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5796cb17-199b-4838-ae9c-c3636824bd13",
+        "name": "PULL LINKEDPULSE1",
+        "type": "n8n-nodes-base.mondayCom",
+        "position": [
+          1720,
+          -40
+        ],
+        "parameters": {
+          "itemId": "=\n{{ $json.linkedPulse.linkedPulseId }}",
+          "resource": "boardItem",
+          "operation": "get"
+        },
+        "credentials": {
+          "mondayComApi": {
+            "id": "5nd48DKapWBLcUBx",
+            "name": "Monday.com account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "notes": "This mondayCom node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "67a8a151-5875-4ec7-8fda-f797f3d3b198",
+        "name": "GET LINKEDPULSES1",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1340,
+          -40
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "data = $input.item.json.value\nid = $input.item.json.id\nname = $input.item.json.column.title\n\nconst linkedPulseID = JSON.parse(data).linkedPulseIds\n\nreturn { \"linkedPulse\": linkedPulseID, \"id\" : id, \"name\": name }\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5dbe451d-ec23-48bf-9193-55a03b8752a4",
+        "name": "SPLIT LINKED PULSES1",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          1540,
+          -40
+        ],
+        "parameters": {
+          "include": "=",
+          "options": {},
+          "fieldToSplitOut": "linkedPulse"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "536897b1-ed71-4888-9761-cb4a363f0a86",
+        "name": "SPLIT SUBITEMS1",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          1540,
+          200
+        ],
+        "parameters": {
+          "include": "selectedOtherFields",
+          "options": {},
+          "fieldToSplitOut": "linkedPulseIds",
+          "fieldsToInclude": "linkedPulseIds[0].linkedPulseId"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "57777d0c-77d0-4652-a798-2d347b12cfb4",
+        "name": "GET EACH SUBITEM1",
+        "type": "n8n-nodes-base.mondayCom",
+        "position": [
+          1700,
+          200
+        ],
+        "parameters": {
+          "itemId": "=\n{{ $json.linkedPulseIds.linkedPulseId }}",
+          "resource": "boardItem",
+          "operation": "get"
+        },
+        "credentials": {
+          "mondayComApi": {
+            "id": "5nd48DKapWBLcUBx",
+            "name": "Monday.com account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "notes": "This mondayCom node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1a7574db-16bb-4d69-b91f-33b20e52c794",
+        "name": "GET ALL COLUMNS1",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1880,
+          200
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "function createColumnValuesArray(data) {\n  const result = {};\n  data.forEach(item => {\n    const name = item.id;\n    result[name] = item;\n  });\n\n  return result;\n}\n\ncolumns = $input.item.json.column_values\ndata1 = { \"name\" : $input.item.json.name, \"id\" : $input.item.json.id }\ndata2 = createColumnValuesArray(columns)\n\nconst combinedData = { ...data1, ...data2 }\n\nreturn (combinedData)\n\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ba95aef3-49b3-4a3e-a5fd-51ec04691949",
+        "name": "GET ALL COLUMNS2",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1840,
+          -420
+        ],
+        "parameters": {
+          "jsCode": "function createColumnValuesArray(data) {\n  const result = {};\n  data.forEach(item => {\n  if (item.type != \"subtasks\") {\n    const name = item.column.title;\n    result[name] = item;\n  }\n  });\n\n  return result;\n}\n\ncolumns = $input.last().json.column_values\ndata = createColumnValuesArray(columns)\nreturn {\"columnValuesByName\": data}\n\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8c475537-efe6-4417-b293-e47abe817f7a",
+        "name": "Aggregate1",
+        "type": "n8n-nodes-base.aggregate",
+        "onError": "continueRegularOutput",
+        "position": [
+          2180,
+          100
+        ],
+        "parameters": {
+          "options": {},
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "subitems"
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This aggregate node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f96f5fb7-1701-4cf4-b572-2ed3d8376232",
+        "name": "PULL SUBITEMS",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1320,
+          200
+        ],
+        "parameters": {
+          "jsCode": "//Search for \"Subitems\" column\nconst columnName = \"Subitems\"\nfunction getColumnValue(item, columnId) {\n    const column = item.column_values.find(column => column.column.title === columnId);\n    if (column) {\n          return column\n    } else {\n        return null;\n    }\n}\nconst columnValue = getColumnValue($input.last().json, columnName);\nreturn JSON.parse(columnValue.value);\n\n//ALT OPTION - direct access by column_values[0]\n//var ids = $input.last().json['column_values'][0]['value'];\n//return JSON.parse(ids)"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "aa96e7e9-6c2a-46d4-95af-124609a7b524",
+        "name": "GET ITEM",
+        "type": "n8n-nodes-base.mondayCom",
+        "position": [
+          1180,
+          -600
+        ],
+        "parameters": {
+          "itemId": "=\n{{ $input.item.json.pulse }}",
+          "resource": "boardItem",
+          "operation": "get"
+        },
+        "credentials": {
+          "mondayComApi": {
+            "id": "5nd48DKapWBLcUBx",
+            "name": "Monday.com account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "notes": "This mondayCom node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "da23cad1-77f9-4035-8ad3-b322dadba853",
+        "name": "GET ALL COLUMNS3",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1880,
+          -40
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "function createColumnValuesArray(data) {\n  const result = {};\n  data.forEach(item => {\n    const name = item.id;\n    result[name] = item;\n  });\n\n  return result;\n}\n\ncolumns = $input.item.json.column_values\ndata1 = { \"name\" : $input.item.json.name, \"id\" : $input.item.json.id }\ndata2 = createColumnValuesArray(columns)\n\nconst combinedData = { \"item\" : data1, columnValuesById: data2}\n\nreturn (combinedData)\n\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9c27b7af-2568-4b07-b526-9c18ca52649f",
+        "name": "Merge4",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          2180,
+          -100
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combinationMode": "mergeByPosition"
+        },
+        "typeVersion": 2.1,
+        "alwaysOutputData": true,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6f0008fd-b8f5-4161-8fbf-363b3d5a7794",
+        "name": "Aggregate",
+        "type": "n8n-nodes-base.aggregate",
+        "onError": "continueRegularOutput",
+        "position": [
+          2340,
+          -100
+        ],
+        "parameters": {
+          "options": {},
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "boardrelations"
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This aggregate node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d95b1e2a-405e-417b-8618-89af85b10350",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "onError": "continueRegularOutput",
+        "position": [
+          2540,
+          0
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combinationMode": "mergeByPosition"
+        },
+        "typeVersion": 2.1,
+        "alwaysOutputData": true,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e9d7977d-1fd3-4be8-ad90-b42a93bc1ea4",
+        "name": "Merge2",
+        "type": "n8n-nodes-base.merge",
+        "onError": "continueRegularOutput",
+        "position": [
+          2480,
+          -240
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combinationMode": "mergeByPosition"
+        },
+        "typeVersion": 2.1,
+        "alwaysOutputData": true,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "72e04613-f953-49b0-ad13-4bd5464cc55e",
+        "name": "Merge1",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          2680,
+          -160
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combinationMode": "mergeByPosition"
+        },
+        "typeVersion": 2.1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0846e8ee-8b58-40c2-8d3f-1e33f519bf55",
+        "name": "Execute Workflow Trigger",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          980,
+          -600
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1c753c05-3541-4579-a815-b3465f26d51c",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1300,
+          -240
+        ],
+        "parameters": {
+          "width": 752.1995067108865,
+          "height": 335.74971164936585,
+          "content": "PULL ALL BOARDRELATION COLUMNS AND THEIR DATA"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "79c61e1f-6cbf-45ca-b0d3-31250fb7be18",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1300,
+          120
+        ],
+        "parameters": {
+          "width": 748.2468880082052,
+          "height": 237.44804034647325,
+          "content": "PULL ALL SUBITEMS AND THEIR COLUMN DATA\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b5da95d7-d0d8-4ad1-ab93-e06e6c823ed2",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1720,
+          -640
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 325.58246828143024,
+          "height": 352.5605536332179,
+          "content": "PULL ALL COLUMN DATA AND INDEX BY ID AND NAME\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "02125cbf-aa28-4cf1-a0ef-cf3cf45e76c2",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2140,
+          -298.05978270268713
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 677.0818915801614,
+          "height": 605.5742002344051,
+          "content": "COMBINE ALL DATA INTO ONE JSON OUTPUT\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e96deeef-6fb5-4130-b422-752e0e0dc9c5",
+        "name": "Execute Workflow",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "position": [
+          1180,
+          -780
+        ],
+        "parameters": {
+          "options": {
+            "waitForSubWorkflow": true
+          },
+          "workflowId": "ZdGZh4qmOqTQe1oq"
+        },
+        "typeVersion": 1,
+        "notes": "This executeWorkflow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "955d8a6e-931c-411f-a26a-17f547370fd9",
+        "name": "Edit Fields",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          980,
+          -780
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "pulse",
+                "stringValue": "4030768878"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f508d0cd-448c-482e-9eeb-d569f26dbaab",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          940,
+          -920
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 418.4714893828877,
+          "height": 302.08861782546296,
+          "content": "HOW TO USE\n-Copy these nodes into another workflow, and update the workflow id in the execute workflow node\n-Using the Edit Fields nodes, define the “pulse” variable which will tell the workflow which monday item to pull data from.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-24bd0cba",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "dd22e2e2-0699-41d1-b6ad-001073624540",
+    "connections": {},
+    "description": "Automated workflow: MONDAY GET FULL ITEM. This workflow integrates 9 different services: stickyNote, code, splitOut, merge, set. It contains 26 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: MONDAY GET FULL ITEM. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "MONDAY GET FULL ITEM",
+    "nodes": [
+      {
+        "name": "Aggregate",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "boardrelations",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1
+      },
+      {
+        "name": "Aggregate1",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "subitems",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1
+      },
+      {
+        "name": "Edit Fields",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "pulse",
+                "stringValue": "4030768878"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Execute Workflow",
+        "parameters": {
+          "options": {
+            "waitForSubWorkflow": true
+          },
+          "workflowId": "ZdGZh4qmOqTQe1oq"
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1
+      },
+      {
+        "name": "Execute Workflow Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "GET ALL COLUMNS",
+        "parameters": {
+          "jsCode": "function createColumnValuesArray(data) {\n  const result = {};\n  data.forEach(item => {\n    const name = item.id;\n    result[name] = item;\n  });\n\n  return result;\n}\n\ncolumns = $input.last().json.column_values\ndata1 = { \"name\" : $input.last().json.name, \"id\" : $input.last().json.id }\ndata2 = createColumnValuesArray(columns)\n\nconst combinedData = { \"item\" : data1, columnValuesById: data2}\n\nreturn (combinedData)\n\n\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "GET ALL COLUMNS1",
+        "parameters": {
+          "jsCode": "function createColumnValuesArray(data) {\n  const result = {};\n  data.forEach(item => {\n    const name = item.id;\n    result[name] = item;\n  });\n\n  return result;\n}\n\ncolumns = $input.item.json.column_values\ndata1 = { \"name\" : $input.item.json.name, \"id\" : $input.item.json.id }\ndata2 = createColumnValuesArray(columns)\n\nconst combinedData = { ...data1, ...data2 }\n\nreturn (combinedData)\n\n\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "GET ALL COLUMNS2",
+        "parameters": {
+          "jsCode": "function createColumnValuesArray(data) {\n  const result = {};\n  data.forEach(item => {\n  if (item.type != \"subtasks\") {\n    const name = item.column.title;\n    result[name] = item;\n  }\n  });\n\n  return result;\n}\n\ncolumns = $input.last().json.column_values\ndata = createColumnValuesArray(columns)\nreturn {\"columnValuesByName\": data}\n\n\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "GET ALL COLUMNS3",
+        "parameters": {
+          "jsCode": "function createColumnValuesArray(data) {\n  const result = {};\n  data.forEach(item => {\n    const name = item.id;\n    result[name] = item;\n  });\n\n  return result;\n}\n\ncolumns = $input.item.json.column_values\ndata1 = { \"name\" : $input.item.json.name, \"id\" : $input.item.json.id }\ndata2 = createColumnValuesArray(columns)\n\nconst combinedData = { \"item\" : data1, columnValuesById: data2}\n\nreturn (combinedData)\n\n\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "GET ALL RELATIONS",
+        "parameters": {
+          "jsCode": "var data = $input.last().json.columnValuesById;\ni = 0;\nrelations = [];\nfor (var key in data) {\n    if (data[key].type == \"board_relation\") {\n      relations[i] = data[key];\n      i++\n    }\n}\n\nreturn relations;\n\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "mondayComApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "GET EACH SUBITEM1",
+        "parameters": {
+          "itemId": "=\n{{ $json.linkedPulseIds.linkedPulseId }}",
+          "operation": "get",
+          "resource": "boardItem"
+        },
+        "type": "n8n-nodes-base.mondayCom",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mondayComApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "GET ITEM",
+        "parameters": {
+          "itemId": "=\n{{ $input.item.json.pulse }}",
+          "operation": "get",
+          "resource": "boardItem"
+        },
+        "type": "n8n-nodes-base.mondayCom",
+        "typeVersion": 1
+      },
+      {
+        "name": "GET LINKEDPULSES1",
+        "parameters": {
+          "jsCode": "data = $input.item.json.value\nid = $input.item.json.id\nname = $input.item.json.column.title\n\nconst linkedPulseID = JSON.parse(data).linkedPulseIds\n\nreturn { \"linkedPulse\": linkedPulseID, \"id\" : id, \"name\": name }\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "combinationMode": "mergeByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Merge1",
+        "parameters": {
+          "combinationMode": "mergeByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Merge2",
+        "parameters": {
+          "combinationMode": "mergeByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Merge4",
+        "parameters": {
+          "combinationMode": "mergeByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "mondayComApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "PULL LINKEDPULSE1",
+        "parameters": {
+          "itemId": "=\n{{ $json.linkedPulse.linkedPulseId }}",
+          "operation": "get",
+          "resource": "boardItem"
+        },
+        "type": "n8n-nodes-base.mondayCom",
+        "typeVersion": 1
+      },
+      {
+        "name": "PULL SUBITEMS",
+        "parameters": {
+          "jsCode": "//Search for \"Subitems\" column\nconst columnName = \"Subitems\"\nfunction getColumnValue(item, columnId) {\n    const column = item.column_values.find(column => column.column.title === columnId);\n    if (column) {\n          return column\n    } else {\n        return null;\n    }\n}\nconst columnValue = getColumnValue($input.last().json, columnName);\nreturn JSON.parse(columnValue.value);\n\n//ALT OPTION - direct access by column_values[0]\n//var ids = $input.last().json['column_values'][0]['value'];\n//return JSON.parse(ids)"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "SPLIT LINKED PULSES1",
+        "parameters": {
+          "fieldToSplitOut": "linkedPulse",
+          "include": "=",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "SPLIT SUBITEMS1",
+        "parameters": {
+          "fieldToSplitOut": "linkedPulseIds",
+          "fieldsToInclude": "linkedPulseIds[0].linkedPulseId",
+          "include": "selectedOtherFields",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "PULL ALL BOARDRELATION COLUMNS AND THEIR DATA",
+          "height": 335.74971164936585,
+          "width": 752.1995067108865
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "PULL ALL SUBITEMS AND THEIR COLUMN DATA\n",
+          "height": 237.44804034647325,
+          "width": 748.2468880082052
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "PULL ALL COLUMN DATA AND INDEX BY ID AND NAME\n",
+          "height": 352.5605536332179,
+          "width": 325.58246828143024
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 6,
+          "content": "HOW TO USE\n-Copy these nodes into another workflow, and update the workflow id in the execute workflow node\n-Using the Edit Fields nodes, define the “pulse” variable which will tell the workflow which monday item to pull data from.\n",
+          "height": 302.08861782546296,
+          "width": 418.4714893828877
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 5,
+          "content": "COMBINE ALL DATA INTO ONE JSON OUTPUT\n",
+          "height": 605.5742002344051,
+          "width": 677.0818915801614
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 27,
+  "integrationCount": 1,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "45 Mins",
+  "integrations": [
+    "Monday.com"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 44,
+  "viewCount": 308,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Monday.com Account"
+    ],
+    "requiredCredentials": [
+      "monday Com  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Execute Workflow Trigger\".",
+      "Open the \"PULL LINKEDPULSE1\" node (n8n-nodes-base.mondayCom) and configure the action parameters, mappings, and fields.",
+      "Open the \"SPLIT LINKED PULSES1\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"SPLIT SUBITEMS1\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"GET EACH SUBITEM1\" node (n8n-nodes-base.mondayCom) and configure the action parameters, mappings, and fields.",
+      "Open the \"Aggregate1\" node (n8n-nodes-base.aggregate) and configure the action parameters, mappings, and fields.",
+      "Open the \"GET ITEM\" node (n8n-nodes-base.mondayCom) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge4\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Aggregate\" node (n8n-nodes-base.aggregate) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge2\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge1\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Execute Workflow\" node (n8n-nodes-base.executeWorkflow) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Edit Fields\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-yfa0g6fik",
+      "workflowId": "monday-get-full-item-lyeqo",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Mondaycom/1781_Mondaycom_Splitout_Import_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Mondaycom\\1781_Mondaycom_Splitout_Import_Triggered.json",
+      "discoveredAt": "2026-07-15T11:17:41.741Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:41.741Z",
+  "updatedAt": "2026-07-15T11:17:41.741Z"
+}

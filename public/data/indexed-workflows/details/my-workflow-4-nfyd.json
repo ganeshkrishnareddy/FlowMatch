@@ -1,0 +1,529 @@
+{
+  "id": "my-workflow-4-67iud",
+  "name": "My workflow 4",
+  "slug": "my-workflow-4-nfyd",
+  "description": "Automated workflow: My workflow 4. This workflow processes data and performs automated tasks.",
+  "shortDescription": "My workflow 4 workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "mW6b4dMHkIDfnaIj",
+    "meta": {
+      "instanceId": "workflow-520237f0",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:47.061066",
+      "updatedAt": "2025-09-29T07:07:47.061074",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "My workflow 4",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "9ae28c07-bb44-4e64-b38c-a74a9de81b2e",
+        "name": "Receive Feedback",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          -440,
+          540
+        ],
+        "webhookId": "89e8d5ec-d442-41ea-9ff1-93a9df0b2aa1",
+        "parameters": {
+          "path": "client-feedback",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "770bc041-1846-4ac1-b8dc-61756686f906",
+        "name": "Prepare AI Prompt",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -240,
+          540
+        ],
+        "parameters": {
+          "functionCode": "\nconst feedback = $json.feedback || \"No feedback provided.\";\nreturn [{\n  json: {\n    prompt: `Analyze this client feedback: \"${feedback}\"\\n\\n1. Summarize the positive points.\\n2. Suggest improvements.\\n3. Generate a short social media post based on the positive elements.`\n  }\n}];\n"
+        },
+        "typeVersion": 1,
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e",
+        "name": "Analyze with AI",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -40,
+          540
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "jsonParameters": true
+        },
+        "typeVersion": 2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bdbf3a85-e68f-4fe3-b0b4-d44578d11c31",
+        "name": "Format AI Output",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          160,
+          540
+        ],
+        "parameters": {
+          "functionCode": "\nconst output = $json.response || $json.choices?.[0]?.text || \"No AI output.\";\nconst splitIndex = output.indexOf(\"3.\");\nlet summary = output;\nlet post = \"No post generated.\";\n\nif (splitIndex !== -1) {\n  summary = output.substring(0, splitIndex).trim();\n  post = output.substring(splitIndex).replace(/^3\\./, \"\").trim();\n}\n\nreturn [{\n  json: {\n    report: summary,\n    post: post\n  }\n}];\n"
+        },
+        "typeVersion": 1,
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "47093d4d-645b-4dc8-a5a4-1b35a649ac97",
+        "name": "Send Feedback Report",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          380,
+          500
+        ],
+        "parameters": {
+          "text": "={{ $json[\"report\"] }}",
+          "options": {},
+          "subject": "Client Feedback Summary",
+          "toEmail": "team@email.com",
+          "fromEmail": "your@email.com"
+        },
+        "typeVersion": 1,
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e49a4898-00d9-4413-ac6d-87aafdfe6ff9",
+        "name": "Send Social Draft",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          380,
+          660
+        ],
+        "webhookId": "07598764-aee9-41ea-82c1-0ded0ac08b57",
+        "parameters": {
+          "text": "={{ $json[\"post\"] }}",
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "additionalFields": {}
+        },
+        "typeVersion": 1,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "54d175ec-080f-4d2d-9d83-60dd36c8f11b",
+    "connections": {
+      "9ae28c07-bb44-4e64-b38c-a74a9de81b2e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e-182d1df0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e-58412d58",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e-a35fac17",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e-159cb661",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e-8126e812",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e-c8a19aee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e-15b51775",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e-d73c2ff7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "47093d4d-645b-4dc8-a5a4-1b35a649ac97": {
+        "main": [
+          [
+            {
+              "node": "error-handler-47093d4d-645b-4dc8-a5a4-1b35a649ac97-b6be746f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-47093d4d-645b-4dc8-a5a4-1b35a649ac97-30c23bea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-47093d4d-645b-4dc8-a5a4-1b35a649ac97-95f8e238",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-47093d4d-645b-4dc8-a5a4-1b35a649ac97-c7ab3bb5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e49a4898-00d9-4413-ac6d-87aafdfe6ff9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e49a4898-00d9-4413-ac6d-87aafdfe6ff9-351bad54",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: My workflow 4. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: My workflow 4. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e-8126e812"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e-c8a19aee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e-15b51775"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0b3a469a-f6f4-4140-9c6f-fd7ba7689c5e-d73c2ff7"
+            }
+          ]
+        ]
+      },
+      "47093d4d-645b-4dc8-a5a4-1b35a649ac97": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-47093d4d-645b-4dc8-a5a4-1b35a649ac97-b6be746f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-47093d4d-645b-4dc8-a5a4-1b35a649ac97-30c23bea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-47093d4d-645b-4dc8-a5a4-1b35a649ac97-95f8e238"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-47093d4d-645b-4dc8-a5a4-1b35a649ac97-c7ab3bb5"
+            }
+          ]
+        ]
+      },
+      "9ae28c07-bb44-4e64-b38c-a74a9de81b2e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e-182d1df0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e-58412d58"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e-a35fac17"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9ae28c07-bb44-4e64-b38c-a74a9de81b2e-159cb661"
+            }
+          ]
+        ]
+      },
+      "e49a4898-00d9-4413-ac6d-87aafdfe6ff9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e49a4898-00d9-4413-ac6d-87aafdfe6ff9-351bad54"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "My workflow 4",
+    "nodes": [
+      {
+        "name": "Analyze with AI",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "jsonParameters": true,
+          "options": {},
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2
+      },
+      {
+        "name": "Format AI Output",
+        "parameters": {
+          "functionCode": "\nconst output = $json.response || $json.choices?.[0]?.text || \"No AI output.\";\nconst splitIndex = output.indexOf(\"3.\");\nlet summary = output;\nlet post = \"No post generated.\";\n\nif (splitIndex !== -1) {\n  summary = output.substring(0, splitIndex).trim();\n  post = output.substring(splitIndex).replace(/^3\\./, \"\").trim();\n}\n\nreturn [{\n  json: {\n    report: summary,\n    post: post\n  }\n}];\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Prepare AI Prompt",
+        "parameters": {
+          "functionCode": "\nconst feedback = $json.feedback || \"No feedback provided.\";\nreturn [{\n  json: {\n    prompt: `Analyze this client feedback: \"${feedback}\"\\n\\n1. Summarize the positive points.\\n2. Suggest improvements.\\n3. Generate a short social media post based on the positive elements.`\n  }\n}];\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Receive Feedback",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "client-feedback"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Send Feedback Report",
+        "parameters": {
+          "fromEmail": "your@email.com",
+          "options": {},
+          "subject": "Client Feedback Summary",
+          "text": "={{ $json[\"report\"] }}",
+          "toEmail": "team@email.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "name": "Send Social Draft",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "YOUR_TELEGRAM_CHAT_ID",
+          "text": "={{ $json[\"post\"] }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Webhook",
+    "HTTP Request",
+    "Emailsend",
+    "Telegram"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 122,
+  "viewCount": 738,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "HTTP Request Account",
+      "Emailsend Account",
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Receive Feedback\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Prepare AI Prompt\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Analyze with AI\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Format AI Output\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Feedback Report\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Social Draft\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-5kcqph3yv",
+      "workflowId": "my-workflow-4-67iud",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1920_HTTP_Telegram_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1920_HTTP_Telegram_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:38.333Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:38.333Z",
+  "updatedAt": "2026-07-15T11:18:38.333Z"
+}

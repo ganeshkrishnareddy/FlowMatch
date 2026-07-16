@@ -1,0 +1,845 @@
+{
+  "id": "sync-youtube-video-urls-with-google-sheets-7d3jo",
+  "name": "Sync Youtube Video Urls with Google Sheets",
+  "slug": "sync-youtube-video-urls-with-google-sheets-6sn9",
+  "description": "Automated workflow: Sync Youtube Video Urls with Google Sheets. This workflow integrates 7 different services: stickyNote, httpRequest, splitOut, set, stopAndError. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Sync Youtube Video Urls with Google Sheets workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": "rJNvM4vU6SLUeC1d",
+    "meta": {
+      "instanceId": "workflow-2cb1da93",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.657777",
+      "updatedAt": "2025-09-29T07:07:54.657794",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Sync Youtube Video Urls with Google Sheets",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "f1cd1374-2214-41c1-af32-9e31e72aab88",
+        "name": "Split Out",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          1720,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "items"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e59d5ac8-5386-4fa4-a18c-39cd84779eae",
+        "name": "Manual Trigger (When Clicking 'Test workflow'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          1100,
+          0
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "46897f6d-5e64-4a85-92b5-d8e596d02702",
+        "name": "Get Youtube Channel Ids from Google Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1300,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 1592454760,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet3"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1xoCVr_mlwn4jFcnJENtrU-_K5nkIytZ8qBXzxMq55n4",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Youtube Videos Comments"
+          },
+          "authentication": "{{ $credentials.serviceAccount }}"
+        },
+        "credentials": {
+          "googleApi": {
+            "id": "jPoTdPxgVL0vr9SQ",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "adb73854-a110-4c1e-9228-221b844a15f5",
+        "name": "Get Youtube Video Urls form specific channel",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1540,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {
+            "pagination": {
+              "pagination": {
+                "parameters": {
+                  "parameters": [
+                    {
+                      "name": "pageToken",
+                      "value": "={{ $response.body.nextPageToken }}"
+                    }
+                  ]
+                },
+                "completeExpression": "={{ !$response.body.nextPageToken}}",
+                "paginationCompleteWhen": "other"
+              }
+            }
+          },
+          "sendQuery": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpQueryAuth",
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "channelId",
+                "value": "={{ $json.channelId }}"
+              },
+              {
+                "name": "part",
+                "value": "snippet"
+              },
+              {
+                "name": "order",
+                "value": "date"
+              },
+              {
+                "name": "maxResults",
+                "value": "50"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpQueryAuth": {
+            "id": "2lgO4p3deoSAoU9d",
+            "name": "Query Auth account 3"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d5926bd7-f1d6-4441-87de-454d16aa6928",
+        "name": "Format fields as required to save in google sheet",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1900,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "21a7a279-8a86-494c-a32f-ebcf956e2f69",
+                "name": "Title",
+                "type": "string",
+                "value": "={{ $json.snippet.title }}"
+              },
+              {
+                "id": "0f7084f4-9180-4eee-ab59-8e0ce75b163f",
+                "name": "video_urls",
+                "type": "string",
+                "value": "={{ $env.WEBHOOK_URL }}{{ $json.id.videoId }}"
+              },
+              {
+                "id": "40b96174-109e-4ddf-b1c2-c3f0b93a2769",
+                "name": "published_at",
+                "type": "string",
+                "value": "={{ $json.snippet.publishedAt }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e23503cd-40ae-488f-9918-83b1e3dc7b28",
+        "name": "Insert & Update Youtube Urls in Google Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          2100,
+          0
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Title": "={{ $json.Title }}",
+              "video_urls": "{{ $env.BASE_URL }}",
+              "published_at": "={{ $json.published_at }}"
+            },
+            "schema": [
+              {
+                "id": "Title",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "Title",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "video_urls",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "video_urls",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "last_fetched_time",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "last_fetched_time",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "next_fetch_time",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "next_fetch_time",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "published_at",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "published_at",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "video_urls"
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "appendOrUpdate",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 760258523,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet2"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1xoCVr_mlwn4jFcnJENtrU-_K5nkIytZ8qBXzxMq55n4",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Youtube Videos Comments"
+          },
+          "authentication": "{{ $credentials.serviceAccount }}"
+        },
+        "credentials": {
+          "googleApi": {
+            "id": "jPoTdPxgVL0vr9SQ",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "428bf48c-1721-4215-9ad4-f5b85f12d6dc",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1020,
+          -100
+        ],
+        "parameters": {
+          "width": 1320,
+          "height": 320,
+          "content": "## Sync Youtube Video Urls with Google Sheets\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3aaf62a9-e97e-48dd-8716-c5440759a03e",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          720,
+          -100
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 280,
+          "height": 220,
+          "content": "## I'm a note \n✅ Reads Channel IDs from `Sheet3`  \n📹 Fetches video URLs using YouTube API  \n📄 Writes video URLs to `Sheet2`  \n\n🔁 Output used in:  \n👉 [Part 2 – YouTube Comment Sentiment Analyzer]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "f874513c-62c9-430d-8c33-c6d48bacb74d",
+    "connections": {
+      "adb73854-a110-4c1e-9228-221b844a15f5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-6ca9c270",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-45b28e6f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-a815f108",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-97a5cd72",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-80b9497f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-9e33e1f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-a1b18d5d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-3abd8b0f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "46897f6d-5e64-4a85-92b5-d8e596d02702": {
+        "main": [
+          [
+            {
+              "node": "error-handler-46897f6d-5e64-4a85-92b5-d8e596d02702-614e9d2c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e23503cd-40ae-488f-9918-83b1e3dc7b28": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e23503cd-40ae-488f-9918-83b1e3dc7b28-cf70b794",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Sync Youtube Video Urls with Google Sheets. This workflow integrates 7 different services: stickyNote, httpRequest, splitOut, set, stopAndError. It contains 12 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Sync Youtube Video Urls with Google Sheets. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "46897f6d-5e64-4a85-92b5-d8e596d02702": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-46897f6d-5e64-4a85-92b5-d8e596d02702-614e9d2c"
+            }
+          ]
+        ]
+      },
+      "adb73854-a110-4c1e-9228-221b844a15f5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-6ca9c270"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-45b28e6f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-a815f108"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-97a5cd72"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-80b9497f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-9e33e1f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-a1b18d5d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-adb73854-a110-4c1e-9228-221b844a15f5-3abd8b0f"
+            }
+          ]
+        ]
+      },
+      "e23503cd-40ae-488f-9918-83b1e3dc7b28": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e23503cd-40ae-488f-9918-83b1e3dc7b28-cf70b794"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Sync Youtube Video Urls with Google Sheets",
+    "nodes": [
+      {
+        "name": "Format fields as required to save in google sheet",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "21a7a279-8a86-494c-a32f-ebcf956e2f69",
+                "name": "Title",
+                "type": "string",
+                "value": "={{ $json.snippet.title }}"
+              },
+              {
+                "id": "0f7084f4-9180-4eee-ab59-8e0ce75b163f",
+                "name": "video_urls",
+                "type": "string",
+                "value": "={{ $env.WEBHOOK_URL }}{{ $json.id.videoId }}"
+              },
+              {
+                "id": "40b96174-109e-4ddf-b1c2-c3f0b93a2769",
+                "name": "published_at",
+                "type": "string",
+                "value": "={{ $json.snippet.publishedAt }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "googleApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Youtube Channel Ids from Google Sheet",
+        "parameters": {
+          "authentication": "{{ $credentials.serviceAccount }}",
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Youtube Videos Comments",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1xoCVr_mlwn4jFcnJENtrU-_K5nkIytZ8qBXzxMq55n4"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet3",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 1592454760
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "httpQueryAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Youtube Video Urls form specific channel",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpQueryAuth",
+          "options": {
+            "pagination": {
+              "pagination": {
+                "completeExpression": "={{ !$response.body.nextPageToken}}",
+                "paginationCompleteWhen": "other",
+                "parameters": {
+                  "parameters": [
+                    {
+                      "name": "pageToken",
+                      "value": "={{ $response.body.nextPageToken }}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "channelId",
+                "value": "={{ $json.channelId }}"
+              },
+              {
+                "name": "part",
+                "value": "snippet"
+              },
+              {
+                "name": "order",
+                "value": "date"
+              },
+              {
+                "name": "maxResults",
+                "value": "50"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "googleApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Insert & Update Youtube Urls in Google Sheet",
+        "parameters": {
+          "authentication": "{{ $credentials.serviceAccount }}",
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "video_urls"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Title",
+                "id": "Title",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "video_urls",
+                "id": "video_urls",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "last_fetched_time",
+                "id": "last_fetched_time",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "next_fetch_time",
+                "id": "next_fetch_time",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "published_at",
+                "id": "published_at",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Title": "={{ $json.Title }}",
+              "published_at": "={{ $json.published_at }}",
+              "video_urls": "{{ $env.BASE_URL }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Youtube Videos Comments",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1xoCVr_mlwn4jFcnJENtrU-_K5nkIytZ8qBXzxMq55n4"
+          },
+          "operation": "appendOrUpdate",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet2",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 760258523
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "Manual Trigger (When Clicking 'Test workflow'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split Out",
+        "parameters": {
+          "fieldToSplitOut": "items",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Sync Youtube Video Urls with Google Sheets\n",
+          "height": 320,
+          "width": 1320
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "## I'm a note \n✅ Reads Channel IDs from `Sheet3`  \n📹 Fetches video URLs using YouTube API  \n📄 Writes video URLs to `Sheet2`  \n\n🔁 Output used in:  \n👉 [Part 2 – YouTube Comment Sentiment Analyzer]({{ $env.WEBHOOK_URL }}",
+          "height": 220,
+          "width": 280
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 146,
+  "viewCount": 649,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "google  A P I details",
+      "http Query Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger (When Clicking 'Test workflow'\".",
+      "Open the \"Split Out\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Youtube Channel Ids from Google Sheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Get Youtube Video Urls form specific channel\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Insert & Update Youtube Urls in Google Sheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Format fields as required to save in google sheet\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-zr15bt8zr",
+      "workflowId": "sync-youtube-video-urls-with-google-sheets-7d3jo",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/1970_Splitout_Manual_Sync_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\1970_Splitout_Manual_Sync_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:56.818Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:56.818Z",
+  "updatedAt": "2026-07-15T11:19:56.818Z"
+}

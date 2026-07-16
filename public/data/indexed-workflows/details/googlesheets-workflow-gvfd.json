@@ -1,0 +1,513 @@
+{
+  "id": "googlesheets-workflow-r24ja",
+  "name": "Googlesheets Workflow",
+  "slug": "googlesheets-workflow-gvfd",
+  "description": "Automated workflow: Googlesheets Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Googlesheets Workflow workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1240,
+          1120
+        ],
+        "parameters": {
+          "range": "A:D",
+          "options": {},
+          "sheetId": "qwertz",
+          "operation": "append",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "{{ $credentials.googleSheetsOAuth2Api.id }}",
+            "name": "google_sheets_oauth"
+          }
+        },
+        "typeVersion": 1,
+        "id": "13bef79a-e880-4db0-9b12-1a6a3c0b4c88",
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "AWS Transcribe 2",
+        "type": "n8n-nodes-base.awsTranscribe",
+        "position": [
+          920,
+          1120
+        ],
+        "parameters": {
+          "operation": "get",
+          "transcriptionJobName": "={{$json[\"Key\"]}}"
+        },
+        "credentials": {
+          "aws": {
+            "id": "{{ $credentials.aws.id }}",
+            "name": "aws"
+          }
+        },
+        "typeVersion": 1,
+        "id": "ba05ee88-981c-4043-a98e-6439a9ce6684",
+        "notes": "This awsTranscribe node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "AWS Transcribe 1",
+        "type": "n8n-nodes-base.awsTranscribe",
+        "position": [
+          600,
+          1120
+        ],
+        "parameters": {
+          "options": {},
+          "mediaFileUri": "=s3://{{$node[\"AWS S3 2\"].parameter[\"bucketName\"]}}/{{$json[\"Key\"]}}",
+          "transcriptionJobName": "={{$json[\"Key\"]}}"
+        },
+        "credentials": {
+          "aws": {
+            "id": "{{ $credentials.aws.id }}",
+            "name": "aws"
+          }
+        },
+        "typeVersion": 1,
+        "id": "2506b121-ac0d-4b6e-8026-2732c45de8d4",
+        "notes": "This awsTranscribe node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "AWS S3 1",
+        "type": "n8n-nodes-base.awsS3",
+        "position": [
+          280,
+          1120
+        ],
+        "parameters": {
+          "tagsUi": {
+            "tagsValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "value": "gdrive"
+              }
+            ]
+          },
+          "fileName": "={{$json[\"name\"]}}",
+          "operation": "upload",
+          "binaryData": false,
+          "bucketName": "mybucket",
+          "fileContent": "street",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "aws": {
+            "id": "{{ $credentials.aws.id }}",
+            "name": "aws"
+          }
+        },
+        "typeVersion": 1,
+        "id": "078b14e8-d4a0-44f8-acde-0db7e1fc62c6",
+        "notes": "This awsS3 node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "AWS S3 2",
+        "type": "n8n-nodes-base.awsS3",
+        "position": [
+          440,
+          1120
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "getAll",
+          "bucketName": "mybucket"
+        },
+        "credentials": {
+          "aws": {
+            "id": "{{ $credentials.aws.id }}",
+            "name": "aws"
+          }
+        },
+        "typeVersion": 1,
+        "id": "511845ba-ca6c-41d0-856d-c4bacc23b345",
+        "notes": "This awsS3 node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1080,
+          1120
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "transcription_date",
+                "value": "={{$node[\"AWS Transcribe 1\"].json[\"CreationTime\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "recording_name",
+                "value": "={{$node[\"AWS Transcribe 1\"].json[\"TranscriptionJobName\"]}}"
+              },
+              {
+                "name": "recording_link",
+                "value": "={{$node[\"Google Drive Trigger\"].json[\"webContentLink\"]}}"
+              },
+              {
+                "name": "transcription",
+                "value": "={{$json[\"transcript\"]}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "810a08ce-af7f-4803-bf6d-4d856acfcc0f",
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Google Drive Trigger1",
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "position": [
+          120,
+          1120
+        ],
+        "parameters": {
+          "event": "fileCreated",
+          "options": {},
+          "triggerOn": "specificFolder",
+          "folderToWatch": "{{ $env.WEBHOOK_URL }}[your_id]"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "{{ $credentials.googleDriveOAuth2Api.id }}",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "20535b08-26ae-4ea0-86cc-21895d99d8f0",
+        "notes": "This googleDriveTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Wait",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          760,
+          1120
+        ],
+        "webhookId": "12345",
+        "parameters": {
+          "resume": "webhook",
+          "options": {
+            "responsePropertyName": "transcript"
+          },
+          "responseMode": "lastNode"
+        },
+        "typeVersion": 1,
+        "id": "22192620-3b67-4b52-8800-38097fd43019",
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-154e6ef7",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Googlesheets Workflow",
+    "description": "Automated workflow: Googlesheets Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-9bfaf972",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.193658",
+      "updatedAt": "2025-09-29T07:07:42.193664",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Googlesheets Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Googlesheets Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "aws": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "AWS S3 1",
+        "parameters": {
+          "additionalFields": {},
+          "binaryData": false,
+          "bucketName": "mybucket",
+          "fileContent": "street",
+          "fileName": "={{$json[\"name\"]}}",
+          "operation": "upload",
+          "tagsUi": {
+            "tagsValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "value": "gdrive"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.awsS3",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "aws": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "AWS S3 2",
+        "parameters": {
+          "bucketName": "mybucket",
+          "operation": "getAll",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.awsS3",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "aws": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "AWS Transcribe 1",
+        "parameters": {
+          "mediaFileUri": "=s3://{{$node[\"AWS S3 2\"].parameter[\"bucketName\"]}}/{{$json[\"Key\"]}}",
+          "options": {},
+          "transcriptionJobName": "={{$json[\"Key\"]}}"
+        },
+        "type": "n8n-nodes-base.awsTranscribe",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "aws": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "AWS Transcribe 2",
+        "parameters": {
+          "operation": "get",
+          "transcriptionJobName": "={{$json[\"Key\"]}}"
+        },
+        "type": "n8n-nodes-base.awsTranscribe",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive Trigger1",
+        "parameters": {
+          "event": "fileCreated",
+          "folderToWatch": "{{ $env.WEBHOOK_URL }}[your_id]",
+          "options": {},
+          "triggerOn": "specificFolder"
+        },
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Sheets",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "operation": "append",
+          "options": {},
+          "range": "A:D",
+          "sheetId": "qwertz"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "transcription_date",
+                "value": "={{$node[\"AWS Transcribe 1\"].json[\"CreationTime\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "recording_name",
+                "value": "={{$node[\"AWS Transcribe 1\"].json[\"TranscriptionJobName\"]}}"
+              },
+              {
+                "name": "recording_link",
+                "value": "={{$node[\"Google Drive Trigger\"].json[\"webContentLink\"]}}"
+              },
+              {
+                "name": "transcription",
+                "value": "={{$json[\"transcript\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wait",
+        "parameters": {
+          "options": {
+            "responsePropertyName": "transcript"
+          },
+          "responseMode": "lastNode",
+          "resume": "webhook"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets",
+    "Awstranscribe",
+    "Awss3",
+    "Google Drive"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 128,
+  "viewCount": 696,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "Awstranscribe Account",
+      "Awss3 Account",
+      "Google Drive Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details",
+      "aws details",
+      "google Drive  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Google Drive Trigger1\".",
+      "Open the \"Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"AWS Transcribe 2\" node (n8n-nodes-base.awsTranscribe) and configure the action parameters, mappings, and fields.",
+      "Open the \"AWS Transcribe 1\" node (n8n-nodes-base.awsTranscribe) and configure the action parameters, mappings, and fields.",
+      "Open the \"AWS S3 1\" node (n8n-nodes-base.awsS3) and configure the action parameters, mappings, and fields.",
+      "Open the \"AWS S3 2\" node (n8n-nodes-base.awsS3) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ya9zuljpk",
+      "workflowId": "googlesheets-workflow-r24ja",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Awss3/0149_Awss3_Wait_Automate_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Awss3\\0149_Awss3_Wait_Automate_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:16.254Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.254Z",
+  "updatedAt": "2026-07-15T11:18:16.254Z"
+}

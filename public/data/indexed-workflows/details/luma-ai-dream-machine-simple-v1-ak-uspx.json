@@ -1,0 +1,973 @@
+{
+  "id": "luma-ai-dream-machine-simple-v1-ak-ldosu",
+  "name": "Luma AI Dream Machine - Simple v1 - AK",
+  "slug": "luma-ai-dream-machine-simple-v1-ak-uspx",
+  "description": "Automated workflow: Luma AI Dream Machine - Simple v1 - AK. This workflow integrates 8 different services: stickyNote, httpRequest, airtable, code, executionData. It contains 10 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Luma AI Dream Machine - Simple v1 - AK workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": "2pMoIW58KP6ZeGir",
+    "meta": {
+      "instanceId": "workflow-b1fe2309",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.852939",
+      "updatedAt": "2025-09-29T07:07:42.852955",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Luma AI Dream Machine - Simple v1 - AK",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "dbe1dbcc-05a0-4439-869c-157e51a99dd1",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -440,
+          0
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "603f7fdd-e590-4a51-b606-a9bb9396a0c0",
+        "name": "Text 2 Video",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"model\": \"ray-2\",\n  \"prompt\": {{ JSON.stringify($('Global SETTINGS').first().json.video_prompt + \"; camera motion: \" + $json.action) }},\n  \"aspect_ratio\": \"{{ $('Global SETTINGS').first().json.aspect_ratio }}\",\n  \"duration\": \"{{ $('Global SETTINGS').item.json.duration }}\",\n  \"loop\": {{ $('Global SETTINGS').first().json.loop }},\n  \"callback_url\": \"{{ $('Global SETTINGS').first().json.callback_url }}\"\n  \n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "zzIlODir90EUTwHh",
+            "name": "Luma Header Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "494ac05e-e0c5-465e-b805-2749683ab789",
+        "name": "RANDOM Camera Motion",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const items = [\n  \"Static\",\n  \"Move Left\",\n  \"Move Right\",\n  \"Move Up\",\n  \"Move Down\",\n  \"Push In\",\n  \"Pull Out\",\n  \"Zoom In\",\n  \"Zoom Out\",\n  \"Pan Left\",\n  \"Pan Right\",\n  \"Orbit Left\",\n  \"Orbit Right\",\n  \"Crane Up\",\n  \"Crane Down\"\n];\n\nconst randomItem = items[Math.floor(Math.random() * items.length)];\n\nreturn [{ json: { action: randomItem } }];\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "30ba7cfc-d2c3-478f-ae01-0a3397ceb439",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -260,
+          -120
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 180,
+          "content": "## Define your SETTINGS here"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "12924397-b2a4-43a0-8ec5-1b13c0357e40",
+        "name": "Global SETTINGS",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -220,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "7064f685-d91f-4049-9fcb-dd7018c1bc8d",
+                "name": "aspect_ratio",
+                "type": "string",
+                "value": "9:16"
+              },
+              {
+                "id": "3d6d3fe0-4e4a-4d1b-9f6a-08037a4e2785",
+                "name": "video_prompt",
+                "type": "string",
+                "value": "a superhero flying through a volcano"
+              },
+              {
+                "id": "7ae48bee-0be5-487f-8d6d-ea7fe98fdd36",
+                "name": "loop",
+                "type": "string",
+                "value": "true"
+              },
+              {
+                "id": "82930db0-971e-4de4-911d-ff5a7fab5d67",
+                "name": "duration",
+                "type": "string",
+                "value": "5s"
+              },
+              {
+                "id": "b51d9834-87c8-4358-a257-6a02ebe2576d",
+                "name": "cluster_id",
+                "type": "string",
+                "value": "={{ Date.now() + '_' + Math.random().toString(36).slice(2, 10) }}"
+              },
+              {
+                "id": "8756fe2d-df04-48d4-9cd4-d29b8d9a3ab1",
+                "name": "airtable_base",
+                "type": "string",
+                "value": "appvk87mtcwRve5p5"
+              },
+              {
+                "id": "a83707ef-3a1c-4b3c-939c-1376bc43cc76",
+                "name": "airtable_table_generated_videos",
+                "type": "string",
+                "value": "tblOzRFWgcsfttRWK"
+              },
+              {
+                "id": "694528cd-c51e-45ac-8dbe-1b33b347f590",
+                "name": "callback_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9f4732b5-8e3e-4fb6-942f-32c72b3eb041",
+        "name": "ADD Video Info",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          660,
+          0
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Global SETTINGS').first().json.airtable_base }}"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Global SETTINGS').first().json.airtable_table_generated_videos }}"
+          },
+          "columns": {
+            "value": {
+              "Model": "={{ $json.model }}",
+              "Aspect": "={{ $json.request.aspect_ratio }}",
+              "Length": "={{ $json.request.duration }}",
+              "Prompt": "={{ $('Global SETTINGS').first().json.video_prompt }}",
+              "Status": "Done",
+              "Cluster ID": "={{ $('Global SETTINGS').first().json.cluster_id }}",
+              "Resolution": "={{ $json.request.resolution }}",
+              "Generation ID": "={{ $json.id }}"
+            },
+            "schema": [
+              {
+                "id": "Generation ID",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Generation ID",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Status",
+                "type": "options",
+                "display": true,
+                "options": [
+                  {
+                    "name": "Todo",
+                    "value": "Todo"
+                  },
+                  {
+                    "name": "In progress",
+                    "value": "In progress"
+                  },
+                  {
+                    "name": "Done",
+                    "value": "Done"
+                  }
+                ],
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Status",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Content Title",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Content Title",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Video URL",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Video URL",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Thumb URL",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Thumb URL",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Prompt",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Prompt",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "VO",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "VO",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Aspect",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Aspect",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Model",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Model",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Resolution",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Resolution",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Length",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Length",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Created",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": true,
+                "required": false,
+                "displayName": "Created",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Cluster ID",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Cluster ID",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "create"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "yqBrLbgHXLcwqH0p",
+            "name": "AlexK Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9923373d-d4ce-42bb-9f2d-34350f64ac5b",
+        "name": "Execution Data",
+        "type": "n8n-nodes-base.executionData",
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This executionData node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5044e1f2-c985-4c3a-9386-f4fe4f85f37b",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -40,
+          -120
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 840,
+          "content": "## This is where the magic happens... "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "e756199d-31fc-4e2f-8937-3625295a147c",
+    "connections": {
+      "603f7fdd-e590-4a51-b606-a9bb9396a0c0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-0cfc384a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-8ab80eef",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-845251f6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-dc0d8e0a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-4f413270",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-bdb5ae9e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-2408fc4e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-2abaac62",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Luma AI Dream Machine - Simple v1 - AK. This workflow integrates 8 different services: stickyNote, httpRequest, airtable, code, executionData. It contains 10 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Luma AI Dream Machine - Simple v1 - AK. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "603f7fdd-e590-4a51-b606-a9bb9396a0c0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-0cfc384a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-8ab80eef"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-845251f6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-dc0d8e0a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-4f413270"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-bdb5ae9e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-2408fc4e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-603f7fdd-e590-4a51-b606-a9bb9396a0c0-2abaac62"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Luma AI Dream Machine - Simple v1 - AK",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "ADD Video Info",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Global SETTINGS').first().json.airtable_base }}"
+          },
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Generation ID",
+                "id": "Generation ID",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Status",
+                "id": "Status",
+                "options": [
+                  {
+                    "name": "Todo",
+                    "value": "Todo"
+                  },
+                  {
+                    "name": "In progress",
+                    "value": "In progress"
+                  },
+                  {
+                    "name": "Done",
+                    "value": "Done"
+                  }
+                ],
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "options"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Content Title",
+                "id": "Content Title",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Video URL",
+                "id": "Video URL",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Thumb URL",
+                "id": "Thumb URL",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Prompt",
+                "id": "Prompt",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "VO",
+                "id": "VO",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Aspect",
+                "id": "Aspect",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Model",
+                "id": "Model",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Resolution",
+                "id": "Resolution",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Length",
+                "id": "Length",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Created",
+                "id": "Created",
+                "readOnly": true,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Cluster ID",
+                "id": "Cluster ID",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Aspect": "={{ $json.request.aspect_ratio }}",
+              "Cluster ID": "={{ $('Global SETTINGS').first().json.cluster_id }}",
+              "Generation ID": "={{ $json.id }}",
+              "Length": "={{ $json.request.duration }}",
+              "Model": "={{ $json.model }}",
+              "Prompt": "={{ $('Global SETTINGS').first().json.video_prompt }}",
+              "Resolution": "={{ $json.request.resolution }}",
+              "Status": "Done"
+            }
+          },
+          "operation": "create",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Global SETTINGS').first().json.airtable_table_generated_videos }}"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Execution Data",
+        "parameters": {},
+        "type": "n8n-nodes-base.executionData",
+        "typeVersion": 1
+      },
+      {
+        "name": "Global SETTINGS",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "7064f685-d91f-4049-9fcb-dd7018c1bc8d",
+                "name": "aspect_ratio",
+                "type": "string",
+                "value": "9:16"
+              },
+              {
+                "id": "3d6d3fe0-4e4a-4d1b-9f6a-08037a4e2785",
+                "name": "video_prompt",
+                "type": "string",
+                "value": "a superhero flying through a volcano"
+              },
+              {
+                "id": "7ae48bee-0be5-487f-8d6d-ea7fe98fdd36",
+                "name": "loop",
+                "type": "string",
+                "value": "true"
+              },
+              {
+                "id": "82930db0-971e-4de4-911d-ff5a7fab5d67",
+                "name": "duration",
+                "type": "string",
+                "value": "5s"
+              },
+              {
+                "id": "b51d9834-87c8-4358-a257-6a02ebe2576d",
+                "name": "cluster_id",
+                "type": "string",
+                "value": "={{ Date.now() + '_' + Math.random().toString(36).slice(2, 10) }}"
+              },
+              {
+                "id": "8756fe2d-df04-48d4-9cd4-d29b8d9a3ab1",
+                "name": "airtable_base",
+                "type": "string",
+                "value": "appvk87mtcwRve5p5"
+              },
+              {
+                "id": "a83707ef-3a1c-4b3c-939c-1376bc43cc76",
+                "name": "airtable_table_generated_videos",
+                "type": "string",
+                "value": "tblOzRFWgcsfttRWK"
+              },
+              {
+                "id": "694528cd-c51e-45ac-8dbe-1b33b347f590",
+                "name": "callback_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "RANDOM Camera Motion",
+        "parameters": {
+          "jsCode": "const items = [\n  \"Static\",\n  \"Move Left\",\n  \"Move Right\",\n  \"Move Up\",\n  \"Move Down\",\n  \"Push In\",\n  \"Pull Out\",\n  \"Zoom In\",\n  \"Zoom Out\",\n  \"Pan Left\",\n  \"Pan Right\",\n  \"Orbit Left\",\n  \"Orbit Right\",\n  \"Crane Up\",\n  \"Crane Down\"\n];\n\nconst randomItem = items[Math.floor(Math.random() * items.length)];\n\nreturn [{ json: { action: randomItem } }];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 3,
+          "content": "## Define your SETTINGS here",
+          "width": 180
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "## This is where the magic happens... ",
+          "width": 840
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Text 2 Video",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"model\": \"ray-2\",\n  \"prompt\": {{ JSON.stringify($('Global SETTINGS').first().json.video_prompt + \"; camera motion: \" + $json.action) }},\n  \"aspect_ratio\": \"{{ $('Global SETTINGS').first().json.aspect_ratio }}\",\n  \"duration\": \"{{ $('Global SETTINGS').item.json.duration }}\",\n  \"loop\": {{ $('Global SETTINGS').first().json.loop }},\n  \"callback_url\": \"{{ $('Global SETTINGS').first().json.callback_url }}\"\n  \n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Airtable"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 187,
+  "viewCount": 406,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Airtable Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details",
+      "airtable Token  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Text 2 Video\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"ADD Video Info\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Execution Data\" node (n8n-nodes-base.executionData) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Global SETTINGS\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-xf9tnvo8l",
+      "workflowId": "luma-ai-dream-machine-simple-v1-ak-ldosu",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0753_Code_Executiondata_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0753_Code_Executiondata_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:16.902Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.902Z",
+  "updatedAt": "2026-07-15T11:18:16.902Z"
+}

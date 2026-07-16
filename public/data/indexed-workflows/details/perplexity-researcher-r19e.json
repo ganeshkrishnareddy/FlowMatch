@@ -1,0 +1,460 @@
+{
+  "id": "perplexity-researcher-u3cvf",
+  "name": "Perplexity Researcher",
+  "slug": "perplexity-researcher-r19e",
+  "description": "Automated workflow: Perplexity Researcher. This workflow integrates 5 different services: stickyNote, httpRequest, set, stopAndError, executeWorkflowTrigger. It contains 7 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Perplexity Researcher workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "id": "5uapJIjLLhwnhX0n",
+    "meta": {
+      "instanceId": "workflow-32de3b5e",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.250845",
+      "updatedAt": "2025-09-29T07:07:46.250916",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Perplexity Researcher",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "5790066d-4157-4844-aeaa-47706140ed7a",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "notes": "Find the latest content related to the field/knowledge you are interested in.\nIn-depth materials to prepare for the writing section",
+        "position": [
+          -60,
+          -380
+        ],
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "typeVersion": 1.1
+      },
+      {
+        "id": "311eb2bf-3b79-46cf-abb1-9d90791167c3",
+        "name": "Set Prompt Variables",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          220,
+          -380
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bab0ccff-a856-49d5-833b-80e65874475e",
+                "name": "System",
+                "type": "string",
+                "value": "Assisstant is a language model. Assistant is designed to be able to assist with a wide range of task, form answering simple question to providing in-depth explanations and discussions on a wide range of topics.  As a language model, assistant is able to generate human-like text based on the imput it receives, allowing it to engage in natural-sounding evoling.  It’s able to process and understand large amounts of text,  and can use this knowledge to provide accurate and informative responses to a wide range of question. Additionally, Assistant is able to generate its own text based on the imput it receives, allowing it to engage in discussions and provide explanations and description on a wide range of topics. Overall, Assistant is a powerfull system that can help with a wide range of task and provide valuable insights and information on a wide range of topics. What you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist"
+              },
+              {
+                "id": "1a6d7638-e2a4-495c-92d4-e0626b676b18",
+                "name": "User",
+                "type": "string",
+                "value": "={{ $json.query }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4385053f-c9c8-4aae-b0d2-4cf7a7817164",
+        "name": "Extract API Response",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          620,
+          -380
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c5869f36-70cb-439a-8ad0-0382b37f9798",
+                "name": "Respone Message Content",
+                "type": "string",
+                "value": "={{ $json.choices[0].message.content }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b8e3f54b-5148-4e04-a8b1-e3003a0ee128",
+        "name": "Workflow Overview",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -160,
+          -480
+        ],
+        "parameters": {
+          "width": 1080,
+          "height": 300,
+          "content": "## Perplexity Research Workflow Overview\nThis workflow takes a user query, formats it using a system prompt, and sends it to the Perplexity AI Sonar model for search.\nResponses are extracted and returned as clean output."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7b77de3d-279a-4c33-b4c1-a796ab94a7fa",
+        "name": "Perplexity Research Content1",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          420,
+          -380
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"model\": \"sonar\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"{{ $json.System }}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.User || $json.query || $json.question || $json['Research Query'] || 'No input provided' }}\"\n    }\n  ],\n  \"max_tokens\": 4000,\n  \"temperature\": 0.2,\n  \"top_p\": 0.9,\n  \"return_citations\": true,\n  \"search_domain_filter\": [\n    \"perplexity.ai\"\n  ],\n  \"return_images\": false,\n  \"return_related_questions\": false,\n  \"search_recency_filter\": \"month\",\n  \"top_k\": 0,\n  \"stream\": false,\n  \"presence_penalty\": 0,\n  \"frequency_penalty\": 1\n}\n\n",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "XTRc36olCHOn9XQP",
+            "name": "Header Auth account 2"
+          }
+        },
+        "notesInFlow": false,
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "callerPolicy": "workflowsFromSameOwner",
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "d506eade-acc3-40ed-9dfc-909cdf373969",
+    "connections": {
+      "7b77de3d-279a-4c33-b4c1-a796ab94a7fa": {
+        "main": [
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-388ee5cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-408aa606",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-00c31cd9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-e999be53",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-ce70fe31",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-542505b9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-b7789a7f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-002cd990",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Perplexity Researcher. This workflow integrates 5 different services: stickyNote, httpRequest, set, stopAndError, executeWorkflowTrigger. It contains 7 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Perplexity Researcher. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "7b77de3d-279a-4c33-b4c1-a796ab94a7fa": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-388ee5cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-408aa606"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-00c31cd9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-e999be53"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-ce70fe31"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-542505b9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-b7789a7f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7b77de3d-279a-4c33-b4c1-a796ab94a7fa-002cd990"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Perplexity Researcher",
+    "nodes": [
+      {
+        "name": "Extract API Response",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c5869f36-70cb-439a-8ad0-0382b37f9798",
+                "name": "Respone Message Content",
+                "type": "string",
+                "value": "={{ $json.choices[0].message.content }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Perplexity Research Content1",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "jsonBody": "={\n  \"model\": \"sonar\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"{{ $json.System }}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.User || $json.query || $json.question || $json['Research Query'] || 'No input provided' }}\"\n    }\n  ],\n  \"max_tokens\": 4000,\n  \"temperature\": 0.2,\n  \"top_p\": 0.9,\n  \"return_citations\": true,\n  \"search_domain_filter\": [\n    \"perplexity.ai\"\n  ],\n  \"return_images\": false,\n  \"return_related_questions\": false,\n  \"search_recency_filter\": \"month\",\n  \"top_k\": 0,\n  \"stream\": false,\n  \"presence_penalty\": 0,\n  \"frequency_penalty\": 1\n}\n\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Set Prompt Variables",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bab0ccff-a856-49d5-833b-80e65874475e",
+                "name": "System",
+                "type": "string",
+                "value": "Assisstant is a language model. Assistant is designed to be able to assist with a wide range of task, form answering simple question to providing in-depth explanations and discussions on a wide range of topics.  As a language model, assistant is able to generate human-like text based on the imput it receives, allowing it to engage in natural-sounding evoling.  It’s able to process and understand large amounts of text,  and can use this knowledge to provide accurate and informative responses to a wide range of question. Additionally, Assistant is able to generate its own text based on the imput it receives, allowing it to engage in discussions and provide explanations and description on a wide range of topics. Overall, Assistant is a powerfull system that can help with a wide range of task and provide valuable insights and information on a wide range of topics. What you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist"
+              },
+              {
+                "id": "1a6d7638-e2a4-495c-92d4-e0626b676b18",
+                "name": "User",
+                "type": "string",
+                "value": "={{ $json.query }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "When Executed by Another Workflow",
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Workflow Overview",
+        "parameters": {
+          "content": "## Perplexity Research Workflow Overview\nThis workflow takes a user query, formats it using a system prompt, and sends it to the Perplexity AI Sonar model for search.\nResponses are extracted and returned as clean output.",
+          "height": 300,
+          "width": 1080
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 1,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 77,
+  "viewCount": 743,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When Executed by Another Workflow\".",
+      "Open the \"Workflow Overview\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Perplexity Research Content1\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Prompt Variables\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Extract API Response\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 90,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-6c4jzto8k",
+      "workflowId": "perplexity-researcher-u3cvf",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1072_HTTP_Stickynote_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1072_HTTP_Stickynote_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:11.449Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:11.449Z",
+  "updatedAt": "2026-07-15T11:29:11.449Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

@@ -1,0 +1,893 @@
+{
+  "id": "insee-enrichment-for-agile-crm-kvf3l",
+  "name": "INSEE Enrichment for Agile CRM",
+  "slug": "insee-enrichment-for-agile-crm-zjdh",
+  "description": "Automated workflow: INSEE Enrichment for Agile CRM. This workflow integrates 10 different services: stickyNote, httpRequest, code, scheduleTrigger, merge. It contains 18 nodes and follows best practices for error handling and security.",
+  "shortDescription": "INSEE Enrichment for Agile CRM workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "id": "G0hO05fypS8n8uYu",
+    "meta": {
+      "instanceId": "workflow-7485cf23",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:43.376204",
+      "updatedAt": "2025-09-29T07:07:43.376217",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "INSEE Enrichment for Agile CRM",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "a45b34c1-514e-4221-b363-abf2d4de43c4",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -3440,
+          -320
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d406941b-80a1-43a3-ba19-2e29570192f2",
+        "name": "Find Company in SIREN database",
+        "type": "n8n-nodes-base.httpRequest",
+        "onError": "continueErrorOutput",
+        "position": [
+          -2660,
+          -220
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              },
+              {
+                "name": "X-INSEE-Api-Key-Integration",
+                "value": "={{ $('Set Insee API Key').all()[0].json['X-INSEE-Api-Key-Integration']  }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "alwaysOutputData": false,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6ab3818b-2f09-44e2-874a-87c51478572b",
+        "name": "Request all data from SIREN database",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -2420,
+          -240
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              },
+              {
+                "name": "X-INSEE-Api-Key-Integration",
+                "value": "={{ $('Set Insee API Key').all()[0].json['X-INSEE-Api-Key-Integration']  }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "89c223fe-289b-4d0f-922a-e9c0ad672b51",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -3420,
+          -640
+        ],
+        "parameters": {
+          "width": 460,
+          "height": 240,
+          "content": "### Enrich CRM data with data from French INSEE OpenDatabase API\nThis workflow takes all company entries from **Agile CRM** and enriches their data using the French [Insee Opendata API]({{ $env.API_BASE_URL }} (Free Access)\n\n__This will update :__ \n1) Official Address of the company headquarters\n2) Add government company id number (SIREN) in a Custom Field"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0bdc49dd-6f26-447f-a8ba-c2ba615dc7ec",
+        "name": "FilterOut all Company that have the ReadOnly Key set",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -2880,
+          -220
+        ],
+        "parameters": {
+          "jsCode": "// Get input data\nconst input = $input.all();\nconst output = input.filter(item => {\n    const properties = item.json.properties || [];\n    return !properties.some(property => property.name === \"RO\" && property.value === \"1\"); // Remove all ReadOnly entries\n}).map(item => {\n    const companyId = item.json.id;\n    const denominationUniteLegale = item.json.properties[0]?.value || null; \n    return {\n        json: {\n            companyId,\n            denominationUniteLegale\n        }\n    };\n});\n\n// Return the transformed output\nreturn output;\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0ef184f7-219c-4eb3-bfe0-4e68d2ce0b43",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -2940,
+          -640
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 647,
+          "height": 232,
+          "content": "### 👨‍🎤 Setup\n1. Add your **Agile CRM** credentials\n2. Link each AgileCRM node to the correct **Agile CRM** credentials\n3. Add your **INSEE** API Key to the **\"Set Insee API Key\"** node\n4. Make sure the **Custom Fields** for the **companies** are set as below (Admin Settings):\n   - Label : \"SIREN\", Type : \"Text Field\", Description \"N° de SIREN\"\n   - Label : \"RO\", Type : \"Number\", Description \"Locks entry from update\"\n5. Click on **Test Workflow** to make sure everything is working\n6. Configure schedule if needed and don't forget to change status to **Active**"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "78255253-195d-472d-a76c-ab63ceac126b",
+        "name": "Set Insee API Key",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -3260,
+          -220
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e993e665-cf31-48b1-8ca8-a4829dc82642",
+                "name": "X-INSEE-Api-Key-Integration",
+                "type": "string",
+                "value": "put-your-insee-api-key-here"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "90b13481-6570-4bfc-b3dc-4b6017c6c8b5",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -3440,
+          -140
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "88c8a6c6-2175-42c3-bfdb-f1d32a5d1c2d",
+        "name": "clean_route",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -2660,
+          -360
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "522d83f6-752e-40b4-a889-334f0a96998b",
+        "name": "Get all Compagnies from Agile CRM",
+        "type": "n8n-nodes-base.agileCrm",
+        "position": [
+          -3080,
+          -220
+        ],
+        "parameters": {
+          "options": {},
+          "resource": "company",
+          "operation": "getAll"
+        },
+        "credentials": {
+          "agileCrmApi": {
+            "id": "wb0EgiQFLQbiFuy4",
+            "name": "AgileCRM account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This agileCrm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8ff0632b-6aca-47d8-b611-72dbc8dec09b",
+        "name": "Enrich CRM with INSEE Data",
+        "type": "n8n-nodes-base.agileCrm",
+        "position": [
+          -1960,
+          -340
+        ],
+        "parameters": {
+          "resource": "company",
+          "companyId": "={{ $json.companyId }}",
+          "operation": "update",
+          "additionalFields": {
+            "addressOptions": {
+              "addressProperties": [
+                {
+                  "address": "={{ $json.etablissement.adresseEtablissement.complementAdresseEtablissement }}\n{{ $json.etablissement.adresseEtablissement.typeVoieEtablissement }} {{ $json.etablissement.adresseEtablissement.libelleVoieEtablissement }}\n{{ $json.etablissement.adresseEtablissement.codePostalEtablissement }}{{ $json.etablissement.adresseEtablissement.libelleCommuneEtablissement }}",
+                  "subtype": "office"
+                }
+              ]
+            },
+            "customProperties": {
+              "customProperty": [
+                {
+                  "name": "SIREN",
+                  "value": "={{ $json.etablissement.siren }}",
+                  "subtype": "TEXT"
+                }
+              ]
+            }
+          }
+        },
+        "credentials": {
+          "agileCrmApi": {
+            "id": "wb0EgiQFLQbiFuy4",
+            "name": "AgileCRM account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This agileCrm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8720be96-8181-4ea7-b114-ce0f5b8e09c1",
+        "name": "Merge data from CRM and SIREN database with enriched for the CRM",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -2180,
+          -340
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "advanced": true,
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "denominationUniteLegale",
+                "field2": "etablissement.uniteLegale.denominationUniteLegale"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "855a39e2-83ef-49d9-b630-ec31aaa96e72",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -3460,
+          20
+        ],
+        "parameters": {
+          "height": 80,
+          "content": "👆 You can use any of those two Trigger to start the process."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b003c1b8-6244-4b72-bbb0-025f563b5d71",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -2260,
+          -640
+        ],
+        "parameters": {
+          "width": 380,
+          "height": 240,
+          "content": "### 🗒️ Notes : \n1. This workflow is made to write over any entry already present. You can change this for each company by setting the **\"RO\"** Custom Field to **1**, making it read-only for this workflow.\n\n2. If you want to make it readonly after the update from this workflow, then **add a custom property** in the last node **Enrich CRM with INSEE Data** named **\"RO\"**, SubType **\"Number\"** and Value **\"1\"**"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "9f328182-d131-4300-a1f4-2cb3dfe91632",
+    "connections": {
+      "d406941b-80a1-43a3-ba19-2e29570192f2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-fc225e73",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-00b07a97",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-8d7e7467",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-a9f2a7b7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-ed0cfcec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-54b44496",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-9f6e121d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-d9c8df40",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "6ab3818b-2f09-44e2-874a-87c51478572b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-411da899",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-63863515",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-02015ab4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-3eed5f47",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-41b7d579",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-e305304d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-0576b584",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-7e839ad6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: INSEE Enrichment for Agile CRM. This workflow integrates 10 different services: stickyNote, httpRequest, code, scheduleTrigger, merge. It contains 18 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: INSEE Enrichment for Agile CRM. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "6ab3818b-2f09-44e2-874a-87c51478572b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-411da899"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-63863515"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-02015ab4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-3eed5f47"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-41b7d579"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-e305304d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-0576b584"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6ab3818b-2f09-44e2-874a-87c51478572b-7e839ad6"
+            }
+          ]
+        ]
+      },
+      "d406941b-80a1-43a3-ba19-2e29570192f2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-fc225e73"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-00b07a97"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-8d7e7467"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-a9f2a7b7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-ed0cfcec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-54b44496"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-9f6e121d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d406941b-80a1-43a3-ba19-2e29570192f2-d9c8df40"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "INSEE Enrichment for Agile CRM",
+    "nodes": [
+      {
+        "name": "clean_route",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "agileCrmApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Enrich CRM with INSEE Data",
+        "parameters": {
+          "additionalFields": {
+            "addressOptions": {
+              "addressProperties": [
+                {
+                  "address": "={{ $json.etablissement.adresseEtablissement.complementAdresseEtablissement }}\n{{ $json.etablissement.adresseEtablissement.typeVoieEtablissement }} {{ $json.etablissement.adresseEtablissement.libelleVoieEtablissement }}\n{{ $json.etablissement.adresseEtablissement.codePostalEtablissement }}{{ $json.etablissement.adresseEtablissement.libelleCommuneEtablissement }}",
+                  "subtype": "office"
+                }
+              ]
+            },
+            "customProperties": {
+              "customProperty": [
+                {
+                  "name": "SIREN",
+                  "subtype": "TEXT",
+                  "value": "={{ $json.etablissement.siren }}"
+                }
+              ]
+            }
+          },
+          "companyId": "={{ $json.companyId }}",
+          "operation": "update",
+          "resource": "company"
+        },
+        "type": "n8n-nodes-base.agileCrm",
+        "typeVersion": 1
+      },
+      {
+        "name": "FilterOut all Company that have the ReadOnly Key set",
+        "parameters": {
+          "jsCode": "// Get input data\nconst input = $input.all();\nconst output = input.filter(item => {\n    const properties = item.json.properties || [];\n    return !properties.some(property => property.name === \"RO\" && property.value === \"1\"); // Remove all ReadOnly entries\n}).map(item => {\n    const companyId = item.json.id;\n    const denominationUniteLegale = item.json.properties[0]?.value || null; \n    return {\n        json: {\n            companyId,\n            denominationUniteLegale\n        }\n    };\n});\n\n// Return the transformed output\nreturn output;\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Find Company in SIREN database",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              },
+              {
+                "name": "X-INSEE-Api-Key-Integration",
+                "value": "={{ $('Set Insee API Key').all()[0].json['X-INSEE-Api-Key-Integration']  }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "agileCrmApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get all Compagnies from Agile CRM",
+        "parameters": {
+          "operation": "getAll",
+          "options": {},
+          "resource": "company"
+        },
+        "type": "n8n-nodes-base.agileCrm",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge data from CRM and SIREN database with enriched for the CRM",
+        "parameters": {
+          "advanced": true,
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "denominationUniteLegale",
+                "field2": "etablissement.uniteLegale.denominationUniteLegale"
+              }
+            ]
+          },
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "Request all data from SIREN database",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              },
+              {
+                "name": "X-INSEE-Api-Key-Integration",
+                "value": "={{ $('Set Insee API Key').all()[0].json['X-INSEE-Api-Key-Integration']  }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Set Insee API Key",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e993e665-cf31-48b1-8ca8-a4829dc82642",
+                "name": "X-INSEE-Api-Key-Integration",
+                "type": "string",
+                "value": "put-your-insee-api-key-here"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "### Enrich CRM data with data from French INSEE OpenDatabase API\nThis workflow takes all company entries from **Agile CRM** and enriches their data using the French [Insee Opendata API]({{ $env.API_BASE_URL }} (Free Access)\n\n__This will update :__ \n1) Official Address of the company headquarters\n2) Add government company id number (SIREN) in a Custom Field",
+          "height": 240,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "### 👨‍🎤 Setup\n1. Add your **Agile CRM** credentials\n2. Link each AgileCRM node to the correct **Agile CRM** credentials\n3. Add your **INSEE** API Key to the **\"Set Insee API Key\"** node\n4. Make sure the **Custom Fields** for the **companies** are set as below (Admin Settings):\n   - Label : \"SIREN\", Type : \"Text Field\", Description \"N° de SIREN\"\n   - Label : \"RO\", Type : \"Number\", Description \"Locks entry from update\"\n5. Click on **Test Workflow** to make sure everything is working\n6. Configure schedule if needed and don't forget to change status to **Active**",
+          "height": 232,
+          "width": 647
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "👆 You can use any of those two Trigger to start the process.",
+          "height": 80
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "### 🗒️ Notes : \n1. This workflow is made to write over any entry already present. You can change this for each company by setting the **\"RO\"** Custom Field to **1**, making it read-only for this workflow.\n\n2. If you want to make it readonly after the update from this workflow, then **add a custom property** in the last node **Enrich CRM with INSEE Data** named **\"RO\"**, SubType **\"Number\"** and Value **\"1\"**",
+          "height": 240,
+          "width": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Agilecrm"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 105,
+  "viewCount": 178,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Agilecrm Account"
+    ],
+    "requiredCredentials": [
+      "agile Crm  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Find Company in SIREN database\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Request all data from SIREN database\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"clean_route\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get all Compagnies from Agile CRM\" node (n8n-nodes-base.agileCrm) and configure the action parameters, mappings, and fields.",
+      "Open the \"Enrich CRM with INSEE Data\" node (n8n-nodes-base.agileCrm) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge data from CRM and SIREN database with enriched for the CRM\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Insee API Key\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-n5pum5azl",
+      "workflowId": "insee-enrichment-for-agile-crm-kvf3l",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/1460_Code_Schedule_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\1460_Code_Schedule_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:28:55.181Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:55.181Z",
+  "updatedAt": "2026-07-15T11:28:55.181Z",
+  "category": {
+    "slug": "crm",
+    "name": "CRM"
+  },
+  "categoryId": "crm"
+}

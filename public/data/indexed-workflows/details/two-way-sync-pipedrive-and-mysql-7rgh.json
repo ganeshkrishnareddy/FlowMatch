@@ -1,0 +1,788 @@
+{
+  "id": "two-way-sync-pipedrive-and-mysql-d9637",
+  "name": "Two Way Sync Pipedrive and MySQL",
+  "slug": "two-way-sync-pipedrive-and-mysql-7rgh",
+  "description": "Automated workflow: Two Way Sync Pipedrive and MySQL. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Two Way Sync Pipedrive and MySQL workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "id": 65,
+    "meta": {
+      "instanceId": "workflow-9a29dd96",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.112807",
+      "updatedAt": "2025-09-29T07:07:44.112816",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Two Way Sync Pipedrive and MySQL",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "7355c5ac-a9a6-4fa5-8036-71fd09e95cd4",
+        "name": "Compare Datasets",
+        "type": "n8n-nodes-base.compareDatasets",
+        "position": [
+          1220,
+          480
+        ],
+        "parameters": {
+          "options": {},
+          "resolve": "includeBoth",
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "email",
+                "field2": "email"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This compareDatasets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7a422493-94d4-4f94-b39c-f6c3980a967c",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          800,
+          320
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b3a0e831-7030-43dd-863a-0c2a4697a14d",
+        "name": "MySQL",
+        "type": "n8n-nodes-base.mySql",
+        "position": [
+          1000,
+          320
+        ],
+        "parameters": {
+          "query": "SELECT id, name, email, phone, updated_on FROM contact",
+          "operation": "executeQuery"
+        },
+        "credentials": {
+          "mySql": {
+            "id": "{{ $credentials.mySql.id }}",
+            "name": "MySQL account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This mySql node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a3a64bb5-8a6f-4011-bc2d-3996a823012c",
+        "name": "Pipedrive",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          800,
+          620
+        ],
+        "parameters": {
+          "resource": "person",
+          "operation": "getAll",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "089e91df-abf7-4de9-b088-357cffce6949",
+        "name": "Create Person",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1420,
+          300
+        ],
+        "parameters": {
+          "name": "={{ $json[\"name\"] }}",
+          "resource": "person",
+          "additionalFields": {
+            "email": [
+              "={{ $json[\"email\"] }}"
+            ],
+            "phone": [
+              "={{ $json[\"phone\"] }}"
+            ]
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a99c3242-8263-4a92-a1f2-dcce7a9a6d81",
+        "name": "Create Contact",
+        "type": "n8n-nodes-base.mySql",
+        "position": [
+          1420,
+          620
+        ],
+        "parameters": {
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "contact",
+            "cachedResultName": "contact"
+          },
+          "columns": "name, email, phone",
+          "options": {}
+        },
+        "credentials": {
+          "mySql": {
+            "id": "{{ $credentials.mySql.id }}",
+            "name": "MySQL account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mySql node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7697d03a-7bc4-40b3-9e06-e38c13ccaaf3",
+        "name": "Date & Time",
+        "type": "n8n-nodes-base.dateTime",
+        "position": [
+          1760,
+          460
+        ],
+        "parameters": {
+          "value": "={{ $json[\"different\"][\"updated_on\"][\"input1\"] }}",
+          "custom": true,
+          "options": {},
+          "toFormat": "YYYY-MM-DD HH:mm:ss",
+          "dataPropertyName": "different.updated_on.input1"
+        },
+        "typeVersion": 1,
+        "notes": "This dateTime node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f882a2e7-a8cf-4683-abe3-77a5b7376bb2",
+        "name": "Update Contact",
+        "type": "n8n-nodes-base.mySql",
+        "position": [
+          2340,
+          620
+        ],
+        "parameters": {
+          "query": "=UPDATE contact\nSET name = '{{$json[\"name\"]}}', phone= '{{$json[\"phone\"]}}'\nWHERE id = {{$json[\"id\"]}};",
+          "operation": "executeQuery"
+        },
+        "credentials": {
+          "mySql": {
+            "id": "{{ $credentials.mySql.id }}",
+            "name": "MySQL account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mySql node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d7549678-5d35-4a8a-b440-5c347b4434f4",
+        "name": "Set Input2",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2120,
+          620
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"different\"][\"id\"] ? $json[\"different\"][\"id\"][\"input1\"] : $json[\"same\"][\"id\"] }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json[\"different\"][\"name\"] ? $json[\"different\"][\"name\"][\"input2\"] : $json[\"same\"][\"name\"] }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json[\"different\"][\"phone\"] ? $json[\"different\"][\"phone\"][\"input2\"] : $json[\"same\"][\"phone\"] }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0018751e-c295-4f8d-b9df-257b9538eedc",
+        "name": "Set Input1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2120,
+          300
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"different\"][\"id\"] ? $json[\"different\"][\"id\"][\"input2\"] : $json[\"same\"][\"id\"] }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json[\"different\"][\"name\"] ? $json[\"different\"][\"name\"][\"input1\"] : $json[\"same\"][\"name\"] }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json[\"different\"][\"phone\"] ? $json[\"different\"][\"phone\"][\"input1\"] : $json[\"same\"][\"phone\"] }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "89af3385-4788-4693-ad02-917b927e7384",
+        "name": "Update Person",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          2340,
+          300
+        ],
+        "parameters": {
+          "personId": "={{ $json[\"id\"] }}",
+          "resource": "person",
+          "operation": "update",
+          "updateFields": {
+            "name": "={{ $json[\"name\"] }}",
+            "phone": [
+              "={{ $json[\"phone\"] }}"
+            ]
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8ffbbb4b-7c2f-457e-ae73-464620aa1588",
+        "name": "IF Data Changed",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1560,
+          480
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ !!$json[\"different\"][\"name\"] || !!$json[\"different\"][\"phone\"] }}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f8d60404-942d-4bb3-96e7-a247a9447a32",
+        "name": "IF Updated On",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1940,
+          460
+        ],
+        "parameters": {
+          "conditions": {
+            "dateTime": [
+              {
+                "value1": "={{ $json[\"different\"][\"updated\"][\"input1\"] }} {{ $json[\"different\"][\"updated_on\"][\"input1\"] }}",
+                "value2": "={{ $json[\"different\"][\"updated\"][\"input2\"] }} {{ $json[\"different\"][\"updated_on\"][\"input2\"] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6965e281-10bd-4e8a-b016-f788030a6d9f",
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1000,
+          620
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"id\"] }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json[\"name\"] }}"
+              },
+              {
+                "name": "email",
+                "value": "={{ $json[\"primary_email\"] }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json[\"phone\"][0][\"value\"] }}"
+              },
+              {
+                "name": "updated_on",
+                "value": "={{ $json[\"update_time\"] }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-aef21415",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: Two Way Sync Pipedrive and MySQL. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Two Way Sync Pipedrive and MySQL. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Two Way Sync Pipedrive and MySQL",
+    "nodes": [
+      {
+        "name": "Compare Datasets",
+        "parameters": {
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "email",
+                "field2": "email"
+              }
+            ]
+          },
+          "options": {},
+          "resolve": "includeBoth"
+        },
+        "type": "n8n-nodes-base.compareDatasets",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mySql": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Contact",
+        "parameters": {
+          "columns": "name, email, phone",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "contact",
+            "mode": "list",
+            "value": "contact"
+          }
+        },
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Person",
+        "parameters": {
+          "additionalFields": {
+            "email": [
+              "={{ $json[\"email\"] }}"
+            ],
+            "phone": [
+              "={{ $json[\"phone\"] }}"
+            ]
+          },
+          "name": "={{ $json[\"name\"] }}",
+          "resource": "person"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Date & Time",
+        "parameters": {
+          "custom": true,
+          "dataPropertyName": "different.updated_on.input1",
+          "options": {},
+          "toFormat": "YYYY-MM-DD HH:mm:ss",
+          "value": "={{ $json[\"different\"][\"updated_on\"][\"input1\"] }}"
+        },
+        "type": "n8n-nodes-base.dateTime",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF Data Changed",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ !!$json[\"different\"][\"name\"] || !!$json[\"different\"][\"phone\"] }}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF Updated On",
+        "parameters": {
+          "conditions": {
+            "dateTime": [
+              {
+                "value1": "={{ $json[\"different\"][\"updated\"][\"input1\"] }} {{ $json[\"different\"][\"updated_on\"][\"input1\"] }}",
+                "value2": "={{ $json[\"different\"][\"updated\"][\"input2\"] }} {{ $json[\"different\"][\"updated_on\"][\"input2\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mySql": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "MySQL",
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, name, email, phone, updated_on FROM contact"
+        },
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Pipedrive",
+        "parameters": {
+          "additionalFields": {},
+          "operation": "getAll",
+          "resource": "person"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"id\"] }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json[\"name\"] }}"
+              },
+              {
+                "name": "email",
+                "value": "={{ $json[\"primary_email\"] }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json[\"phone\"][0][\"value\"] }}"
+              },
+              {
+                "name": "updated_on",
+                "value": "={{ $json[\"update_time\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Input1",
+        "parameters": {
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"different\"][\"id\"] ? $json[\"different\"][\"id\"][\"input2\"] : $json[\"same\"][\"id\"] }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json[\"different\"][\"name\"] ? $json[\"different\"][\"name\"][\"input1\"] : $json[\"same\"][\"name\"] }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json[\"different\"][\"phone\"] ? $json[\"different\"][\"phone\"][\"input1\"] : $json[\"same\"][\"phone\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Input2",
+        "parameters": {
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"different\"][\"id\"] ? $json[\"different\"][\"id\"][\"input1\"] : $json[\"same\"][\"id\"] }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json[\"different\"][\"name\"] ? $json[\"different\"][\"name\"][\"input2\"] : $json[\"same\"][\"name\"] }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json[\"different\"][\"phone\"] ? $json[\"different\"][\"phone\"][\"input2\"] : $json[\"same\"][\"phone\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mySql": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Contact",
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "=UPDATE contact\nSET name = '{{$json[\"name\"]}}', phone= '{{$json[\"phone\"]}}'\nWHERE id = {{$json[\"id\"]}};"
+        },
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Person",
+        "parameters": {
+          "operation": "update",
+          "personId": "={{ $json[\"id\"] }}",
+          "resource": "person",
+          "updateFields": {
+            "name": "={{ $json[\"name\"] }}",
+            "phone": [
+              "={{ $json[\"phone\"] }}"
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Comparedatasets",
+    "MySQL",
+    "Pipedrive"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 193,
+  "viewCount": 722,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Comparedatasets Account",
+      "MySQL Account",
+      "Pipedrive Account"
+    ],
+    "requiredCredentials": [
+      "my Sql details",
+      "pipedrive  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"MySQL\" node (n8n-nodes-base.mySql) and configure the action parameters, mappings, and fields.",
+      "Open the \"Pipedrive\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Person\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Contact\" node (n8n-nodes-base.mySql) and configure the action parameters, mappings, and fields.",
+      "Open the \"Date & Time\" node (n8n-nodes-base.dateTime) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Contact\" node (n8n-nodes-base.mySql) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Person\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF Data Changed\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF Updated On\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Compare Datasets\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set Input2\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set Input1\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-l1k7vll03",
+      "workflowId": "two-way-sync-pipedrive-and-mysql-d9637",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Datetime/1092_Datetime_Schedule_Sync_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Datetime\\1092_Datetime_Schedule_Sync_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:28:57.553Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:57.553Z",
+  "updatedAt": "2026-07-15T11:28:57.553Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

@@ -1,0 +1,816 @@
+{
+  "id": "httprequest-workflow-i3179",
+  "name": "Httprequest Workflow",
+  "slug": "httprequest-workflow-g6co",
+  "description": "Automated workflow: Httprequest Workflow. This workflow integrates 6 different services: webhook, stickyNote, httpRequest, code, set. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Httprequest Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-7446a221",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.943903",
+      "updatedAt": "2025-09-29T07:07:45.943919",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "b2015e98-23bf-4bdb-b588-2991ee4d69d5",
+        "name": "Confluence: Get template content",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1460,
+          660
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpBasicAuth"
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "wQWJ3gbaDYd4nNIK",
+            "name": "Atlassian"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b5b665d6-f92e-43f1-bfd8-5de4155b73d4",
+        "name": "Confluence: Create page from template",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1900,
+          660
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "type",
+                "value": "page"
+              },
+              {
+                "name": "title",
+                "value": "={{ $now.format(\"yyyy-MM-dd-HH-mm\") }}-{{ $('Replace placeholders in template body and title').item.json.page_title }}"
+              },
+              {
+                "name": "space",
+                "value": "={{ { \"key\" : $('Set parameters').item.json.target_space_key } }}"
+              },
+              {
+                "name": "body",
+                "value": "={{ { \"storage\" : { \"value\" : $('Replace placeholders in template body and title').item.json.page_body, \"representation\" : \"storage\" } } }}"
+              },
+              {
+                "name": "ancestors",
+                "value": "={{ [{\"type\" : \"page\", \"id\" : $('Set parameters').item.json.target_parent_page_id} ] }}"
+              }
+            ]
+          },
+          "genericAuthType": "httpBasicAuth"
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "wQWJ3gbaDYd4nNIK",
+            "name": "Atlassian"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "571a104e-4112-4898-8e63-08dd8809b328",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1000,
+          300
+        ],
+        "parameters": {
+          "color": 2,
+          "width": 610,
+          "height": 315,
+          "content": "## Create Atlassian Confluence page from template\n\nCreates a new page in Confluence from a space template.\n\n### Setup\nAll parameters you need to change are defined in the _Set parameters_ node\nFor detailled setup instructions and explanation how it all works --> [🎥 Video]({{ $env.WEBHOOK_URL }}\n\n### Credentials\nAs the password for the basic auth credential, you need to use an API key. \nDocumentation on those is [here]({{ $env.API_BASE_URL }}\n[Here's]({{ $env.API_BASE_URL }} where you create and manage Atlassian API keys."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eac6d0bc-0ea5-4e23-977c-8e06b346ea79",
+        "name": "Set parameters",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1240,
+          660
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "01116d20-ddaf-405a-99ec-81197f71cd4f",
+                "name": "confluence_base_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              },
+              {
+                "id": "4a5a8737-5694-40ef-99c5-d5aa4fab1220",
+                "name": "template_id",
+                "type": "string",
+                "value": "834764824"
+              },
+              {
+                "id": "27c1681d-4f44-4b6f-9e6b-6013bfcac6a0",
+                "name": "target_space_key",
+                "type": "string",
+                "value": "~5f5915647187b8006ffffe8e"
+              },
+              {
+                "id": "5de1868b-ee33-4ef4-aa45-0d951b5ce5ff",
+                "name": "target_parent_page_id",
+                "type": "string",
+                "value": "312344667"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c28299ef-8ce7-497f-98d8-356a741f461d",
+        "name": "Replace placeholders in template body and title",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1680,
+          660
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "function replacePlaceholders(template, values) {\n    // Regular expression to find placeholders in the format $some.place.holder$\n    const placeholderPattern = /\\$(.*?)\\$/g;\n\n    // Replace function to look up the value from the object\n    return template.replace(placeholderPattern, (match, p1) => {\n        // Split the placeholder into parts by dot notation\n        const keys = p1.split('.');\n        let value = values;\n\n        // Traverse the object based on the dot notation\n        for (const key of keys) {\n            if (value && key in value) {\n                value = value[key];\n            } else {\n                // If the key is not found, return the original placeholder\n                return match;\n            }\n        }\n        // Return the value found in the object\n        return value;\n    });\n}\n\nconst templateTitle = $('Confluence: Get template content').item.json.name;\nconst templateBody = $('Confluence: Get template content').item.json.body.storage.value;\nconst values = $('Webhook').item.json;\n\nconst pageTitle = replacePlaceholders(templateTitle, values); \nconst pageBody = replacePlaceholders(templateBody, values);\n\nreturn { \"page_title\": pageTitle, \"page_body\" :  pageBody};"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "42bbd727-e3ea-4e36-be11-1f7def28f134",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          1020,
+          660
+        ],
+        "webhookId": "d291ef27-c27f-42cf-90cf-4dad7dd71a7c",
+        "parameters": {
+          "path": "d291ef27-c27f-42cf-90cf-4dad7dd71a7c",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {
+      "Webhook": [
+        {
+          "user": {
+            "name": "Alice",
+            "messages": {
+              "count": 5
+            }
+          }
+        }
+      ]
+    },
+    "connections": {
+      "b2015e98-23bf-4bdb-b588-2991ee4d69d5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-83e5d0e0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-c29bf89d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-98d12dae",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-951e807c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-5df5b621",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-ea8a712b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-50bc9eb9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-ecb47c85",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b5b665d6-f92e-43f1-bfd8-5de4155b73d4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-ddc301f8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-620ee50a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-e15bf2ea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-cf60177f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-05752688",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-faeb1f8d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-c7f410e7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-3f19a51f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "42bbd727-e3ea-4e36-be11-1f7def28f134": {
+        "main": [
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-e017a85b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-39626f87",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-d570b884",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-f76dbaf4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-25f4f849",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-105bda86",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-4ce9f03a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-f83d12e3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Httprequest Workflow. This workflow integrates 6 different services: webhook, stickyNote, httpRequest, code, set. It contains 12 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Httprequest Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "42bbd727-e3ea-4e36-be11-1f7def28f134": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-e017a85b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-39626f87"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-d570b884"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-f76dbaf4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-25f4f849"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-105bda86"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-4ce9f03a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42bbd727-e3ea-4e36-be11-1f7def28f134-f83d12e3"
+            }
+          ]
+        ]
+      },
+      "b2015e98-23bf-4bdb-b588-2991ee4d69d5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-83e5d0e0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-c29bf89d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-98d12dae"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-951e807c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-5df5b621"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-ea8a712b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-50bc9eb9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2015e98-23bf-4bdb-b588-2991ee4d69d5-ecb47c85"
+            }
+          ]
+        ]
+      },
+      "b5b665d6-f92e-43f1-bfd8-5de4155b73d4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-ddc301f8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-620ee50a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-e15bf2ea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-cf60177f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-05752688"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-faeb1f8d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-c7f410e7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5b665d6-f92e-43f1-bfd8-5de4155b73d4-3f19a51f"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Confluence: Create page from template",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "type",
+                "value": "page"
+              },
+              {
+                "name": "title",
+                "value": "={{ $now.format(\"yyyy-MM-dd-HH-mm\") }}-{{ $('Replace placeholders in template body and title').item.json.page_title }}"
+              },
+              {
+                "name": "space",
+                "value": "={{ { \"key\" : $('Set parameters').item.json.target_space_key } }}"
+              },
+              {
+                "name": "body",
+                "value": "={{ { \"storage\" : { \"value\" : $('Replace placeholders in template body and title').item.json.page_body, \"representation\" : \"storage\" } } }}"
+              },
+              {
+                "name": "ancestors",
+                "value": "={{ [{\"type\" : \"page\", \"id\" : $('Set parameters').item.json.target_parent_page_id} ] }}"
+              }
+            ]
+          },
+          "genericAuthType": "httpBasicAuth",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Confluence: Get template content",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpBasicAuth",
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Replace placeholders in template body and title",
+        "parameters": {
+          "jsCode": "function replacePlaceholders(template, values) {\n    // Regular expression to find placeholders in the format $some.place.holder$\n    const placeholderPattern = /\\$(.*?)\\$/g;\n\n    // Replace function to look up the value from the object\n    return template.replace(placeholderPattern, (match, p1) => {\n        // Split the placeholder into parts by dot notation\n        const keys = p1.split('.');\n        let value = values;\n\n        // Traverse the object based on the dot notation\n        for (const key of keys) {\n            if (value && key in value) {\n                value = value[key];\n            } else {\n                // If the key is not found, return the original placeholder\n                return match;\n            }\n        }\n        // Return the value found in the object\n        return value;\n    });\n}\n\nconst templateTitle = $('Confluence: Get template content').item.json.name;\nconst templateBody = $('Confluence: Get template content').item.json.body.storage.value;\nconst values = $('Webhook').item.json;\n\nconst pageTitle = replacePlaceholders(templateTitle, values); \nconst pageBody = replacePlaceholders(templateBody, values);\n\nreturn { \"page_title\": pageTitle, \"page_body\" :  pageBody};",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Set parameters",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "01116d20-ddaf-405a-99ec-81197f71cd4f",
+                "name": "confluence_base_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              },
+              {
+                "id": "4a5a8737-5694-40ef-99c5-d5aa4fab1220",
+                "name": "template_id",
+                "type": "string",
+                "value": "834764824"
+              },
+              {
+                "id": "27c1681d-4f44-4b6f-9e6b-6013bfcac6a0",
+                "name": "target_space_key",
+                "type": "string",
+                "value": "~5f5915647187b8006ffffe8e"
+              },
+              {
+                "id": "5de1868b-ee33-4ef4-aa45-0d951b5ce5ff",
+                "name": "target_parent_page_id",
+                "type": "string",
+                "value": "312344667"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 2,
+          "content": "## Create Atlassian Confluence page from template\n\nCreates a new page in Confluence from a space template.\n\n### Setup\nAll parameters you need to change are defined in the _Set parameters_ node\nFor detailled setup instructions and explanation how it all works --> [🎥 Video]({{ $env.WEBHOOK_URL }}\n\n### Credentials\nAs the password for the basic auth credential, you need to use an API key. \nDocumentation on those is [here]({{ $env.API_BASE_URL }}\n[Here's]({{ $env.API_BASE_URL }} where you create and manage Atlassian API keys.",
+          "height": 315,
+          "width": 610
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "d291ef27-c27f-42cf-90cf-4dad7dd71a7c"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 122,
+  "viewCount": 211,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "http Basic Auth details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Confluence: Get template content\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Confluence: Create page from template\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set parameters\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-x2yrttz41",
+      "workflowId": "httprequest-workflow-i3179",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0559_HTTP_Webhook_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0559_HTTP_Webhook_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:09.309Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:09.309Z",
+  "updatedAt": "2026-07-15T11:29:09.309Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

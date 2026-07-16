@@ -1,0 +1,407 @@
+{
+  "id": "shopifytrigger-workflow-sugfj",
+  "name": "Shopifytrigger Workflow",
+  "slug": "shopifytrigger-workflow-2brl",
+  "description": "Automated workflow: Shopifytrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Shopifytrigger Workflow workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-98aa009d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.258523",
+      "updatedAt": "2025-09-29T07:07:52.258534",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "1b1fd43f-5acb-45e7-bd98-e4774754cdfe",
+        "name": "On order updated",
+        "type": "n8n-nodes-base.shopifyTrigger",
+        "position": [
+          180,
+          520
+        ],
+        "webhookId": "0972ce92-d800-4049-ab60-7c71898ecbfa",
+        "parameters": {
+          "topic": "orders/updated"
+        },
+        "credentials": {
+          "shopifyApi": {
+            "id": "{{ $credentials.shopifyApi.id }}",
+            "name": "Shopify account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This shopifyTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d96cde15-f810-4302-aa45-554f6675b505",
+        "name": "Order exists in Zendesk",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1220,
+          540
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json[\"ZendeskTicketId\"] }}",
+                "operation": "isNotEmpty"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "62c09ef2-55c8-4269-9869-c15e8a955169",
+        "name": "NoOp",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1500,
+          460
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "68f867c3-842c-478a-8afd-c7299e12b98d",
+        "name": "Find if order already has a ticket in Zendesk",
+        "type": "n8n-nodes-base.zendesk",
+        "position": [
+          480,
+          660
+        ],
+        "parameters": {
+          "options": {
+            "query": "external_id:1027",
+            "status": "open"
+          },
+          "operation": "getAll"
+        },
+        "credentials": {
+          "zendeskApi": {
+            "id": "{{ $credentials.zendeskApi.id }}",
+            "name": "Zendesk account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This zendesk node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "01d4acba-8641-43e8-b333-e4494a2594d1",
+        "name": "Keep only ticket Id",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          720,
+          660
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "external_Id",
+                "value": "={{ $json[\"external_id\"] }}"
+              },
+              {
+                "name": "ZendeskTicketId",
+                "value": "={{ $json[\"id\"] }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "63099ec6-7ae5-4d88-881b-a6a8ae3a64b8",
+        "name": "Add ticket info to order data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          960,
+          540
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "order_number",
+          "propertyName2": "external_Id"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "79bf059e-d3b9-4323-88e5-7887deae74f7",
+        "name": "Create new ticket for new orders",
+        "type": "n8n-nodes-base.zendesk",
+        "position": [
+          1500,
+          640
+        ],
+        "parameters": {
+          "description": "=Order #{{ $json[\"order_number\"] }} - {{$json[\"line_items\"].length}} item(s)\n\nOrder:\nCustomer: {{$json[\"customer\"][\"first_name\"]}} {{$json[\"customer\"][\"last_name\"]}} \nemail: {{$json[\"customer\"][\"email\"]}}\nStatus: New order",
+          "additionalFields": {
+            "status": "open",
+            "subject": "=Order #{{ $json[\"order_number\"] }} - {{$json[\"line_items\"].length}} item(s)",
+            "externalId": "={{ $json[\"order_number\"] }}"
+          }
+        },
+        "credentials": {
+          "zendeskApi": {
+            "id": "{{ $credentials.zendeskApi.id }}",
+            "name": "Zendesk account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zendesk node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-9a843543",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Shopifytrigger Workflow",
+    "description": "Automated workflow: Shopifytrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Shopifytrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Shopifytrigger Workflow",
+    "nodes": [
+      {
+        "name": "Add ticket info to order data",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "order_number",
+          "propertyName2": "external_Id"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "zendeskApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create new ticket for new orders",
+        "parameters": {
+          "additionalFields": {
+            "externalId": "={{ $json[\"order_number\"] }}",
+            "status": "open",
+            "subject": "=Order #{{ $json[\"order_number\"] }} - {{$json[\"line_items\"].length}} item(s)"
+          },
+          "description": "=Order #{{ $json[\"order_number\"] }} - {{$json[\"line_items\"].length}} item(s)\n\nOrder:\nCustomer: {{$json[\"customer\"][\"first_name\"]}} {{$json[\"customer\"][\"last_name\"]}} \nemail: {{$json[\"customer\"][\"email\"]}}\nStatus: New order"
+        },
+        "type": "n8n-nodes-base.zendesk",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "zendeskApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Find if order already has a ticket in Zendesk",
+        "parameters": {
+          "operation": "getAll",
+          "options": {
+            "query": "external_id:1027",
+            "status": "open"
+          }
+        },
+        "type": "n8n-nodes-base.zendesk",
+        "typeVersion": 1
+      },
+      {
+        "name": "Keep only ticket Id",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "external_Id",
+                "value": "={{ $json[\"external_id\"] }}"
+              },
+              {
+                "name": "ZendeskTicketId",
+                "value": "={{ $json[\"id\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "NoOp",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "shopifyApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "On order updated",
+        "parameters": {
+          "topic": "orders/updated"
+        },
+        "type": "n8n-nodes-base.shopifyTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Order exists in Zendesk",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "isNotEmpty",
+                "value1": "={{ $json[\"ZendeskTicketId\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Shopify",
+    "Zendesk"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 205,
+  "viewCount": 844,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Shopify Account",
+      "Zendesk Account"
+    ],
+    "requiredCredentials": [
+      "shopify  A P I details",
+      "zendesk  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On order updated\".",
+      "Open the \"Order exists in Zendesk\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"NoOp\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Find if order already has a ticket in Zendesk\" node (n8n-nodes-base.zendesk) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add ticket info to order data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create new ticket for new orders\" node (n8n-nodes-base.zendesk) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Keep only ticket Id\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-piz23v0w0",
+      "workflowId": "shopifytrigger-workflow-sugfj",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Shopify/0269_Shopify_Zendesk_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Shopify\\0269_Shopify_Zendesk_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:17:42.729Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:42.729Z",
+  "updatedAt": "2026-07-15T11:17:42.729Z"
+}

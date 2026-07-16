@@ -1,0 +1,1014 @@
+{
+  "id": "workflow-management-959h8",
+  "name": "Workflow management",
+  "slug": "workflow-management-157r",
+  "description": "Production-ready workflow: Workflow management. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Workflow management workflow containing 20 nodes.",
+  "originalWorkflowJson": {
+    "id": "48",
+    "name": "Workflow management",
+    "nodes": [
+      {
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-1e39f4b1"
+      },
+      {
+        "name": "Function",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          570,
+          300
+        ],
+        "parameters": {
+          "functionCode": "//console.log(items[0].json.data);\nlet data = items[0].json.data;\nitems = data.map(i => {\n//  console.log({json:i});\n  return {json:i};\n});\n//console.log(items);\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-417ecd6b"
+      },
+      {
+        "name": "SplitInBatches",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          760,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "batchSize": 1
+        },
+        "typeVersion": 1,
+        "id": "node-c96bfac7"
+      },
+      {
+        "name": "IF",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          2090,
+          570
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"SplitInBatches\"].context[\"noItemsLeft\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-29788593"
+      },
+      {
+        "name": "NoOp",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          2270,
+          550
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-44b2d6e0"
+      },
+      {
+        "name": "Airtable",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1100,
+          200
+        ],
+        "parameters": {
+          "table": "Workflows",
+          "operation": "list",
+          "application": "<YOUR_APP_ID>",
+          "additionalOptions": {
+            "fields": [],
+            "filterByFormula": "=workflowId={{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}"
+          }
+        },
+        "credentials": {
+          "airtableApi": "n8n management demo"
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "id": "node-46b15162"
+      },
+      {
+        "name": "Airtable1",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1750,
+          130
+        ],
+        "parameters": {
+          "id": "={{$node[\"Airtable\"].json[\"id\"]}}",
+          "table": "Workflows",
+          "options": {
+            "typecast": true
+          },
+          "operation": "update",
+          "application": "<YOUR_APP_ID>"
+        },
+        "credentials": {
+          "airtableApi": "n8n management demo"
+        },
+        "typeVersion": 1,
+        "id": "node-96251166"
+      },
+      {
+        "name": "Airtable2",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1750,
+          320
+        ],
+        "parameters": {
+          "table": "Workflows",
+          "options": {
+            "typecast": true
+          },
+          "operation": "append",
+          "application": "<YOUR_APP_ID>"
+        },
+        "credentials": {
+          "airtableApi": "n8n management demo"
+        },
+        "typeVersion": 1,
+        "id": "node-61b6ce15"
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1590,
+          130
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "workflowId",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}"
+              },
+              {
+                "name": "name",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"name\"]}}"
+              },
+              {
+                "name": "errorWorkflowId",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"errorWorkflow\"]}}"
+              },
+              {
+                "name": "createdAt",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"createdAt\"]}}"
+              },
+              {
+                "name": "updatedAt",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"updatedAt\"]}}"
+              },
+              {
+                "name": "nodes",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"nodes\"]}}"
+              },
+              {
+                "name": "timezone",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"timezone\"]}}"
+              },
+              {
+                "name": "CRON_details",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"CRON_details\"]}}"
+              },
+              {
+                "name": "rawData",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"rawData\"]}}"
+              }
+            ],
+            "boolean": [
+              {
+                "name": "isActive",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"active\"]}}"
+              },
+              {
+                "name": "isCRON",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"isCRON\"]}}"
+              },
+              {
+                "name": "saveManualExecutions",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"saveManualExecutions\"]}}"
+              },
+              {
+                "name": "isTrigger",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"isTrigger\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-1ab7ec7d"
+      },
+      {
+        "name": "Set1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1590,
+          320
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "workflowId",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}"
+              },
+              {
+                "name": "name",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"name\"]}}"
+              },
+              {
+                "name": "errorWorkflowId",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"errorWorkflow\"]}}"
+              },
+              {
+                "name": "createdAt",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"createdAt\"]}}"
+              },
+              {
+                "name": "updatedAt",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"updatedAt\"]}}"
+              },
+              {
+                "name": "nodes",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"nodes\"]}}"
+              },
+              {
+                "name": "timezone",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"timezone\"]}}"
+              },
+              {
+                "name": "CRON_details",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"CRON_details\"]}}"
+              },
+              {
+                "name": "rawData",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"rawData\"]}}"
+              }
+            ],
+            "boolean": [
+              {
+                "name": "isActive",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"active\"]}}"
+              },
+              {
+                "name": "isCRON",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"isCRON\"]}}"
+              },
+              {
+                "name": "saveManualExecutions",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"saveManualExecutions\"]}}"
+              },
+              {
+                "name": "isTrigger",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"isTrigger\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-a989fc39"
+      },
+      {
+        "name": "Get All Workflows",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          410,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "fullResponse": false
+          },
+          "headerParametersUi": {
+            "parameter": [
+              {
+                "name": "Authorization",
+                "value": "<TOKEN>"
+              }
+            ]
+          },
+          "allowUnauthorizedCerts": true
+        },
+        "typeVersion": 1,
+        "id": "node-0d024bf6"
+      },
+      {
+        "name": "Prepare data",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1430,
+          130
+        ],
+        "parameters": {
+          "functionCode": "let data = $node[\"Get Workflow Details\"].json[\"data\"];\nlet file = $node[\"Get file link\"].json[\"link\"];\nlet nodes = new Set(data[\"nodes\"].map(i => i.type));\nlet nodes2 = [...nodes];\n//console.log(...nodes);\nlet data2 = data[\"nodes\"].map(i => i.name);\nif(nodes2.includes('n8n-nodes-base.cron')){\n  console.log('Cron found!');\n//  console.log(data);\n  let cron_node = data[\"nodes\"].filter(i => i.type == 'n8n-nodes-base.cron');\n  //console.log(cron_node[0].parameters.triggerTimes.item);\n  items[0].json[\"fields\"][\"isCRON\"]=true;\n  items[0].json[\"fields\"][\"nodes\"]=[...nodes];\n  items[0].json[\"fields\"][\"CRON_details\"]=cron_node[0].parameters.triggerTimes.item;\n  items[0].json[\"fields\"][\"rawData\"]=[{url:file ,filename: 'workflow_'+data[\"id\"]+'__'+data[\"updatedAt\"]+'.json'}];\n} else {  \n  //console.log('Cron not found!');\n  items[0].json[\"fields\"][\"isCRON\"]=false;\n  items[0].json[\"fields\"][\"nodes\"]=[...nodes];\n  items[0].json[\"fields\"][\"rawData\"]=[{url:file ,filename: 'workflow_'+data[\"id\"]+'__'+data[\"updatedAt\"]+'.json'}];\n}\nif(nodes2.some(i => {\n  let regExp = new RegExp(/n8n-nodes-base\\.[\\w]+Trigger/);\n  if(i=='n8n-nodes-base.webhook'){\n    return true;\n  }\n  if(regExp.test(i)){\n    return true;\n  }\n  return false;\n})){\n  items[0].json[\"fields\"][\"isTrigger\"]=true;  \n} else {\n  items[0].json[\"fields\"][\"isTrigger\"]=false;\n}\n  \n//console.log(items);\nreturn items;\n"
+        },
+        "typeVersion": 1,
+        "id": "node-4bfb64cd"
+      },
+      {
+        "name": "Prepare data1",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1430,
+          320
+        ],
+        "parameters": {
+          "functionCode": "let data = $node[\"Get Workflow Details\"].json[\"data\"];\nlet file = $node[\"Get file link\"].json[\"link\"];\nlet nodes = new Set(data[\"nodes\"].map(i => i.type));\nlet nodes2 = [...nodes];\n//console.log(data);\nlet data2 = data[\"nodes\"].map(i => i.name);\nif(nodes2.includes('n8n-nodes-base.cron')){\n  //console.log('Cron found!');\n  let cron_node = data[\"nodes\"].filter(i => i.type == 'n8n-nodes-base.cron');\n  items[0].json={\n    fields:{\n      isCRON:true,\n      nodes:[...nodes],\n      CRON_details:cron_node[0].parameters.triggerTimes.item,\n      rawData:[{url:file ,filename: 'workflow_'+data[\"id\"]+'__'+data[\"updatedAt\"]+'.json'}]\n    }\n  };\n} else {  \n  //console.log('Cron not found!');\n  items[0].json={\n    fields:{\n      isCRON:false,\n      nodes:[...nodes],\n      rawData:[{url:file ,filename: 'workflow_'+data[\"id\"]+'__'+data[\"updatedAt\"]+'.json'}]\n    }\n  };\n}\nif(nodes2.some(i => {\n  let regExp = new RegExp(/n8n-nodes-base\\.[\\w]+Trigger/);\n  if(i=='n8n-nodes-base.webhook'){\n    return true;\n  }\n  if(regExp.test(i)){\n    return true;\n  }\n  return false;\n})){\n  items[0].json[\"fields\"][\"isTrigger\"]=true;  \n} else {\n  items[0].json[\"fields\"][\"isTrigger\"]=false;\n}\n//console.log(items);\nreturn items;\n\n"
+        },
+        "typeVersion": 1,
+        "id": "node-d1945cb6"
+      },
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          250,
+          510
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyHour",
+                "minute": 15
+              },
+              {
+                "mode": "everyHour",
+                "minute": 45
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-f99f4930"
+      },
+      {
+        "name": "Move Binary Data",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          1000,
+          -10
+        ],
+        "parameters": {
+          "mode": "jsonToBinary",
+          "options": {
+            "keepSource": true
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-8221fcc4"
+      },
+      {
+        "name": "Dropbox",
+        "type": "n8n-nodes-base.dropbox",
+        "position": [
+          1140,
+          -10
+        ],
+        "parameters": {
+          "path": "=/workflows/workflow_{{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}/workflow_{{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}__{{$node[\"Get Workflow Details\"].json[\"data\"][\"updatedAt\"]}}.json",
+          "binaryData": true
+        },
+        "credentials": {
+          "dropboxApi": "My n8n backups"
+        },
+        "typeVersion": 1,
+        "id": "node-369d07de"
+      },
+      {
+        "name": "Get Workflow Details",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          840,
+          -10
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "headerParametersUi": {
+            "parameter": [
+              {
+                "name": "Authorization",
+                "value": "<TOKEN>"
+              }
+            ]
+          },
+          "allowUnauthorizedCerts": true
+        },
+        "typeVersion": 1,
+        "id": "node-05299dcd"
+      },
+      {
+        "name": "Get file link",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1290,
+          -10
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "path",
+                "value": "={{$node[\"Dropbox\"].json[\"path_lower\"]}}"
+              }
+            ]
+          },
+          "headerParametersUi": {
+            "parameter": [
+              {
+                "name": "Authorization",
+                "value": "<TOKEN>"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "alwaysOutputData": true,
+        "id": "node-c0e50932"
+      },
+      {
+        "name": "IF Airtable record exists?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1270,
+          200
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Airtable\"].json[\"id\"] != \"\" && $node[\"Airtable\"].json[\"id\"] != null && $node[\"Airtable\"].json[\"id\"] != undefined}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-d119b76a"
+      },
+      {
+        "id": "error-b2edf571",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "settings": {
+      "errorWorkflow": null,
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-cdbb3bdc",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.287530",
+      "updatedAt": "2025-09-29T07:07:44.287569",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Workflow management. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Workflow management",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Airtable",
+        "parameters": {
+          "additionalOptions": {
+            "fields": [],
+            "filterByFormula": "=workflowId={{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}"
+          },
+          "application": "<YOUR_APP_ID>",
+          "operation": "list",
+          "table": "Workflows"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Airtable1",
+        "parameters": {
+          "application": "<YOUR_APP_ID>",
+          "id": "={{$node[\"Airtable\"].json[\"id\"]}}",
+          "operation": "update",
+          "options": {
+            "typecast": true
+          },
+          "table": "Workflows"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Airtable2",
+        "parameters": {
+          "application": "<YOUR_APP_ID>",
+          "operation": "append",
+          "options": {
+            "typecast": true
+          },
+          "table": "Workflows"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "minute": 15,
+                "mode": "everyHour"
+              },
+              {
+                "minute": 45,
+                "mode": "everyHour"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "dropboxApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Dropbox",
+        "parameters": {
+          "binaryData": true,
+          "path": "=/workflows/workflow_{{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}/workflow_{{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}__{{$node[\"Get Workflow Details\"].json[\"data\"][\"updatedAt\"]}}.json"
+        },
+        "type": "n8n-nodes-base.dropbox",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Function",
+        "parameters": {
+          "functionCode": "//console.log(items[0].json.data);\nlet data = items[0].json.data;\nitems = data.map(i => {\n//  console.log({json:i});\n  return {json:i};\n});\n//console.log(items);\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get All Workflows",
+        "parameters": {
+          "allowUnauthorizedCerts": true,
+          "headerParametersUi": {
+            "parameter": [
+              {
+                "name": "Authorization",
+                "value": "<TOKEN>"
+              }
+            ]
+          },
+          "options": {
+            "fullResponse": false
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get file link",
+        "parameters": {
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "path",
+                "value": "={{$node[\"Dropbox\"].json[\"path_lower\"]}}"
+              }
+            ]
+          },
+          "headerParametersUi": {
+            "parameter": [
+              {
+                "name": "Authorization",
+                "value": "<TOKEN>"
+              }
+            ]
+          },
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get Workflow Details",
+        "parameters": {
+          "allowUnauthorizedCerts": true,
+          "headerParametersUi": {
+            "parameter": [
+              {
+                "name": "Authorization",
+                "value": "<TOKEN>"
+              }
+            ]
+          },
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"SplitInBatches\"].context[\"noItemsLeft\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF Airtable record exists?",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Airtable\"].json[\"id\"] != \"\" && $node[\"Airtable\"].json[\"id\"] != null && $node[\"Airtable\"].json[\"id\"] != undefined}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Move Binary Data",
+        "parameters": {
+          "mode": "jsonToBinary",
+          "options": {
+            "keepSource": true
+          }
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "name": "NoOp",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Prepare data",
+        "parameters": {
+          "functionCode": "let data = $node[\"Get Workflow Details\"].json[\"data\"];\nlet file = $node[\"Get file link\"].json[\"link\"];\nlet nodes = new Set(data[\"nodes\"].map(i => i.type));\nlet nodes2 = [...nodes];\n//console.log(...nodes);\nlet data2 = data[\"nodes\"].map(i => i.name);\nif(nodes2.includes('n8n-nodes-base.cron')){\n  console.log('Cron found!');\n//  console.log(data);\n  let cron_node = data[\"nodes\"].filter(i => i.type == 'n8n-nodes-base.cron');\n  //console.log(cron_node[0].parameters.triggerTimes.item);\n  items[0].json[\"fields\"][\"isCRON\"]=true;\n  items[0].json[\"fields\"][\"nodes\"]=[...nodes];\n  items[0].json[\"fields\"][\"CRON_details\"]=cron_node[0].parameters.triggerTimes.item;\n  items[0].json[\"fields\"][\"rawData\"]=[{url:file ,filename: 'workflow_'+data[\"id\"]+'__'+data[\"updatedAt\"]+'.json'}];\n} else {  \n  //console.log('Cron not found!');\n  items[0].json[\"fields\"][\"isCRON\"]=false;\n  items[0].json[\"fields\"][\"nodes\"]=[...nodes];\n  items[0].json[\"fields\"][\"rawData\"]=[{url:file ,filename: 'workflow_'+data[\"id\"]+'__'+data[\"updatedAt\"]+'.json'}];\n}\nif(nodes2.some(i => {\n  let regExp = new RegExp(/n8n-nodes-base\\.[\\w]+Trigger/);\n  if(i=='n8n-nodes-base.webhook'){\n    return true;\n  }\n  if(regExp.test(i)){\n    return true;\n  }\n  return false;\n})){\n  items[0].json[\"fields\"][\"isTrigger\"]=true;  \n} else {\n  items[0].json[\"fields\"][\"isTrigger\"]=false;\n}\n  \n//console.log(items);\nreturn items;\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Prepare data1",
+        "parameters": {
+          "functionCode": "let data = $node[\"Get Workflow Details\"].json[\"data\"];\nlet file = $node[\"Get file link\"].json[\"link\"];\nlet nodes = new Set(data[\"nodes\"].map(i => i.type));\nlet nodes2 = [...nodes];\n//console.log(data);\nlet data2 = data[\"nodes\"].map(i => i.name);\nif(nodes2.includes('n8n-nodes-base.cron')){\n  //console.log('Cron found!');\n  let cron_node = data[\"nodes\"].filter(i => i.type == 'n8n-nodes-base.cron');\n  items[0].json={\n    fields:{\n      isCRON:true,\n      nodes:[...nodes],\n      CRON_details:cron_node[0].parameters.triggerTimes.item,\n      rawData:[{url:file ,filename: 'workflow_'+data[\"id\"]+'__'+data[\"updatedAt\"]+'.json'}]\n    }\n  };\n} else {  \n  //console.log('Cron not found!');\n  items[0].json={\n    fields:{\n      isCRON:false,\n      nodes:[...nodes],\n      rawData:[{url:file ,filename: 'workflow_'+data[\"id\"]+'__'+data[\"updatedAt\"]+'.json'}]\n    }\n  };\n}\nif(nodes2.some(i => {\n  let regExp = new RegExp(/n8n-nodes-base\\.[\\w]+Trigger/);\n  if(i=='n8n-nodes-base.webhook'){\n    return true;\n  }\n  if(regExp.test(i)){\n    return true;\n  }\n  return false;\n})){\n  items[0].json[\"fields\"][\"isTrigger\"]=true;  \n} else {\n  items[0].json[\"fields\"][\"isTrigger\"]=false;\n}\n//console.log(items);\nreturn items;\n\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "boolean": [
+              {
+                "name": "isActive",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"active\"]}}"
+              },
+              {
+                "name": "isCRON",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"isCRON\"]}}"
+              },
+              {
+                "name": "saveManualExecutions",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"saveManualExecutions\"]}}"
+              },
+              {
+                "name": "isTrigger",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"isTrigger\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "workflowId",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}"
+              },
+              {
+                "name": "name",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"name\"]}}"
+              },
+              {
+                "name": "errorWorkflowId",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"errorWorkflow\"]}}"
+              },
+              {
+                "name": "createdAt",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"createdAt\"]}}"
+              },
+              {
+                "name": "updatedAt",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"updatedAt\"]}}"
+              },
+              {
+                "name": "nodes",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"nodes\"]}}"
+              },
+              {
+                "name": "timezone",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"timezone\"]}}"
+              },
+              {
+                "name": "CRON_details",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"CRON_details\"]}}"
+              },
+              {
+                "name": "rawData",
+                "value": "={{$node[\"Prepare data\"].json[\"fields\"][\"rawData\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set1",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "boolean": [
+              {
+                "name": "isActive",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"active\"]}}"
+              },
+              {
+                "name": "isCRON",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"isCRON\"]}}"
+              },
+              {
+                "name": "saveManualExecutions",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"saveManualExecutions\"]}}"
+              },
+              {
+                "name": "isTrigger",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"isTrigger\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "workflowId",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"id\"]}}"
+              },
+              {
+                "name": "name",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"name\"]}}"
+              },
+              {
+                "name": "errorWorkflowId",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"errorWorkflow\"]}}"
+              },
+              {
+                "name": "createdAt",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"createdAt\"]}}"
+              },
+              {
+                "name": "updatedAt",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"updatedAt\"]}}"
+              },
+              {
+                "name": "nodes",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"nodes\"]}}"
+              },
+              {
+                "name": "timezone",
+                "value": "={{$node[\"Get Workflow Details\"].json[\"data\"][\"settings\"][\"timezone\"]}}"
+              },
+              {
+                "name": "CRON_details",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"CRON_details\"]}}"
+              },
+              {
+                "name": "rawData",
+                "value": "={{$node[\"Prepare data1\"].json[\"fields\"][\"rawData\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "SplitInBatches",
+        "parameters": {
+          "batchSize": 1,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 20,
+  "integrationCount": 4,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Airtable",
+    "HTTP Request",
+    "Movebinarydata",
+    "Dropbox"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 162,
+  "viewCount": 801,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Airtable Account",
+      "HTTP Request Account",
+      "Movebinarydata Account",
+      "Dropbox Account"
+    ],
+    "requiredCredentials": [
+      "airtable  A P I details",
+      "dropbox  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Function\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"SplitInBatches\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"NoOp\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Airtable\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Airtable1\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Airtable2\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get All Workflows\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Prepare data\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Prepare data1\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Move Binary Data\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"Dropbox\" node (n8n-nodes-base.dropbox) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Workflow Details\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get file link\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF Airtable record exists?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set1\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-2g9548ouo",
+      "workflowId": "workflow-management-959h8",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Dropbox/0969_Dropbox_Manual_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Dropbox\\0969_Dropbox_Manual_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:20.654Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:20.654Z",
+  "updatedAt": "2026-07-15T11:18:20.654Z"
+}

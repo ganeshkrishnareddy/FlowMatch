@@ -1,0 +1,616 @@
+{
+  "id": "manualtrigger-workflow-t3c7o",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-q2z8",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "29451054-fcd6-4054-b072-a87c716f6c67",
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          240,
+          240
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "995ae9b0-130c-4989-8e94-81a14b7743c4",
+        "name": "Read Google Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          460,
+          240
+        ],
+        "parameters": {
+          "options": {},
+          "sheetId": "1cz-4tVi7Nn3j1gh147hROq9l6S4ta06sMfhm2AAI6js"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "{{ $credentials.googleSheetsOAuth2Api.id }}",
+            "name": "Tom's Google Sheets account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2c1ed019-85f1-4b0f-bcf5-ce59ff13ea49",
+        "name": "Search Salesforce accounts",
+        "type": "n8n-nodes-base.salesforce",
+        "position": [
+          680,
+          240
+        ],
+        "parameters": {
+          "query": "=SELECT id, Name FROM Account WHERE Name = '{{$json[\"Company Name\"].replace(/'/g, '\\\\\\'')}}'",
+          "resource": "search"
+        },
+        "credentials": {
+          "salesforceOAuth2Api": {
+            "id": "{{ $credentials.salesforceOAuth2Api.id }}",
+            "name": "Salesforce account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": false,
+        "notes": "This salesforce node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c6978a27-3cdc-44a2-a961-94557b2aed88",
+        "name": "Keep new companies",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          900,
+          40
+        ],
+        "parameters": {
+          "mode": "removeKeyMatches",
+          "propertyName1": "Company Name",
+          "propertyName2": "Name"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7b5df5cf-7019-415b-9758-7f62c4fb13c8",
+        "name": "Merge existing account data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          900,
+          440
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Company Name",
+          "propertyName2": "Name"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7da1de2f-2b37-4e33-b8d4-d1dc59e94bbe",
+        "name": "Account found?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1120,
+          440
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json[\"Id\"] }}",
+                "operation": "isNotEmpty"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "80890a2a-f6d3-4efd-92b1-6465f98f512b",
+        "name": "Remove duplicate companies",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          1120,
+          140
+        ],
+        "parameters": {
+          "compare": "selectedFields",
+          "options": {},
+          "operation": "removeDuplicates",
+          "fieldsToCompare": {
+            "fields": [
+              {
+                "fieldName": "Company Name"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ea9afa15-77be-4d7a-a287-35d4c1c6e6c1",
+        "name": "Set Account ID for existing accounts",
+        "type": "n8n-nodes-base.renameKeys",
+        "position": [
+          1340,
+          440
+        ],
+        "parameters": {
+          "keys": {
+            "key": [
+              {
+                "newKey": "{{ $credentials.newKey }}",
+                "currentKey": "{{ $credentials.currentKey }}"
+              }
+            ]
+          },
+          "additionalOptions": {}
+        },
+        "typeVersion": 1,
+        "notes": "This renameKeys node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "61cfdf30-9135-40bf-929d-317fca0ad474",
+        "name": "Retrieve new company contacts",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1780,
+          40
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Company Name",
+          "propertyName2": "Name"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c10dea7c-96b0-4f3b-b859-af094ced51cc",
+        "name": "Set new account name",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1560,
+          140
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"id\"] }}"
+              },
+              {
+                "name": "Name",
+                "value": "={{ $node[\"Remove duplicate companies\"].json[\"Company Name\"] }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a4a2be2a-7bd9-4a70-b4d9-0df53834bdda",
+        "name": "Create Salesforce account",
+        "type": "n8n-nodes-base.salesforce",
+        "position": [
+          1340,
+          140
+        ],
+        "parameters": {
+          "name": "={{ $json[\"Company Name\"] }}",
+          "resource": "account",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "salesforceOAuth2Api": {
+            "id": "{{ $credentials.salesforceOAuth2Api.id }}",
+            "name": "Salesforce account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This salesforce node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "89f49e6f-62be-403f-9a4c-cd56e28141f3",
+        "name": "Create Salesforce contact",
+        "type": "n8n-nodes-base.salesforce",
+        "position": [
+          2000,
+          240
+        ],
+        "parameters": {
+          "lastname": "={{ $json[\"Last Name\"] }}",
+          "resource": "contact",
+          "operation": "upsert",
+          "externalId": "Email",
+          "externalIdValue": "={{ $json[\"Email\"] }}",
+          "additionalFields": {
+            "email": "={{ $json[\"Email\"] }}",
+            "firstName": "={{ $json[\"First Name\"] }}",
+            "acconuntId": "={{ $json[\"Account ID\"] }}"
+          }
+        },
+        "credentials": {
+          "salesforceOAuth2Api": {
+            "id": "{{ $credentials.salesforceOAuth2Api.id }}",
+            "name": "Salesforce account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This salesforce node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-9bb4107a",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "995ae9b0-130c-4989-8e94-81a14b7743c4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-995ae9b0-130c-4989-8e94-81a14b7743c4-adc7f048",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-20fc8122",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.776056",
+      "updatedAt": "2025-09-29T07:07:48.776070",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "995ae9b0-130c-4989-8e94-81a14b7743c4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-995ae9b0-130c-4989-8e94-81a14b7743c4-adc7f048"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Account found?",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "isNotEmpty",
+                "value1": "={{ $json[\"Id\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "salesforceOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Salesforce account",
+        "parameters": {
+          "additionalFields": {},
+          "name": "={{ $json[\"Company Name\"] }}",
+          "resource": "account"
+        },
+        "type": "n8n-nodes-base.salesforce",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "salesforceOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Salesforce contact",
+        "parameters": {
+          "additionalFields": {
+            "acconuntId": "={{ $json[\"Account ID\"] }}",
+            "email": "={{ $json[\"Email\"] }}",
+            "firstName": "={{ $json[\"First Name\"] }}"
+          },
+          "externalId": "Email",
+          "externalIdValue": "={{ $json[\"Email\"] }}",
+          "lastname": "={{ $json[\"Last Name\"] }}",
+          "operation": "upsert",
+          "resource": "contact"
+        },
+        "type": "n8n-nodes-base.salesforce",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Keep new companies",
+        "parameters": {
+          "mode": "removeKeyMatches",
+          "propertyName1": "Company Name",
+          "propertyName2": "Name"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge existing account data",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Company Name",
+          "propertyName2": "Name"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Read Google Sheet",
+        "parameters": {
+          "options": {},
+          "sheetId": "1cz-4tVi7Nn3j1gh147hROq9l6S4ta06sMfhm2AAI6js"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 2
+      },
+      {
+        "name": "Remove duplicate companies",
+        "parameters": {
+          "compare": "selectedFields",
+          "fieldsToCompare": {
+            "fields": [
+              {
+                "fieldName": "Company Name"
+              }
+            ]
+          },
+          "operation": "removeDuplicates",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 1
+      },
+      {
+        "name": "Retrieve new company contacts",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Company Name",
+          "propertyName2": "Name"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "salesforceOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search Salesforce accounts",
+        "parameters": {
+          "query": "=SELECT id, Name FROM Account WHERE Name = '{{$json[\"Company Name\"].replace(/'/g, '\\\\\\'')}}'",
+          "resource": "search"
+        },
+        "type": "n8n-nodes-base.salesforce",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Account ID for existing accounts",
+        "parameters": {
+          "additionalOptions": {},
+          "keys": {
+            "key": [
+              {
+                "currentKey": "{{ $credentials.currentKey }}",
+                "newKey": "{{ $credentials.newKey }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.renameKeys",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set new account name",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "id",
+                "value": "={{ $json[\"id\"] }}"
+              },
+              {
+                "name": "Name",
+                "value": "={{ $node[\"Remove duplicate companies\"].json[\"Company Name\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Google Sheets",
+    "Salesforce",
+    "Itemlists",
+    "Renamekeys"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 112,
+  "viewCount": 197,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "Salesforce Account",
+      "Itemlists Account",
+      "Renamekeys Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details",
+      "salesforce  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the \"Read Google Sheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Search Salesforce accounts\" node (n8n-nodes-base.salesforce) and configure the action parameters, mappings, and fields.",
+      "Open the \"Keep new companies\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge existing account data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Account found?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove duplicate companies\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set Account ID for existing accounts\" node (n8n-nodes-base.renameKeys) and configure the action parameters, mappings, and fields.",
+      "Open the \"Retrieve new company contacts\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Salesforce account\" node (n8n-nodes-base.salesforce) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Salesforce contact\" node (n8n-nodes-base.salesforce) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set new account name\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-aw9fewzlv",
+      "workflowId": "manualtrigger-workflow-t3c7o",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0257_Manual_GoogleSheets_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0257_Manual_GoogleSheets_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:26.805Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:26.805Z",
+  "updatedAt": "2026-07-15T11:29:26.805Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

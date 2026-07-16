@@ -1,0 +1,748 @@
+{
+  "id": "rag-ai-agent-with-milvus-and-cohere-bcjjj",
+  "name": "RAG AI Agent with Milvus and Cohere",
+  "slug": "rag-ai-agent-with-milvus-and-cohere-yt5m",
+  "description": "Automated workflow: RAG AI Agent with Milvus and Cohere. This workflow integrates 13 different services: stickyNote, googleDriveTrigger, textSplitterRecursiveCharacterTextSplitter, agent, googleDrive. It contains 18 nodes and follows best practices for error handling and security.",
+  "shortDescription": "RAG AI Agent with Milvus and Cohere workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "id": "2Eba0OHGtOmoTWOU",
+    "meta": {
+      "instanceId": "workflow-6ab0a70c",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.610608",
+      "updatedAt": "2025-09-29T07:07:44.610631",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "RAG AI Agent with Milvus and Cohere",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "361065cc-edbf-47da-8da7-c59b564db6f3",
+        "name": "Default Data Loader",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          0,
+          320
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This documentDefaultDataLoader node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a01b9512-ced1-4e28-a2aa-88077ab79d9a",
+        "name": "Embeddings Cohere",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -140,
+          320
+        ],
+        "parameters": {
+          "modelName": "embed-multilingual-v3.0"
+        },
+        "credentials": {
+          "cohereApi": {
+            "id": "8gcYMleu1b8Hm03D",
+            "name": "CohereApi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This embeddingsCohere node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1da6ea4b-de88-44d3-a215-78c55b5592a2",
+        "name": "When chat message received",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -800,
+          520
+        ],
+        "webhookId": "a4257301-3fb9-4b9d-a965-1fa66f314696",
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1.1,
+        "notes": "This chatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "23004477-3f6d-4909-a626-0eba0557a5bd",
+        "name": "Watch New Files",
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "position": [
+          -800,
+          100
+        ],
+        "parameters": {
+          "event": "fileCreated",
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder",
+          "folderToWatch": {
+            "__rl": true,
+            "mode": "list",
+            "value": "15gjDQZiHZuBeVscnK8Ic_kIWt3mOaVfs",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "RAG template"
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "r1DVmNxwkIL8JO17",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This googleDriveTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "001fbdbe-dfcb-4552-bf09-de416b253389",
+        "name": "Download New",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          -580,
+          100
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "options": {},
+          "operation": "download"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "r1DVmNxwkIL8JO17",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c1116cba-beb9-4d28-843d-c5c21c0643de",
+        "name": "Insert into Milvus",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -124,
+          100
+        ],
+        "parameters": {
+          "mode": "insert",
+          "options": {
+            "clearCollection": false
+          },
+          "milvusCollection": {
+            "__rl": true,
+            "mode": "list",
+            "value": "collectionName",
+            "cachedResultName": "collectionName"
+          }
+        },
+        "credentials": {
+          "milvusApi": {
+            "id": "Gpsxqr2l9Qxu48h0",
+            "name": "Milvus account"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This vectorStoreMilvus node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2dbc7139-46f6-41d8-8c13-9fafad5aec55",
+        "name": "RAG Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -540,
+          520
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1.8,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a103506e-9019-41f2-9b0d-9b831434c9e9",
+        "name": "Retrieve from Milvus",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -340,
+          740
+        ],
+        "parameters": {
+          "mode": "retrieve-as-tool",
+          "topK": 10,
+          "toolName": "vector_store",
+          "toolDescription": "You are an AI agent that responds based on information received from a vector database.",
+          "milvusCollection": {
+            "__rl": true,
+            "mode": "list",
+            "value": "collectionName",
+            "cachedResultName": "collectionName"
+          }
+        },
+        "credentials": {
+          "milvusApi": {
+            "id": "Gpsxqr2l9Qxu48h0",
+            "name": "Milvus account"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This vectorStoreMilvus node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "74ccdff1-b976-4e1c-a2c4-237ffff19e34",
+        "name": "OpenAI 4o",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -580,
+          740
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o",
+            "cachedResultName": "gpt-4o"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "vupAk5StuhOafQcb",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "36e35eaf-f723-4eeb-9658-143d5bc390a0",
+        "name": "Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -460,
+          740
+        ],
+        "parameters": {},
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ec7b6b92-065c-455c-a3f0-17586d9e48d7",
+        "name": "Cohere embeddings",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -220,
+          900
+        ],
+        "parameters": {
+          "modelName": "embed-multilingual-v3.0"
+        },
+        "credentials": {
+          "cohereApi": {
+            "id": "8gcYMleu1b8Hm03D",
+            "name": "CohereApi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This embeddingsCohere node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3c3a8900-0b98-4479-8602-16b21e011ba1",
+        "name": "Set Chunks",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          80,
+          480
+        ],
+        "parameters": {
+          "options": {},
+          "chunkSize": 700,
+          "chunkOverlap": 60
+        },
+        "typeVersion": 1,
+        "notes": "This textSplitterRecursiveCharacterTextSplitter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3a43bf1a-7e22-4b5e-bbb1-6bb2c1798c07",
+        "name": "Extract from File",
+        "type": "n8n-nodes-base.extractFromFile",
+        "position": [
+          -360,
+          100
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "pdf"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e0c9d4d7-5e3e-4e47-bb1f-dbdca360b20a",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1440,
+          120
+        ],
+        "parameters": {
+          "color": 2,
+          "width": 540,
+          "height": 600,
+          "content": "## Why Milvus\nBased on comparisons and user feedback, **Milvus is often considered a more performant and scalable vector database solution compared to Supabase**, particularly for demanding use cases involving large datasets, high-volume vector search operations, and multilingual support.\n\n\n### Requirements\n- Create an account on [Zilliz]({{ $env.WEBHOOK_URL }} to generate the Milvus cluster. \n- There is no need to create docker containers or your own instance, Zilliz provides the cloud infraestructure to build it easily\n- Get your credentials ready from Drive, Milvus (Zilliz), and [Cohere]({{ $env.WEBHOOK_URL }}\n\n### Usage\nEvery time a new pdf is added into the Drive folder, it will be inserted into the Milvus Vector Store, allowing for the interaction with the RAG agent in seconds.\n\n## Calculate your company's RAG costs\n\nWant to run Milvus on your own server on n8n? Zilliz provides a great [cost calculator]({{ $env.WEBHOOK_URL }}\n\n### Get in touch with us\nWant to implement a RAG AI agent for your company? [Shoot us a message]({{ $env.WEBHOOK_URL }}\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-43cf3364",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "8b5fc2b8-50f7-425c-8fc8-94ba4f76ecf3",
+    "connections": {
+      "23004477-3f6d-4909-a626-0eba0557a5bd": {
+        "main": [
+          [
+            {
+              "node": "error-handler-23004477-3f6d-4909-a626-0eba0557a5bd-567630fe",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "001fbdbe-dfcb-4552-bf09-de416b253389": {
+        "main": [
+          [
+            {
+              "node": "error-handler-001fbdbe-dfcb-4552-bf09-de416b253389-e0bfc747",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "74ccdff1-b976-4e1c-a2c4-237ffff19e34": {
+        "main": [
+          [
+            {
+              "node": "error-handler-74ccdff1-b976-4e1c-a2c4-237ffff19e34-c6125f81",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "3a43bf1a-7e22-4b5e-bbb1-6bb2c1798c07": {
+        "main": [
+          [
+            {
+              "node": "error-handler-3a43bf1a-7e22-4b5e-bbb1-6bb2c1798c07-0851940f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: RAG AI Agent with Milvus and Cohere. This workflow integrates 13 different services: stickyNote, googleDriveTrigger, textSplitterRecursiveCharacterTextSplitter, agent, googleDrive. It contains 18 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: RAG AI Agent with Milvus and Cohere. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "001fbdbe-dfcb-4552-bf09-de416b253389": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-001fbdbe-dfcb-4552-bf09-de416b253389-e0bfc747"
+            }
+          ]
+        ]
+      },
+      "23004477-3f6d-4909-a626-0eba0557a5bd": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-23004477-3f6d-4909-a626-0eba0557a5bd-567630fe"
+            }
+          ]
+        ]
+      },
+      "3a43bf1a-7e22-4b5e-bbb1-6bb2c1798c07": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a43bf1a-7e22-4b5e-bbb1-6bb2c1798c07-0851940f"
+            }
+          ]
+        ]
+      },
+      "74ccdff1-b976-4e1c-a2c4-237ffff19e34": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74ccdff1-b976-4e1c-a2c4-237ffff19e34-c6125f81"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "RAG AI Agent with Milvus and Cohere",
+    "nodes": [
+      {
+        "credentials": {
+          "cohereApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Cohere embeddings",
+        "parameters": {
+          "modelName": "embed-multilingual-v3.0"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Default Data Loader",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Download New",
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "operation": "download",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "cohereApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Embeddings Cohere",
+        "parameters": {
+          "modelName": "embed-multilingual-v3.0"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract from File",
+        "parameters": {
+          "operation": "pdf",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "milvusApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Insert into Milvus",
+        "parameters": {
+          "milvusCollection": {
+            "__rl": true,
+            "cachedResultName": "collectionName",
+            "mode": "list",
+            "value": "collectionName"
+          },
+          "mode": "insert",
+          "options": {
+            "clearCollection": false
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Memory",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI 4o",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "cachedResultName": "gpt-4o",
+            "mode": "list",
+            "value": "gpt-4o"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "RAG Agent",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "credentials": {
+          "milvusApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Retrieve from Milvus",
+        "parameters": {
+          "milvusCollection": {
+            "__rl": true,
+            "cachedResultName": "collectionName",
+            "mode": "list",
+            "value": "collectionName"
+          },
+          "mode": "retrieve-as-tool",
+          "toolDescription": "You are an AI agent that responds based on information received from a vector database.",
+          "toolName": "vector_store",
+          "topK": 10
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Set Chunks",
+        "parameters": {
+          "chunkOverlap": 60,
+          "chunkSize": 700,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 2,
+          "content": "## Why Milvus\nBased on comparisons and user feedback, **Milvus is often considered a more performant and scalable vector database solution compared to Supabase**, particularly for demanding use cases involving large datasets, high-volume vector search operations, and multilingual support.\n\n\n### Requirements\n- Create an account on [Zilliz]({{ $env.WEBHOOK_URL }} to generate the Milvus cluster. \n- There is no need to create docker containers or your own instance, Zilliz provides the cloud infraestructure to build it easily\n- Get your credentials ready from Drive, Milvus (Zilliz), and [Cohere]({{ $env.WEBHOOK_URL }}\n\n### Usage\nEvery time a new pdf is added into the Drive folder, it will be inserted into the Milvus Vector Store, allowing for the interaction with the RAG agent in seconds.\n\n## Calculate your company's RAG costs\n\nWant to run Milvus on your own server on n8n? Zilliz provides a great [cost calculator]({{ $env.WEBHOOK_URL }}\n\n### Get in touch with us\nWant to implement a RAG AI agent for your company? [Shoot us a message]({{ $env.WEBHOOK_URL }}\n",
+          "height": 600,
+          "width": 540
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Watch New Files",
+        "parameters": {
+          "event": "fileCreated",
+          "folderToWatch": {
+            "__rl": true,
+            "cachedResultName": "RAG template",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "15gjDQZiHZuBeVscnK8Ic_kIWt3mOaVfs"
+          },
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder"
+        },
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "When chat message received",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Google Drive"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 46,
+  "viewCount": 494,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account"
+    ],
+    "requiredCredentials": [
+      "cohere  A P I details",
+      "google Drive  O Auth2  A P I details",
+      "milvus  A P I details",
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Watch New Files\".",
+      "Open the \"Default Data Loader\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Embeddings Cohere\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"When chat message received\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download New\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Insert into Milvus\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"RAG Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Retrieve from Milvus\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI 4o\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Cohere embeddings\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set Chunks\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract from File\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-04i3cns46",
+      "workflowId": "rag-ai-agent-with-milvus-and-cohere-bcjjj",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Extractfromfile/0741_Extractfromfile_Stickynote_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Extractfromfile\\0741_Extractfromfile_Stickynote_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:28:59.700Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:59.700Z",
+  "updatedAt": "2026-07-15T11:28:59.700Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

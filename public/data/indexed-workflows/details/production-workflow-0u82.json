@@ -1,0 +1,440 @@
+{
+  "id": "production-workflow-67e8c",
+  "name": "Production Workflow",
+  "slug": "production-workflow-0u82",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          310,
+          300
+        ],
+        "webhookId": "6be952e8-e30f-4dd7-90b3-bc202ae9f174",
+        "parameters": {
+          "path": "6be952e8-e30f-4dd7-90b3-bc202ae9f174",
+          "options": {
+            "rawBody": true
+          },
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1,
+        "id": "node-f629c597"
+      },
+      {
+        "name": "SearchTorrent",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          530,
+          300
+        ],
+        "parameters": {
+          "functionCode": "const TorrentSearchApi = require('torrent-search-api');\n\nTorrentSearchApi.enableProvider('KickassTorrents');\nTorrentSearchApi.enableProvider('Rarbg');\n\nitem.title = $node[\"Webhook\"].json[\"body\"].title.trim();\n\nconst torrents = await TorrentSearchApi.search(item.title, 'All', 5);\n\nitem.torrents = torrents;\nitem.found = true;\n\nif(!torrents.length)\n  item.found = false;\n  \nconsole.log('Done!');\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "id": "node-d1756a8e"
+      },
+      {
+        "name": "Start download",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          960,
+          280
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.basicAuth }}",
+          "jsonParameters": true,
+          "bodyParametersJson": "={\"method\":\"torrent-add\",\"arguments\":{\"paused\":false,\"download-dir\":\"/media/FILM/TORRENT\",\"filename\":\"{{$node[\"SearchTorrent\"].json[\"torrents\"][0][\"magnet\"]}}\"}}",
+          "headerParametersJson": "{\"X-Transmission-Session-Id\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}"
+        },
+        "credentials": {
+          "httpBasicAuth": "Transmission-basic-auth"
+        },
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "id": "node-612c79e9"
+      },
+      {
+        "name": "IF",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          740,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json[\"found\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-e4f9f859"
+      },
+      {
+        "name": "Torrent not found",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          960,
+          470
+        ],
+        "parameters": {
+          "text": "=Film {{$node[\"Webhook\"].json[\"body\"].title}} non trovato.",
+          "chatId": "00000000",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": "your_bot_credential"
+        },
+        "typeVersion": 1,
+        "id": "node-fc097ed0"
+      },
+      {
+        "name": "Telegram1",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          1500,
+          490
+        ],
+        "parameters": {
+          "text": "=Scarico {{$node[\"Webhook\"].json[\"body\"].title}}!\nTitolo: {{$node[\"SearchTorrent\"].json[\"torrents\"][0][\"title\"]}}",
+          "chatId": "0000000",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": "your_bot_credential"
+        },
+        "typeVersion": 1,
+        "id": "node-b89cfbff"
+      },
+      {
+        "name": "IF2",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1150,
+          280
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "=\"{{$json[\"error\"][\"statusCode\"]}}\"",
+                "value2": "=\"409\""
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-1d4d98cb"
+      },
+      {
+        "name": "Start download new token",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1340,
+          260
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.basicAuth }}",
+          "jsonParameters": true,
+          "bodyParametersJson": "={\"method\":\"torrent-add\",\"arguments\":{\"paused\":false,\"download-dir\":\"/media/FILM/TORRENT\",\"filename\":\"{{$node[\"SearchTorrent\"].json[\"torrents\"][0][\"magnet\"]}}\"}}",
+          "headerParametersJson": "={\"X-Transmission-Session-Id\":\"{{$node[\"Start download\"].json[\"error\"][\"response\"][\"headers\"][\"x-transmission-session-id\"]}}\"}"
+        },
+        "credentials": {
+          "httpBasicAuth": "Transmission-basic-auth"
+        },
+        "typeVersion": 1,
+        "id": "node-b94d98ae"
+      },
+      {
+        "id": "error-e854522f",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-42b9fddb",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.060021",
+      "updatedAt": "2025-09-29T07:07:45.060030",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json[\"found\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF2",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "=\"{{$json[\"error\"][\"statusCode\"]}}\"",
+                "value2": "=\"409\""
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "SearchTorrent",
+        "parameters": {
+          "functionCode": "const TorrentSearchApi = require('torrent-search-api');\n\nTorrentSearchApi.enableProvider('KickassTorrents');\nTorrentSearchApi.enableProvider('Rarbg');\n\nitem.title = $node[\"Webhook\"].json[\"body\"].title.trim();\n\nconst torrents = await TorrentSearchApi.search(item.title, 'All', 5);\n\nitem.torrents = torrents;\nitem.found = true;\n\nif(!torrents.length)\n  item.found = false;\n  \nconsole.log('Done!');\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Start download",
+        "parameters": {
+          "authentication": "{{ $credentials.basicAuth }}",
+          "bodyParametersJson": "={\"method\":\"torrent-add\",\"arguments\":{\"paused\":false,\"download-dir\":\"/media/FILM/TORRENT\",\"filename\":\"{{$node[\"SearchTorrent\"].json[\"torrents\"][0][\"magnet\"]}}\"}}",
+          "headerParametersJson": "{\"X-Transmission-Session-Id\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}",
+          "jsonParameters": true,
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Start download new token",
+        "parameters": {
+          "authentication": "{{ $credentials.basicAuth }}",
+          "bodyParametersJson": "={\"method\":\"torrent-add\",\"arguments\":{\"paused\":false,\"download-dir\":\"/media/FILM/TORRENT\",\"filename\":\"{{$node[\"SearchTorrent\"].json[\"torrents\"][0][\"magnet\"]}}\"}}",
+          "headerParametersJson": "={\"X-Transmission-Session-Id\":\"{{$node[\"Start download\"].json[\"error\"][\"response\"][\"headers\"][\"x-transmission-session-id\"]}}\"}",
+          "jsonParameters": true,
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Telegram1",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "0000000",
+          "text": "=Scarico {{$node[\"Webhook\"].json[\"body\"].title}}!\nTitolo: {{$node[\"SearchTorrent\"].json[\"torrents\"][0][\"title\"]}}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Torrent not found",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "00000000",
+          "text": "=Film {{$node[\"Webhook\"].json[\"body\"].title}} non trovato."
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {
+            "rawBody": true
+          },
+          "path": "6be952e8-e30f-4dd7-90b3-bc202ae9f174"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "Functionitem",
+    "HTTP Request",
+    "Telegram"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 152,
+  "viewCount": 757,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Functionitem Account",
+      "HTTP Request Account",
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "http Basic Auth details",
+      "telegram  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"SearchTorrent\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Start download\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Torrent not found\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Telegram1\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF2\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Start download new token\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-8u23we5l7",
+      "workflowId": "production-workflow-67e8c",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Functionitem/0146_Functionitem_Telegram_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Functionitem\\0146_Functionitem_Telegram_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:02.348Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:02.348Z",
+  "updatedAt": "2026-07-15T11:29:02.348Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

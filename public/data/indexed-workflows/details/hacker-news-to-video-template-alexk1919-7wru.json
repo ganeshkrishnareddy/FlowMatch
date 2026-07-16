@@ -1,0 +1,4028 @@
+{
+  "id": "hacker-news-to-video-template-alexk1919-l8lcx",
+  "name": "Hacker News to Video Template - AlexK1919",
+  "slug": "hacker-news-to-video-template-alexk1919-7wru",
+  "description": "Automated workflow: Hacker News to Video Template - AlexK1919. This workflow integrates 22 different services: stickyNote, youTube, lmChatOpenAi, if, splitInBatches. It contains 82 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Hacker News to Video Template - AlexK1919 workflow containing 48 nodes.",
+  "originalWorkflowJson": {
+    "id": "744G7emgZe0pXaPB",
+    "meta": {
+      "instanceId": "workflow-2eae8aab",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.013580",
+      "updatedAt": "2025-09-29T07:07:48.013604",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Hacker News to Video Template - AlexK1919",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "c777c41b-842d-4504-a1a0-ccbb034a0fdd",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -320,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "74fafd7c-55a4-46ec-b4a8-33d46f2b5b54",
+        "name": "Hacker News",
+        "type": "n8n-nodes-base.hackerNews",
+        "position": [
+          -20,
+          300
+        ],
+        "parameters": {
+          "resource": "all",
+          "additionalFields": {}
+        },
+        "typeVersion": 1,
+        "notes": "This hackerNews node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9cd87fd2-6a38-463a-a22e-e0c34910818f",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          440,
+          300
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "611b24cd-558b-4025-a0a8-ea355ba61988",
+        "name": "OpenAI Chat Model3",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          720,
+          580
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f814682c-cf6f-49a8-8ea0-48fbc64a3ebe",
+        "name": "HTTP Request1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          900,
+          580
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "toolDescription": "grab the article for the ai agent to use"
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2a4bcf69-23f0-440d-a3b0-c8261e153c62",
+        "name": "Structured Output Parser",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1080,
+          580
+        ],
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"summary\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"related\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n        \"image urls\": {\n\t\t\t\"type\": \"string\"\n        }\n\t}\n}"
+        },
+        "typeVersion": 1.2,
+        "notes": "This outputParserStructured node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "83c3b8f0-8d67-48a2-a5ce-b777ea1d7b32",
+        "name": "Upload to Minio",
+        "type": "n8n-nodes-base.s3",
+        "position": [
+          4240,
+          1080
+        ],
+        "parameters": {
+          "operation": "upload",
+          "bucketName": "=",
+          "additionalFields": {
+            "grantRead": true,
+            "parentFolderKey": "YOUR_CREDENTIAL_HERE"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This s3 node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "05b972ff-ccab-415b-8787-aafabb3b7292",
+        "name": "News1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2180,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ec8013d5-84b5-43c8-abcb-6986ef15939d",
+                "name": "property_name",
+                "type": "string",
+                "value": "={{ $json.message.content['Article Title'] }}"
+              },
+              {
+                "id": "4d91c4fc-12a2-4fe2-a58e-02284314e1de",
+                "name": "property_text",
+                "type": "string",
+                "value": "={{ $json.message.content['Article Blurb'] }}"
+              },
+              {
+                "id": "cad2b795-8b71-415f-a100-700d9ec62bbd",
+                "name": "property_image_url",
+                "type": "string",
+                "value": "={{ $('If Topic').item.json.output['image urls'] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d175d366-e672-4452-b78e-a06336ef242b",
+        "name": "Leo - Improve Prompt",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2720,
+          100
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "jsonBody": "={\n  \"prompt\": \"{{ $('Article Prep').item.json.message.content['Image Prompt 1'] }}\"\n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d8da7879-1a67-4da1-86db-f70e50b4e9da",
+        "name": "Leo - Get imageId",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          3320,
+          100
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "content-type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "faf80246-3b1a-49c6-a277-0152428e46e1",
+        "name": "Runway - Create Video",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2520,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "promptImage",
+                "value": "={{ $json.body.generations_by_pk.generated_images[0].url }}"
+              },
+              {
+                "name": "promptText",
+                "value": "string"
+              },
+              {
+                "name": "model",
+                "value": "gen3a_turbo"
+              }
+            ]
+          },
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Runway-Version",
+                "value": "2024-11-06"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e91c1f01-7870-4063-9557-24a6ba1d3db3",
+        "name": "Runway - Get Video",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2920,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Runway-Version",
+                "value": "2024-11-06"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "41ee2665-e1aa-4d48-ade6-e37af568f211",
+        "name": "Wait2",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          2720,
+          300
+        ],
+        "webhookId": "ddca5833-a40b-404a-9140-686cd4fa26cb",
+        "parameters": {
+          "unit": "minutes",
+          "amount": 3
+        },
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "091e9e07-89ba-4fe3-9fc5-278fc333dbff",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -160,
+          -40
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 341,
+          "height": 951,
+          "content": "# Choose your data source \n## This can be swapped for any other data source of your choosing."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9660a593-9966-4ebe-bfd7-f884dc185d56",
+        "name": "If Topic",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1100,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "56219de5-244d-4b7f-a511-f3061572cf93",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.output.related }}",
+                "rightValue": "yes"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e47140ac-20cc-417b-a6cd-30f780dc8289",
+        "name": "Get Image",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1500,
+          320
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "26f80f71-2c3a-46fe-a960-21cdbc18ce34",
+        "name": "Prompt Settings1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2520,
+          100
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "56c8f20d-d9d9-4be7-ac2a-38df6ffdd722",
+                "name": "model",
+                "type": "string",
+                "value": "6b645e3a-d64f-4341-a6d8-7a3690fbf042"
+              }
+            ]
+          },
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ce697f6f-f8fc-4ba7-b776-17bbc2e870b7",
+        "name": "Leo - Generate Image",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2920,
+          100
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "jsonBody": "={\n  \"alchemy\": true,\n  \"width\": 1024,\n  \"height\": 768,\n  \"modelId\": \"6b645e3a-d64f-4341-a6d8-7a3690fbf042\",\n  \"num_images\": 1,\n  \"presetStyle\": \"MONOCHROME\",\n  \"prompt\": \"{{ $json.body.promptGeneration.prompt }}; Use the rule of thirds, leading lines, & balance. DO NOT INCLUDE ANY WORDS OR LABELS.\",\n  \"guidance_scale\": 7,\n  \"highResolution\": true,\n  \"promptMagic\": false,\n  \"promptMagicStrength\": 0.5,\n  \"promptMagicVersion\": \"v3\",\n  \"public\": false,\n  \"ultra\": false,\n  \"photoReal\": false,\n  \"negative_prompt\": \"\"\n} ",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e2067fe5-3fae-4f97-97c0-879967efd9b8",
+        "name": "Wait1",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          3120,
+          100
+        ],
+        "webhookId": "256c3814-6a52-4eb1-969a-30f9f3b8e04e",
+        "parameters": {
+          "amount": 30
+        },
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f0ba57a5-1d27-4c75-a422-4bc0e2cead9d",
+        "name": "Limit",
+        "type": "n8n-nodes-base.limit",
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "keep": "lastItems",
+          "maxItems": 50
+        },
+        "typeVersion": 1,
+        "notes": "This limit node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e01152aa-961b-4e33-a1e3-186d47d81c55",
+        "name": "Image Analysis",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1300,
+          320
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {
+            "detail": "auto"
+          },
+          "resource": "image",
+          "imageUrls": "{{ $env.BASE_URL }}",
+          "operation": "analyze"
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "ysxujEYFiY5ozRTS",
+            "name": "AlexK OpenAi Key"
+          }
+        },
+        "typeVersion": 1.6,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ab346129-c3d5-4f51-af5e-5d63cd154981",
+        "name": "Wait3",
+        "type": "n8n-nodes-base.wait",
+        "disabled": true,
+        "position": [
+          3080,
+          1020
+        ],
+        "webhookId": "6e4a0b8d-6c31-4a98-8ec3-2509aa2087e8",
+        "parameters": {
+          "unit": "minutes"
+        },
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "872c35a3-bdd5-4eec-9bac-0959f3ff78e7",
+        "name": "Article Analysis",
+        "type": "n8n-nodes-base.noOp",
+        "onError": "continueErrorOutput",
+        "position": [
+          740,
+          300
+        ],
+        "parameters": {
+          "text": "=Can you tell me if the article at {{ $json.url }} is related to automation or ai? \n\nthen, create a 250 word summary of the article\n\nAlso, list any image url's related to the article content from the url. Limit to 1 image url.",
+          "options": {
+            "systemMessage": "You are a helpful assistant in summarizing and identifying articles related to automation and ai. \nOutput the results as:\nsummary: \nrelated: yes or no\nimage urls: "
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.7,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "31c3a90e-10ee-4217-9b08-ff57bf17ea10",
+        "name": "Dropbox",
+        "type": "n8n-nodes-base.dropbox",
+        "position": [
+          3640,
+          1080
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This dropbox node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "22ccd0a0-f7f6-40ca-bd09-40ed4a7fcde1",
+        "name": "Google Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          3840,
+          1080
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "options": {},
+          "operation": "update"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "m8K1mbAUn7yuiEwl",
+            "name": "AlexK1919 Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ea75931d-c1ee-4139-9bdc-7901056ba016",
+        "name": "Microsoft OneDrive",
+        "type": "n8n-nodes-base.microsoftOneDrive",
+        "position": [
+          4040,
+          1080
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This microsoftOneDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "38888521-3087-4e0a-81d6-cf4b9a5dd3dd",
+        "name": "YouTube",
+        "type": "n8n-nodes-base.youTube",
+        "position": [
+          3640,
+          1500
+        ],
+        "parameters": {
+          "options": {},
+          "resource": "video",
+          "operation": "upload"
+        },
+        "typeVersion": 1,
+        "notes": "This youTube node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "55f3decc-f952-4d2a-804d-2aec44fb2755",
+        "name": "Twitter",
+        "type": "n8n-nodes-base.twitter",
+        "position": [
+          3840,
+          1500
+        ],
+        "parameters": {
+          "additionalFields": {}
+        },
+        "typeVersion": 2,
+        "notes": "This twitter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "54c8b762-444d-4790-97a9-a2f84518492f",
+        "name": "Instagram",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          4240,
+          1500
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "90040f15-95c0-4ebb-818f-dde508eb0689",
+        "name": "LinkedIn",
+        "type": "n8n-nodes-base.linkedIn",
+        "position": [
+          4040,
+          1500
+        ],
+        "parameters": {
+          "additionalFields": {}
+        },
+        "typeVersion": 1,
+        "notes": "This linkedIn node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "691eb779-5fae-4f65-89eb-b1b8e5488809",
+        "name": "Leo - Improve Prompt2",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2720,
+          500
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "jsonBody": "={\n  \"prompt\": \"{{ $('Article Prep').item.json.message.content['Image Prompt 2'] }}\"\n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "hIzUsjbtHLmIe6uM",
+            "name": "RunwayML Custom Auth"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "076a745a-055b-459c-8af9-fa7b6740dc6f",
+        "name": "Wait4",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          2720,
+          700
+        ],
+        "webhookId": "89b31515-b403-4644-a2c1-970e5e774008",
+        "parameters": {
+          "unit": "minutes",
+          "amount": 3
+        },
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "adc2c993-3f89-40df-96fc-eb3ff5eafb1c",
+        "name": "Wait6",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          3120,
+          500
+        ],
+        "webhookId": "2efb873f-bcbd-41d9-99da-b2b57ef5ad93",
+        "parameters": {
+          "amount": 30
+        },
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "156f5735-bc20-46a9-871c-143b0772ca45",
+        "name": "Leo - Generate Image2",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2920,
+          500
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "jsonBody": "={\n  \"alchemy\": true,\n  \"width\": 1024,\n  \"height\": 768,\n  \"modelId\": \"6b645e3a-d64f-4341-a6d8-7a3690fbf042\",\n  \"num_images\": 1,\n  \"presetStyle\": \"MONOCHROME\",\n  \"prompt\": \"{{ $json.body.promptGeneration.prompt }}; Use the rule of thirds, leading lines, & balance. DO NOT INCLUDE ANY WORDS OR LABELS.\",\n  \"guidance_scale\": 7,\n  \"highResolution\": true,\n  \"promptMagic\": false,\n  \"promptMagicStrength\": 0.5,\n  \"promptMagicVersion\": \"v3\",\n  \"public\": false,\n  \"ultra\": false,\n  \"photoReal\": false,\n  \"negative_prompt\": \"\"\n} ",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4f270fa8-4da2-44f0-927f-3509fd9f8f7d",
+        "name": "Leo - Get imageId2",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          3320,
+          500
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "content-type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "49c0e7ba-bf9c-4819-b479-61aa099ab9ab",
+        "name": "Runway - Create Video2",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2520,
+          700
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "promptImage",
+                "value": "={{ $json.body.generations_by_pk.generated_images[0].url }}"
+              },
+              {
+                "name": "promptText",
+                "value": "string"
+              },
+              {
+                "name": "model",
+                "value": "gen3a_turbo"
+              }
+            ]
+          },
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Runway-Version",
+                "value": "2024-11-06"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "hIzUsjbtHLmIe6uM",
+            "name": "RunwayML Custom Auth"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d03eb190-5fc0-4b7e-ad65-88ece3ab833d",
+        "name": "Runway - Get Video2",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2920,
+          700
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Runway-Version",
+                "value": "2024-11-06"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0072563d-b87d-47c5-80fd-ed3c051b3287",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          3580,
+          940
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 882,
+          "height": 372,
+          "content": "# Upload Assets\nYou can extend this workflow further by uploading the generated assets to your storage option of choice."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a0b2377e-57ea-47e9-83c9-3e58372610e5",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          3580,
+          1360
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 882,
+          "height": 372,
+          "content": "# Post to Social Media\nYou can extend this workflow further by posting the generated assets to social media."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "708fe6a0-4899-462b-9a08-fadea7c7e195",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2420,
+          -40
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 1114,
+          "height": 943,
+          "content": "# Generate Images and Videos"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5bbb6552-ec3a-42ea-a911-993f67a6c8dc",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2420,
+          940
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 1114,
+          "height": 372,
+          "content": "# Stitch it all together"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "25f4cc09-fbff-4c10-b706-30df5840b794",
+        "name": "Cre - Generate Video1",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2880,
+          1020
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "jsonBody": "={\n  \"max_width\": 480,\n  \"template_id\": \"enterTemplateID\",\n  \"modifications\": {\n    \"Scenes.elements\": [\n      {\n        \"name\": \"Intro Comp\",\n        \"type\": \"composition\",\n        \"track\": 1,\n        \"elements\": [\n          {\n            \"name\": \"Image-1\",\n            \"type\": \"image\",\n            \"source\": \"{{ $('Leo - Get imageId').item.json.body.generations_by_pk.generated_images[0].url }}\"\n          },\n          {\n            \"name\": \"Subtitles-1\",\n            \"type\": \"text\",\n            \"transcript_source\": \"Voiceover-1\",\n            \"width\": \"86.66%\",\n            \"height\": \"37.71%\",\n            \"x_alignment\": \"50%\",\n            \"y_alignment\": \"50%\",\n            \"fill_color\": \"#ffffff\",\n            \"stroke_color\": \"#333333\",\n            \"stroke_width\": \"1.05 vmin\",\n            \"font_family\": \"Inter\",\n            \"font_weight\": \"700\",\n            \"font_size\": \"8 vmin\",\n            \"background_color\": \"rgba(255,255,255,0.2)\",\n            \"background_x_padding\": \"26%\",\n            \"background_y_padding\": \"7%\",\n            \"background_border_radius\": \"28%\",\n            \"transcript_effect\": \"highlight\",\n            \"transcript_color\": \"#ff5900\"\n          },\n          {\n            \"name\": \"Voiceover-1\",\n            \"type\": \"audio\",\n            \"source\": \"{{ $('News1').item.json.property_name }}\",\n            \"provider\": \"openai model=tts-1 voice=onyx\"\n          }\n        ]\n      },\n      {\n        \"name\": \"Auto Scene Comp\",\n        \"type\": \"composition\",\n        \"track\": 1,\n        \"elements\": [\n          {\n            \"name\": \"Video-2\",\n            \"type\": \"video\",\n            \"source\": \"{{ $('Runway - Get Video').first().json.output[0] }}\",\n            \"loop\": true\n          },\n          {\n            \"name\": \"Subtitles-2\",\n            \"type\": \"text\",\n            \"transcript_source\": \"Voiceover-2\",\n            \"y\": \"78.2173%\",\n            \"width\": \"86.66%\",\n            \"height\": \"37.71%\",\n            \"x_alignment\": \"50%\",\n            \"y_alignment\": \"50%\",\n            \"fill_color\": \"#ffffff\",\n            \"stroke_color\": \"#333333\",\n            \"stroke_width\": \"1.05 vmin\",\n            \"font_family\": \"Inter\",\n            \"font_weight\": \"700\",\n            \"font_size\": \"8 vmin\",\n            \"background_color\": \"rgba(255,255,255,0.2)\",\n            \"background_x_padding\": \"26%\",\n            \"background_y_padding\": \"7%\",\n            \"background_border_radius\": \"28%\",\n            \"transcript_effect\": \"highlight\",\n            \"transcript_color\": \"#ff5900\"\n          },\n          {\n            \"name\": \"Voiceover-2\",\n            \"type\": \"audio\",\n            \"source\": \"{{ $('Article Prep').item.json.message.content['Summary Blurb 1'] }}\",\n            \"provider\": \"openai model=tts-1 voice=onyx\"\n          }\n        ]\n      },\n      {\n        \"name\": \"Auto Scene Comp\",\n        \"type\": \"composition\",\n        \"track\": 1,\n        \"elements\": [\n          {\n            \"name\": \"Video-3\",\n            \"type\": \"video\",\n            \"source\": \"{{ $('Runway - Get Video2').first().json.output[0] }}\",\n            \"loop\": true\n          },\n          {\n            \"name\": \"Subtitles-3\",\n            \"type\": \"text\",\n            \"transcript_source\": \"Voiceover-3\",\n            \"y\": \"78.2173%\",\n            \"width\": \"86.66%\",\n            \"height\": \"37.71%\",\n            \"x_alignment\": \"50%\",\n            \"y_alignment\": \"50%\",\n            \"fill_color\": \"#ffffff\",\n            \"stroke_color\": \"#333333\",\n            \"stroke_width\": \"1.05 vmin\",\n            \"font_family\": \"Inter\",\n            \"font_weight\": \"700\",\n            \"font_size\": \"8 vmin\",\n            \"background_color\": \"rgba(255,89,0,0.5)\",\n            \"background_x_padding\": \"26%\",\n            \"background_y_padding\": \"7%\",\n            \"background_border_radius\": \"28%\",\n            \"transcript_effect\": \"highlight\",\n            \"transcript_color\": \"#ff0040\"\n          },\n          {\n            \"name\": \"Voiceover-3\",\n            \"type\": \"audio\",\n            \"source\": \"{{ $('Article Prep').item.json.message.content['Summary Blurb 2'] }}\",\n            \"provider\": \"openai model=tts-1 voice=onyx\"\n          }\n        ]\n      }\n    ]\n  }\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth"
+        },
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "hIzUsjbtHLmIe6uM",
+            "name": "RunwayML Custom Auth"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7093de7b-a4e3-4363-8038-1002f7b20fbc",
+        "name": "Cre - Get Video",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          3280,
+          1020
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth"
+        },
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "hIzUsjbtHLmIe6uM",
+            "name": "RunwayML Custom Auth"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a57b719f-b299-431e-9c85-fa333e38b6a7",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          660,
+          -40
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 1033,
+          "height": 951,
+          "content": "# Article Analysis - Is it the right topic?"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "60b879a0-8b7f-40f1-ae70-ac94e4675b38",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1740,
+          -40
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 630,
+          "height": 947,
+          "content": "# Prepare the article for content generation"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "afaf8437-ee52-434b-a267-8dbaff0e1922",
+        "name": "Article Prep",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1820,
+          320
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {},
+          "messages": {
+            "values": [
+              {
+                "content": "=prepare the following summary for a newsletter where the article will be 1 of several presented in the newsletter:\n\n{{ $('Article Analysis').first().json.output.summary }}\n\nMake sure the Article Blurb lenght is less than 15 words.\n\nThen, create 2 Summary Blurbs, making sure each is less than 15 words.\n\nAlso create 2 image prompts that is less than 15 words long for each Summary Blurb"
+              },
+              {
+                "role": "system",
+                "content": "Output in markdown format\nArticle Title\nArticle Blurb\nSummary Blurb 1\nSummary Blurb 2\nArticle Image\nImage Prompt 1\nImage Prompt 2"
+              }
+            ]
+          },
+          "jsonOutput": true
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "ysxujEYFiY5ozRTS",
+            "name": "AlexK OpenAi Key"
+          }
+        },
+        "typeVersion": 1.6,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e7c95d56-86e1-4456-a6d3-9c8b9fc3a53c",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -620,
+          -40
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 252,
+          "height": 946,
+          "content": "# AlexK1919 \n![Alex Kim]({{ $env.WEBHOOK_URL }}\n\n#### I’m Alex Kim, an AI-Native Workflow Automation Architect Building Solutions to Optimize your Personal and Professional Life.\n\n### Workflow Overview Video\n{{ $env.WEBHOOK_URL }}\n\n### About Me\n{{ $env.WEBHOOK_URL }}\n\n### Product Used \n[Leonardo.ai]({{ $env.WEBHOOK_URL }}\n[RunwayML]({{ $env.WEBHOOK_URL }}\n[Creatomate]({{ $env.WEBHOOK_URL }}\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "32e2803e-bf7c-4da4-a4ae-c9b6fa5ae226",
+        "name": "Sticky Note8",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          3280,
+          1180
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 180,
+          "height": 100,
+          "content": "Don't forget to connect this last node to the loop to process additional items"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "c7ab1ecd-50cb-4e4b-b2f7-aade804bbd63",
+    "connections": {
+      "f814682c-cf6f-49a8-8ea0-48fbc64a3ebe": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-c49848a5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-a6b90bcf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-926c482c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-af592049",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-6b897dee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-f08f2ec6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-5d63f81f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-68f45011",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d175d366-e672-4452-b78e-a06336ef242b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-f069781f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-1c0080fd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-2a2a40fe",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-21b40afe",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-37b9ab64",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-952d0c74",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-335ff6e0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-21ebf5ef",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d8da7879-1a67-4da1-86db-f70e50b4e9da": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-ed66a83b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-b9246d34",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-d9b915f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-12406b07",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-b1d039f2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-d48cfef6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-414c043b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-043f8dad",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "faf80246-3b1a-49c6-a277-0152428e46e1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-56b3612d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-b52b7429",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-0ce48d11",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-56e354ef",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-1912c58c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-00dbf9f8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-38fc391d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-f229c3ff",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e91c1f01-7870-4063-9557-24a6ba1d3db3": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-fcbee5ec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-d95a67ee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-d5358e43",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-403e80de",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-aa0b5a8a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-fdd86381",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-577fe548",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-e2c1d619",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e47140ac-20cc-417b-a6cd-30f780dc8289": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-a0925131",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-f13ee446",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-ab0ab0cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-410e7004",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-d53c64b0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-535a1ed4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-8da65925",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-3178c26c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ce697f6f-f8fc-4ba7-b776-17bbc2e870b7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-3fd24bd6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-107cd7c8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-a239741e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-622c5c82",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-cc22932e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-fdd53e21",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-0c6b9084",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-7ef02a5d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "54c8b762-444d-4790-97a9-a2f84518492f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-8d9734b8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-1d6c8eac",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-838ffcfd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-181f7b4f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-eb8ce698",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-acefbdf9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-a026e45f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-e38c6535",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "691eb779-5fae-4f65-89eb-b1b8e5488809": {
+        "main": [
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-9f1b416e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-3c7c5ca5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-1aca1587",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-07cf5ebd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-86b3c944",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-b9df7173",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-00ed975e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-430ce812",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "156f5735-bc20-46a9-871c-143b0772ca45": {
+        "main": [
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-d7602028",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-a3f6ad89",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-651eef00",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-24ea5046",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-5580c25b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-e22065c9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-142df811",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-350d933c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4f270fa8-4da2-44f0-927f-3509fd9f8f7d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-1dad8ab7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-7d5f553f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-d760324a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-baac0997",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-dc125c1e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-02013f56",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-3e6c5b21",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-5e878c6c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "49c0e7ba-bf9c-4819-b479-61aa099ab9ab": {
+        "main": [
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-fa0bb1bb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-8fb4a82f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-a1f6e314",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-ff8027ed",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-8fc49cd0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-322150b8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-713856f4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-1ff2910b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d03eb190-5fc0-4b7e-ad65-88ece3ab833d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-2c17266c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-2e15e708",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-c29e7b42",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-76bff176",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-97ec374a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-4df27cb7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-a9073146",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-214e9dbb",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "25f4cc09-fbff-4c10-b706-30df5840b794": {
+        "main": [
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-cf50a7da",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-f86a61be",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-f663a5f7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-2acccc4c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-6a2aa8a1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-b83c2a5c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-e4375020",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-3d6721df",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "7093de7b-a4e3-4363-8038-1002f7b20fbc": {
+        "main": [
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-70236382",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-6b810bf9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-bbc74d86",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-803a9810",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-483d1b34",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-62a18691",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-d4c514f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-21c233c2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "611b24cd-558b-4025-a0a8-ea355ba61988": {
+        "main": [
+          [
+            {
+              "node": "error-handler-611b24cd-558b-4025-a0a8-ea355ba61988-846daabb",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e01152aa-961b-4e33-a1e3-186d47d81c55": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e01152aa-961b-4e33-a1e3-186d47d81c55-75e1b717",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "22ccd0a0-f7f6-40ca-bd09-40ed4a7fcde1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-22ccd0a0-f7f6-40ca-bd09-40ed4a7fcde1-6fdf44cf",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "afaf8437-ee52-434b-a267-8dbaff0e1922": {
+        "main": [
+          [
+            {
+              "node": "error-handler-afaf8437-ee52-434b-a267-8dbaff0e1922-72979c1f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Hacker News to Video Template - AlexK1919. This workflow integrates 22 different services: stickyNote, youTube, lmChatOpenAi, if, splitInBatches. It contains 82 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Hacker News to Video Template - AlexK1919. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "156f5735-bc20-46a9-871c-143b0772ca45": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-d7602028"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-a3f6ad89"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-651eef00"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-24ea5046"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-5580c25b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-e22065c9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-142df811"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-156f5735-bc20-46a9-871c-143b0772ca45-350d933c"
+            }
+          ]
+        ]
+      },
+      "22ccd0a0-f7f6-40ca-bd09-40ed4a7fcde1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-22ccd0a0-f7f6-40ca-bd09-40ed4a7fcde1-6fdf44cf"
+            }
+          ]
+        ]
+      },
+      "25f4cc09-fbff-4c10-b706-30df5840b794": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-cf50a7da"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-f86a61be"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-f663a5f7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-2acccc4c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-6a2aa8a1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-b83c2a5c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-e4375020"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-25f4cc09-fbff-4c10-b706-30df5840b794-3d6721df"
+            }
+          ]
+        ]
+      },
+      "49c0e7ba-bf9c-4819-b479-61aa099ab9ab": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-fa0bb1bb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-8fb4a82f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-a1f6e314"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-ff8027ed"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-8fc49cd0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-322150b8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-713856f4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-49c0e7ba-bf9c-4819-b479-61aa099ab9ab-1ff2910b"
+            }
+          ]
+        ]
+      },
+      "4f270fa8-4da2-44f0-927f-3509fd9f8f7d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-1dad8ab7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-7d5f553f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-d760324a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-baac0997"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-dc125c1e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-02013f56"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-3e6c5b21"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f270fa8-4da2-44f0-927f-3509fd9f8f7d-5e878c6c"
+            }
+          ]
+        ]
+      },
+      "54c8b762-444d-4790-97a9-a2f84518492f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-8d9734b8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-1d6c8eac"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-838ffcfd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-181f7b4f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-eb8ce698"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-acefbdf9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-a026e45f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54c8b762-444d-4790-97a9-a2f84518492f-e38c6535"
+            }
+          ]
+        ]
+      },
+      "611b24cd-558b-4025-a0a8-ea355ba61988": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-611b24cd-558b-4025-a0a8-ea355ba61988-846daabb"
+            }
+          ]
+        ]
+      },
+      "691eb779-5fae-4f65-89eb-b1b8e5488809": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-9f1b416e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-3c7c5ca5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-1aca1587"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-07cf5ebd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-86b3c944"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-b9df7173"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-00ed975e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-691eb779-5fae-4f65-89eb-b1b8e5488809-430ce812"
+            }
+          ]
+        ]
+      },
+      "7093de7b-a4e3-4363-8038-1002f7b20fbc": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-70236382"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-6b810bf9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-bbc74d86"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-803a9810"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-483d1b34"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-62a18691"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-d4c514f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7093de7b-a4e3-4363-8038-1002f7b20fbc-21c233c2"
+            }
+          ]
+        ]
+      },
+      "afaf8437-ee52-434b-a267-8dbaff0e1922": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-afaf8437-ee52-434b-a267-8dbaff0e1922-72979c1f"
+            }
+          ]
+        ]
+      },
+      "ce697f6f-f8fc-4ba7-b776-17bbc2e870b7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-3fd24bd6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-107cd7c8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-a239741e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-622c5c82"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-cc22932e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-fdd53e21"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-0c6b9084"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ce697f6f-f8fc-4ba7-b776-17bbc2e870b7-7ef02a5d"
+            }
+          ]
+        ]
+      },
+      "d03eb190-5fc0-4b7e-ad65-88ece3ab833d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-2c17266c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-2e15e708"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-c29e7b42"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-76bff176"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-97ec374a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-4df27cb7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-a9073146"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d03eb190-5fc0-4b7e-ad65-88ece3ab833d-214e9dbb"
+            }
+          ]
+        ]
+      },
+      "d175d366-e672-4452-b78e-a06336ef242b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-f069781f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-1c0080fd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-2a2a40fe"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-21b40afe"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-37b9ab64"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-952d0c74"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-335ff6e0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d175d366-e672-4452-b78e-a06336ef242b-21ebf5ef"
+            }
+          ]
+        ]
+      },
+      "d8da7879-1a67-4da1-86db-f70e50b4e9da": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-ed66a83b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-b9246d34"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-d9b915f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-12406b07"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-b1d039f2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-d48cfef6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-414c043b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8da7879-1a67-4da1-86db-f70e50b4e9da-043f8dad"
+            }
+          ]
+        ]
+      },
+      "e01152aa-961b-4e33-a1e3-186d47d81c55": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e01152aa-961b-4e33-a1e3-186d47d81c55-75e1b717"
+            }
+          ]
+        ]
+      },
+      "e47140ac-20cc-417b-a6cd-30f780dc8289": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-a0925131"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-f13ee446"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-ab0ab0cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-410e7004"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-d53c64b0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-535a1ed4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-8da65925"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e47140ac-20cc-417b-a6cd-30f780dc8289-3178c26c"
+            }
+          ]
+        ]
+      },
+      "e91c1f01-7870-4063-9557-24a6ba1d3db3": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-fcbee5ec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-d95a67ee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-d5358e43"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-403e80de"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-aa0b5a8a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-fdd86381"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-577fe548"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e91c1f01-7870-4063-9557-24a6ba1d3db3-e2c1d619"
+            }
+          ]
+        ]
+      },
+      "f814682c-cf6f-49a8-8ea0-48fbc64a3ebe": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-c49848a5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-a6b90bcf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-926c482c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-af592049"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-6b897dee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-f08f2ec6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-5d63f81f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f814682c-cf6f-49a8-8ea0-48fbc64a3ebe-68f45011"
+            }
+          ]
+        ]
+      },
+      "faf80246-3b1a-49c6-a277-0152428e46e1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-56b3612d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-b52b7429"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-0ce48d11"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-56e354ef"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-1912c58c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-00dbf9f8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-38fc391d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-faf80246-3b1a-49c6-a277-0152428e46e1-f229c3ff"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Hacker News to Video Template - AlexK1919",
+    "nodes": [
+      {
+        "name": "Article Analysis",
+        "parameters": {
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "You are a helpful assistant in summarizing and identifying articles related to automation and ai. \nOutput the results as:\nsummary: \nrelated: yes or no\nimage urls: "
+          },
+          "promptType": "define",
+          "text": "=Can you tell me if the article at {{ $json.url }} is related to automation or ai? \n\nthen, create a 250 word summary of the article\n\nAlso, list any image url's related to the article content from the url. Limit to 1 image url."
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Article Prep",
+        "parameters": {
+          "jsonOutput": true,
+          "messages": {
+            "values": [
+              {
+                "content": "=prepare the following summary for a newsletter where the article will be 1 of several presented in the newsletter:\n\n{{ $('Article Analysis').first().json.output.summary }}\n\nMake sure the Article Blurb lenght is less than 15 words.\n\nThen, create 2 Summary Blurbs, making sure each is less than 15 words.\n\nAlso create 2 image prompts that is less than 15 words long for each Summary Blurb"
+              },
+              {
+                "content": "Output in markdown format\nArticle Title\nArticle Blurb\nSummary Blurb 1\nSummary Blurb 2\nArticle Image\nImage Prompt 1\nImage Prompt 2",
+                "role": "system"
+              }
+            ]
+          },
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Cre - Generate Video1",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "jsonBody": "={\n  \"max_width\": 480,\n  \"template_id\": \"enterTemplateID\",\n  \"modifications\": {\n    \"Scenes.elements\": [\n      {\n        \"name\": \"Intro Comp\",\n        \"type\": \"composition\",\n        \"track\": 1,\n        \"elements\": [\n          {\n            \"name\": \"Image-1\",\n            \"type\": \"image\",\n            \"source\": \"{{ $('Leo - Get imageId').item.json.body.generations_by_pk.generated_images[0].url }}\"\n          },\n          {\n            \"name\": \"Subtitles-1\",\n            \"type\": \"text\",\n            \"transcript_source\": \"Voiceover-1\",\n            \"width\": \"86.66%\",\n            \"height\": \"37.71%\",\n            \"x_alignment\": \"50%\",\n            \"y_alignment\": \"50%\",\n            \"fill_color\": \"#ffffff\",\n            \"stroke_color\": \"#333333\",\n            \"stroke_width\": \"1.05 vmin\",\n            \"font_family\": \"Inter\",\n            \"font_weight\": \"700\",\n            \"font_size\": \"8 vmin\",\n            \"background_color\": \"rgba(255,255,255,0.2)\",\n            \"background_x_padding\": \"26%\",\n            \"background_y_padding\": \"7%\",\n            \"background_border_radius\": \"28%\",\n            \"transcript_effect\": \"highlight\",\n            \"transcript_color\": \"#ff5900\"\n          },\n          {\n            \"name\": \"Voiceover-1\",\n            \"type\": \"audio\",\n            \"source\": \"{{ $('News1').item.json.property_name }}\",\n            \"provider\": \"openai model=tts-1 voice=onyx\"\n          }\n        ]\n      },\n      {\n        \"name\": \"Auto Scene Comp\",\n        \"type\": \"composition\",\n        \"track\": 1,\n        \"elements\": [\n          {\n            \"name\": \"Video-2\",\n            \"type\": \"video\",\n            \"source\": \"{{ $('Runway - Get Video').first().json.output[0] }}\",\n            \"loop\": true\n          },\n          {\n            \"name\": \"Subtitles-2\",\n            \"type\": \"text\",\n            \"transcript_source\": \"Voiceover-2\",\n            \"y\": \"78.2173%\",\n            \"width\": \"86.66%\",\n            \"height\": \"37.71%\",\n            \"x_alignment\": \"50%\",\n            \"y_alignment\": \"50%\",\n            \"fill_color\": \"#ffffff\",\n            \"stroke_color\": \"#333333\",\n            \"stroke_width\": \"1.05 vmin\",\n            \"font_family\": \"Inter\",\n            \"font_weight\": \"700\",\n            \"font_size\": \"8 vmin\",\n            \"background_color\": \"rgba(255,255,255,0.2)\",\n            \"background_x_padding\": \"26%\",\n            \"background_y_padding\": \"7%\",\n            \"background_border_radius\": \"28%\",\n            \"transcript_effect\": \"highlight\",\n            \"transcript_color\": \"#ff5900\"\n          },\n          {\n            \"name\": \"Voiceover-2\",\n            \"type\": \"audio\",\n            \"source\": \"{{ $('Article Prep').item.json.message.content['Summary Blurb 1'] }}\",\n            \"provider\": \"openai model=tts-1 voice=onyx\"\n          }\n        ]\n      },\n      {\n        \"name\": \"Auto Scene Comp\",\n        \"type\": \"composition\",\n        \"track\": 1,\n        \"elements\": [\n          {\n            \"name\": \"Video-3\",\n            \"type\": \"video\",\n            \"source\": \"{{ $('Runway - Get Video2').first().json.output[0] }}\",\n            \"loop\": true\n          },\n          {\n            \"name\": \"Subtitles-3\",\n            \"type\": \"text\",\n            \"transcript_source\": \"Voiceover-3\",\n            \"y\": \"78.2173%\",\n            \"width\": \"86.66%\",\n            \"height\": \"37.71%\",\n            \"x_alignment\": \"50%\",\n            \"y_alignment\": \"50%\",\n            \"fill_color\": \"#ffffff\",\n            \"stroke_color\": \"#333333\",\n            \"stroke_width\": \"1.05 vmin\",\n            \"font_family\": \"Inter\",\n            \"font_weight\": \"700\",\n            \"font_size\": \"8 vmin\",\n            \"background_color\": \"rgba(255,89,0,0.5)\",\n            \"background_x_padding\": \"26%\",\n            \"background_y_padding\": \"7%\",\n            \"background_border_radius\": \"28%\",\n            \"transcript_effect\": \"highlight\",\n            \"transcript_color\": \"#ff0040\"\n          },\n          {\n            \"name\": \"Voiceover-3\",\n            \"type\": \"audio\",\n            \"source\": \"{{ $('Article Prep').item.json.message.content['Summary Blurb 2'] }}\",\n            \"provider\": \"openai model=tts-1 voice=onyx\"\n          }\n        ]\n      }\n    ]\n  }\n}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Cre - Get Video",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Dropbox",
+        "parameters": {},
+        "type": "n8n-nodes-base.dropbox",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get Image",
+        "parameters": {
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive",
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "operation": "update",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Hacker News",
+        "parameters": {
+          "additionalFields": {},
+          "resource": "all"
+        },
+        "type": "n8n-nodes-base.hackerNews",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTTP Request1",
+        "parameters": {
+          "toolDescription": "grab the article for the ai agent to use",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "If Topic",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "56219de5-244d-4b7f-a511-f3061572cf93",
+                "leftValue": "={{ $json.output.related }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "yes"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Image Analysis",
+        "parameters": {
+          "imageUrls": "{{ $env.BASE_URL }}",
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "operation": "analyze",
+          "options": {
+            "detail": "auto"
+          },
+          "resource": "image"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "name": "Instagram",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Leo - Generate Image",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"alchemy\": true,\n  \"width\": 1024,\n  \"height\": 768,\n  \"modelId\": \"6b645e3a-d64f-4341-a6d8-7a3690fbf042\",\n  \"num_images\": 1,\n  \"presetStyle\": \"MONOCHROME\",\n  \"prompt\": \"{{ $json.body.promptGeneration.prompt }}; Use the rule of thirds, leading lines, & balance. DO NOT INCLUDE ANY WORDS OR LABELS.\",\n  \"guidance_scale\": 7,\n  \"highResolution\": true,\n  \"promptMagic\": false,\n  \"promptMagicStrength\": 0.5,\n  \"promptMagicVersion\": \"v3\",\n  \"public\": false,\n  \"ultra\": false,\n  \"photoReal\": false,\n  \"negative_prompt\": \"\"\n} ",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Leo - Generate Image2",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"alchemy\": true,\n  \"width\": 1024,\n  \"height\": 768,\n  \"modelId\": \"6b645e3a-d64f-4341-a6d8-7a3690fbf042\",\n  \"num_images\": 1,\n  \"presetStyle\": \"MONOCHROME\",\n  \"prompt\": \"{{ $json.body.promptGeneration.prompt }}; Use the rule of thirds, leading lines, & balance. DO NOT INCLUDE ANY WORDS OR LABELS.\",\n  \"guidance_scale\": 7,\n  \"highResolution\": true,\n  \"promptMagic\": false,\n  \"promptMagicStrength\": 0.5,\n  \"promptMagicVersion\": \"v3\",\n  \"public\": false,\n  \"ultra\": false,\n  \"photoReal\": false,\n  \"negative_prompt\": \"\"\n} ",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Leo - Get imageId",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "content-type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Leo - Get imageId2",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "content-type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Leo - Improve Prompt",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"prompt\": \"{{ $('Article Prep').item.json.message.content['Image Prompt 1'] }}\"\n}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Leo - Improve Prompt2",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"prompt\": \"{{ $('Article Prep').item.json.message.content['Image Prompt 2'] }}\"\n}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Limit",
+        "parameters": {
+          "keep": "lastItems",
+          "maxItems": 50
+        },
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1
+      },
+      {
+        "name": "LinkedIn",
+        "parameters": {
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.linkedIn",
+        "typeVersion": 1
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "Microsoft OneDrive",
+        "parameters": {},
+        "type": "n8n-nodes-base.microsoftOneDrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "News1",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ec8013d5-84b5-43c8-abcb-6986ef15939d",
+                "name": "property_name",
+                "type": "string",
+                "value": "={{ $json.message.content['Article Title'] }}"
+              },
+              {
+                "id": "4d91c4fc-12a2-4fe2-a58e-02284314e1de",
+                "name": "property_text",
+                "type": "string",
+                "value": "={{ $json.message.content['Article Blurb'] }}"
+              },
+              {
+                "id": "cad2b795-8b71-415f-a100-700d9ec62bbd",
+                "name": "property_image_url",
+                "type": "string",
+                "value": "={{ $('If Topic').item.json.output['image urls'] }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "OpenAI Chat Model3",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Prompt Settings1",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "56c8f20d-d9d9-4be7-ac2a-38df6ffdd722",
+                "name": "model",
+                "type": "string",
+                "value": "6b645e3a-d64f-4341-a6d8-7a3690fbf042"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Runway - Create Video",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "promptImage",
+                "value": "={{ $json.body.generations_by_pk.generated_images[0].url }}"
+              },
+              {
+                "name": "promptText",
+                "value": "string"
+              },
+              {
+                "name": "model",
+                "value": "gen3a_turbo"
+              }
+            ]
+          },
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Runway-Version",
+                "value": "2024-11-06"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Runway - Create Video2",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "promptImage",
+                "value": "={{ $json.body.generations_by_pk.generated_images[0].url }}"
+              },
+              {
+                "name": "promptText",
+                "value": "string"
+              },
+              {
+                "name": "model",
+                "value": "gen3a_turbo"
+              }
+            ]
+          },
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Runway-Version",
+                "value": "2024-11-06"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Runway - Get Video",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Runway-Version",
+                "value": "2024-11-06"
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Runway - Get Video2",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Runway-Version",
+                "value": "2024-11-06"
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 5,
+          "content": "# Choose your data source \n## This can be swapped for any other data source of your choosing.",
+          "height": 951,
+          "width": 341
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 6,
+          "content": "# Upload Assets\nYou can extend this workflow further by uploading the generated assets to your storage option of choice.",
+          "height": 372,
+          "width": 882
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 6,
+          "content": "# Post to Social Media\nYou can extend this workflow further by posting the generated assets to social media.",
+          "height": 372,
+          "width": 882
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 4,
+          "content": "# Generate Images and Videos",
+          "height": 943,
+          "width": 1114
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 5,
+          "content": "# Stitch it all together",
+          "height": 372,
+          "width": 1114
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "color": 6,
+          "content": "# AlexK1919 \n![Alex Kim]({{ $env.WEBHOOK_URL }}\n\n#### I’m Alex Kim, an AI-Native Workflow Automation Architect Building Solutions to Optimize your Personal and Professional Life.\n\n### Workflow Overview Video\n{{ $env.WEBHOOK_URL }}\n\n### About Me\n{{ $env.WEBHOOK_URL }}\n\n### Product Used \n[Leonardo.ai]({{ $env.WEBHOOK_URL }}\n[RunwayML]({{ $env.WEBHOOK_URL }}\n[Creatomate]({{ $env.WEBHOOK_URL }}\n",
+          "height": 946,
+          "width": 252
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "color": 3,
+          "content": "# Article Analysis - Is it the right topic?",
+          "height": 951,
+          "width": 1033
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "color": 3,
+          "content": "# Prepare the article for content generation",
+          "height": 947,
+          "width": 630
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note8",
+        "parameters": {
+          "color": 7,
+          "content": "Don't forget to connect this last node to the loop to process additional items",
+          "height": 100,
+          "width": 180
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Structured Output Parser",
+        "parameters": {
+          "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"summary\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"related\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n        \"image urls\": {\n\t\t\t\"type\": \"string\"\n        }\n\t}\n}",
+          "schemaType": "manual"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Twitter",
+        "parameters": {
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.twitter",
+        "typeVersion": 2
+      },
+      {
+        "name": "Upload to Minio",
+        "parameters": {
+          "additionalFields": {
+            "grantRead": true,
+            "parentFolderKey": "YOUR_CREDENTIAL_HERE"
+          },
+          "bucketName": "=",
+          "operation": "upload"
+        },
+        "type": "n8n-nodes-base.s3",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wait1",
+        "parameters": {
+          "amount": 30
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Wait2",
+        "parameters": {
+          "amount": 3,
+          "unit": "minutes"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Wait3",
+        "parameters": {
+          "unit": "minutes"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Wait4",
+        "parameters": {
+          "amount": 3,
+          "unit": "minutes"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Wait6",
+        "parameters": {
+          "amount": 30
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "YouTube",
+        "parameters": {
+          "operation": "upload",
+          "options": {},
+          "resource": "video"
+        },
+        "type": "n8n-nodes-base.youTube",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 48,
+  "integrationCount": 9,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "75 Mins",
+  "integrations": [
+    "Hackernews",
+    "S3",
+    "HTTP Request",
+    "Dropbox",
+    "Google Drive",
+    "OneDrive",
+    "YouTube",
+    "Twitter/X",
+    "LinkedIn"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 147,
+  "viewCount": 80,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Hackernews Account",
+      "S3 Account",
+      "HTTP Request Account",
+      "Dropbox Account",
+      "Google Drive Account",
+      "OneDrive Account",
+      "YouTube Account",
+      "Twitter/X Account",
+      "LinkedIn Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "google Drive  O Auth2  A P I details",
+      "http Custom Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Hacker News\" node (n8n-nodes-base.hackerNews) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model3\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Request1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Structured Output Parser\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Upload to Minio\" node (n8n-nodes-base.s3) and configure the action parameters, mappings, and fields.",
+      "Open the \"Leo - Improve Prompt\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Leo - Get imageId\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Runway - Create Video\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Runway - Get Video\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait2\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Topic\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Image\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Leo - Generate Image\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait1\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Limit\" node (n8n-nodes-base.limit) and configure the action parameters, mappings, and fields.",
+      "Open the \"Image Analysis\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait3\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Article Analysis\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Dropbox\" node (n8n-nodes-base.dropbox) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Drive\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Microsoft OneDrive\" node (n8n-nodes-base.microsoftOneDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"YouTube\" node (n8n-nodes-base.youTube) and configure the action parameters, mappings, and fields.",
+      "Open the \"Twitter\" node (n8n-nodes-base.twitter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Instagram\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"LinkedIn\" node (n8n-nodes-base.linkedIn) and configure the action parameters, mappings, and fields.",
+      "Open the \"Leo - Improve Prompt2\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait4\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait6\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Leo - Generate Image2\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Leo - Get imageId2\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Runway - Create Video2\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Runway - Get Video2\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Cre - Generate Video1\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Cre - Get Video\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Article Prep\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note8\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"News1\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Prompt Settings1\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-8wcdy0n2y",
+      "workflowId": "hacker-news-to-video-template-alexk1919-l8lcx",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Linkedin/1121_Linkedin_Wait_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Linkedin\\1121_Linkedin_Wait_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:42.044Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:42.044Z",
+  "updatedAt": "2026-07-15T11:18:42.044Z"
+}

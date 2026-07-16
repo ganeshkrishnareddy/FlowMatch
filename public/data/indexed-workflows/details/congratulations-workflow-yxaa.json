@@ -1,0 +1,414 @@
+{
+  "id": "congratulations-workflow-ci160",
+  "name": "Congratulations Workflow",
+  "slug": "congratulations-workflow-yxaa",
+  "description": "Automated workflow: Congratulations Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Congratulations Workflow workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "247",
+    "name": "Congratulations Workflow",
+    "nodes": [
+      {
+        "name": "Daily Trigger",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          200,
+          400
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 8
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "fc85f669-ecca-4523-8595-5ff3c7dfa118",
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Congratulations Calendar",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          400,
+          400
+        ],
+        "parameters": {
+          "range": "A:E",
+          "options": {
+            "valueRenderMode": "FORMATTED_VALUE"
+          },
+          "sheetId": "",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": ""
+        },
+        "typeVersion": 1,
+        "id": "01f7f01e-3830-485b-a709-54c8d17975f0",
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Any Event Today?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          600,
+          400
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Congratulations Calendar\"].json[\"Date\"]}}",
+                "value2": "={{(new Date).getDate()}}/{{(new Date).getMonth()+1}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "a554ecb6-b239-4d83-8621-49ec32d639c5",
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Do Nothing",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          800,
+          550
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "7fc0ca43-c5df-41b1-98d4-9ad976ef885c",
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Congratulations Messages",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1000,
+          550
+        ],
+        "parameters": {
+          "range": "Congratulations Messages!A:B",
+          "options": {},
+          "sheetId": "",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": ""
+        },
+        "typeVersion": 1,
+        "id": "92c7abc7-05b5-472b-a6fb-ed8ae225eb40",
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Merge Data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1200,
+          400
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Event Name",
+          "propertyName2": "Event Name"
+        },
+        "typeVersion": 1,
+        "id": "f92e4639-26c0-44ee-829f-1310a9a61d98",
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Personalize Message",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1400,
+          400
+        ],
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor (let i=0;i<items.length;i++) {\n  wishes_array = items[i].json.Congratulations.split(',');\n  greeting = wishes_array.shift();\n  \n  new_wish = greeting + ' ' + items[i].json['First Name'] + ',' + wishes_array.join(',');\n  newItems.push({json: {Wishes: new_wish, \"Phone Number\": items[i].json['Phone Number']}});\n}\n\nreturn newItems;"
+        },
+        "typeVersion": 1,
+        "id": "f1db6ed4-d97f-4434-bf79-52898129428b",
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Send SMS",
+        "type": "n8n-nodes-base.twilio",
+        "position": [
+          1600,
+          400
+        ],
+        "parameters": {
+          "to": "={{$node[\"Personalize Message\"].json[\"Phone Number\"]}}",
+          "from": "",
+          "message": "={{$node[\"Personalize Message\"].json[\"Wishes\"]}}"
+        },
+        "credentials": {
+          "twilioApi": "Twilio Programmable SMS"
+        },
+        "typeVersion": 1,
+        "id": "4df1b6aa-d4bf-42d2-8ff9-d8c7dedce4fe",
+        "notes": "This twilio node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-c4ffda16",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: Congratulations Workflow. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-7ca677ef",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.121858",
+      "updatedAt": "2025-09-29T07:07:51.121867",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Congratulations Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Congratulations Workflow",
+    "nodes": [
+      {
+        "name": "Any Event Today?",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Congratulations Calendar\"].json[\"Date\"]}}",
+                "value2": "={{(new Date).getDate()}}/{{(new Date).getMonth()+1}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Congratulations Calendar",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "options": {
+            "valueRenderMode": "FORMATTED_VALUE"
+          },
+          "range": "A:E",
+          "sheetId": ""
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Congratulations Messages",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "options": {},
+          "range": "Congratulations Messages!A:B",
+          "sheetId": ""
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1
+      },
+      {
+        "name": "Daily Trigger",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 8
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Do Nothing",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge Data",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "Event Name",
+          "propertyName2": "Event Name"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "Personalize Message",
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor (let i=0;i<items.length;i++) {\n  wishes_array = items[i].json.Congratulations.split(',');\n  greeting = wishes_array.shift();\n  \n  new_wish = greeting + ' ' + items[i].json['First Name'] + ',' + wishes_array.join(',');\n  newItems.push({json: {Wishes: new_wish, \"Phone Number\": items[i].json['Phone Number']}});\n}\n\nreturn newItems;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "twilioApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send SMS",
+        "parameters": {
+          "from": "",
+          "message": "={{$node[\"Personalize Message\"].json[\"Wishes\"]}}",
+          "to": "={{$node[\"Personalize Message\"].json[\"Phone Number\"]}}"
+        },
+        "type": "n8n-nodes-base.twilio",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets",
+    "Twilio"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 33,
+  "viewCount": 805,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "Twilio Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details",
+      "twilio  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Daily Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Congratulations Calendar\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Any Event Today?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Do Nothing\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Congratulations Messages\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Merge Data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Personalize Message\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send SMS\" node (n8n-nodes-base.twilio) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-g9k9vcv64",
+      "workflowId": "congratulations-workflow-ci160",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Noop/0610_Noop_Twilio_Automate_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Noop\\0610_Noop_Twilio_Automate_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:17:41.940Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:41.940Z",
+  "updatedAt": "2026-07-15T11:17:41.940Z"
+}

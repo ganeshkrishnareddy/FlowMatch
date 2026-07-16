@@ -1,0 +1,327 @@
+{
+  "id": "send-updates-about-the-position-of-the-iss-every-minute-to-a-topic-in-activemq-f5gqc",
+  "name": "Send updates about the position of the ISS every minute to a topic in ActiveMQ",
+  "slug": "send-updates-about-the-position-of-the-iss-every-minute-to-a-topic-in-activemq-egd1",
+  "description": "Production-ready workflow: Send updates about the position of the ISS every minute to a topic in ActiveMQ. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Send updates about the position of the ISS every minute to a topic in ActiveMQ workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "id": "102",
+    "name": "Send updates about the position of the ISS every minute to a topic in ActiveMQ",
+    "nodes": [
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          510,
+          300
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-6737d0af"
+      },
+      {
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          710,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "timestamps",
+                "value": "={{Date.now();}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-d69aaa7b"
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          910,
+          300
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "Latitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"latitude\"]}}"
+              },
+              {
+                "name": "Longitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"longitude\"]}}"
+              },
+              {
+                "name": "Timestamp",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"timestamp\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "Name",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"name\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-7fd2aa20"
+      },
+      {
+        "name": "AMQP Sender",
+        "type": "n8n-nodes-base.amqp",
+        "position": [
+          1110,
+          300
+        ],
+        "parameters": {
+          "sink": "iss-postition",
+          "options": {}
+        },
+        "credentials": {
+          "amqp": "ampq"
+        },
+        "typeVersion": 1,
+        "id": "node-fb19334f"
+      },
+      {
+        "id": "error-e6458834",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-10f4940d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.606191",
+      "updatedAt": "2025-09-29T07:07:45.606206",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Send updates about the position of the ISS every minute to a topic in ActiveMQ. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Send updates about the position of the ISS every minute to a topic in ActiveMQ",
+    "nodes": [
+      {
+        "credentials": {
+          "amqp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "AMQP Sender",
+        "parameters": {
+          "options": {},
+          "sink": "iss-postition"
+        },
+        "type": "n8n-nodes-base.amqp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTTP Request",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "timestamps",
+                "value": "={{Date.now();}}"
+              }
+            ]
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "Latitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"latitude\"]}}"
+              },
+              {
+                "name": "Longitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"longitude\"]}}"
+              },
+              {
+                "name": "Timestamp",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"timestamp\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "Name",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"name\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Amqp"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 13,
+  "viewCount": 649,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Amqp Account"
+    ],
+    "requiredCredentials": [
+      "amqp details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"AMQP Sender\" node (n8n-nodes-base.amqp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 91,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-z76kw3095",
+      "workflowId": "send-updates-about-the-position-of-the-iss-every-minute-to-a-topic-in-activemq-f5gqc",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0015_HTTP_Cron_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0015_HTTP_Cron_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:17:38.524Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:38.524Z",
+  "updatedAt": "2026-07-15T11:17:38.524Z"
+}

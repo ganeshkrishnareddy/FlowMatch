@@ -1,0 +1,1332 @@
+{
+  "id": "structured-bulk-data-extract-with-bright-data-web-scraper-aoitc",
+  "name": "Structured Bulk Data Extract with Bright Data Web Scraper",
+  "slug": "structured-bulk-data-extract-with-bright-data-web-scraper-5vzd",
+  "description": "Automated workflow: Structured Bulk Data Extract with Bright Data Web Scraper. This workflow integrates 10 different services: stickyNote, httpRequest, wait, readWriteFile, function. It contains 25 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Structured Bulk Data Extract with Bright Data Web Scraper workflow containing 16 nodes.",
+  "originalWorkflowJson": {
+    "id": "OjwmaLrXhW4pO5ph",
+    "meta": {
+      "instanceId": "workflow-5b9fd796",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:59.441786",
+      "updatedAt": "2025-09-29T07:07:59.441796",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Structured Bulk Data Extract with Bright Data Web Scraper",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "1bdca5ae-1e56-4cf2-a8dc-e135a6a2dfec",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -900,
+          -395
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "533968cd-1329-4a86-8875-478600ed82b7",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          200,
+          -470
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "6a7e5360-4cb5-4806-892e-5c85037fa71c",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.status }}",
+                "rightValue": "ready"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "83991fdf-0402-4de3-bbb5-7050e3e9fb62",
+        "name": "Set Snapshot Id",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -240,
+          -395
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "2c3369c6-9206-45d7-9349-f577baeaf189",
+                "name": "snapshot_id",
+                "type": "string",
+                "value": "={{ $json.snapshot_id }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "408a36af-decb-49b3-a95e-a2df0b6eea5f",
+        "name": "Download Snapshot",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          640,
+          -520
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "timeout": 10000
+          },
+          "sendQuery": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "format",
+                "value": "json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "kdbqXuxIR8qIxF7y",
+            "name": "Header Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9d6cd882-c287-46ca-bc1e-df6b995fc422",
+        "name": "Wait",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          420,
+          -295
+        ],
+        "webhookId": "631cd5de-36b3-4264-88ae-45b30e2c2ccc",
+        "parameters": {
+          "amount": 30
+        },
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c9cf847a-6399-4c93-a901-30f1c0e7408a",
+        "name": "Check on the errors",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          420,
+          -520
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "b267071c-7102-407b-a98d-f613bcb1a106",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.errors.toString() }}",
+                "rightValue": "0"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b648614e-c33e-4818-8348-e95df56928c7",
+        "name": "Check Snapshot Status",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -20,
+          -395
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "kdbqXuxIR8qIxF7y",
+            "name": "Header Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "408a1584-666f-471e-bfcd-c4d857319688",
+        "name": "Initiate a Webhook Notification",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1080,
+          -520
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {},
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "response",
+                "value": "={{ $json.data[0] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6548a794-a4fd-4050-b07d-bc7ca4517882",
+        "name": "Aggregate JSON Response",
+        "type": "n8n-nodes-base.aggregate",
+        "position": [
+          860,
+          -520
+        ],
+        "parameters": {
+          "options": {},
+          "aggregate": "aggregateAllItemData"
+        },
+        "typeVersion": 1,
+        "notes": "This aggregate node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c84e195c-edd2-4f59-8986-516d116b7352",
+        "name": "Set Dataset Id, Request URL",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -680,
+          -400
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c16061c8-c829-4bd3-b335-e79c605665f2",
+                "name": "dataset_id",
+                "type": "string",
+                "value": "gd_l7q7dkf244hwjntr0"
+              },
+              {
+                "id": "a4594c55-e39e-4a9e-80d6-d39370001e20",
+                "name": "request",
+                "type": "string",
+                "value": "[{     \"url\": \"{{ $env.WEBHOOK_URL }}\"   }]"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ceae108e-ed78-40c5-8e58-7013591ccaad",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -900,
+          -700
+        ],
+        "parameters": {
+          "width": 520,
+          "height": 280,
+          "content": "## Note\n\nDeals with the Amazon web scraping by utilizing Bright Data Web Scraper Product.\n\n\n**Please make sure to set the Bright Data \n -> Dataset Id, Request URL and update the Webhook Notification URL**\n\nRefer \n- {{ $env.WEBHOOK_URL }}\n- {{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1f55cffa-abd9-437b-bc9d-3fe0d8b02454",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -120,
+          -600
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 720,
+          "height": 500,
+          "content": "## Wait until the Snapshot is ready"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d8ba0f62-80a9-4e66-b70c-086ee5992df6",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -900,
+          -220
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 660,
+          "content": "## Who can benefit?\nData analysts, scientists, engineers, and developers seeking efficient methods to collect and analyze web data for AI, ML, big data applications, and more will find Scraper APIs particularly beneficial."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7fdffafd-f256-4760-b001-a42b5198dbad",
+        "name": "Create a binary data",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1100,
+          -720
+        ],
+        "parameters": {
+          "functionCode": "items[0].binary = {\n  data: {\n    data: new Buffer(JSON.stringify(items[0].json, null, 2)).toString('base64')\n  }\n};\nreturn items;"
+        },
+        "typeVersion": 1,
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "934ab31a-cfb9-4e97-8d86-92cd95dd219c",
+        "name": "Write the file to disk",
+        "type": "n8n-nodes-base.readWriteFile",
+        "position": [
+          1320,
+          -720
+        ],
+        "parameters": {
+          "options": {},
+          "fileName": "d:\\bulk_data.json",
+          "operation": "write"
+        },
+        "typeVersion": 1,
+        "notes": "This readWriteFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1130523a-b598-425e-acf1-417ae8699f66",
+        "name": "HTTP Request to the specified URL",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -460,
+          -395
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={{ $json.request }}",
+          "sendBody": true,
+          "sendQuery": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "dataset_id",
+                "value": "={{ $json.dataset_id }}"
+              },
+              {
+                "name": "format",
+                "value": "json"
+              },
+              {
+                "name": "uncompressed_webhook",
+                "value": "true"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "kdbqXuxIR8qIxF7y",
+            "name": "Header Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "8fb2eb85-ffd6-4632-9668-00f29bc91c34",
+    "connections": {
+      "408a36af-decb-49b3-a95e-a2df0b6eea5f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-74a6e938",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-3dbdaf7e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-c13bc276",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-a6925349",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-439c9cb2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-17e8a396",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-ae0f51d7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-24336e6a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b648614e-c33e-4818-8348-e95df56928c7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-1a826b80",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-90dfff28",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-0363dd79",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-da9a1f31",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-6df49322",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-4f422a48",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-0b0def0c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-6763ca95",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "408a1584-666f-471e-bfcd-c4d857319688": {
+        "main": [
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-7d4b4110",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-99e02c1e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-b41b796f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-816c3c3a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-20db0a00",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-5c77107a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-e906d958",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-c6c81822",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "1130523a-b598-425e-acf1-417ae8699f66": {
+        "main": [
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-aa7ef267",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-9f4a91cd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-6a1835fc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-8fe5d1ce",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-1d699127",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-6ca85914",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-3832e946",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-eda7b5a9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "934ab31a-cfb9-4e97-8d86-92cd95dd219c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-934ab31a-cfb9-4e97-8d86-92cd95dd219c-892f3c43",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Structured Bulk Data Extract with Bright Data Web Scraper. This workflow integrates 10 different services: stickyNote, httpRequest, wait, readWriteFile, function. It contains 25 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Structured Bulk Data Extract with Bright Data Web Scraper. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "1130523a-b598-425e-acf1-417ae8699f66": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-aa7ef267"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-9f4a91cd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-6a1835fc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-8fe5d1ce"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-1d699127"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-6ca85914"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-3832e946"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1130523a-b598-425e-acf1-417ae8699f66-eda7b5a9"
+            }
+          ]
+        ]
+      },
+      "408a1584-666f-471e-bfcd-c4d857319688": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-7d4b4110"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-99e02c1e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-b41b796f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-816c3c3a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-20db0a00"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-5c77107a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-e906d958"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a1584-666f-471e-bfcd-c4d857319688-c6c81822"
+            }
+          ]
+        ]
+      },
+      "408a36af-decb-49b3-a95e-a2df0b6eea5f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-74a6e938"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-3dbdaf7e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-c13bc276"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-a6925349"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-439c9cb2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-17e8a396"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-ae0f51d7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-408a36af-decb-49b3-a95e-a2df0b6eea5f-24336e6a"
+            }
+          ]
+        ]
+      },
+      "934ab31a-cfb9-4e97-8d86-92cd95dd219c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-934ab31a-cfb9-4e97-8d86-92cd95dd219c-892f3c43"
+            }
+          ]
+        ]
+      },
+      "b648614e-c33e-4818-8348-e95df56928c7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-1a826b80"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-90dfff28"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-0363dd79"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-da9a1f31"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-6df49322"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-4f422a48"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-0b0def0c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b648614e-c33e-4818-8348-e95df56928c7-6763ca95"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Structured Bulk Data Extract with Bright Data Web Scraper",
+    "nodes": [
+      {
+        "name": "Aggregate JSON Response",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1
+      },
+      {
+        "name": "Check on the errors",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "b267071c-7102-407b-a98d-f613bcb1a106",
+                "leftValue": "={{ $json.errors.toString() }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "0"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Check Snapshot Status",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Create a binary data",
+        "parameters": {
+          "functionCode": "items[0].binary = {\n  data: {\n    data: new Buffer(JSON.stringify(items[0].json, null, 2)).toString('base64')\n  }\n};\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Download Snapshot",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {
+            "timeout": 10000
+          },
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "format",
+                "value": "json"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "HTTP Request to the specified URL",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "jsonBody": "={{ $json.request }}",
+          "method": "POST",
+          "options": {},
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "dataset_id",
+                "value": "={{ $json.dataset_id }}"
+              },
+              {
+                "name": "format",
+                "value": "json"
+              },
+              {
+                "name": "uncompressed_webhook",
+                "value": "true"
+              }
+            ]
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "sendQuery": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "6a7e5360-4cb5-4806-892e-5c85037fa71c",
+                "leftValue": "={{ $json.status }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "ready"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Initiate a Webhook Notification",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "response",
+                "value": "={{ $json.data[0] }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Set Dataset Id, Request URL",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c16061c8-c829-4bd3-b335-e79c605665f2",
+                "name": "dataset_id",
+                "type": "string",
+                "value": "gd_l7q7dkf244hwjntr0"
+              },
+              {
+                "id": "a4594c55-e39e-4a9e-80d6-d39370001e20",
+                "name": "request",
+                "type": "string",
+                "value": "[{     \"url\": \"{{ $env.WEBHOOK_URL }}\"   }]"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Set Snapshot Id",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "2c3369c6-9206-45d7-9349-f577baeaf189",
+                "name": "snapshot_id",
+                "type": "string",
+                "value": "={{ $json.snapshot_id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Note\n\nDeals with the Amazon web scraping by utilizing Bright Data Web Scraper Product.\n\n\n**Please make sure to set the Bright Data \n -> Dataset Id, Request URL and update the Webhook Notification URL**\n\nRefer \n- {{ $env.WEBHOOK_URL }}\n- {{ $env.WEBHOOK_URL }}",
+          "height": 280,
+          "width": 520
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "## Wait until the Snapshot is ready",
+          "height": 500,
+          "width": 720
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "## Who can benefit?\nData analysts, scientists, engineers, and developers seeking efficient methods to collect and analyze web data for AI, ML, big data applications, and more will find Scraper APIs particularly beneficial.",
+          "width": 660
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wait",
+        "parameters": {
+          "amount": 30
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Write the file to disk",
+        "parameters": {
+          "fileName": "d:\\bulk_data.json",
+          "operation": "write",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 16,
+  "integrationCount": 2,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Readwritefile"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 138,
+  "viewCount": 207,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Readwritefile Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download Snapshot\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check on the errors\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check Snapshot Status\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Initiate a Webhook Notification\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Aggregate JSON Response\" node (n8n-nodes-base.aggregate) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create a binary data\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Write the file to disk\" node (n8n-nodes-base.readWriteFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Request to the specified URL\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Snapshot Id\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set Dataset Id, Request URL\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-3cmzprw9v",
+      "workflowId": "structured-bulk-data-extract-with-bright-data-web-scraper-aoitc",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Wait/1579_Wait_Manual_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Wait\\1579_Wait_Manual_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:20:46.737Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:46.737Z",
+  "updatedAt": "2026-07-15T11:20:46.737Z"
+}

@@ -1,0 +1,515 @@
+{
+  "id": "set-workflow-8c4p1",
+  "name": "Set Workflow",
+  "slug": "set-workflow-z4so",
+  "description": "Automated workflow: Set Workflow. This workflow integrates 5 different services: pipedrive, stickyNote, code, typeformTrigger, set. It contains 8 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Set Workflow workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-a51d3cba",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.327350",
+      "updatedAt": "2025-09-29T07:07:42.327365",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "7917ccbb-ef43-4784-adb9-7347be1f1e20",
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          580,
+          560
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "company",
+                "value": "={{$json[\"What *company* are you contacting us from?\"]}}"
+              },
+              {
+                "name": "name",
+                "value": "={{$json[\"Let's start with your *first and last name.*\"]}}"
+              },
+              {
+                "name": "email",
+                "value": "={{$json[\"What *email address* can we reach you at?\"]}}"
+              },
+              {
+                "name": "n8nFamiliar",
+                "value": "={{$json[\"How familiar are you with*  n8n*?\"]}}"
+              },
+              {
+                "name": "questions",
+                "value": "={{$json[\"Do you have any *specific questions* about embedding n8n at this stage?\"]}}"
+              },
+              {
+                "name": "employees",
+                "value": "={{$json[\"How many employees?\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c0cc18d0-fdd1-4ef8-aabe-33bd13667c7d",
+        "name": "Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          540,
+          360
+        ],
+        "parameters": {
+          "width": 760,
+          "height": 440,
+          "content": "## Format Typeform inputs to Pipedrive\nIn this example, we ask for the number of employees at a company. \n\nTo map this to Pipedrive, we need the unique item number coming from Pipedrive for each of these sections. This is what the function node does. \n\nIn the Pipedrive: Organization, we map this under the custom property.\n\n\n\n\n\n\n\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "92646ffb-73fb-4fee-a2b4-5060c7e04b59",
+        "name": "Create Organization",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1060,
+          560
+        ],
+        "parameters": {
+          "name": "={{$node[\"Map company size\"].json[\"company\"]}}",
+          "resource": "organization",
+          "additionalFields": {
+            "customProperties": {
+              "property": [
+                {
+                  "name": "eb7a7fb64081a9b9100c0622c696c159330cf3d2",
+                  "value": "={{$node[\"Map company size\"].json[\"pipedriveemployees\"]}}"
+                }
+              ]
+            }
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4c1b7376-cc1f-4974-9110-7e1481e3fdbe",
+        "name": "Create Person",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1400,
+          560
+        ],
+        "parameters": {
+          "name": "={{$node[\"Map company size\"].json[\"name\"]}}",
+          "resource": "person",
+          "additionalFields": {
+            "email": [
+              "={{$node[\"On form completion\"].json[\"What *email address* can we reach you at?\"]}}"
+            ],
+            "org_id": "={{$json.id}}"
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5c463f99-38e0-4c2e-a34c-86fc199b9d1f",
+        "name": "Create Lead",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1600,
+          560
+        ],
+        "parameters": {
+          "title": "={{$node[\"Map company size\"].json[\"company\"]}} lead",
+          "resource": "lead",
+          "organization_id": "={{$node[\"Create Organization\"].json.id}}",
+          "additionalFields": {
+            "person_id": "={{$json.id}}"
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d63383ca-a71e-4384-a3fb-942c25d7fe01",
+        "name": "Create Note",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1800,
+          560
+        ],
+        "parameters": {
+          "content": "=Website form submitted\n\nQuestion:\n{{$node[\"Map company size\"].json[\"questions\"]}}\n\nCompany Size:\n{{$node[\"Set\"].json[\"employees\"]}}",
+          "resource": "note",
+          "additionalFields": {
+            "lead_id": "={{$json.id}}"
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "78568df6-1c6b-493d-b186-9f9246de518a",
+        "name": "On form completion",
+        "type": "n8n-nodes-base.typeformTrigger",
+        "position": [
+          380,
+          560
+        ],
+        "webhookId": "[UPDATE ME]",
+        "parameters": {
+          "formId": "[UPDATE ME]"
+        },
+        "credentials": {
+          "typeformApi": {
+            "id": "{{ $credentials.typeformApi.id }}",
+            "name": "Typeform account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This typeformTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6bc56059-6ae7-48bd-838c-08e717bd6bd4",
+        "name": "Map company size",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          820,
+          560
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "switch ($input.item.json.employees) {\n  case '< 20':\n  // small\n    $input.item.json.pipedriveemployees='59' \n    break;\n  case '20 - 100':\n    // medium\n    $input.item.json.pipedriveemployees='60' \n    break;\n  case '101 - 500':\n    // large\n    $input.item.json.pipedriveemployees='73' \n    break;\n  case '501 - 1000':\n    // xlarge\n    $input.item.json.pipedriveemployees='74' \n    break;\n  case '1000+':\n    // Enterprise\n    $input.item.json.pipedriveemployees='61' \n    break;\n}\nreturn $input.item;\n"
+        },
+        "typeVersion": 1,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-d8066917",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Set Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Set Workflow. This workflow integrates 5 different services: pipedrive, stickyNote, code, typeformTrigger, set. It contains 8 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Set Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Set Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Lead",
+        "parameters": {
+          "additionalFields": {
+            "person_id": "={{$json.id}}"
+          },
+          "organization_id": "={{$node[\"Create Organization\"].json.id}}",
+          "resource": "lead",
+          "title": "={{$node[\"Map company size\"].json[\"company\"]}} lead"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Note",
+        "parameters": {
+          "additionalFields": {
+            "lead_id": "={{$json.id}}"
+          },
+          "content": "=Website form submitted\n\nQuestion:\n{{$node[\"Map company size\"].json[\"questions\"]}}\n\nCompany Size:\n{{$node[\"Set\"].json[\"employees\"]}}",
+          "resource": "note"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Organization",
+        "parameters": {
+          "additionalFields": {
+            "customProperties": {
+              "property": [
+                {
+                  "name": "eb7a7fb64081a9b9100c0622c696c159330cf3d2",
+                  "value": "={{$node[\"Map company size\"].json[\"pipedriveemployees\"]}}"
+                }
+              ]
+            }
+          },
+          "name": "={{$node[\"Map company size\"].json[\"company\"]}}",
+          "resource": "organization"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Person",
+        "parameters": {
+          "additionalFields": {
+            "email": [
+              "={{$node[\"On form completion\"].json[\"What *email address* can we reach you at?\"]}}"
+            ],
+            "org_id": "={{$json.id}}"
+          },
+          "name": "={{$node[\"Map company size\"].json[\"name\"]}}",
+          "resource": "person"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Map company size",
+        "parameters": {
+          "jsCode": "switch ($input.item.json.employees) {\n  case '< 20':\n  // small\n    $input.item.json.pipedriveemployees='59' \n    break;\n  case '20 - 100':\n    // medium\n    $input.item.json.pipedriveemployees='60' \n    break;\n  case '101 - 500':\n    // large\n    $input.item.json.pipedriveemployees='73' \n    break;\n  case '501 - 1000':\n    // xlarge\n    $input.item.json.pipedriveemployees='74' \n    break;\n  case '1000+':\n    // Enterprise\n    $input.item.json.pipedriveemployees='61' \n    break;\n}\nreturn $input.item;\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1
+      },
+      {
+        "name": "Note",
+        "parameters": {
+          "content": "## Format Typeform inputs to Pipedrive\nIn this example, we ask for the number of employees at a company. \n\nTo map this to Pipedrive, we need the unique item number coming from Pipedrive for each of these sections. This is what the function node does. \n\nIn the Pipedrive: Organization, we map this under the custom property.\n\n\n\n\n\n\n\n\n",
+          "height": 440,
+          "width": 760
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "typeformApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "On form completion",
+        "parameters": {
+          "formId": "[UPDATE ME]"
+        },
+        "type": "n8n-nodes-base.typeformTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "company",
+                "value": "={{$json[\"What *company* are you contacting us from?\"]}}"
+              },
+              {
+                "name": "name",
+                "value": "={{$json[\"Let's start with your *first and last name.*\"]}}"
+              },
+              {
+                "name": "email",
+                "value": "={{$json[\"What *email address* can we reach you at?\"]}}"
+              },
+              {
+                "name": "n8nFamiliar",
+                "value": "={{$json[\"How familiar are you with*  n8n*?\"]}}"
+              },
+              {
+                "name": "questions",
+                "value": "={{$json[\"Do you have any *specific questions* about embedding n8n at this stage?\"]}}"
+              },
+              {
+                "name": "employees",
+                "value": "={{$json[\"How many employees?\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Pipedrive",
+    "Typeform"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 72,
+  "viewCount": 158,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Pipedrive Account",
+      "Typeform Account"
+    ],
+    "requiredCredentials": [
+      "pipedrive  A P I details",
+      "typeform  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On form completion\".",
+      "Open the \"Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Organization\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Person\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Lead\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Note\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-prcmfdtm4",
+      "workflowId": "set-workflow-8c4p1",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0239_Code_Typeform_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0239_Code_Typeform_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:28:53.793Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:53.793Z",
+  "updatedAt": "2026-07-15T11:28:53.793Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

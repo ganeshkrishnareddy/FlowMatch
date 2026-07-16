@@ -1,0 +1,398 @@
+{
+  "id": "manualtrigger-workflow-acrx8",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-2ukb",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 3 different services: stickyNote, manualTrigger, airtable. It contains 4 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-2b131704",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.973973",
+      "updatedAt": "2025-09-29T07:07:48.973984",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "b58964ca-d7a9-435d-a7cc-b09cac5c0a30",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          1000,
+          720
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "08dcd330-232d-48bf-b3fc-275513be9c62",
+        "name": "Get all records with an image URL",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1200,
+          720
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "app5TBVbHPs64w5lE",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "N8N Image Automation"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tblTVTofgqfzqyIZk",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Frogs"
+          },
+          "options": {},
+          "operation": "search",
+          "filterByFormula": "=NOT({Image source URL} = '')"
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "331b2a4f-2168-443e-9827-f4967587d643",
+        "name": "Update attachment field with images",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1400,
+          720
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "app5TBVbHPs64w5lE",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "N8N Image Automation"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tblTVTofgqfzqyIZk",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Frogs"
+          },
+          "columns": {
+            "value": {
+              "id": "={{ $json.id }}",
+              "Image attachment": "={\n\"Attachment\": {\n\"url\": \"{{ $json[\"Image source URL\"] }}\"\n}\n}"
+            },
+            "schema": [
+              {
+                "id": "id",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": true,
+                "required": false,
+                "displayName": "id",
+                "defaultMatch": true
+              },
+              {
+                "id": "Image source URL",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Image source URL",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Image attachment",
+                "type": "object",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Image attachment",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "id"
+            ]
+          },
+          "options": {},
+          "operation": "update"
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d2be8b46-c845-4ebf-adfc-2ca2eee9ee46",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          460,
+          460
+        ],
+        "parameters": {
+          "width": 476,
+          "height": 849,
+          "content": "## Read me\nSuper simple workflow to upload image URLs as attachments in Airtable. [Here's the example Airtable database I used for this workflow.]({{ $env.WEBHOOK_URL }}\n\n1. Set up your Airtable database with one text field which contains image URLs, and an attachment field. \n![Source example]({{ $env.WEBHOOK_URL }}<IMAGE-NAME>.png#full-width)\n\n2. In each Airtable node, add your Airtable credentials and connect to the base and table you want to modify.\n\n3. In the \"Get all records with an image URL\" node under \"Filter by Formula\", change the field name from \"Image Source URL\" to whatever your URL field name is.\n![Source example]({{ $env.WEBHOOK_URL }}<IMAGE-NAME>.png)\n\n4. In the third node \"Update attachment field with images\", update the expression with the correct field name for the URL field. \n![Source example]({{ $env.WEBHOOK_URL }}<IMAGE-NAME>.png)\n\n5. Click \"Execute Workflow\" and watch the magic happen!\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-5b81eb94",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {},
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 3 different services: stickyNote, manualTrigger, airtable. It contains 4 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get all records with an image URL",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "N8N Image Automation",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "app5TBVbHPs64w5lE"
+          },
+          "filterByFormula": "=NOT({Image source URL} = '')",
+          "operation": "search",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "Frogs",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tblTVTofgqfzqyIZk"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Read me\nSuper simple workflow to upload image URLs as attachments in Airtable. [Here's the example Airtable database I used for this workflow.]({{ $env.WEBHOOK_URL }}\n\n1. Set up your Airtable database with one text field which contains image URLs, and an attachment field. \n![Source example]({{ $env.WEBHOOK_URL }}<IMAGE-NAME>.png#full-width)\n\n2. In each Airtable node, add your Airtable credentials and connect to the base and table you want to modify.\n\n3. In the \"Get all records with an image URL\" node under \"Filter by Formula\", change the field name from \"Image Source URL\" to whatever your URL field name is.\n![Source example]({{ $env.WEBHOOK_URL }}<IMAGE-NAME>.png)\n\n4. In the third node \"Update attachment field with images\", update the expression with the correct field name for the URL field. \n![Source example]({{ $env.WEBHOOK_URL }}<IMAGE-NAME>.png)\n\n5. Click \"Execute Workflow\" and watch the magic happen!\n\n",
+          "height": 849,
+          "width": 476
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Update attachment field with images",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "N8N Image Automation",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "app5TBVbHPs64w5lE"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "id"
+            ],
+            "schema": [
+              {
+                "defaultMatch": true,
+                "display": true,
+                "displayName": "id",
+                "id": "id",
+                "readOnly": true,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Image source URL",
+                "id": "Image source URL",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Image attachment",
+                "id": "Image attachment",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "object"
+              }
+            ],
+            "value": {
+              "Image attachment": "={\n\"Attachment\": {\n\"url\": \"{{ $json[\"Image source URL\"] }}\"\n}\n}",
+              "id": "={{ $json.id }}"
+            }
+          },
+          "operation": "update",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "Frogs",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tblTVTofgqfzqyIZk"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 1,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Airtable"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 91,
+  "viewCount": 675,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Airtable Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"Get all records with an image URL\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update attachment field with images\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 89,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-qzboo7u95",
+      "workflowId": "manualtrigger-workflow-acrx8",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0377_Manual_Stickynote_Update_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0377_Manual_Stickynote_Update_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:28.968Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:28.968Z",
+  "updatedAt": "2026-07-15T11:29:28.968Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

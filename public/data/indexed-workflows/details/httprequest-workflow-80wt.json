@@ -1,0 +1,936 @@
+{
+  "id": "httprequest-workflow-kpvfb",
+  "name": "Httprequest Workflow",
+  "slug": "httprequest-workflow-80wt",
+  "description": "Automated workflow: Httprequest Workflow. This workflow integrates 6 different services: webhook, stickyNote, httpRequest, set, respondToWebhook. It contains 15 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Httprequest Workflow workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-e822a471",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.990119",
+      "updatedAt": "2025-09-29T07:07:45.990141",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "9fdbfdc1-67f3-4c8b-861c-9e5840b002ec",
+        "name": "Session",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          780,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "BWkbkxgDD4hkRCvs",
+            "name": "Fastmail Masked E-Mail Addresses"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "215d96fa-6bda-4e8c-884a-eb9a8db0838f",
+        "name": "create random masked email",
+        "type": "n8n-nodes-base.httpRequest",
+        "notes": "{{ $env.API_BASE_URL }}\n\n{{ $env.API_BASE_URL }}",
+        "position": [
+          1280,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"using\": [\n    \"urn:ietf:params:jmap:core\",\n    \"{{ $env.WEBHOOK_URL }}\"\n  ],\n  \"methodCalls\": [\n    [\n      \"MaskedEmail/set\",\n      {\n        \"accountId\": \"{{ $('Session').item.json.primaryAccounts['{{ $env.WEBHOOK_URL }}'] }}\",\n        \"create\": {\n          \"maskedEmailId1\": {\n            \"description\": \"{{ $json.description }}\",\n            \"state\": \"{{ $json.state }}\"\n          }\n        }\n      },\n      \"c1\"\n    ]\n  ]\n}\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "BWkbkxgDD4hkRCvs",
+            "name": "Fastmail Masked E-Mail Addresses"
+          }
+        },
+        "typeVersion": 4.2
+      },
+      {
+        "id": "237f6596-f8df-4c21-a2fa-44e935a72d56",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1800,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "respondWith": "text",
+          "responseBody": "={{ $json }}"
+        },
+        "typeVersion": 1.1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6699eb83-a41e-44bc-b332-77e407fb3542",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          460,
+          480
+        ],
+        "parameters": {
+          "width": 1654.8203324571532,
+          "height": 471.75430470511367,
+          "content": "### Template Description\nThis n8n workflow template allows you to create a masked email address using the Fastmail API, triggered by a webhook. This is especially useful for generating disposable email addresses for privacy-conscious users or for testing purposes.\n\n#### Workflow Details:\n1. **Webhook Trigger**: The workflow is initiated by sending a POST request to a specific webhook. You can include `state` and `description` in your request body to customize the masked email's state and description.\n2. **Session Retrieval**: The workflow makes an HTTP request to the Fastmail API to retrieve session information. It uses this data to authenticate further requests.\n3. **Create Masked Email**: Using the retrieved session data, the workflow sends a POST request to Fastmail's JMAP API to create a masked email. It uses the provided state and description from the webhook payload.\n4. **Prepare Output**: Once the masked email is successfully created, the workflow extracts the email address and attaches the description for further processing.\n5. **Respond to Webhook**: Finally, the workflow responds to the original POST request with the newly created masked email and its description.\n\n#### Requirements:\n- **Fastmail API Access**: You will need valid API credentials for Fastmail configured with HTTP Header Authentication.\n- **Authorization Setup**: Optionally set up authorization if your webhook is exposed to the internet to prevent misuse.\n- **Custom Webhook Request**: Use a tool like `curl` or create a shortcut on macOS/iOS to send the POST request to the webhook with the necessary JSON payload, like so:\n  \n  ```bash\n  curl -X POST -H 'Content-Type: application/json' {{ $env.WEBHOOK_URL }} -d '{\"state\": \"pending\", \"description\": \"my mega fancy masked email\"}'\n  ```\n\nThis template simplifies the process of integrating masked email functionality into your projects or workflows and can be extended for various use cases."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0c5d6d5a-ad0f-451e-9075-1009c8bf7212",
+        "name": "get fields for creation",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1000,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "870bb03d-c672-49d6-9652-5a0233b16eb2",
+                "name": "state",
+                "type": "string",
+                "value": "={{ $('Webhook').item.json.body.state ?? \"pending\" }}"
+              },
+              {
+                "id": "ac9b45a0-885f-48b2-b0ec-e38c79080045",
+                "name": "description",
+                "type": "string",
+                "value": "={{ $('Webhook').item.json.body.description ?? \"Test via N8n\" }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "be7ba978-00d7-4fb1-9e1b-e3f83285e6fb",
+        "name": "prepare output",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1540,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "19a09822-7ae0-4884-9192-c6e5bc3393a8",
+                "name": "email",
+                "type": "string",
+                "value": "={{ $json.methodResponses[0][1].created.maskedEmailId1.email }}"
+              },
+              {
+                "id": "ae8a1fe4-3010-4db8-aa88-f6074cae3006",
+                "name": "desciption",
+                "type": "string",
+                "value": "={{ $('get fields for creation').item.json.description }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dd014889-81eb-4a94-886e-4fe084c504ff",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          540,
+          300
+        ],
+        "webhookId": "87f9abd1-2c9b-4d1f-8c7f-2261f4698c3c",
+        "parameters": {
+          "path": "createMaskedEmail",
+          "options": {},
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "9fdbfdc1-67f3-4c8b-861c-9e5840b002ec": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-861c066d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-2edae31e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-13a2459b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-e75c422a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-a9ab332f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-6bbe96d2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-53d489ea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-bdc45cf3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "215d96fa-6bda-4e8c-884a-eb9a8db0838f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-27647592",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-9934a0cd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-85b8e6e3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-e94a1b47",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-5c55b6ce",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-57713b27",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-c319b89c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-2763daa5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "237f6596-f8df-4c21-a2fa-44e935a72d56": {
+        "main": [
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-a45a0f8d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-5bfe0c38",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-f6937907",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-c03c14dd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-1fac1954",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-68eeb62b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-fb0083b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-90757047",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "dd014889-81eb-4a94-886e-4fe084c504ff": {
+        "main": [
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-73eb59d3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-b0f73801",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-6ece71a3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-3e0dbe04",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-42c03d19",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-9fe067fb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-3c0d99eb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-10ad3c2b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Httprequest Workflow. This workflow integrates 6 different services: webhook, stickyNote, httpRequest, set, respondToWebhook. It contains 15 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Httprequest Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "215d96fa-6bda-4e8c-884a-eb9a8db0838f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-27647592"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-9934a0cd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-85b8e6e3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-e94a1b47"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-5c55b6ce"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-57713b27"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-c319b89c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-215d96fa-6bda-4e8c-884a-eb9a8db0838f-2763daa5"
+            }
+          ]
+        ]
+      },
+      "237f6596-f8df-4c21-a2fa-44e935a72d56": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-a45a0f8d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-5bfe0c38"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-f6937907"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-c03c14dd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-1fac1954"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-68eeb62b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-fb0083b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-237f6596-f8df-4c21-a2fa-44e935a72d56-90757047"
+            }
+          ]
+        ]
+      },
+      "9fdbfdc1-67f3-4c8b-861c-9e5840b002ec": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-861c066d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-2edae31e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-13a2459b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-e75c422a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-a9ab332f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-6bbe96d2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-53d489ea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fdbfdc1-67f3-4c8b-861c-9e5840b002ec-bdc45cf3"
+            }
+          ]
+        ]
+      },
+      "dd014889-81eb-4a94-886e-4fe084c504ff": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-73eb59d3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-b0f73801"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-6ece71a3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-3e0dbe04"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-42c03d19"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-9fe067fb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-3c0d99eb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd014889-81eb-4a94-886e-4fe084c504ff-10ad3c2b"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "create random masked email",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"using\": [\n    \"urn:ietf:params:jmap:core\",\n    \"{{ $env.WEBHOOK_URL }}\"\n  ],\n  \"methodCalls\": [\n    [\n      \"MaskedEmail/set\",\n      {\n        \"accountId\": \"{{ $('Session').item.json.primaryAccounts['{{ $env.WEBHOOK_URL }}'] }}\",\n        \"create\": {\n          \"maskedEmailId1\": {\n            \"description\": \"{{ $json.description }}\",\n            \"state\": \"{{ $json.state }}\"\n          }\n        }\n      },\n      \"c1\"\n    ]\n  ]\n}\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "get fields for creation",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "870bb03d-c672-49d6-9652-5a0233b16eb2",
+                "name": "state",
+                "type": "string",
+                "value": "={{ $('Webhook').item.json.body.state ?? \"pending\" }}"
+              },
+              {
+                "id": "ac9b45a0-885f-48b2-b0ec-e38c79080045",
+                "name": "description",
+                "type": "string",
+                "value": "={{ $('Webhook').item.json.body.description ?? \"Test via N8n\" }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "prepare output",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "19a09822-7ae0-4884-9192-c6e5bc3393a8",
+                "name": "email",
+                "type": "string",
+                "value": "={{ $json.methodResponses[0][1].created.maskedEmailId1.email }}"
+              },
+              {
+                "id": "ae8a1fe4-3010-4db8-aa88-f6074cae3006",
+                "name": "desciption",
+                "type": "string",
+                "value": "={{ $('get fields for creation').item.json.description }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Respond to Webhook",
+        "parameters": {
+          "options": {},
+          "respondWith": "text",
+          "responseBody": "={{ $json }}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Session",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {},
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "### Template Description\nThis n8n workflow template allows you to create a masked email address using the Fastmail API, triggered by a webhook. This is especially useful for generating disposable email addresses for privacy-conscious users or for testing purposes.\n\n#### Workflow Details:\n1. **Webhook Trigger**: The workflow is initiated by sending a POST request to a specific webhook. You can include `state` and `description` in your request body to customize the masked email's state and description.\n2. **Session Retrieval**: The workflow makes an HTTP request to the Fastmail API to retrieve session information. It uses this data to authenticate further requests.\n3. **Create Masked Email**: Using the retrieved session data, the workflow sends a POST request to Fastmail's JMAP API to create a masked email. It uses the provided state and description from the webhook payload.\n4. **Prepare Output**: Once the masked email is successfully created, the workflow extracts the email address and attaches the description for further processing.\n5. **Respond to Webhook**: Finally, the workflow responds to the original POST request with the newly created masked email and its description.\n\n#### Requirements:\n- **Fastmail API Access**: You will need valid API credentials for Fastmail configured with HTTP Header Authentication.\n- **Authorization Setup**: Optionally set up authorization if your webhook is exposed to the internet to prevent misuse.\n- **Custom Webhook Request**: Use a tool like `curl` or create a shortcut on macOS/iOS to send the POST request to the webhook with the necessary JSON payload, like so:\n  \n  ```bash\n  curl -X POST -H 'Content-Type: application/json' {{ $env.WEBHOOK_URL }} -d '{\"state\": \"pending\", \"description\": \"my mega fancy masked email\"}'\n  ```\n\nThis template simplifies the process of integrating masked email functionality into your projects or workflows and can be extended for various use cases.",
+          "height": 471.75430470511367,
+          "width": 1654.8203324571532
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "createMaskedEmail",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 79,
+  "viewCount": 673,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Respond to Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Session\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"create random masked email\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"get fields for creation\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"prepare output\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-4i8l3dx0p",
+      "workflowId": "httprequest-workflow-kpvfb",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0606_HTTP_Respondtowebhook_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0606_HTTP_Respondtowebhook_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:32.114Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:32.114Z",
+  "updatedAt": "2026-07-15T11:18:32.114Z"
+}

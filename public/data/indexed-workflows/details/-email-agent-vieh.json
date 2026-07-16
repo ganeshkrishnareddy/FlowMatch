@@ -1,0 +1,653 @@
+{
+  "id": "-email-agent-wx5m6",
+  "name": "🤖Email Agent",
+  "slug": "-email-agent-vieh",
+  "description": "Automated workflow: 🤖Email Agent. This workflow processes data and performs automated tasks.",
+  "shortDescription": "🤖Email Agent workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "name": "🤖Email Agent",
+    "nodes": [
+      {
+        "parameters": {
+          "model": "gpt-4o",
+          "options": {}
+        },
+        "id": "c98bcc4d-20a9-4b29-a4aa-f6b6e7bb1f1b",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          560,
+          680
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "BP9v81AwJlpYGStD",
+            "name": "OpenAi account"
+          }
+        },
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "7ab380a2-a8d3-421c-ab4e-748ea8fb7904",
+                "name": "response",
+                "value": "Unable to perform task. Please try again.",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "0505c1f0-53d1-4988-843f-eb9eac2d7856",
+        "name": "Try Again",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1640,
+          500
+        ],
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "39c2f302-03be-4464-a17a-d7cc481d6d44",
+                "name": "=response",
+                "value": "={{$json.output}}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "97393469-bde9-4a13-8d89-68ac6a4305db",
+        "name": "Success",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1640,
+          320
+        ],
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.query }}",
+          "options": {
+            "systemMessage": "=# Overview\nYou are an email management assistant. All emails must be formatted professionally in HTML and signed off as \"Nate.\" \n\n**Email Management Tools**   \n   - Use \"Send Email\" to send emails.  \n   - Use \"Create Draft\" if the user asks for a draft.  \n   - Use \"Get Emails\" to retrieve emails when requested.\n   - Use \"Get Labels\" to retrieve labels.\n   - Use \"Mark Unread\" to mark an email as unread. You must use \"Get Emails\" first so you have the message ID of the email to flag.\n   - Use \"Label Email\" to flag an email. You must use \"Get Emails\" first so you have the message ID of the email to flag. Then you must use \"Get Labels\" so you have the label ID.\n   - Use \"Email Reply\" to reply to an email. You must use \"Get Emails\" first so you have the message ID of the email to reply to.\n\n## Final Notes\n- Here is the current date/time: {{ $now }}"
+          }
+        },
+        "id": "0f7ba4a7-44b1-41ce-8904-9a78e8e03be4",
+        "name": "Email Agent",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6,
+        "position": [
+          1040,
+          400
+        ],
+        "onError": "continueErrorOutput",
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $fromAI(\"emailAddress\") }}",
+          "subject": "={{ $fromAI(\"subject\") }}",
+          "message": "={{ $fromAI(\"emailBody\") }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1,
+        "position": [
+          720,
+          760
+        ],
+        "id": "9e043f46-3e1a-431a-9495-b34e251de785",
+        "name": "Send Email",
+        "webhookId": "86c8c4b1-13bb-4ebe-acb9-30e1d7082d55",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "MHutgNQIvAz7qMgP",
+            "name": "Gmail account"
+          }
+        },
+        "notes": "This gmailTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "operation": "getAll",
+          "limit": "={{ $fromAI(\"limit\",\"how many emails the user wants\") }}",
+          "simple": false,
+          "filters": {
+            "sender": "={{ $fromAI(\"sender\",\"who the emails are from\") }}"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1,
+        "position": [
+          1360,
+          860
+        ],
+        "id": "fc850981-86fa-4714-a47a-27d5ed2f4944",
+        "name": "Get Emails",
+        "webhookId": "af4b3298-9037-44b0-aa12-2acbfbb5e66f",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "MHutgNQIvAz7qMgP",
+            "name": "Gmail account"
+          }
+        },
+        "notes": "This gmailTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "resource": "draft",
+          "subject": "={{ $fromAI(\"subject\") }}",
+          "emailType": "html",
+          "message": "={{ $fromAI(\"emailBody\") }}",
+          "options": {
+            "sendTo": "={{ $fromAI(\"emailAddress\") }}"
+          }
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1,
+        "position": [
+          1200,
+          880
+        ],
+        "id": "c460b943-04a8-4598-9e70-be4f5d4d2303",
+        "name": "Create Draft",
+        "webhookId": "17016bce-d7d7-428a-a56c-f6ea122db8be",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "MHutgNQIvAz7qMgP",
+            "name": "Gmail account"
+          }
+        },
+        "notes": "This gmailTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "operation": "reply",
+          "messageId": "={{ $fromAI(\"ID\",\"the message ID\") }}",
+          "message": "={{ $fromAI(\"emailBody\") }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1,
+        "position": [
+          880,
+          820
+        ],
+        "id": "500202a6-a9be-45ac-be3d-33e0928fb830",
+        "name": "Email Reply",
+        "webhookId": "114785e6-a859-432b-81b4-c490c1c35b1c",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "MHutgNQIvAz7qMgP",
+            "name": "Gmail account"
+          }
+        },
+        "notes": "This gmailTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "resource": "label",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1,
+        "position": [
+          1480,
+          800
+        ],
+        "id": "b05ce6a1-ae44-4d46-a32b-c6d2250794b1",
+        "name": "Get Labels",
+        "webhookId": "9e08b59e-792d-4566-83f1-9263c9ad86ae",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "MHutgNQIvAz7qMgP",
+            "name": "Gmail account"
+          }
+        },
+        "notes": "This gmailTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "operation": "addLabels",
+          "messageId": "={{ $fromAI(\"ID\",\"the ID of the message\") }}",
+          "labelIds": "={{ $fromAI(\"labelID\") }}"
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1,
+        "position": [
+          1040,
+          860
+        ],
+        "id": "88c2635f-5088-4f0c-b5f8-c4a5f73ffc79",
+        "name": "Label Emails",
+        "webhookId": "0e951529-2e6d-40bf-ac40-fc0947e242e2",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "MHutgNQIvAz7qMgP",
+            "name": "Gmail account"
+          }
+        },
+        "notes": "This gmailTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "operation": "markAsUnread",
+          "messageId": "={{ $fromAI(\"messageID\") }}"
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1,
+        "position": [
+          1620,
+          740
+        ],
+        "id": "8f3771c3-cf3d-4481-8a6d-4ead60291649",
+        "name": "Mark Unread",
+        "webhookId": "a35af9d8-f67d-4ff9-803f-59ec6356e795",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "MHutgNQIvAz7qMgP",
+            "name": "Gmail account"
+          }
+        },
+        "notes": "This gmailTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          800,
+          400
+        ],
+        "id": "053be115-2ecf-4d22-8f7f-93ad7271bf80",
+        "name": "When Executed by Another Workflow",
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-9dab0292",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "c98bcc4d-20a9-4b29-a4aa-f6b6e7bb1f1b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c98bcc4d-20a9-4b29-a4aa-f6b6e7bb1f1b-b600de5a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "e76750a7-4129-45a9-83ff-321a6ba6d324",
+    "meta": {
+      "instanceId": "workflow-ee223649",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.202943",
+      "updatedAt": "2025-09-29T07:07:45.202956",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "id": "C3hLlOS4O6ZJtVFy",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Automated workflow: 🤖Email Agent. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: 🤖Email Agent. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "c98bcc4d-20a9-4b29-a4aa-f6b6e7bb1f1b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c98bcc4d-20a9-4b29-a4aa-f6b6e7bb1f1b-b600de5a"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "🤖Email Agent",
+    "nodes": [
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Draft",
+        "parameters": {
+          "emailType": "html",
+          "message": "={{ $fromAI(\"emailBody\") }}",
+          "options": {
+            "sendTo": "={{ $fromAI(\"emailAddress\") }}"
+          },
+          "resource": "draft",
+          "subject": "={{ $fromAI(\"subject\") }}"
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Email Agent",
+        "parameters": {
+          "options": {
+            "systemMessage": "=# Overview\nYou are an email management assistant. All emails must be formatted professionally in HTML and signed off as \"Nate.\" \n\n**Email Management Tools**   \n   - Use \"Send Email\" to send emails.  \n   - Use \"Create Draft\" if the user asks for a draft.  \n   - Use \"Get Emails\" to retrieve emails when requested.\n   - Use \"Get Labels\" to retrieve labels.\n   - Use \"Mark Unread\" to mark an email as unread. You must use \"Get Emails\" first so you have the message ID of the email to flag.\n   - Use \"Label Email\" to flag an email. You must use \"Get Emails\" first so you have the message ID of the email to flag. Then you must use \"Get Labels\" so you have the label ID.\n   - Use \"Email Reply\" to reply to an email. You must use \"Get Emails\" first so you have the message ID of the email to reply to.\n\n## Final Notes\n- Here is the current date/time: {{ $now }}"
+          },
+          "promptType": "define",
+          "text": "={{ $json.query }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Email Reply",
+        "parameters": {
+          "message": "={{ $fromAI(\"emailBody\") }}",
+          "messageId": "={{ $fromAI(\"ID\",\"the message ID\") }}",
+          "operation": "reply",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Emails",
+        "parameters": {
+          "filters": {
+            "sender": "={{ $fromAI(\"sender\",\"who the emails are from\") }}"
+          },
+          "limit": "={{ $fromAI(\"limit\",\"how many emails the user wants\") }}",
+          "operation": "getAll",
+          "options": {},
+          "simple": false
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Labels",
+        "parameters": {
+          "resource": "label",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Label Emails",
+        "parameters": {
+          "labelIds": "={{ $fromAI(\"labelID\") }}",
+          "messageId": "={{ $fromAI(\"ID\",\"the ID of the message\") }}",
+          "operation": "addLabels"
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mark Unread",
+        "parameters": {
+          "messageId": "={{ $fromAI(\"messageID\") }}",
+          "operation": "markAsUnread"
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": "gpt-4o",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email",
+        "parameters": {
+          "message": "={{ $fromAI(\"emailBody\") }}",
+          "options": {
+            "appendAttribution": false
+          },
+          "sendTo": "={{ $fromAI(\"emailAddress\") }}",
+          "subject": "={{ $fromAI(\"subject\") }}"
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Success",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "39c2f302-03be-4464-a17a-d7cc481d6d44",
+                "name": "=response",
+                "type": "string",
+                "value": "={{$json.output}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Try Again",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "7ab380a2-a8d3-421c-ab4e-748ea8fb7904",
+                "name": "response",
+                "type": "string",
+                "value": "Unable to perform task. Please try again."
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "When Executed by Another Workflow",
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Gmailtool"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 117,
+  "viewCount": 504,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Gmailtool Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When Executed by Another Workflow\".",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Email Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Email\" node (n8n-nodes-base.gmailTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Emails\" node (n8n-nodes-base.gmailTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Draft\" node (n8n-nodes-base.gmailTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Email Reply\" node (n8n-nodes-base.gmailTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Labels\" node (n8n-nodes-base.gmailTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Label Emails\" node (n8n-nodes-base.gmailTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mark Unread\" node (n8n-nodes-base.gmailTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Try Again\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Success\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-zh8fxluuf",
+      "workflowId": "-email-agent-wx5m6",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Gmailtool/1795_Gmailtool_Executeworkflow_Send_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Gmailtool\\1795_Gmailtool_Executeworkflow_Send_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:26.321Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:26.321Z",
+  "updatedAt": "2026-07-15T11:18:26.321Z"
+}

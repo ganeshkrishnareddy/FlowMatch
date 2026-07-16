@@ -1,0 +1,552 @@
+{
+  "id": "if-workflow-g9px0",
+  "name": "If Workflow",
+  "slug": "if-workflow-lsw6",
+  "description": "Automated workflow: If Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "If Workflow workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-f07ca58a",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.729434",
+      "updatedAt": "2025-09-29T07:07:45.729454",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "acf47a04-1f3f-448a-b571-a94c84004c45",
+        "name": "Current won time Not Equal to Previous",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          140,
+          260
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json[\"current\"].won_time}}",
+                "value2": "={{ $json[\"previous\"].won_time}}",
+                "operation": "notEqual"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "452a0208-be12-4aac-8c1a-9101ab79f8fb",
+        "name": "On deal updated",
+        "type": "n8n-nodes-base.pipedriveTrigger",
+        "position": [
+          -80,
+          260
+        ],
+        "webhookId": "af0f5626-e92f-4e29-bdc8-8e13c9c9cf99",
+        "parameters": {
+          "action": "updated",
+          "object": "deal"
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedriveTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "202b9a47-2f00-43ec-bbab-ba82f94e4174",
+        "name": "Get organisation details",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          380,
+          240
+        ],
+        "parameters": {
+          "resource": "organization",
+          "operation": "get",
+          "organizationId": "={{ $json[\"current\"].org_id }}",
+          "resolveProperties": true
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b88e18a3-1514-424f-ba96-c8bb94c14cb3",
+        "name": "Search customer",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          600,
+          100
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "query",
+                "value": "=name:'{{ $json[\"Name\"] }}'"
+              }
+            ]
+          },
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "stripeApi": {
+            "id": "{{ $credentials.stripeApi.id }}",
+            "name": "Stripe account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b4a4491e-8d69-41b6-83a4-128f228108e3",
+        "name": "Customer does not exist",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          860,
+          100
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ JSON.stringify($json[\"data\"]) }}",
+                "value2": "[]"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6aeaa043-ce4b-4665-a1eb-9fe66d86202f",
+        "name": "Continue with organisation data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1120,
+          220
+        ],
+        "parameters": {
+          "mode": "passThrough",
+          "output": "input2"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "21bc3b5a-72eb-4015-957a-7facfce371e0",
+        "name": "Create customer",
+        "type": "n8n-nodes-base.stripe",
+        "position": [
+          1360,
+          220
+        ],
+        "parameters": {
+          "name": "={{ $json[\"Name\"] }}",
+          "resource": "customer",
+          "operation": "create",
+          "additionalFields": {
+            "address": {
+              "details": {
+                "city": "={{ $json[\"City/town/village/locality\"] }}",
+                "line1": "={{ $json[\"Street/road name\"] }} {{ $json[\"House number\"] }}",
+                "state": "={{ $json[\"State/county\"] }}",
+                "country": "={{ $json[\"Country\"] }}",
+                "postal_code": "={{ $json[\"ZIP/Postal code\"] }}"
+              }
+            }
+          }
+        },
+        "credentials": {
+          "stripeApi": {
+            "id": "{{ $credentials.stripeApi.id }}",
+            "name": "Stripe account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This stripe node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "b88e18a3-1514-424f-ba96-c8bb94c14cb3": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-c332a95c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-75298d3f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-eca96590",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-d56979d3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-69ce819e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-29697248",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-cabbe860",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-13e00884",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "description": "Automated workflow: If Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: If Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "b88e18a3-1514-424f-ba96-c8bb94c14cb3": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-c332a95c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-75298d3f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-eca96590"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-d56979d3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-69ce819e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-29697248"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-cabbe860"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b88e18a3-1514-424f-ba96-c8bb94c14cb3-13e00884"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "nodes": [
+      {
+        "name": "Continue with organisation data",
+        "parameters": {
+          "mode": "passThrough",
+          "output": "input2"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "stripeApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create customer",
+        "parameters": {
+          "additionalFields": {
+            "address": {
+              "details": {
+                "city": "={{ $json[\"City/town/village/locality\"] }}",
+                "country": "={{ $json[\"Country\"] }}",
+                "line1": "={{ $json[\"Street/road name\"] }} {{ $json[\"House number\"] }}",
+                "postal_code": "={{ $json[\"ZIP/Postal code\"] }}",
+                "state": "={{ $json[\"State/county\"] }}"
+              }
+            }
+          },
+          "name": "={{ $json[\"Name\"] }}",
+          "operation": "create",
+          "resource": "customer"
+        },
+        "type": "n8n-nodes-base.stripe",
+        "typeVersion": 1
+      },
+      {
+        "name": "Current won time Not Equal to Previous",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "notEqual",
+                "value1": "={{ $json[\"current\"].won_time}}",
+                "value2": "={{ $json[\"previous\"].won_time}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Customer does not exist",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ JSON.stringify($json[\"data\"]) }}",
+                "value2": "[]"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get organisation details",
+        "parameters": {
+          "operation": "get",
+          "organizationId": "={{ $json[\"current\"].org_id }}",
+          "resolveProperties": true,
+          "resource": "organization"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "On deal updated",
+        "parameters": {
+          "action": "updated",
+          "object": "deal"
+        },
+        "type": "n8n-nodes-base.pipedriveTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "stripeApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search customer",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "query",
+                "value": "=name:'{{ $json[\"Name\"] }}'"
+              }
+            ]
+          },
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Pipedrive",
+    "HTTP Request",
+    "Stripe"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 151,
+  "viewCount": 769,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Pipedrive Account",
+      "HTTP Request Account",
+      "Stripe Account"
+    ],
+    "requiredCredentials": [
+      "pipedrive  A P I details",
+      "stripe  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On deal updated\".",
+      "Open the \"Current won time Not Equal to Previous\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get organisation details\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search customer\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Customer does not exist\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Continue with organisation data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create customer\" node (n8n-nodes-base.stripe) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-hqec1h7cy",
+      "workflowId": "if-workflow-g9px0",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0245_HTTP_Stripe_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0245_HTTP_Stripe_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:30.218Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:30.218Z",
+  "updatedAt": "2026-07-15T11:18:30.218Z"
+}

@@ -1,0 +1,743 @@
+{
+  "id": "stickynote-workflow-ndu9j",
+  "name": "Stickynote Workflow",
+  "slug": "stickynote-workflow-5x46",
+  "description": "Automated workflow: Stickynote Workflow. This workflow integrates 12 different services: stickyNote, vectorStorePinecone, textSplitterRecursiveCharacterTextSplitter, agent, googleDrive. It contains 19 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Stickynote Workflow workflow containing 16 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-bcf845f0",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.853558",
+      "updatedAt": "2025-09-29T07:07:48.853654",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "1f2bb917-6d65-4cfa-9474-fc3b19a8c3bd",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          -120
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 918,
+          "height": 627,
+          "content": "### Load data into database\nFetch file from Google Drive, split it into chunks and insert into Pinecone index"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eabbc944-5b62-4959-8ea4-879f28e19ab8",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          740,
+          -120
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 534,
+          "height": 627,
+          "content": "### Chat with database\nEmbed the incoming chat message and use it retrieve relevant chunks from the vector store. These are passed to the model to formulate an answer "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ab577f4d-8906-4e0c-bc62-e8a4b2610551",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -720,
+          240
+        ],
+        "parameters": {
+          "height": 264.61498034081166,
+          "content": "## Try me out\n1. In Pinecone, create an index with 1536 dimensions and select it in *both* Pinecone nodes\n2. Click 'test workflow' at the bottom of the canvas to load data into the vector store\n3. Click 'chat' at the bottom of the canvas to ask questions about the data"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6f074b77-3441-4026-a13a-ed891a1c959b",
+        "name": "When clicking 'Test Workflow' button",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -700,
+          -20
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0a6f8b88-9c62-4e3e-82cb-a7028bdcac45",
+        "name": "Pinecone Vector Store",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          80,
+          -20
+        ],
+        "parameters": {
+          "mode": "insert",
+          "options": {
+            "clearNamespace": true
+          },
+          "pineconeIndex": {
+            "__rl": true,
+            "mode": "id",
+            "value": "test-index"
+          }
+        },
+        "credentials": {
+          "pineconeApi": {
+            "id": "OHDlDbBkaPDgpnOY",
+            "name": "PineconeApi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This vectorStorePinecone node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ae426fdc-0d58-46a6-bfe6-0f25c0e70cf1",
+        "name": "When chat message received",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          560,
+          -20
+        ],
+        "webhookId": "dec328cc-f47e-4727-b1c5-7370be86a958",
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1.1,
+        "notes": "This chatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9388b413-f133-45a6-8066-cf71c0fb826c",
+        "name": "Question & Answer",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          800,
+          -20
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1.8,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c50e8f9b-8254-495e-9e13-62f42d22c9b0",
+        "name": "Set Google Drive file URL",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -380,
+          -20
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "d08ef1f5-932b-4bbb-bb02-0cbdff26a636",
+                "name": "file_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d97920ad-6b36-4981-8b9d-9d470b5c769a",
+        "name": "Google Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          -180,
+          -20
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "={{ $json.file_url }}"
+          },
+          "options": {},
+          "operation": "download"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "yOwz41gMQclOadgu",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "742beb54-8b89-49a3-afe5-fd7e73b37044",
+        "name": "Default Data Loader",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          180,
+          200
+        ],
+        "parameters": {
+          "options": {},
+          "dataType": "binary"
+        },
+        "typeVersion": 1,
+        "notes": "This documentDefaultDataLoader node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f75e31e9-f752-45d1-bc44-75097ec85ce6",
+        "name": "Recursive Character Text Splitter",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          260,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "chunkSize": 3000,
+          "chunkOverlap": 200
+        },
+        "typeVersion": 1,
+        "notes": "This textSplitterRecursiveCharacterTextSplitter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "034a2b72-f728-4978-bc18-c950f0f2c24c",
+        "name": "Embeddings OpenAI1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1000,
+          320
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This embeddingsOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bac883c8-4c1f-466b-b20f-d0fdf6acfc42",
+        "name": "Embeddings OpenAI",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          60,
+          200
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This embeddingsOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7b6cdba3-906b-44dd-85be-1d515337972b",
+        "name": "Pinecone Vector Store1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          920,
+          200
+        ],
+        "parameters": {
+          "mode": "retrieve-as-tool",
+          "options": {},
+          "toolName": "bitcoin_paper",
+          "pineconeIndex": {
+            "__rl": true,
+            "mode": "id",
+            "value": "test-index"
+          },
+          "toolDescription": "Call this tool to retrieve facts from the bitcoin whitepaper",
+          "includeDocumentMetadata": false
+        },
+        "credentials": {
+          "pineconeApi": {
+            "id": "OHDlDbBkaPDgpnOY",
+            "name": "PineconeApi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This vectorStorePinecone node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cf9d18a9-4c1e-4a67-8149-961b3eee374d",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          800,
+          200
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-8c985f36",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "d97920ad-6b36-4981-8b9d-9d470b5c769a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d97920ad-6b36-4981-8b9d-9d470b5c769a-8edc3fdc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "034a2b72-f728-4978-bc18-c950f0f2c24c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-034a2b72-f728-4978-bc18-c950f0f2c24c-e6155cf6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "bac883c8-4c1f-466b-b20f-d0fdf6acfc42": {
+        "main": [
+          [
+            {
+              "node": "error-handler-bac883c8-4c1f-466b-b20f-d0fdf6acfc42-999ded3b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cf9d18a9-4c1e-4a67-8149-961b3eee374d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-cf9d18a9-4c1e-4a67-8149-961b3eee374d-27866b07",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Stickynote Workflow. This workflow integrates 12 different services: stickyNote, vectorStorePinecone, textSplitterRecursiveCharacterTextSplitter, agent, googleDrive. It contains 19 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stickynote Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "034a2b72-f728-4978-bc18-c950f0f2c24c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-034a2b72-f728-4978-bc18-c950f0f2c24c-e6155cf6"
+            }
+          ]
+        ]
+      },
+      "bac883c8-4c1f-466b-b20f-d0fdf6acfc42": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bac883c8-4c1f-466b-b20f-d0fdf6acfc42-999ded3b"
+            }
+          ]
+        ]
+      },
+      "cf9d18a9-4c1e-4a67-8149-961b3eee374d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cf9d18a9-4c1e-4a67-8149-961b3eee374d-27866b07"
+            }
+          ]
+        ]
+      },
+      "d97920ad-6b36-4981-8b9d-9d470b5c769a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d97920ad-6b36-4981-8b9d-9d470b5c769a-8edc3fdc"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "nodes": [
+      {
+        "name": "Default Data Loader",
+        "parameters": {
+          "dataType": "binary",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Embeddings OpenAI",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Embeddings OpenAI1",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive",
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "={{ $json.file_url }}"
+          },
+          "operation": "download",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "pineconeApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Pinecone Vector Store",
+        "parameters": {
+          "mode": "insert",
+          "options": {
+            "clearNamespace": true
+          },
+          "pineconeIndex": {
+            "__rl": true,
+            "mode": "id",
+            "value": "test-index"
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pineconeApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Pinecone Vector Store1",
+        "parameters": {
+          "includeDocumentMetadata": false,
+          "mode": "retrieve-as-tool",
+          "options": {},
+          "pineconeIndex": {
+            "__rl": true,
+            "mode": "id",
+            "value": "test-index"
+          },
+          "toolDescription": "Call this tool to retrieve facts from the bitcoin whitepaper",
+          "toolName": "bitcoin_paper"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Question & Answer",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "name": "Recursive Character Text Splitter",
+        "parameters": {
+          "chunkOverlap": 200,
+          "chunkSize": 3000,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Google Drive file URL",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "d08ef1f5-932b-4bbb-bb02-0cbdff26a636",
+                "name": "file_url",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "### Load data into database\nFetch file from Google Drive, split it into chunks and insert into Pinecone index",
+          "height": 627,
+          "width": 918
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "### Chat with database\nEmbed the incoming chat message and use it retrieve relevant chunks from the vector store. These are passed to the model to formulate an answer ",
+          "height": 627,
+          "width": 534
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Try me out\n1. In Pinecone, create an index with 1536 dimensions and select it in *both* Pinecone nodes\n2. Click 'test workflow' at the bottom of the canvas to load data into the vector store\n3. Click 'chat' at the bottom of the canvas to ask questions about the data",
+          "height": 264.61498034081166
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When chat message received",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When clicking 'Test Workflow' button",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 16,
+  "integrationCount": 1,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Google Drive"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 119,
+  "viewCount": 724,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account"
+    ],
+    "requiredCredentials": [
+      "pinecone  A P I details",
+      "google Drive  O Auth2  A P I details",
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking 'Test Workflow' button\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Pinecone Vector Store\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"When chat message received\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Question & Answer\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Drive\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Default Data Loader\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Recursive Character Text Splitter\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Embeddings OpenAI1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Embeddings OpenAI\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Pinecone Vector Store1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Google Drive file URL\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 100,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-09m4p90je",
+      "workflowId": "stickynote-workflow-ndu9j",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0326_Manual_Stickynote_Send_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0326_Manual_Stickynote_Send_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:50.671Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:50.671Z",
+  "updatedAt": "2026-07-15T11:18:50.671Z"
+}

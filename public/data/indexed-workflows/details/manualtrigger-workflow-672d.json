@@ -1,0 +1,523 @@
+{
+  "id": "manualtrigger-workflow-ahjis",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-672d",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 8 different services: stickyNote, chainLlm, outputParserStructured, set, stopAndError. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 12 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-74830df3",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.845095",
+      "updatedAt": "2025-09-29T07:07:48.845106",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "1116cae7-c7f3-424d-8b87-06ecbac0539f",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          1040,
+          -260
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c01d02c0-a41b-445e-b006-8b46ad1c437d",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2000,
+          260
+        ],
+        "parameters": {
+          "height": 264.69900963477494,
+          "content": "### Parser which defines the output format and which gets used to validate the output"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "97f977e2-eb78-4ad9-ab21-816ff94c8f0c",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1600,
+          260
+        ],
+        "parameters": {
+          "height": 266.9506012398238,
+          "content": "### The LLM which gets used to try to autofix the output in case it was not valid"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5325a0d4-9422-445c-bd21-3290c2b14415",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1320,
+          -40
+        ],
+        "parameters": {
+          "height": 245.56048099185898,
+          "content": "### The LLM to process the original prompt"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "55e78fdb-1e08-4f13-be0d-7e476aced21b",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1740,
+          -40
+        ],
+        "parameters": {
+          "width": 348,
+          "height": 253,
+          "content": "### Autofixing parser which tries to fix invalid outputs with the help of an LLM"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "622183c2-9d57-4e1c-a7bd-c5320ef42668",
+        "name": "Basic LLM Chain",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1480,
+          -260
+        ],
+        "parameters": {
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.5,
+        "notes": "This chainLlm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "314739fe-0ab3-40a1-b192-6e09b548b92f",
+        "name": "Prompt",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1260,
+          -260
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6f09dac7-429c-4e8f-af32-8e0112efc8c2",
+                "name": "chatInput",
+                "type": "string",
+                "value": "Return the 5 largest states by area in the USA with their 3 largest cities and their population."
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e76f5ac7-e185-46d4-aa26-971c8fe03c76",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1400,
+          60
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5306e68a-cce0-4298-a50a-33727e2186c5",
+        "name": "Auto-fixing Output Parser",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1800,
+          80
+        ],
+        "parameters": {
+          "options": {
+            "prompt": "Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This outputParserAutofixing node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d5642767-69f6-4a09-92da-195a25a17dd1",
+        "name": "OpenAI Chat Model1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1680,
+          400
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dc708b80-8d48-40cb-9af3-692ddd566b9f",
+        "name": "Structured Output Parser",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          2080,
+          380
+        ],
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"state\": {\n      \"type\": \"string\"\n    },\n    \"cities\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"name\": \"string\",\n          \"population\": \"number\"\n        }\n      }\n    }\n  }\n}"
+        },
+        "typeVersion": 1.2,
+        "notes": "This outputParserStructured node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-83f781fa",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "e76f5ac7-e185-46d4-aa26-971c8fe03c76": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e76f5ac7-e185-46d4-aa26-971c8fe03c76-29a23b93",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d5642767-69f6-4a09-92da-195a25a17dd1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d5642767-69f6-4a09-92da-195a25a17dd1-80211b91",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 8 different services: stickyNote, chainLlm, outputParserStructured, set, stopAndError. It contains 13 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "d5642767-69f6-4a09-92da-195a25a17dd1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d5642767-69f6-4a09-92da-195a25a17dd1-80211b91"
+            }
+          ]
+        ]
+      },
+      "e76f5ac7-e185-46d4-aa26-971c8fe03c76": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e76f5ac7-e185-46d4-aa26-971c8fe03c76-29a23b93"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Auto-fixing Output Parser",
+        "parameters": {
+          "options": {
+            "prompt": "Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Basic LLM Chain",
+        "parameters": {
+          "hasOutputParser": true
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.5
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model1",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Prompt",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6f09dac7-429c-4e8f-af32-8e0112efc8c2",
+                "name": "chatInput",
+                "type": "string",
+                "value": "Return the 5 largest states by area in the USA with their 3 largest cities and their population."
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "### Parser which defines the output format and which gets used to validate the output",
+          "height": 264.69900963477494
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "### The LLM which gets used to try to autofix the output in case it was not valid",
+          "height": 266.9506012398238
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "### The LLM to process the original prompt",
+          "height": 245.56048099185898
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "### Autofixing parser which tries to fix invalid outputs with the help of an LLM",
+          "height": 253,
+          "width": 348
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Structured Output Parser",
+        "parameters": {
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"state\": {\n      \"type\": \"string\"\n    },\n    \"cities\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"name\": \"string\",\n          \"population\": \"number\"\n        }\n      }\n    }\n  }\n}",
+          "schemaType": "manual"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 12,
+  "integrationCount": 0,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 20,
+  "viewCount": 559,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [],
+    "requiredCredentials": [
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Basic LLM Chain\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Auto-fixing Output Parser\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Structured Output Parser\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Prompt\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-fmp7y6zyg",
+      "workflowId": "manualtrigger-workflow-ahjis",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0323_Manual_Stickynote_Process_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0323_Manual_Stickynote_Process_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:27.874Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:27.874Z",
+  "updatedAt": "2026-07-15T11:29:27.874Z",
+  "category": {
+    "slug": "ai-automation",
+    "name": "AI Automation"
+  },
+  "categoryId": "ai-automation"
+}

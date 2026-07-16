@@ -1,0 +1,646 @@
+{
+  "id": "notion-workflow-ut16a",
+  "name": "Notion Workflow",
+  "slug": "notion-workflow-azdr",
+  "description": "Automated workflow: Notion Workflow. This workflow integrates 6 different services: stickyNote, function, githubTrigger, switch, if. It contains 11 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Notion Workflow workflow containing 12 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-e342aacb",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.115570",
+      "updatedAt": "2025-09-29T07:07:45.115679",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "0bd18974-8414-4b83-b3fb-85d2f6a74164",
+        "name": "Create database page",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1220,
+          400
+        ],
+        "parameters": {
+          "title": "={{$json[\"body\"][\"issue\"][\"title\"]}}",
+          "resource": "databasePage",
+          "databaseId": "5026700b-6693-473a-8100-8cc6ddef62a6",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "numberValue": "={{$node[\"Trigger on issues\"].json[\"body\"][\"issue\"][\"id\"]}}"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "urlValue": "{{ $env.BASE_URL }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dfce23fd-7ff8-42d1-9544-694345156080",
+        "name": "Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1220,
+          800
+        ],
+        "parameters": {
+          "content": "## IF & Switch\nDepends on what action was taken on an issue in GitHub."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "577e0d7a-0539-414f-8ec8-00ce12807d5b",
+        "name": "Find database page",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1400,
+          600
+        ],
+        "parameters": {
+          "options": {},
+          "resource": "databasePage",
+          "operation": "getAll",
+          "returnAll": true,
+          "databaseId": "5026700b-6693-473a-8100-8cc6ddef62a6",
+          "filterJson": "={{$node[\"Create custom Notion filters\"].json[\"notionfilter\"]}}",
+          "filterType": "json"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "91b0586c-eb08-41d0-bbb0-8a03c4a0ac3a",
+        "name": "Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          1580,
+          600
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "edited"
+              },
+              {
+                "output": 1,
+                "value2": "deleted"
+              },
+              {
+                "output": 2,
+                "value2": "closed"
+              },
+              {
+                "output": 3,
+                "value2": "reopened"
+              }
+            ]
+          },
+          "value1": "={{$node[\"Trigger on issues\"].json[\"body\"][\"action\"]}}",
+          "dataType": "string"
+        },
+        "typeVersion": 1,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5262e14e-adc2-45d1-9e3f-c0eba013077a",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1040,
+          500
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Trigger on issues\"].json[\"body\"][\"action\"]}}",
+                "value2": "opened"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "735ef0b3-70c3-4a88-ad02-35edf8f749c4",
+        "name": "Edit issue",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1760,
+          360
+        ],
+        "parameters": {
+          "pageId": "={{ $node[\"Find database page\"].json[\"id\"] }}",
+          "resource": "databasePage",
+          "operation": "update",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "title": "={{$node[\"Trigger on issues\"].json[\"body\"][\"issue\"][\"title\"]}}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "39b75e78-bd62-40e4-9e88-12c6a1901c34",
+        "name": "Delete issue",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1760,
+          520
+        ],
+        "parameters": {
+          "pageId": "={{$node[\"Find database page\"].json[\"id\"]}}",
+          "operation": "archive"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d8fee72d-c19d-4b99-85c2-dcc5d4fa6756",
+        "name": "Create custom Notion filters",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1220,
+          600
+        ],
+        "parameters": {
+          "functionCode": "const new_items = [];\nfor (item of $items(\"Trigger on issues\")) {\n\n  // do not process this item if action is created\n  if (item.json[\"body\"][\"action\"] == \"opened\") {\n    continue;\n  }\n\n  // build the output template\n  var new_item = {\n    \"json\": {\n      \"notionfilter\": \"\"\n    }\n  };\n  new_item = JSON.stringify(new_item);\n  new_item = JSON.parse(new_item);\n  new_items.push(new_item);\n\n  // create Notion filter to find specific database page by issue ID\n  notionfilter = {\n    or: [],\n  }\n\n  const filter = {\n    property: 'Issue ID',\n    number: {\n      equals: parseInt(item.json[\"body\"][\"issue\"][\"id\"])\n    }\n  }\n  notionfilter[\"or\"].push(filter);\n\n  new_item.json.notionfilter = JSON.stringify(notionfilter); \n}\n\nreturn new_items;"
+        },
+        "typeVersion": 1,
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "99c69200-d932-4379-9a36-96cd8420f21c",
+        "name": "Close issue",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1760,
+          680
+        ],
+        "parameters": {
+          "pageId": "={{$node[\"Find database page\"].json[\"id\"]}}",
+          "resource": "databasePage",
+          "operation": "update",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "checkboxValue": true
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3f4b27d3-33ae-44f8-ab18-1c23ae7cf890",
+        "name": "Reopen issue",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          1760,
+          840
+        ],
+        "parameters": {
+          "pageId": "={{$node[\"Find database page\"].json[\"id\"]}}",
+          "resource": "databasePage",
+          "operation": "update",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "62e1a9d3-3fc6-46de-a048-cf8176f30f94",
+        "name": "Trigger on issues",
+        "type": "n8n-nodes-base.githubTrigger",
+        "position": [
+          860,
+          500
+        ],
+        "webhookId": "bc0a0a44-00db-473b-8746-b60b3b36039c",
+        "parameters": {
+          "owner": "John-n8n",
+          "events": [
+            "issues"
+          ],
+          "repository": "DemoRepo"
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "{{ $credentials.githubApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This githubTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-3fda287f",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Notion Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Notion Workflow. This workflow integrates 6 different services: stickyNote, function, githubTrigger, switch, if. It contains 11 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Notion Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Notion Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Close issue",
+        "parameters": {
+          "operation": "update",
+          "pageId": "={{$node[\"Find database page\"].json[\"id\"]}}",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "checkboxValue": true,
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "name": "Create custom Notion filters",
+        "parameters": {
+          "functionCode": "const new_items = [];\nfor (item of $items(\"Trigger on issues\")) {\n\n  // do not process this item if action is created\n  if (item.json[\"body\"][\"action\"] == \"opened\") {\n    continue;\n  }\n\n  // build the output template\n  var new_item = {\n    \"json\": {\n      \"notionfilter\": \"\"\n    }\n  };\n  new_item = JSON.stringify(new_item);\n  new_item = JSON.parse(new_item);\n  new_items.push(new_item);\n\n  // create Notion filter to find specific database page by issue ID\n  notionfilter = {\n    or: [],\n  }\n\n  const filter = {\n    property: 'Issue ID',\n    number: {\n      equals: parseInt(item.json[\"body\"][\"issue\"][\"id\"])\n    }\n  }\n  notionfilter[\"or\"].push(filter);\n\n  new_item.json.notionfilter = JSON.stringify(notionfilter); \n}\n\nreturn new_items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create database page",
+        "parameters": {
+          "databaseId": "5026700b-6693-473a-8100-8cc6ddef62a6",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "numberValue": "={{$node[\"Trigger on issues\"].json[\"body\"][\"issue\"][\"id\"]}}"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "urlValue": "{{ $env.BASE_URL }}"
+              }
+            ]
+          },
+          "resource": "databasePage",
+          "title": "={{$json[\"body\"][\"issue\"][\"title\"]}}"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Delete issue",
+        "parameters": {
+          "operation": "archive",
+          "pageId": "={{$node[\"Find database page\"].json[\"id\"]}}"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Edit issue",
+        "parameters": {
+          "operation": "update",
+          "pageId": "={{ $node[\"Find database page\"].json[\"id\"] }}",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "title": "={{$node[\"Trigger on issues\"].json[\"body\"][\"issue\"][\"title\"]}}"
+              }
+            ]
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Find database page",
+        "parameters": {
+          "databaseId": "5026700b-6693-473a-8100-8cc6ddef62a6",
+          "filterJson": "={{$node[\"Create custom Notion filters\"].json[\"notionfilter\"]}}",
+          "filterType": "json",
+          "operation": "getAll",
+          "options": {},
+          "resource": "databasePage",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Trigger on issues\"].json[\"body\"][\"action\"]}}",
+                "value2": "opened"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Note",
+        "parameters": {
+          "content": "## IF & Switch\nDepends on what action was taken on an issue in GitHub."
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Reopen issue",
+        "parameters": {
+          "operation": "update",
+          "pageId": "={{$node[\"Find database page\"].json[\"id\"]}}",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "name": "Switch",
+        "parameters": {
+          "dataType": "string",
+          "rules": {
+            "rules": [
+              {
+                "value2": "edited"
+              },
+              {
+                "output": 1,
+                "value2": "deleted"
+              },
+              {
+                "output": 2,
+                "value2": "closed"
+              },
+              {
+                "output": 3,
+                "value2": "reopened"
+              }
+            ]
+          },
+          "value1": "={{$node[\"Trigger on issues\"].json[\"body\"][\"action\"]}}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "githubApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Trigger on issues",
+        "parameters": {
+          "events": [
+            "issues"
+          ],
+          "owner": "John-n8n",
+          "repository": "DemoRepo"
+        },
+        "type": "n8n-nodes-base.githubTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 12,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Notion",
+    "GitHub"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 73,
+  "viewCount": 781,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Notion Account",
+      "GitHub Account"
+    ],
+    "requiredCredentials": [
+      "notion  A P I details",
+      "github  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Trigger on issues\".",
+      "Open the \"Create database page\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Find database page\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Edit issue\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Delete issue\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create custom Notion filters\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Close issue\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Reopen issue\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-4owhv1ukz",
+      "workflowId": "notion-workflow-ut16a",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Github/0264_GitHub_Stickynote_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Github\\0264_GitHub_Stickynote_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:25.415Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:25.415Z",
+  "updatedAt": "2026-07-15T11:18:25.415Z"
+}

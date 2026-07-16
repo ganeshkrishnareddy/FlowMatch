@@ -1,0 +1,625 @@
+{
+  "id": "production-workflow-qb8a5",
+  "name": "Production Workflow",
+  "slug": "production-workflow-h0yv",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 17 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          0,
+          150
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-ce5259b0"
+      },
+      {
+        "name": "dataArray",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          450,
+          300
+        ],
+        "parameters": {
+          "functionCode": "const newItems = [];\nfor (item of items[0].json.data) {\n  newItems.push({json: item});\n}\nreturn newItems;"
+        },
+        "typeVersion": 1,
+        "id": "node-46b5b34c"
+      },
+      {
+        "name": "N8N Workflows",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          300,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "node-99635667"
+      },
+      {
+        "name": "GitHub",
+        "type": "n8n-nodes-base.github",
+        "position": [
+          800,
+          130
+        ],
+        "parameters": {
+          "owner": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+          "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$json[\"name\"]}}.json",
+          "resource": "file",
+          "operation": "get",
+          "repository": "={{$node[\"Globals\"].json[\"repo\"][\"name\"]}}",
+          "asBinaryProperty": false
+        },
+        "credentials": {
+          "githubApi": "GitHub"
+        },
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "alwaysOutputData": true,
+        "id": "node-6fced56a"
+      },
+      {
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1000,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-38585662"
+      },
+      {
+        "name": "N8N Workflow Detail",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          800,
+          460
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "node-8118aabb"
+      },
+      {
+        "name": "github_status",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          1300,
+          300
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "same"
+              },
+              {
+                "output": 1,
+                "value2": "different"
+              },
+              {
+                "output": 2,
+                "value2": "new"
+              }
+            ]
+          },
+          "value1": "={{$json[\"github_status\"]}}",
+          "dataType": "string"
+        },
+        "typeVersion": 1,
+        "id": "node-56117a85"
+      },
+      {
+        "name": "same",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1500,
+          130
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-edcc469d"
+      },
+      {
+        "name": "different",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1500,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-898e2367"
+      },
+      {
+        "name": "new",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1500,
+          460
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-fa58330e"
+      },
+      {
+        "name": "GitHub Edit",
+        "type": "n8n-nodes-base.github",
+        "position": [
+          1700,
+          180
+        ],
+        "parameters": {
+          "owner": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+          "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$node[\"N8N Workflow Detail\"].json[\"data\"][\"name\"]}}.json",
+          "resource": "file",
+          "operation": "edit",
+          "repository": "={{$node[\"Globals\"].json[\"repo\"][\"name\"]}}",
+          "fileContent": "={{$node[\"isDiffOrNew\"].json[\"n8n_data_stringy\"]}}",
+          "commitMessage": "=[N8N Backup] {{$node[\"N8N Workflow Detail\"].json[\"data\"][\"name\"]}}.json ({{$json[\"github_status\"]}})"
+        },
+        "credentials": {
+          "githubApi": "GitHub"
+        },
+        "typeVersion": 1,
+        "id": "node-71c19859"
+      },
+      {
+        "name": "GitHub Create",
+        "type": "n8n-nodes-base.github",
+        "position": [
+          1700,
+          460
+        ],
+        "parameters": {
+          "owner": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+          "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$node[\"N8N Workflow Detail\"].json[\"data\"][\"name\"]}}.json",
+          "resource": "file",
+          "repository": "={{$node[\"Globals\"].json[\"repo\"][\"name\"]}}",
+          "fileContent": "={{$node[\"isDiffOrNew\"].json[\"n8n_data_stringy\"]}}",
+          "commitMessage": "=[N8N Backup] {{$node[\"N8N Workflow Detail\"].json[\"data\"][\"name\"]}}.json ({{$json[\"github_status\"]}})"
+        },
+        "credentials": {
+          "githubApi": "GitHub"
+        },
+        "typeVersion": 1,
+        "id": "node-b0b7edf0"
+      },
+      {
+        "name": "isDiffOrNew",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1150,
+          300
+        ],
+        "parameters": {
+          "functionCode": "// File Returned with Content\nif (Object.keys(items[0].json).includes(\"content\")) {\n  // Get JSON Objects\n  var origWorkflow = eval(\"(\"+Buffer.from(items[0].json.content, 'base64').toString()+\")\");\n  var n8nWorkflow = (items[1].json.data);\n  \n  // Order JSON Objects\n  var orderedOriginal = {}\n  var orderedActual = {}\n  \n  Object.keys(origWorkflow).sort().forEach(function(key) {\n    orderedOriginal[key] = origWorkflow[key];\n  });\n  \n  Object.keys(n8nWorkflow).sort().forEach(function(key) {\n    orderedActual[key] = n8nWorkflow[key];\n  });\n  \n  // Determine Difference\n  if ( JSON.stringify(orderedOriginal) === JSON.stringify(orderedActual) ) {\n    items[0].json.github_status = \"same\";\n    items[0].json.content_decoded = orderedOriginal;\n  } else {\n    items[0].json.github_status = \"different\";\n    items[0].json.content_decoded = orderedOriginal;\n    items[0].json.n8n_data_stringy = JSON.stringify(orderedActual, null, 2);\n  }\n// No File Returned / New Workflow\n} else {\n  // Order JSON Object\n  var n8nWorkflow = (items[1].json.data);\n  var orderedActual = {}\n  Object.keys(n8nWorkflow).sort().forEach(function(key) {\n    orderedActual[key] = n8nWorkflow[key];\n  });\n  \n  // Proper Formatting\n  items[0].json.github_status = \"new\";\n  items[0].json.n8n_data_stringy = JSON.stringify(orderedActual, null, 2);\n}\n\n// Return Items\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-5f1fb908"
+      },
+      {
+        "name": "Daily @ 20:00",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          0,
+          450
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 20,
+                "minute": 11
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-669a0838"
+      },
+      {
+        "name": "OneAtATime",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          600,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "batchSize": 1
+        },
+        "typeVersion": 1,
+        "id": "node-5ed197ef"
+      },
+      {
+        "name": "Globals",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          150,
+          300
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "repo.owner",
+                "value": "octocat"
+              },
+              {
+                "name": "repo.name",
+                "value": "Hello-World"
+              },
+              {
+                "name": "repo.path",
+                "value": "my-team/n8n/workflows/"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "node-7262d1fb"
+      },
+      {
+        "id": "error-d5398d42",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-4ce7b501",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.118731",
+      "updatedAt": "2025-09-29T07:07:45.118748",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "Daily @ 20:00",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 20,
+                "minute": 11
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "dataArray",
+        "parameters": {
+          "functionCode": "const newItems = [];\nfor (item of items[0].json.data) {\n  newItems.push({json: item});\n}\nreturn newItems;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "different",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "githubApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "GitHub",
+        "parameters": {
+          "asBinaryProperty": false,
+          "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$json[\"name\"]}}.json",
+          "operation": "get",
+          "owner": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+          "repository": "={{$node[\"Globals\"].json[\"repo\"][\"name\"]}}",
+          "resource": "file"
+        },
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "githubApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "GitHub Create",
+        "parameters": {
+          "commitMessage": "=[N8N Backup] {{$node[\"N8N Workflow Detail\"].json[\"data\"][\"name\"]}}.json ({{$json[\"github_status\"]}})",
+          "fileContent": "={{$node[\"isDiffOrNew\"].json[\"n8n_data_stringy\"]}}",
+          "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$node[\"N8N Workflow Detail\"].json[\"data\"][\"name\"]}}.json",
+          "owner": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+          "repository": "={{$node[\"Globals\"].json[\"repo\"][\"name\"]}}",
+          "resource": "file"
+        },
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "githubApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "GitHub Edit",
+        "parameters": {
+          "commitMessage": "=[N8N Backup] {{$node[\"N8N Workflow Detail\"].json[\"data\"][\"name\"]}}.json ({{$json[\"github_status\"]}})",
+          "fileContent": "={{$node[\"isDiffOrNew\"].json[\"n8n_data_stringy\"]}}",
+          "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$node[\"N8N Workflow Detail\"].json[\"data\"][\"name\"]}}.json",
+          "operation": "edit",
+          "owner": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+          "repository": "={{$node[\"Globals\"].json[\"repo\"][\"name\"]}}",
+          "resource": "file"
+        },
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1
+      },
+      {
+        "name": "github_status",
+        "parameters": {
+          "dataType": "string",
+          "rules": {
+            "rules": [
+              {
+                "value2": "same"
+              },
+              {
+                "output": 1,
+                "value2": "different"
+              },
+              {
+                "output": 2,
+                "value2": "new"
+              }
+            ]
+          },
+          "value1": "={{$json[\"github_status\"]}}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      },
+      {
+        "name": "Globals",
+        "parameters": {
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "repo.owner",
+                "value": "octocat"
+              },
+              {
+                "name": "repo.name",
+                "value": "Hello-World"
+              },
+              {
+                "name": "repo.path",
+                "value": "my-team/n8n/workflows/"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "isDiffOrNew",
+        "parameters": {
+          "functionCode": "// File Returned with Content\nif (Object.keys(items[0].json).includes(\"content\")) {\n  // Get JSON Objects\n  var origWorkflow = eval(\"(\"+Buffer.from(items[0].json.content, 'base64').toString()+\")\");\n  var n8nWorkflow = (items[1].json.data);\n  \n  // Order JSON Objects\n  var orderedOriginal = {}\n  var orderedActual = {}\n  \n  Object.keys(origWorkflow).sort().forEach(function(key) {\n    orderedOriginal[key] = origWorkflow[key];\n  });\n  \n  Object.keys(n8nWorkflow).sort().forEach(function(key) {\n    orderedActual[key] = n8nWorkflow[key];\n  });\n  \n  // Determine Difference\n  if ( JSON.stringify(orderedOriginal) === JSON.stringify(orderedActual) ) {\n    items[0].json.github_status = \"same\";\n    items[0].json.content_decoded = orderedOriginal;\n  } else {\n    items[0].json.github_status = \"different\";\n    items[0].json.content_decoded = orderedOriginal;\n    items[0].json.n8n_data_stringy = JSON.stringify(orderedActual, null, 2);\n  }\n// No File Returned / New Workflow\n} else {\n  // Order JSON Object\n  var n8nWorkflow = (items[1].json.data);\n  var orderedActual = {}\n  Object.keys(n8nWorkflow).sort().forEach(function(key) {\n    orderedActual[key] = n8nWorkflow[key];\n  });\n  \n  // Proper Formatting\n  items[0].json.github_status = \"new\";\n  items[0].json.n8n_data_stringy = JSON.stringify(orderedActual, null, 2);\n}\n\n// Return Items\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {},
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "N8N Workflow Detail",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "N8N Workflows",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "new",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "OneAtATime",
+        "parameters": {
+          "batchSize": 1,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 1
+      },
+      {
+        "name": "same",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 17,
+  "integrationCount": 2,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "HTTP Request",
+    "GitHub"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 148,
+  "viewCount": 692,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "GitHub Account"
+    ],
+    "requiredCredentials": [
+      "github  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the scheduler node \"Daily @ 20:00\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"dataArray\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"N8N Workflows\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"GitHub\" node (n8n-nodes-base.github) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"N8N Workflow Detail\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"github_status\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"same\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"different\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"new\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"GitHub Edit\" node (n8n-nodes-base.github) and configure the action parameters, mappings, and fields.",
+      "Open the \"GitHub Create\" node (n8n-nodes-base.github) and configure the action parameters, mappings, and fields.",
+      "Open the \"isDiffOrNew\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"OneAtATime\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Globals\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ygphpytnk",
+      "workflowId": "production-workflow-qb8a5",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Github/1149_GitHub_Manual_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Github\\1149_GitHub_Manual_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:18:25.638Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:25.638Z",
+  "updatedAt": "2026-07-15T11:18:25.638Z"
+}

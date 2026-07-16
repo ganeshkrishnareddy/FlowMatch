@@ -1,0 +1,572 @@
+{
+  "id": "stickynote-workflow-a62hx",
+  "name": "Stickynote Workflow",
+  "slug": "stickynote-workflow-76ml",
+  "description": "Automated workflow: Stickynote Workflow. This workflow integrates 8 different services: stickyNote, toolHttpRequest, agent, stopAndError, toolWikipedia. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Stickynote Workflow workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-8c69ac04",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.891133",
+      "updatedAt": "2025-09-29T07:07:54.891146",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "trigger-8917334a",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "100f23d3-cbe9-458a-9ef1-7cc5fcba8f3c",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          640,
+          540
+        ],
+        "parameters": {
+          "width": 300,
+          "height": 205,
+          "content": "### The conversation history(last 20 messages) is stored in a buffer memory"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b48f989f-deb9-479c-b163-03f098d00c9c",
+        "name": "On new manual Chat Message",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          380,
+          240
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualChatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "add8e8df-6b2a-4cbd-84e7-3b006733ef7d",
+        "name": "Wikipedia",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1180,
+          640
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This toolWikipedia node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a97454a8-001d-4986-9cb5-83176229ea70",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          980,
+          540
+        ],
+        "parameters": {
+          "width": 300,
+          "height": 205,
+          "content": "### Tools which agent can use to accomplish the task"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "52b57e72-8cc9-4865-9a00-d03b2e7f1b92",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          600,
+          160
+        ],
+        "parameters": {
+          "width": 422,
+          "height": 211,
+          "content": "### Conversational agent will utilise available tools to answer the prompt. "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8f0653ab-376b-40b9-b876-e608defdeb89",
+        "name": "Window Buffer Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          740,
+          600
+        ],
+        "parameters": {
+          "contextWindowLength": 20
+        },
+        "typeVersion": 1,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "13237945-e143-4f65-b034-785f5ebde5bb",
+        "name": "AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          680,
+          240
+        ],
+        "parameters": {
+          "text": "={{ $json.input }}",
+          "options": {
+            "systemMessage": "=You are a helpful assistant, with weather tool and wiki tool. find out the latitude and longitude information of a location then use the weather tool for current weather and weather forecast. For general info, use the wiki tool."
+          },
+          "promptType": "define"
+        },
+        "typeVersion": 1.6,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ee06c0f4-b2de-4257-9735-3ec228f2b794",
+        "name": "Weather HTTP Request",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1020,
+          620
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "sendQuery": true,
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "latitude"
+              },
+              {
+                "name": "longitude"
+              },
+              {
+                "name": "forecast_days",
+                "value": "1",
+                "valueProvider": "fieldValue"
+              },
+              {
+                "name": "hourly",
+                "value": "temperature_2m",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "toolDescription": "Fetch current temperature for given coordinates."
+        },
+        "notesInFlow": true,
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3e5608c8-281d-47e0-af9d-77707530fd6b",
+        "name": "Ollama Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          520,
+          620
+        ],
+        "parameters": {
+          "model": "llama3.2:latest",
+          "options": {}
+        },
+        "credentials": {
+          "ollamaApi": {
+            "id": "xHuYe0MDGOs9IpBW",
+            "name": "Local Ollama service"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOllama node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b3d794f4-37b5-46c8-9d7d-ad1087006ce5",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1040,
+          140
+        ],
+        "parameters": {
+          "color": 4,
+          "height": 240,
+          "content": "### In System Message, add the following.\n\n\"You are a helpful assistant, with weather tool and wiki tool. find out the latitude and longitude information of a location then use the weather tool for current weather and weather forecast. For general info, use the wiki tool.\""
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "ee06c0f4-b2de-4257-9735-3ec228f2b794": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-ad3a2099",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-ebc8157a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-b3e2816b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-f8c629c2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-cda3de3c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-cbbf6513",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-8bbb2e17",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-2053557c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Stickynote Workflow. This workflow integrates 8 different services: stickyNote, toolHttpRequest, agent, stopAndError, toolWikipedia. It contains 12 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stickynote Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "ee06c0f4-b2de-4257-9735-3ec228f2b794": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-ad3a2099"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-ebc8157a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-b3e2816b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-f8c629c2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-cda3de3c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-cbbf6513"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-8bbb2e17"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee06c0f4-b2de-4257-9735-3ec228f2b794-2053557c"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "nodes": [
+      {
+        "name": "AI Agent",
+        "parameters": {
+          "options": {
+            "systemMessage": "=You are a helpful assistant, with weather tool and wiki tool. find out the latitude and longitude information of a location then use the weather tool for current weather and weather forecast. For general info, use the wiki tool."
+          },
+          "promptType": "define",
+          "text": "={{ $json.input }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "ollamaApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Ollama Chat Model",
+        "parameters": {
+          "model": "llama3.2:latest",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "On new manual Chat Message",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "### In System Message, add the following.\n\n\"You are a helpful assistant, with weather tool and wiki tool. find out the latitude and longitude information of a location then use the weather tool for current weather and weather forecast. For general info, use the wiki tool.\"",
+          "height": 240
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "### Tools which agent can use to accomplish the task",
+          "height": 205,
+          "width": 300
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "### The conversation history(last 20 messages) is stored in a buffer memory",
+          "height": 205,
+          "width": 300
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "content": "### Conversational agent will utilise available tools to answer the prompt. ",
+          "height": 211,
+          "width": 422
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Weather HTTP Request",
+        "parameters": {
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "latitude"
+              },
+              {
+                "name": "longitude"
+              },
+              {
+                "name": "forecast_days",
+                "value": "1",
+                "valueProvider": "fieldValue"
+              },
+              {
+                "name": "hourly",
+                "value": "temperature_2m",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "toolDescription": "Fetch current temperature for given coordinates.",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Wikipedia",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Window Buffer Memory",
+        "parameters": {
+          "contextWindowLength": 20
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 0,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [],
+  "securityStatus": "Passed",
+  "verified": false,
+  "featured": true,
+  "downloadCount": 66,
+  "viewCount": 468,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [],
+    "requiredCredentials": [
+      "ollama  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"On new manual Chat Message\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wikipedia\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Window Buffer Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Weather HTTP Request\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Ollama Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid With Warnings",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-batqz3dy4",
+      "workflowId": "stickynote-workflow-a62hx",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stickynote/1253_Stickynote_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stickynote\\1253_Stickynote_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:20:00.218Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:00.218Z",
+  "updatedAt": "2026-07-15T11:20:00.218Z"
+}

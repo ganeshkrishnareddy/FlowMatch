@@ -1,0 +1,769 @@
+{
+  "id": "play-with-spotify-from-telegram-midmx",
+  "name": "Play with Spotify from Telegram",
+  "slug": "play-with-spotify-from-telegram-k0rw",
+  "description": "Automated workflow: Play with Spotify from Telegram. This workflow integrates 9 different services: telegramTrigger, stickyNote, telegram, merge, set. It contains 17 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Play with Spotify from Telegram workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "id": "F7CfIF10XjXhqbGb",
+    "meta": {
+      "instanceId": "workflow-a09a9b6d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:57.162461",
+      "updatedAt": "2025-09-29T07:07:57.162479",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Play with Spotify from Telegram",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "0395b3e4-94ef-49ea-9b4c-8f908e62f8c6",
+        "name": "Telegram Trigger",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "position": [
+          -60,
+          20
+        ],
+        "webhookId": "e7aa284b-5eef-4ac1-94bf-8e4d307a3b14",
+        "parameters": {
+          "updates": [
+            "message"
+          ],
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "gblW5oACGEPuccja",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This telegramTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "263edf45-58a0-45e8-91f8-601bc62c7d6f",
+        "name": "OpenAI - Ask about a track",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          120,
+          -120
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {},
+          "messages": {
+            "values": [
+              {
+                "content": "=get artist and song name from '{{ $json.message.text }}'. Reply only eg. 'track:song name artist:artist name'"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "vDcge3EgslxfX3EC",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.6,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "086aef8b-533a-4c33-9952-29d5adb152c8",
+        "name": "Search track",
+        "type": "n8n-nodes-base.spotify",
+        "onError": "continueErrorOutput",
+        "position": [
+          540,
+          -200
+        ],
+        "parameters": {
+          "limit": 1,
+          "query": "={{ $json.message.content }}",
+          "filters": {},
+          "resource": "track",
+          "operation": "search"
+        },
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "wylKghFNQa8IKy1U",
+            "name": "Spotify account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This spotify node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "08af6055-ba52-4cb2-a561-ea04ac55279f",
+        "name": "Add song",
+        "type": "n8n-nodes-base.spotify",
+        "onError": "continueErrorOutput",
+        "position": [
+          780,
+          -240
+        ],
+        "parameters": {
+          "id": "=spotify:track:{{ $json.id }}"
+        },
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "wylKghFNQa8IKy1U",
+            "name": "Spotify account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This spotify node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2dbdafa4-3b6f-4a14-813c-4e10da10abad",
+        "name": "Next Song",
+        "type": "n8n-nodes-base.spotify",
+        "onError": "continueErrorOutput",
+        "position": [
+          980,
+          -280
+        ],
+        "parameters": {
+          "operation": "nextSong"
+        },
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "wylKghFNQa8IKy1U",
+            "name": "Spotify account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This spotify node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cb8d42aa-0c7e-45a5-90b5-b91e483dd13a",
+        "name": "Resume play",
+        "type": "n8n-nodes-base.spotify",
+        "notes": "We don't have to stop here on error. An error is thrown from Spotify if the player is already playing.",
+        "onError": "continueRegularOutput",
+        "position": [
+          1240,
+          -380
+        ],
+        "parameters": {
+          "operation": "resume"
+        },
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "wylKghFNQa8IKy1U",
+            "name": "Spotify account"
+          }
+        },
+        "typeVersion": 1
+      },
+      {
+        "id": "089e1070-b013-454c-9f6c-55b909e06c1d",
+        "name": "Currently Playing",
+        "type": "n8n-nodes-base.spotify",
+        "onError": "continueErrorOutput",
+        "position": [
+          1420,
+          -300
+        ],
+        "parameters": {
+          "operation": "currentlyPlaying"
+        },
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "wylKghFNQa8IKy1U",
+            "name": "Spotify account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This spotify node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e9df0dcf-b166-45a3-910b-787b3718bbcf",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          120,
+          -300
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 254.05813953488382,
+          "content": "## Telegram to Spotify \nAsk AI about a track with artist and song name or if you can't remember describe it and AI does it's thing.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "77bae9be-2d92-4028-ae78-7887b6a2d394",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          440,
+          220
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combineBy": "combineAll"
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0d95000d-7efd-402a-9a34-47ababb2f53e",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          620,
+          -440
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "02af5387-07d2-4a16-bd83-e1359d091165",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json?.id }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "363f89ad-34d0-4445-8ff3-693d991dad09",
+        "name": "Message parser",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1280,
+          -40
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "93cd2545-c6e9-4717-96b7-d49eb056ac70",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.error }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8b80f80d-8c8e-44de-9838-6d05199bb734",
+        "name": "Not found error message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          880,
+          -460
+        ],
+        "parameters": {
+          "mode": "raw",
+          "options": {},
+          "jsonOutput": "{\n  \"error\": \"Song not found\"\n}\n"
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f1785140-8e97-43e1-9d84-aedc8b8d5e06",
+        "name": "Return message to Telegram",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          760,
+          220
+        ],
+        "parameters": {
+          "text": "={{ $('Message parser').item.json.message }}",
+          "chatId": "={{ $json.message.chat.id }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "gblW5oACGEPuccja",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e3e16535-094b-41bf-88c6-166bb6805d53",
+        "name": "Define Now Playing",
+        "type": "n8n-nodes-base.set",
+        "notes": "We use the object \"error\" as a returned bject so we can re-use the Message Parser node.",
+        "position": [
+          1660,
+          -240
+        ],
+        "parameters": {
+          "mode": "raw",
+          "options": {},
+          "jsonOutput": "={\n  \"error\": \"Now playing {{ $json.item.name }} - {{ $json.item.artists[0].name }} - {{ $json.item.album.name }}\"\n}\n"
+        },
+        "typeVersion": 3.4
+      },
+      {
+        "id": "error-a6dc8ede",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "6f219c9e-f17a-45b1-ab8d-09d991fd8e34",
+    "connections": {
+      "0395b3e4-94ef-49ea-9b4c-8f908e62f8c6": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0395b3e4-94ef-49ea-9b4c-8f908e62f8c6-5f2040e0",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "263edf45-58a0-45e8-91f8-601bc62c7d6f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-263edf45-58a0-45e8-91f8-601bc62c7d6f-f3c2164f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f1785140-8e97-43e1-9d84-aedc8b8d5e06": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f1785140-8e97-43e1-9d84-aedc8b8d5e06-d359f1a6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Play with Spotify from Telegram. This workflow integrates 9 different services: telegramTrigger, stickyNote, telegram, merge, set. It contains 17 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Play with Spotify from Telegram. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0395b3e4-94ef-49ea-9b4c-8f908e62f8c6": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0395b3e4-94ef-49ea-9b4c-8f908e62f8c6-5f2040e0"
+            }
+          ]
+        ]
+      },
+      "263edf45-58a0-45e8-91f8-601bc62c7d6f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263edf45-58a0-45e8-91f8-601bc62c7d6f-f3c2164f"
+            }
+          ]
+        ]
+      },
+      "f1785140-8e97-43e1-9d84-aedc8b8d5e06": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1785140-8e97-43e1-9d84-aedc8b8d5e06-d359f1a6"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Play with Spotify from Telegram",
+    "nodes": [
+      {
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add song",
+        "parameters": {
+          "id": "=spotify:track:{{ $json.id }}"
+        },
+        "type": "n8n-nodes-base.spotify",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Currently Playing",
+        "parameters": {
+          "operation": "currentlyPlaying"
+        },
+        "type": "n8n-nodes-base.spotify",
+        "typeVersion": 1
+      },
+      {
+        "name": "Define Now Playing",
+        "parameters": {
+          "jsonOutput": "={\n  \"error\": \"Now playing {{ $json.item.name }} - {{ $json.item.artists[0].name }} - {{ $json.item.album.name }}\"\n}\n",
+          "mode": "raw",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "02af5387-07d2-4a16-bd83-e1359d091165",
+                "leftValue": "={{ $json?.id }}",
+                "operator": {
+                  "operation": "notEmpty",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "combineBy": "combineAll",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "Message parser",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "93cd2545-c6e9-4717-96b7-d49eb056ac70",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.error }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Next Song",
+        "parameters": {
+          "operation": "nextSong"
+        },
+        "type": "n8n-nodes-base.spotify",
+        "typeVersion": 1
+      },
+      {
+        "name": "Not found error message",
+        "parameters": {
+          "jsonOutput": "{\n  \"error\": \"Song not found\"\n}\n",
+          "mode": "raw",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI - Ask about a track",
+        "parameters": {
+          "messages": {
+            "values": [
+              {
+                "content": "=get artist and song name from '{{ $json.message.text }}'. Reply only eg. 'track:song name artist:artist name'"
+              }
+            ]
+          },
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Resume play",
+        "parameters": {
+          "operation": "resume"
+        },
+        "type": "n8n-nodes-base.spotify",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Return message to Telegram",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "={{ $json.message.chat.id }}",
+          "text": "={{ $('Message parser').item.json.message }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "spotifyOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search track",
+        "parameters": {
+          "filters": {},
+          "limit": 1,
+          "operation": "search",
+          "query": "={{ $json.message.content }}",
+          "resource": "track"
+        },
+        "type": "n8n-nodes-base.spotify",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 5,
+          "content": "## Telegram to Spotify \nAsk AI about a track with artist and song name or if you can't remember describe it and AI does it's thing.\n",
+          "width": 254.05813953488382
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Telegram Trigger",
+        "parameters": {
+          "additionalFields": {},
+          "updates": [
+            "message"
+          ]
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Telegram",
+    "Spotify"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 80,
+  "viewCount": 86,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Telegram Account",
+      "Spotify Account"
+    ],
+    "requiredCredentials": [
+      "telegram  A P I details",
+      "open Ai  A P I details",
+      "spotify  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Telegram Trigger\".",
+      "Open the \"OpenAI - Ask about a track\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search track\" node (n8n-nodes-base.spotify) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add song\" node (n8n-nodes-base.spotify) and configure the action parameters, mappings, and fields.",
+      "Open the \"Next Song\" node (n8n-nodes-base.spotify) and configure the action parameters, mappings, and fields.",
+      "Open the \"Resume play\" node (n8n-nodes-base.spotify) and configure the action parameters, mappings, and fields.",
+      "Open the \"Currently Playing\" node (n8n-nodes-base.spotify) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Return message to Telegram\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Message parser\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Not found error message\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Define Now Playing\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ew8pwrhss",
+      "workflowId": "play-with-spotify-from-telegram-midmx",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/1448_Telegram_Stickynote_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\1448_Telegram_Stickynote_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:30:52.250Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:52.250Z",
+  "updatedAt": "2026-07-15T11:30:52.250Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

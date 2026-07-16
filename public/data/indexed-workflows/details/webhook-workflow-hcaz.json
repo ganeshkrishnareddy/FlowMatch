@@ -1,0 +1,382 @@
+{
+  "id": "webhook-workflow-beavc",
+  "name": "Webhook Workflow",
+  "slug": "webhook-workflow-hcaz",
+  "description": "Automated workflow: Webhook Workflow. This workflow integrates 4 different services: webhook, stickyNote, stopAndError, notion. It contains 5 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Webhook Workflow workflow containing 3 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-f85ff3ed",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.793373",
+      "updatedAt": "2025-09-29T07:07:54.793386",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "cc514d10-89cc-4fcf-8c1f-b65395cd168a",
+        "name": "On new invoice in Clockify",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          460,
+          460
+        ],
+        "webhookId": "8af31ab8-e16a-4401-84b7-b246c65ba6a9",
+        "parameters": {
+          "path": "8af31ab8-e16a-4401-84b7-b246c65ba6a9",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ef9e5ce6-cb3e-4cb9-b33d-3b05a2ab589d",
+        "name": "Create database page",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          680,
+          460
+        ],
+        "parameters": {
+          "title": "={{ $json[\"body\"][\"number\"] }}",
+          "resource": "databasePage",
+          "databaseId": "ea3219a7-0a1a-4792-8dd6-ab450204dc06",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "date": "={{ $json[\"body\"][\"issuedDate\"] }}"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "date": "={{ $json[\"body\"][\"dueDate\"] }}"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "numberValue": "={{ $json[\"body\"][\"amount\"] }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e2ecb86f-2f0c-4fe7-8919-e9095abdb5a0",
+        "name": "Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -60,
+          240
+        ],
+        "parameters": {
+          "width": 462,
+          "height": 595,
+          "content": "## Send new Clockify invoice to Notion database\n### How it works\n1. `On new invoice in Clockify` webhook node will trigger when a new invoice is created in Clockify. Setup is involved.\n2. `Create database page` Notion node will create a database page with the information specified from the Clockify trigger. You can add additional fields if required by following the setup.\n\n### Setup\n1. Create a Clockify webhook by going to the [webhooks section in Clockify]({{ $env.WEBHOOK_URL }}\n2. Create the webhook specifying the \"Invoice created\" event and paste in the URL provided from `On new invoice in Clockify` webhook step.\n3. Now go to Notion and create a new database where we will store our Clockify invoices.\n4. In the new Notion database, create the following fields:\n    - Invoice number (renamed from \"Name\" field)\n    - Issue date (date field)\n    - Due date (date field)\n    - Amount (number field)\n5. If you want to add more fields to Notion, create those fields in Notion and map it accordingly in `Create database page` node."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "cc514d10-89cc-4fcf-8c1f-b65395cd168a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-7efcd583",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-ea3a60da",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-e9e3c12d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-1eaff8d1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-c96317f3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-e69022f5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-2654a556",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-e56d5d04",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Webhook Workflow. This workflow integrates 4 different services: webhook, stickyNote, stopAndError, notion. It contains 5 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Webhook Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "cc514d10-89cc-4fcf-8c1f-b65395cd168a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-7efcd583"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-ea3a60da"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-e9e3c12d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-1eaff8d1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-c96317f3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-e69022f5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-2654a556"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cc514d10-89cc-4fcf-8c1f-b65395cd168a-e56d5d04"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create database page",
+        "parameters": {
+          "databaseId": "ea3219a7-0a1a-4792-8dd6-ab450204dc06",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "date": "={{ $json[\"body\"][\"issuedDate\"] }}",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "date": "={{ $json[\"body\"][\"dueDate\"] }}",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "numberValue": "={{ $json[\"body\"][\"amount\"] }}"
+              }
+            ]
+          },
+          "resource": "databasePage",
+          "title": "={{ $json[\"body\"][\"number\"] }}"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "name": "Note",
+        "parameters": {
+          "content": "## Send new Clockify invoice to Notion database\n### How it works\n1. `On new invoice in Clockify` webhook node will trigger when a new invoice is created in Clockify. Setup is involved.\n2. `Create database page` Notion node will create a database page with the information specified from the Clockify trigger. You can add additional fields if required by following the setup.\n\n### Setup\n1. Create a Clockify webhook by going to the [webhooks section in Clockify]({{ $env.WEBHOOK_URL }}\n2. Create the webhook specifying the \"Invoice created\" event and paste in the URL provided from `On new invoice in Clockify` webhook step.\n3. Now go to Notion and create a new database where we will store our Clockify invoices.\n4. In the new Notion database, create the following fields:\n    - Invoice number (renamed from \"Name\" field)\n    - Issue date (date field)\n    - Due date (date field)\n    - Amount (number field)\n5. If you want to add more fields to Notion, create those fields in Notion and map it accordingly in `Create database page` node.",
+          "height": 595,
+          "width": 462
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "On new invoice in Clockify",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "8af31ab8-e16a-4401-84b7-b246c65ba6a9"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 3,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "5 Mins",
+  "integrations": [
+    "Webhook",
+    "Notion"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 164,
+  "viewCount": 122,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Notion Account"
+    ],
+    "requiredCredentials": [
+      "notion  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"On new invoice in Clockify\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Create database page\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 91,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-p3v9ohxm9",
+      "workflowId": "webhook-workflow-beavc",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stickynote/0281_Stickynote_Notion_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stickynote\\0281_Stickynote_Notion_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:57.966Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:57.966Z",
+  "updatedAt": "2026-07-15T11:19:57.966Z"
+}

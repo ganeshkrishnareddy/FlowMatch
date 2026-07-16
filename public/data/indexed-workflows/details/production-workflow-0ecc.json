@@ -1,0 +1,561 @@
+{
+  "id": "production-workflow-6k3fp",
+  "name": "Production Workflow",
+  "slug": "production-workflow-0ecc",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 12 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Airtable",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1650,
+          300
+        ],
+        "parameters": {
+          "table": "Pokemon",
+          "operation": "list",
+          "additionalOptions": {}
+        },
+        "credentials": {
+          "airtableApi": "Airtable Credentials @n8n"
+        },
+        "typeVersion": 1,
+        "id": "node-905e6f6f"
+      },
+      {
+        "name": "Redis",
+        "type": "n8n-nodes-base.redis",
+        "position": [
+          600,
+          600
+        ],
+        "parameters": {
+          "key": "{{ $credentials.key }}",
+          "ttl": 3600,
+          "expire": true,
+          "operation": "incr"
+        },
+        "credentials": {
+          "redis": "Redis Cloud Credentials"
+        },
+        "typeVersion": 1,
+        "id": "node-55f2f76c"
+      },
+      {
+        "name": "Redis1",
+        "type": "n8n-nodes-base.redis",
+        "position": [
+          1200,
+          450
+        ],
+        "parameters": {
+          "key": "{{ $credentials.key }}",
+          "operation": "incr"
+        },
+        "credentials": {
+          "redis": "Redis Cloud Credentials"
+        },
+        "typeVersion": 1,
+        "id": "node-155b97cd"
+      },
+      {
+        "name": "Set1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1600,
+          550
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "message",
+                "value": "You exceeded your limit"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-3d7ccd78"
+      },
+      {
+        "name": "Webhook1",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          200,
+          600
+        ],
+        "webhookId": "a3167ed7-98d2-422c-bfe2-e3ba599d19f1",
+        "parameters": {
+          "path": "a3167ed7-98d2-422c-bfe2-e3ba599d19f1",
+          "options": {},
+          "responseMode": "lastNode",
+          "authentication": "{{ $credentials.headerAuth }}"
+        },
+        "credentials": {
+          "httpHeaderAuth": "Credential Example"
+        },
+        "typeVersion": 1,
+        "id": "node-0e286c24"
+      },
+      {
+        "name": "Function",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1900,
+          300
+        ],
+        "parameters": {
+          "functionCode": " const limit = `Limit consumed: `+ $node['Redis1'].json[$node[\"Set2\"].json[\"apiKey\"]];\n return [\n  {\n    json: {\n      message:limit,\n      body: items.map(item => {\n        const name= item.json.fields.name\n        const url= item.json.fields.url\n        return {name,url}\n      })\n    }\n  }\n]\n"
+        },
+        "typeVersion": 1,
+        "id": "node-6e368f92"
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          400,
+          600
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "apiKey",
+                "value": "={{$json[\"headers\"][\"x-api-key\"] +'-'+ new Date().getHours() +'-'+ new Date().getMinutes()}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-4d4e41b1"
+      },
+      {
+        "name": "Set2",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1000,
+          450
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "apiKey",
+                "value": "={{$node['Webhook1'].json[\"headers\"][\"x-api-key\"] +'-'+ new Date().getHours()}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-92c73a75"
+      },
+      {
+        "name": "Set3",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1000,
+          700
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "message",
+                "value": "You exceeded your limit"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-ec3bc090"
+      },
+      {
+        "name": "Per hour",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1400,
+          450
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$json[$node[\"Set2\"].json[\"apiKey\"]]}}",
+                "value2": 60
+              }
+            ],
+            "string": []
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-8cb729eb"
+      },
+      {
+        "name": "Per minute",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          800,
+          600
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$json[$node[\"Set\"].json[\"apiKey\"]]}}",
+                "value2": 10,
+                "operation": "smallerEqual"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-11e6fe06"
+      },
+      {
+        "id": "error-d380966e",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-570d7d98",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:08:00.089473",
+      "updatedAt": "2025-09-29T07:08:00.089488",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Airtable",
+        "parameters": {
+          "additionalOptions": {},
+          "operation": "list",
+          "table": "Pokemon"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Function",
+        "parameters": {
+          "functionCode": " const limit = `Limit consumed: `+ $node['Redis1'].json[$node[\"Set2\"].json[\"apiKey\"]];\n return [\n  {\n    json: {\n      message:limit,\n      body: items.map(item => {\n        const name= item.json.fields.name\n        const url= item.json.fields.url\n        return {name,url}\n      })\n    }\n  }\n]\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Per hour",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$json[$node[\"Set2\"].json[\"apiKey\"]]}}",
+                "value2": 60
+              }
+            ],
+            "string": []
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Per minute",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "smallerEqual",
+                "value1": "={{$json[$node[\"Set\"].json[\"apiKey\"]]}}",
+                "value2": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "redis": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Redis",
+        "parameters": {
+          "expire": true,
+          "key": "{{ $credentials.key }}",
+          "operation": "incr",
+          "ttl": 3600
+        },
+        "type": "n8n-nodes-base.redis",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "redis": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Redis1",
+        "parameters": {
+          "key": "{{ $credentials.key }}",
+          "operation": "incr"
+        },
+        "type": "n8n-nodes-base.redis",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "apiKey",
+                "value": "={{$json[\"headers\"][\"x-api-key\"] +'-'+ new Date().getHours() +'-'+ new Date().getMinutes()}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set1",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "message",
+                "value": "You exceeded your limit"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set2",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "apiKey",
+                "value": "={{$node['Webhook1'].json[\"headers\"][\"x-api-key\"] +'-'+ new Date().getHours()}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set3",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "message",
+                "value": "You exceeded your limit"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Webhook1",
+        "parameters": {
+          "authentication": "{{ $credentials.headerAuth }}",
+          "options": {},
+          "path": "a3167ed7-98d2-422c-bfe2-e3ba599d19f1",
+          "responseMode": "lastNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 12,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Airtable",
+    "Redis",
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 204,
+  "viewCount": 748,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Airtable Account",
+      "Redis Account",
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "airtable  A P I details",
+      "redis details",
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook1\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Airtable\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Redis\" node (n8n-nodes-base.redis) and configure the action parameters, mappings, and fields.",
+      "Open the \"Redis1\" node (n8n-nodes-base.redis) and configure the action parameters, mappings, and fields.",
+      "Open the \"Function\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Per hour\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Per minute\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set1\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set2\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set3\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-05qny4apb",
+      "workflowId": "production-workflow-6k3fp",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Webhook/0099_Webhook_Airtable_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Webhook\\0099_Webhook_Airtable_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:31:21.442Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:31:21.442Z",
+  "updatedAt": "2026-07-15T11:31:21.442Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

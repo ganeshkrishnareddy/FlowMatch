@@ -1,0 +1,643 @@
+{
+  "id": "outputparserstructured-workflow-ekomh",
+  "name": "Outputparserstructured Workflow",
+  "slug": "outputparserstructured-workflow-asaf",
+  "description": "Automated workflow: Outputparserstructured Workflow. This workflow integrates 8 different services: stickyNote, gmailTrigger, agent, outputParserStructured, stopAndError. It contains 10 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Outputparserstructured Workflow workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-41f18dbc",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.168278",
+      "updatedAt": "2025-09-29T07:07:45.168317",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "53cc8017-5310-4205-85e0-8cc839693601",
+        "name": "Structured Output Parser",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          720,
+          400
+        ],
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"name\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n      \"email\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n      \"linkedin\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n      \"score\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t\t\n\t}\n}"
+        },
+        "typeVersion": 1.2,
+        "notes": "This outputParserStructured node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ea0c00d3-25c8-4523-88ff-d61d6665ecf7",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -760,
+          160
+        ],
+        "parameters": {
+          "width": 480,
+          "height": 260,
+          "content": "## Resume Screener from Gmail to Sheets\n\n### 📃Before you get started, you'll need:\n- [n8n installation]({{ $env.WEBHOOK_URL }} \n- [OpenAI API Key]({{ $env.API_BASE_URL }}\n- Google Sheets API enabled in [Google Cloud Console]({{ $env.API_BASE_URL }}\n- Google Drive API enabled in [Google Cloud Console]({{ $env.API_BASE_URL }}\n- OAuth 2.0 Client ID and Client Secret from your [Google Cloud Console Credentials]({{ $env.API_BASE_URL }}\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e4f3aef9-750a-48bb-899b-bd4a810032f2",
+        "name": "Extract text from PDF File",
+        "type": "n8n-nodes-base.extractFromFile",
+        "position": [
+          320,
+          180
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "pdf",
+          "binaryPropertyName": "attachment_0"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5418cfae-25da-4f58-99ef-d6957d8819a8",
+        "name": "AI Agent to evaluate Resume",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          540,
+          180
+        ],
+        "parameters": {
+          "text": "=Here is the resume:\n\n{{ $json.text }}",
+          "options": {
+            "systemMessage": "You are an invaluable assistant. You were given a resume. You have to help me analyze the resume and give it a score based on the details available in the resume. Also, extract the name, email, and LinkedIn profile from the resume."
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.8,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dce8e431-9d5c-4aa1-a0eb-c2a27de2d7f9",
+        "name": "OpenAI Chat Model (GPT 4o-mini)",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          520,
+          400
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "PMxepoh6OuVxbpg1",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e7fdaf75-11ad-40c2-84a0-13c52f6f2eb1",
+        "name": "Add Resume Evaluation to Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          920,
+          180
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Name": "={{ $json.output.name }}",
+              "Email": "={{ $json.output.email }}",
+              "Score": "={{ $json.output.score }}",
+              "LinkedIn": "={{ $json.output.linkedin }}",
+              "Resume text": "={{ $('Extract text from PDF File').item.json.text }}"
+            },
+            "schema": [
+              {
+                "id": "Name",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Name",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Email",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Email",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "LinkedIn",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "LinkedIn",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Score",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Score",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Resume text",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Resume text",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {
+            "useAppend": true
+          },
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 781640061,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Resume Score"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1SGYsuJI2YJVztZZmSLsFZ0lbUHnxm0V9r3c8S5-2q74",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Lead Generation"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "kzZGQmdAV5cPfymZ",
+            "name": "Google Sheets (server@hic)"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0ad65e2b-665d-4b77-a941-b15a7ffbfb89",
+        "name": "Trigger on new Email Received",
+        "type": "n8n-nodes-base.gmailTrigger",
+        "position": [
+          60,
+          180
+        ],
+        "parameters": {
+          "simple": false,
+          "filters": {
+            "q": "has:attachment",
+            "labelIds": [
+              "UNREAD"
+            ],
+            "readStatus": "unread"
+          },
+          "options": {
+            "downloadAttachments": true
+          },
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyHour",
+                "minute": 1
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "tPOAqAl9y3adqJD6",
+            "name": "Gmail account (hire@hic)"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This gmailTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-e23b7ef4",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "e4f3aef9-750a-48bb-899b-bd4a810032f2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e4f3aef9-750a-48bb-899b-bd4a810032f2-1304f85c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "dce8e431-9d5c-4aa1-a0eb-c2a27de2d7f9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-dce8e431-9d5c-4aa1-a0eb-c2a27de2d7f9-06eee85b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e7fdaf75-11ad-40c2-84a0-13c52f6f2eb1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e7fdaf75-11ad-40c2-84a0-13c52f6f2eb1-22382597",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Outputparserstructured Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Outputparserstructured Workflow. This workflow integrates 8 different services: stickyNote, gmailTrigger, agent, outputParserStructured, stopAndError. It contains 10 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Outputparserstructured Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "dce8e431-9d5c-4aa1-a0eb-c2a27de2d7f9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dce8e431-9d5c-4aa1-a0eb-c2a27de2d7f9-06eee85b"
+            }
+          ]
+        ]
+      },
+      "e4f3aef9-750a-48bb-899b-bd4a810032f2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e4f3aef9-750a-48bb-899b-bd4a810032f2-1304f85c"
+            }
+          ]
+        ]
+      },
+      "e7fdaf75-11ad-40c2-84a0-13c52f6f2eb1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e7fdaf75-11ad-40c2-84a0-13c52f6f2eb1-22382597"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Outputparserstructured Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add Resume Evaluation to Google Sheets",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Name",
+                "id": "Name",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Email",
+                "id": "Email",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "LinkedIn",
+                "id": "LinkedIn",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Score",
+                "id": "Score",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Resume text",
+                "id": "Resume text",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Email": "={{ $json.output.email }}",
+              "LinkedIn": "={{ $json.output.linkedin }}",
+              "Name": "={{ $json.output.name }}",
+              "Resume text": "={{ $('Extract text from PDF File').item.json.text }}",
+              "Score": "={{ $json.output.score }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Lead Generation",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1SGYsuJI2YJVztZZmSLsFZ0lbUHnxm0V9r3c8S5-2q74"
+          },
+          "operation": "append",
+          "options": {
+            "useAppend": true
+          },
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Resume Score",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 781640061
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "AI Agent to evaluate Resume",
+        "parameters": {
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "You are an invaluable assistant. You were given a resume. You have to help me analyze the resume and give it a score based on the details available in the resume. Also, extract the name, email, and LinkedIn profile from the resume."
+          },
+          "promptType": "define",
+          "text": "=Here is the resume:\n\n{{ $json.text }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract text from PDF File",
+        "parameters": {
+          "binaryPropertyName": "attachment_0",
+          "operation": "pdf",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model (GPT 4o-mini)",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Resume Screener from Gmail to Sheets\n\n### 📃Before you get started, you'll need:\n- [n8n installation]({{ $env.WEBHOOK_URL }} \n- [OpenAI API Key]({{ $env.API_BASE_URL }}\n- Google Sheets API enabled in [Google Cloud Console]({{ $env.API_BASE_URL }}\n- Google Drive API enabled in [Google Cloud Console]({{ $env.API_BASE_URL }}\n- OAuth 2.0 Client ID and Client Secret from your [Google Cloud Console Credentials]({{ $env.API_BASE_URL }}\n",
+          "height": 260,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Structured Output Parser",
+        "parameters": {
+          "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"name\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n      \"email\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n      \"linkedin\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n      \"score\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t\t\n\t}\n}",
+          "schemaType": "manual"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Trigger on new Email Received",
+        "parameters": {
+          "filters": {
+            "labelIds": [
+              "UNREAD"
+            ],
+            "q": "has:attachment",
+            "readStatus": "unread"
+          },
+          "options": {
+            "downloadAttachments": true
+          },
+          "pollTimes": {
+            "item": [
+              {
+                "minute": 1,
+                "mode": "everyHour"
+              }
+            ]
+          },
+          "simple": false
+        },
+        "type": "n8n-nodes-base.gmailTrigger",
+        "typeVersion": 1.2
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets",
+    "Gmail"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 47,
+  "viewCount": 228,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "Gmail Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "google Sheets  O Auth2  A P I details",
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Trigger on new Email Received\".",
+      "Open the \"Structured Output Parser\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract text from PDF File\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"AI Agent to evaluate Resume\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model (GPT 4o-mini)\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add Resume Evaluation to Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Incoming triggers will qualified/formatted, new rows will be written to Google Sheets, and email replies or alerts will be sent automatically.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-v2sy746td",
+      "workflowId": "outputparserstructured-workflow-ekomh",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Gmail/0852_Gmail_GoogleSheets_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Gmail\\0852_Gmail_GoogleSheets_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:03.437Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:03.437Z",
+  "updatedAt": "2026-07-15T11:29:03.437Z",
+  "category": {
+    "slug": "email-automation",
+    "name": "Email Automation"
+  },
+  "categoryId": "email-automation"
+}

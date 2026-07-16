@@ -1,0 +1,844 @@
+{
+  "id": "lemlist-workflow-i78fl",
+  "name": "Lemlist Workflow",
+  "slug": "lemlist-workflow-77g9",
+  "description": "Automated workflow: Lemlist Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Lemlist Workflow workflow containing 12 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-b136cd46",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:47.308430",
+      "updatedAt": "2025-09-29T07:07:47.308449",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "44b2e0ac-1ec9-4acd-bf00-7e280378b8df",
+        "name": "Lemlist - Unsubscribe",
+        "type": "n8n-nodes-base.lemlist",
+        "position": [
+          1300,
+          -180
+        ],
+        "parameters": {
+          "email": "={{ $json[\"leadEmail\"] }}",
+          "resource": "lead",
+          "operation": "unsubscribe",
+          "campaignId": "={{$json[\"campaignId\"]}}"
+        },
+        "credentials": {
+          "lemlistApi": {
+            "id": "{{ $credentials.lemlistApi.id }}",
+            "name": "Lemlist - \"lemlist\" team API key"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lemlist node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "75dd6db8-5e59-4521-a4be-2272e2914494",
+        "name": "follow up task",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          1520,
+          640
+        ],
+        "parameters": {
+          "type": "task",
+          "metadata": {
+            "subject": "=OOO - Follow up with {{ $json[\"properties\"][\"firstname\"][\"value\"] }} {{ $json[\"properties\"][\"lastname\"][\"value\"] }}"
+          },
+          "resource": "engagement",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "associations": {
+              "contactIds": "={{ $json[\"vid\"] }}"
+            }
+          }
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "{{ $credentials.hubspotOAuth2Api.id }}",
+            "name": "Hubspot account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0ba95d5d-fe73-4687-8e21-02b97b19924f",
+        "name": "Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          380,
+          300
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "Unsubscribe"
+              },
+              {
+                "output": 1,
+                "value2": "Interested"
+              },
+              {
+                "output": 2,
+                "value2": "Out of Office"
+              }
+            ]
+          },
+          "value1": "={{ $json[\"text\"].trim() }}",
+          "dataType": "string",
+          "fallbackOutput": 3
+        },
+        "typeVersion": 1,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "abdb4925-4b2a-48e0-aa3d-042e1112150a",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          140,
+          300
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {
+            "clashHandling": {
+              "values": {
+                "resolveClash": "preferInput1"
+              }
+            }
+          },
+          "combinationMode": "mergeByPosition"
+        },
+        "typeVersion": 2,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b911bd29-9141-43ac-87d4-3922be5cbe5c",
+        "name": "lemlist - Mark as interested",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1300,
+          160
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "lemlistApi": {
+            "id": "{{ $credentials.lemlistApi.id }}",
+            "name": "Lemlist - \"lemlist\" team API key"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "510adb64-fb3a-4d56-abf3-ab9cc0d3e683",
+        "name": "HubSpot - Create Deal",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          1520,
+          380
+        ],
+        "parameters": {
+          "stage": "79009480",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "dealName": "=New Deal with {{ $json[\"identity-profiles\"][0][\"identities\"][0][\"value\"] }}",
+            "associatedVids": "={{$json[\"canonical-vid\"]}}"
+          }
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "{{ $credentials.hubspotOAuth2Api.id }}",
+            "name": "Hubspot account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "635e40a2-0546-4c3e-8080-26d72fc5ea35",
+        "name": "HubSpot - Get contact ID",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          1300,
+          380
+        ],
+        "parameters": {
+          "email": "={{ $json[\"leadEmail\"] }}",
+          "resource": "contact",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "lastName": "={{ $json[\"leadLastName\"] }}",
+            "firstName": "={{ $json[\"leadFirstName\"] }}"
+          }
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "{{ $credentials.hubspotOAuth2Api.id }}",
+            "name": "Hubspot account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a072f9bb-09ca-4edb-b4ae-76c768be681f",
+        "name": "Slack",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          1740,
+          380
+        ],
+        "parameters": {
+          "text": "=Hello a new lead is interested. \n\nMore info in Hubspot here: \n{{ $env.WEBHOOK_URL }}{{$json[\"dealId\"]}}",
+          "channel": "Your channel name",
+          "attachments": [],
+          "otherOptions": {},
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "typeVersion": 1,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "db18ac14-8e18-4d86-853d-19590a09b7cc",
+        "name": "HubSpot - Get contact ID1",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          1300,
+          640
+        ],
+        "parameters": {
+          "email": "={{ $json[\"leadEmail\"] }}",
+          "resource": "contact",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "lastName": "={{ $json[\"leadLastName\"] }}",
+            "firstName": "={{ $json[\"leadFirstName\"] }}"
+          }
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "{{ $credentials.hubspotOAuth2Api.id }}",
+            "name": "Hubspot account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9153abd0-4606-423c-8e9b-7cdcf7a9c490",
+        "name": "Slack1",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          1300,
+          900
+        ],
+        "parameters": {
+          "text": "=Hello a lead replied to your emails. \n\nMore info in lemlist here: \n{{ $env.WEBHOOK_URL }}{{$json[\"teamId\"]}}/reports/campaigns/{{$json[\"campaignId\"]}}",
+          "channel": "Your channel name",
+          "attachments": [],
+          "otherOptions": {},
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "typeVersion": 1,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "42b93264-df66-4528-ab02-c038ea0d8758",
+        "name": "Lemlist - Lead Replied",
+        "type": "n8n-nodes-base.lemlistTrigger",
+        "position": [
+          -520,
+          320
+        ],
+        "webhookId": "c8f49f36-7ab6-4607-bc5a-41c9555ebd09",
+        "parameters": {
+          "event": "emailsReplied",
+          "options": {
+            "isFirst": true
+          }
+        },
+        "credentials": {
+          "lemlistApi": {
+            "id": "{{ $credentials.lemlistApi.id }}",
+            "name": "Lemlist - \"lemlist\" team API key"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lemlistTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c3b52828-e6d6-41a0-b9ca-101cec379dbf",
+        "name": "OpenAI",
+        "type": "n8n-nodes-base.openAi",
+        "position": [
+          -240,
+          140
+        ],
+        "parameters": {
+          "prompt": "=The following is a list of emails and the categories they fall into:\nCategories=[\"interested\", \"Out of office\", \"unsubscribe\", \"other\"]\n\nInterested is when the reply is positive.\"\n\n{{$json[\"text\"].replaceAll(/^\\s+|\\s+$/g, '').replace(/(\\r\\n|\\n|\\r)/gm, \"\")}}\\\"\nCategory:",
+          "options": {
+            "topP": 1,
+            "maxTokens": "YOUR_TOKEN_HERE",
+            "temperature": 0
+          }
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "{{ $credentials.openAiApi.id }}",
+            "name": "Lucas Open AI"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "b911bd29-9141-43ac-87d4-3922be5cbe5c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-43a181bf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-acde745d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-4341c765",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-d404abbf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-d8c4fbf2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-bc0f8988",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-3e5a4436",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-ade206da",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a072f9bb-09ca-4edb-b4ae-76c768be681f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a072f9bb-09ca-4edb-b4ae-76c768be681f-21d33fbb",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9153abd0-4606-423c-8e9b-7cdcf7a9c490": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9153abd0-4606-423c-8e9b-7cdcf7a9c490-ec2ea187",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "c3b52828-e6d6-41a0-b9ca-101cec379dbf": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c3b52828-e6d6-41a0-b9ca-101cec379dbf-24243d1f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Lemlist Workflow",
+    "description": "Automated workflow: Lemlist Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Lemlist Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "9153abd0-4606-423c-8e9b-7cdcf7a9c490": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9153abd0-4606-423c-8e9b-7cdcf7a9c490-ec2ea187"
+            }
+          ]
+        ]
+      },
+      "a072f9bb-09ca-4edb-b4ae-76c768be681f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a072f9bb-09ca-4edb-b4ae-76c768be681f-21d33fbb"
+            }
+          ]
+        ]
+      },
+      "b911bd29-9141-43ac-87d4-3922be5cbe5c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-43a181bf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-acde745d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-4341c765"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-d404abbf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-d8c4fbf2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-bc0f8988"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-3e5a4436"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b911bd29-9141-43ac-87d4-3922be5cbe5c-ade206da"
+            }
+          ]
+        ]
+      },
+      "c3b52828-e6d6-41a0-b9ca-101cec379dbf": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c3b52828-e6d6-41a0-b9ca-101cec379dbf-24243d1f"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Lemlist Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "follow up task",
+        "parameters": {
+          "additionalFields": {
+            "associations": {
+              "contactIds": "={{ $json[\"vid\"] }}"
+            }
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "metadata": {
+            "subject": "=OOO - Follow up with {{ $json[\"properties\"][\"firstname\"][\"value\"] }} {{ $json[\"properties\"][\"lastname\"][\"value\"] }}"
+          },
+          "resource": "engagement",
+          "type": "task"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "HubSpot - Create Deal",
+        "parameters": {
+          "additionalFields": {
+            "associatedVids": "={{$json[\"canonical-vid\"]}}",
+            "dealName": "=New Deal with {{ $json[\"identity-profiles\"][0][\"identities\"][0][\"value\"] }}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "stage": "79009480"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "HubSpot - Get contact ID",
+        "parameters": {
+          "additionalFields": {
+            "firstName": "={{ $json[\"leadFirstName\"] }}",
+            "lastName": "={{ $json[\"leadLastName\"] }}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "email": "={{ $json[\"leadEmail\"] }}",
+          "resource": "contact"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "HubSpot - Get contact ID1",
+        "parameters": {
+          "additionalFields": {
+            "firstName": "={{ $json[\"leadFirstName\"] }}",
+            "lastName": "={{ $json[\"leadLastName\"] }}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "email": "={{ $json[\"leadEmail\"] }}",
+          "resource": "contact"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "lemlistApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Lemlist - Lead Replied",
+        "parameters": {
+          "event": "emailsReplied",
+          "options": {
+            "isFirst": true
+          }
+        },
+        "type": "n8n-nodes-base.lemlistTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "lemlistApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "lemlist - Mark as interested",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "lemlistApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Lemlist - Unsubscribe",
+        "parameters": {
+          "campaignId": "={{$json[\"campaignId\"]}}",
+          "email": "={{ $json[\"leadEmail\"] }}",
+          "operation": "unsubscribe",
+          "resource": "lead"
+        },
+        "type": "n8n-nodes-base.lemlist",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "combinationMode": "mergeByPosition",
+          "mode": "combine",
+          "options": {
+            "clashHandling": {
+              "values": {
+                "resolveClash": "preferInput1"
+              }
+            }
+          }
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI",
+        "parameters": {
+          "options": {
+            "maxTokens": "YOUR_TOKEN_HERE",
+            "temperature": 0,
+            "topP": 1
+          },
+          "prompt": "=The following is a list of emails and the categories they fall into:\nCategories=[\"interested\", \"Out of office\", \"unsubscribe\", \"other\"]\n\nInterested is when the reply is positive.\"\n\n{{$json[\"text\"].replaceAll(/^\\s+|\\s+$/g, '').replace(/(\\r\\n|\\n|\\r)/gm, \"\")}}\\\"\nCategory:"
+        },
+        "type": "n8n-nodes-base.openAi",
+        "typeVersion": 1
+      },
+      {
+        "name": "Slack",
+        "parameters": {
+          "attachments": [],
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "channel": "Your channel name",
+          "otherOptions": {},
+          "text": "=Hello a new lead is interested. \n\nMore info in Hubspot here: \n{{ $env.WEBHOOK_URL }}{{$json[\"dealId\"]}}"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 1
+      },
+      {
+        "name": "Slack1",
+        "parameters": {
+          "attachments": [],
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "channel": "Your channel name",
+          "otherOptions": {},
+          "text": "=Hello a lead replied to your emails. \n\nMore info in lemlist here: \n{{ $env.WEBHOOK_URL }}{{$json[\"teamId\"]}}/reports/campaigns/{{$json[\"campaignId\"]}}"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 1
+      },
+      {
+        "name": "Switch",
+        "parameters": {
+          "dataType": "string",
+          "fallbackOutput": 3,
+          "rules": {
+            "rules": [
+              {
+                "value2": "Unsubscribe"
+              },
+              {
+                "output": 1,
+                "value2": "Interested"
+              },
+              {
+                "output": 2,
+                "value2": "Out of Office"
+              }
+            ]
+          },
+          "value1": "={{ $json[\"text\"].trim() }}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 12,
+  "integrationCount": 5,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Lemlist",
+    "Hubspot",
+    "HTTP Request",
+    "Slack",
+    "OpenAI"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 172,
+  "viewCount": 484,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Lemlist Account",
+      "Hubspot Account",
+      "HTTP Request Account",
+      "Slack Account",
+      "OpenAI Account"
+    ],
+    "requiredCredentials": [
+      "lemlist  A P I details",
+      "hubspot  O Auth2  A P I details",
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Lemlist - Lead Replied\".",
+      "Open the \"Lemlist - Unsubscribe\" node (n8n-nodes-base.lemlist) and configure the action parameters, mappings, and fields.",
+      "Open the \"follow up task\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"lemlist - Mark as interested\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"HubSpot - Create Deal\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"HubSpot - Get contact ID\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Slack\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"HubSpot - Get contact ID1\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Slack1\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the AI node \"OpenAI\".",
+      "Adjust the Model settings (e.g. gpt-4o, gpt-3.5-turbo) and write or refine the System Prompt parameters.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-uo494hi3d",
+      "workflowId": "lemlist-workflow-i78fl",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Lemlist/0283_Lemlist_Slack_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Lemlist\\0283_Lemlist_Slack_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:40.078Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:40.078Z",
+  "updatedAt": "2026-07-15T11:18:40.078Z"
+}

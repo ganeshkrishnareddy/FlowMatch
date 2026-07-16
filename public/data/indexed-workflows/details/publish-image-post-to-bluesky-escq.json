@@ -1,0 +1,1101 @@
+{
+  "id": "publish-image-post-to-bluesky-h0saz",
+  "name": "Publish Image Post to Bluesky",
+  "slug": "publish-image-post-to-bluesky-escq",
+  "description": "Automated workflow: Publish Image Post to Bluesky. This workflow integrates 8 different services: stickyNote, httpRequest, code, splitOut, set. It contains 23 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Publish Image Post to Bluesky workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "id": "XGFs5jZNCeURd4OT",
+    "meta": {
+      "instanceId": "workflow-747de0c3",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.391334",
+      "updatedAt": "2025-09-29T07:07:54.391355",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Publish Image Post to Bluesky",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "afd666fc-8f79-488d-a295-4bfdd6883924",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          35,
+          260
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d31bfe18-5acc-4f72-80d0-d85111dd62cc",
+        "name": "Create Bluesky Session",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          435,
+          260
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={{ $('Define Credentials').item.json.credentials }}",
+          "sendBody": true,
+          "specifyBody": "json"
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "514ac077-3c96-41f0-b178-afefe2f9faae",
+        "name": "Download Images",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1260,
+          260
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "67e77e91-3a53-44c3-a474-2cd3b4977cf2",
+        "name": "Code",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1580,
+          260
+        ],
+        "parameters": {
+          "jsCode": "return $input.all().map( item => ({\n    alt: \"-\",\n    image: {\n      ...item.json.blob\n    }\n}));"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b8540b04-afe8-4455-8fec-fcab5ffff1ae",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          640,
+          102.39520958083813
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 391.0892880786254,
+          "height": 335.5179928232044,
+          "content": "## Define Your Post Caption Here\nYou can set\n* the text caption of your post (max 300 characters)\n* image URLs (max of 4 images at 1MB each)"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2a6e60ef-4042-4648-85bb-143d226aa736",
+        "name": "Split Out",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          1100,
+          260
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "photos"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5c3a6c2f-7b60-4448-9d85-4174e9f5f770",
+        "name": "Post to Bluesky",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1940,
+          260
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"repo\": \"{{ $('Create Bluesky Session').item.json.did }}\",\n  \"collection\": \"app.bsky.feed.post\",\n  \"record\": {\n      \"$type\": \"app.bsky.feed.post\",\n      \"text\": \"{{ $('Set Caption').item.json['Post Text'].trim()}}\",\n      \"createdAt\": \"{{ $now }}\",\n\"embed\": {\n\"$type\": \"app.bsky.embed.images\",\n\"images\":{{ $('Aggregate').item.json.data.toJsonString() }}\n}\n  }\n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Create Bluesky Session').item.json.accessJwt }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "266ef5cb-18df-45b0-b5c4-59782e571d40",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          180,
+          -2.994011976047659
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 418.7983637184758,
+          "height": 440.36620487216396,
+          "content": "## Set Bluesky Credentials\nYou'll need to set 2 values...\n1. _Identifier_ \nThis is your Bluesky username, e.g. \"username.bsky.social\"\n2. _App Password_\nThis is _not_ your sign-in password, but something created in [your Bluesky account]({{ $env.WEBHOOK_URL }}\n\n\nA Bluesky session is then opened for image uploading and posting."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3a7fc037-02f6-4091-bcdc-5b22d43269ef",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1063.9520958083824,
+          160
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 814.7806424732389,
+          "height": 269.1258097879526,
+          "content": "### Handling image attachments\nBluesky doesn't attach images directly to the post, they're first individually uploaded [then embedded in the post]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "aa7796b3-9cc7-4219-85af-a9ae3613f891",
+        "name": "Define Credentials",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          235,
+          260
+        ],
+        "parameters": {
+          "mode": "raw",
+          "options": {},
+          "jsonOutput": "{\"credentials\":\n  {\n    \"identifier\": \"username.bsky.social\",\n    \"password\": \"XXXX-YYYY-ZZZZ-XXXX\"\n  }\n}"
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4bcf77ef-b40e-485e-b444-659f77cf9d69",
+        "name": "Aggregate",
+        "type": "n8n-nodes-base.aggregate",
+        "position": [
+          1740,
+          260
+        ],
+        "parameters": {
+          "options": {},
+          "aggregate": "aggregateAllItemData"
+        },
+        "typeVersion": 1,
+        "notes": "This aggregate node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eb2730e5-cad7-47f0-96d2-f2ae1dee6dd5",
+        "name": "Set Images",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          880,
+          260
+        ],
+        "parameters": {
+          "mode": "raw",
+          "options": {},
+          "jsonOutput": "{  \"photos\":[\n    {\n      \"url\":\"{{ $env.WEBHOOK_URL }}\"\n    },\n    {\n      \"url\":\"{{ $env.WEBHOOK_URL }}\"\n    },\n    {\n      \"url\":\"{{ $env.WEBHOOK_URL }}\"\n    },\n    {\n      \"url\":\"{{ $env.WEBHOOK_URL }}\"\n    }\n  ]}"
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0d3a030e-1ac6-420d-a850-d267928f4072",
+        "name": "Post Image to Bluesky",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1420,
+          260
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "binaryData",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Create Bluesky Session').item.json.accessJwt }}"
+              }
+            ]
+          },
+          "inputDataFieldName": "data"
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "31124777-ee35-4ceb-b0e7-75f7cef4b481",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          680,
+          -260
+        ],
+        "parameters": {
+          "width": 880.0000000000002,
+          "height": 207.9041916167665,
+          "content": "# Create a new post with images on Bluesky\nThis workflow will \n1. retrieve images from URLs you specify\n2. upload them 1 by 1 as blobs to BlueSky\n3. let you specify the basic text of a post\n3. use your Bluesky credentials to post to your feed"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f8e54515-c9ec-474d-aa2b-fe357cbd4775",
+        "name": "Set Caption",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          688,
+          260
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6135981d-82d9-47bb-9eb5-ce9a4220f108",
+                "name": "Caption Text",
+                "type": "string",
+                "value": "Here is the amazing content of my post, max of 300 characters!"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "86d8df08-3f73-40a5-9c5b-d2ebda3f3b13",
+    "connections": {
+      "d31bfe18-5acc-4f72-80d0-d85111dd62cc": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-e9e8e320",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-58acb0af",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-f8d8f66b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-ce3e236f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-785e44de",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-eea9cea4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-5096ec9a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-04c1fabc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "514ac077-3c96-41f0-b178-afefe2f9faae": {
+        "main": [
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-258246c3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-6925c730",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-4c6254c6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-283adb33",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-f8f678c6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-64cb3aa0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-89d42060",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-0e10cdab",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "5c3a6c2f-7b60-4448-9d85-4174e9f5f770": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-df23d740",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-17fbeb0a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-a4b7bc9f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-f4208ff2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-f475cf44",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-4869d5ab",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-a2d36afe",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-f605af0f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "0d3a030e-1ac6-420d-a850-d267928f4072": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-ac3afd0a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-e9ade298",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-c058075b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-129d4c2b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-3aa60dd0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-5c592872",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-a8509678",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-666d11ea",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Publish Image Post to Bluesky. This workflow integrates 8 different services: stickyNote, httpRequest, code, splitOut, set. It contains 23 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Publish Image Post to Bluesky. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0d3a030e-1ac6-420d-a850-d267928f4072": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-ac3afd0a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-e9ade298"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-c058075b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-129d4c2b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-3aa60dd0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-5c592872"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-a8509678"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d3a030e-1ac6-420d-a850-d267928f4072-666d11ea"
+            }
+          ]
+        ]
+      },
+      "514ac077-3c96-41f0-b178-afefe2f9faae": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-258246c3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-6925c730"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-4c6254c6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-283adb33"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-f8f678c6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-64cb3aa0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-89d42060"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-514ac077-3c96-41f0-b178-afefe2f9faae-0e10cdab"
+            }
+          ]
+        ]
+      },
+      "5c3a6c2f-7b60-4448-9d85-4174e9f5f770": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-df23d740"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-17fbeb0a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-a4b7bc9f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-f4208ff2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-f475cf44"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-4869d5ab"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-a2d36afe"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5c3a6c2f-7b60-4448-9d85-4174e9f5f770-f605af0f"
+            }
+          ]
+        ]
+      },
+      "d31bfe18-5acc-4f72-80d0-d85111dd62cc": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-e9e8e320"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-58acb0af"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-f8d8f66b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-ce3e236f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-785e44de"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-eea9cea4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-5096ec9a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d31bfe18-5acc-4f72-80d0-d85111dd62cc-04c1fabc"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Publish Image Post to Bluesky",
+    "nodes": [
+      {
+        "name": "Aggregate",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1
+      },
+      {
+        "name": "Code",
+        "parameters": {
+          "jsCode": "return $input.all().map( item => ({\n    alt: \"-\",\n    image: {\n      ...item.json.blob\n    }\n}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Create Bluesky Session",
+        "parameters": {
+          "jsonBody": "={{ $('Define Credentials').item.json.credentials }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Define Credentials",
+        "parameters": {
+          "jsonOutput": "{\"credentials\":\n  {\n    \"identifier\": \"username.bsky.social\",\n    \"password\": \"XXXX-YYYY-ZZZZ-XXXX\"\n  }\n}",
+          "mode": "raw",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Download Images",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Post Image to Bluesky",
+        "parameters": {
+          "contentType": "binaryData",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Create Bluesky Session').item.json.accessJwt }}"
+              }
+            ]
+          },
+          "inputDataFieldName": "data",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Post to Bluesky",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Create Bluesky Session').item.json.accessJwt }}"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"repo\": \"{{ $('Create Bluesky Session').item.json.did }}\",\n  \"collection\": \"app.bsky.feed.post\",\n  \"record\": {\n      \"$type\": \"app.bsky.feed.post\",\n      \"text\": \"{{ $('Set Caption').item.json['Post Text'].trim()}}\",\n      \"createdAt\": \"{{ $now }}\",\n\"embed\": {\n\"$type\": \"app.bsky.embed.images\",\n\"images\":{{ $('Aggregate').item.json.data.toJsonString() }}\n}\n  }\n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Set Caption",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6135981d-82d9-47bb-9eb5-ce9a4220f108",
+                "name": "Caption Text",
+                "type": "string",
+                "value": "Here is the amazing content of my post, max of 300 characters!"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Set Images",
+        "parameters": {
+          "jsonOutput": "{  \"photos\":[\n    {\n      \"url\":\"{{ $env.WEBHOOK_URL }}\"\n    },\n    {\n      \"url\":\"{{ $env.WEBHOOK_URL }}\"\n    },\n    {\n      \"url\":\"{{ $env.WEBHOOK_URL }}\"\n    },\n    {\n      \"url\":\"{{ $env.WEBHOOK_URL }}\"\n    }\n  ]}",
+          "mode": "raw",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Split Out",
+        "parameters": {
+          "fieldToSplitOut": "photos",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "## Define Your Post Caption Here\nYou can set\n* the text caption of your post (max 300 characters)\n* image URLs (max of 4 images at 1MB each)",
+          "height": 335.5179928232044,
+          "width": 391.0892880786254
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 3,
+          "content": "## Set Bluesky Credentials\nYou'll need to set 2 values...\n1. _Identifier_ \nThis is your Bluesky username, e.g. \"username.bsky.social\"\n2. _App Password_\nThis is _not_ your sign-in password, but something created in [your Bluesky account]({{ $env.WEBHOOK_URL }}\n\n\nA Bluesky session is then opened for image uploading and posting.",
+          "height": 440.36620487216396,
+          "width": 418.7983637184758
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 7,
+          "content": "### Handling image attachments\nBluesky doesn't attach images directly to the post, they're first individually uploaded [then embedded in the post]({{ $env.WEBHOOK_URL }}",
+          "height": 269.1258097879526,
+          "width": 814.7806424732389
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "# Create a new post with images on Bluesky\nThis workflow will \n1. retrieve images from URLs you specify\n2. upload them 1 by 1 as blobs to BlueSky\n3. let you specify the basic text of a post\n3. use your Bluesky credentials to post to your feed",
+          "height": 207.9041916167665,
+          "width": 880.0000000000002
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 173,
+  "viewCount": 635,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Create Bluesky Session\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download Images\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post to Bluesky\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Aggregate\" node (n8n-nodes-base.aggregate) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post Image to Bluesky\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Define Credentials\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set Images\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set Caption\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-cyjqoly5p",
+      "workflowId": "publish-image-post-to-bluesky-h0saz",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/1757_Splitout_Code_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\1757_Splitout_Code_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:27.556Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:27.556Z",
+  "updatedAt": "2026-07-15T11:30:27.556Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

@@ -1,0 +1,663 @@
+{
+  "id": "scalable-webhook-orchestrator-mambr",
+  "name": "Scalable Webhook Orchestrator",
+  "slug": "scalable-webhook-orchestrator-88gn",
+  "description": "Scalable Webhook Orchestrator built for n8n integrations.",
+  "shortDescription": "Scalable Webhook Orchestrator workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "name": "Scalable Webhook Orchestrator",
+    "nodes": [
+      {
+        "id": "b0a9f7f1-1db8-4d0e-bca4-7f6c4f75a001",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          200,
+          300
+        ],
+        "webhookId": "c1d2e3f4-5a6b-7c8d-9e0f-abc123456901",
+        "parameters": {
+          "path": "template/scalable-orchestrator",
+          "httpMethod": "POST",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "typeVersion": 2
+      },
+      {
+        "id": "a7f2c1b0-8d64-4f8a-9f67-63b1c4d50a02",
+        "name": "Notas & Testes",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -120,
+          80
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 720,
+          "height": 380,
+          "content": "## Template: Orquestrador Webhook Escalável\n\n- Objetivo: Roteia ações (ping/process) e responde rápido.\n- Teste rápido (Terminal):\n```bash\ncurl -X POST http://<SEU_N8N>/webhook/template/scalable-orchestrator \\\n  -H 'Content-Type: application/json' \\\n  -d '{\\\"action\\\":\\\"process\\\",\\\"payload\\\":{\\\"id\\\":1,\\\"text\\\":\\\"olá\\\"}}'\n```\n- Produção: Troque 'HTTP Service A' para sua API/serviço com credenciais.\n- Resiliência: HTTP possui retry automático (2x).\n"
+        },
+        "typeVersion": 1
+      },
+      {
+        "id": "f5a1d0e3-0e64-4c35-8e8f-83e8b6ddaa03",
+        "name": "Parse Input",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          460,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "in_action",
+                "name": "action",
+                "type": "string",
+                "value": "={{ $json.body?.action || 'ping' }}"
+              },
+              {
+                "id": "in_payload",
+                "name": "payload",
+                "type": "object",
+                "value": "={{ $json.body?.payload || {\\\"id\\\":123,\\\"text\\\":\\\"hello\\\"} }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4
+      },
+      {
+        "id": "a3c2b8b7-4a30-4a66-9c6a-4a61e8f7bb04",
+        "name": "Route by action",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "ping",
+                "conditions": {
+                  "options": {
+                    "version": 1,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "ping"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "process",
+                "conditions": {
+                  "options": {
+                    "version": 1,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "process"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "none"
+          }
+        },
+        "typeVersion": 3
+      },
+      {
+        "id": "b5f3a9e0-bbfb-4b6b-9b46-cb6bde7f0a05",
+        "name": "HTTP Service A",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          980,
+          360
+        ],
+        "parameters": {
+          "url": "https://httpbin.org/post",
+          "method": "POST",
+          "specifyBody": "json",
+          "sendBody": true,
+          "jsonBody": "={{ $json.payload }}",
+          "options": {
+            "retryOnFail": true,
+            "maxRetries": 2
+          }
+        },
+        "typeVersion": 4.2
+      },
+      {
+        "id": "d4a9c2b3-3e1e-4f59-9d73-1c8d61e3bb06",
+        "name": "Compose Ping",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          980,
+          220
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ok1",
+                "name": "ok",
+                "type": "boolean",
+                "value": true
+              },
+              {
+                "id": "msg1",
+                "name": "message",
+                "type": "string",
+                "value": "pong"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4
+      },
+      {
+        "id": "c7b5e8d1-7a3d-4e12-8d8f-4b1a5e2caa07",
+        "name": "Compose Result",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1240,
+          360
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ok2",
+                "name": "ok",
+                "type": "boolean",
+                "value": true
+              },
+              {
+                "id": "data2",
+                "name": "data",
+                "type": "object",
+                "value": "={{ $json.json || {} }}"
+              },
+              {
+                "id": "src2",
+                "name": "source",
+                "type": "string",
+                "value": "serviceA"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4
+      },
+      {
+        "id": "e0f1a2b3-c4d5-4e6f-8a7b-9c0d1e2f3a08",
+        "name": "Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1500,
+          280
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "typeVersion": 1.1
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Parse Input",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Input": {
+        "main": [
+          [
+            {
+              "node": "Route by action",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route by action": {
+        "main": [
+          [
+            {
+              "node": "Compose Ping",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "HTTP Service A",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Service A": {
+        "main": [
+          [
+            {
+              "node": "Compose Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Compose Ping": {
+        "main": [
+          [
+            {
+              "node": "Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Compose Result": {
+        "main": [
+          [
+            {
+              "node": "Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "Compose Ping": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Respond"
+            }
+          ]
+        ]
+      },
+      "Compose Result": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Respond"
+            }
+          ]
+        ]
+      },
+      "HTTP Service A": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Compose Result"
+            }
+          ]
+        ]
+      },
+      "Parse Input": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Route by action"
+            }
+          ]
+        ]
+      },
+      "Route by action": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Compose Ping"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "HTTP Service A"
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Parse Input"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scalable Webhook Orchestrator",
+    "nodes": [
+      {
+        "name": "Compose Ping",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ok1",
+                "name": "ok",
+                "type": "boolean",
+                "value": true
+              },
+              {
+                "id": "msg1",
+                "name": "message",
+                "type": "string",
+                "value": "pong"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Compose Result",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ok2",
+                "name": "ok",
+                "type": "boolean",
+                "value": true
+              },
+              {
+                "id": "data2",
+                "name": "data",
+                "type": "object",
+                "value": "={{ $json.json || {} }}"
+              },
+              {
+                "id": "src2",
+                "name": "source",
+                "type": "string",
+                "value": "serviceA"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "HTTP Service A",
+        "parameters": {
+          "jsonBody": "={{ $json.payload }}",
+          "method": "POST",
+          "options": {
+            "maxRetries": 2,
+            "retryOnFail": true
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "https://httpbin.org/post"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Notas & Testes",
+        "parameters": {
+          "color": 7,
+          "content": "## Template: Orquestrador Webhook Escalável\n\n- Objetivo: Roteia ações (ping/process) e responde rápido.\n- Teste rápido (Terminal):\n```bash\ncurl -X POST http://<SEU_N8N>/webhook/template/scalable-orchestrator \\\n  -H 'Content-Type: application/json' \\\n  -d '{\\\"action\\\":\\\"process\\\",\\\"payload\\\":{\\\"id\\\":1,\\\"text\\\":\\\"olá\\\"}}'\n```\n- Produção: Troque 'HTTP Service A' para sua API/serviço com credenciais.\n- Resiliência: HTTP possui retry automático (2x).\n",
+          "height": 380,
+          "width": 720
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Parse Input",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "in_action",
+                "name": "action",
+                "type": "string",
+                "value": "={{ $json.body?.action || 'ping' }}"
+              },
+              {
+                "id": "in_payload",
+                "name": "payload",
+                "type": "object",
+                "value": "={{ $json.body?.payload || {\\\"id\\\":123,\\\"text\\\":\\\"hello\\\"} }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Respond",
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "={{ $json }}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Route by action",
+        "parameters": {
+          "options": {
+            "fallbackOutput": "none"
+          },
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "operator": {
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "ping"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 1
+                  }
+                },
+                "outputKey": "ping",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "operator": {
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "process"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 1
+                  }
+                },
+                "outputKey": "process",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "template/scalable-orchestrator",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 178,
+  "viewCount": 675,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Respond\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Notas & Testes\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Route by action\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Service A\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Parse Input\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Compose Ping\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Compose Result\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-mbs7mqdrj",
+      "workflowId": "scalable-webhook-orchestrator-mambr",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Templates/9001_Scalable_Webhook_Orchestrator_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Templates\\9001_Scalable_Webhook_Orchestrator_Webhook.json",
+      "discoveredAt": "2026-07-15T11:20:28.796Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:28.796Z",
+  "updatedAt": "2026-07-15T11:20:28.796Z"
+}

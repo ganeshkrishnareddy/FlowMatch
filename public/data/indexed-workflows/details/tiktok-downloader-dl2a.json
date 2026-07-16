@@ -1,0 +1,857 @@
+{
+  "id": "tiktok-downloader-3qle0",
+  "name": "Tiktok Downloader",
+  "slug": "tiktok-downloader-dl2a",
+  "description": "Automated workflow: Tiktok Downloader. This workflow integrates 6 different services: stickyNote, httpRequest, code, googleDrive, stopAndError. It contains 16 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Tiktok Downloader workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "aVienX696oMCH1DR",
+    "meta": {
+      "instanceId": "workflow-e9347ced",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:43.683394",
+      "updatedAt": "2025-09-29T07:07:43.683445",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Tiktok Downloader",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "4dc30078-c7df-4bcb-91ed-953cd6da4a13",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -280,
+          20
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5598aa10-f667-4023-b9de-fe07e86badec",
+        "name": "Get TikTok Video Page Data",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          40,
+          20
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "responseFormat": "text"
+              }
+            }
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "734a5304-f67f-4ace-a1da-0d268664452c",
+        "name": "Scrape raw video URL",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          480,
+          20
+        ],
+        "parameters": {
+          "jsCode": "const html = $input.first().json.data;\nconst headers = $input.first().json.headers || {};\nconst cookies = headers['set-cookie'] || [];\n\nif (!html) {\n  throw new Error(\"HTML body is undefined. Check the previous node's output.\");\n}\nconst regex = /<script id=\"__UNIVERSAL_DATA_FOR_REHYDRATION__\" type=\"application\\/json\">([\\s\\S]*?)<\\/script>/;\nconst match = html.match(regex);\n\nif (match) {\n  const jsonStr = match[1];\n  const data = JSON.parse(jsonStr);\n  const videoUrl = data?.__DEFAULT_SCOPE__?.[\"webapp.video-detail\"]?.itemInfo?.itemStruct?.video?.playAddr;\n  if (!videoUrl) {\n    throw new Error(\"Could not find video URL in the JSON data.\");\n  }\n  return [{ json: { videoUrl, cookies: cookies.join('; ') } }];\n} else {\n  throw new Error(\"Could not find __UNIVERSAL_DATA_FOR_REHYDRATION__ script in the HTML.\");\n}"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5",
+        "name": "Output video file without watermark",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          900,
+          20
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            },
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+              },
+              {
+                "name": "Referer",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              },
+              {
+                "name": "Accept",
+                "value": "video/mp4,video/webm,video/*;q=0.9,application/octet-stream;q=0.8"
+              },
+              {
+                "name": "Accept-Language",
+                "value": "en-US,en;q=0.5"
+              },
+              {
+                "name": "Connection",
+                "value": "keep-alive"
+              },
+              {
+                "name": "Cookie",
+                "value": "={{ $json.cookies }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "73d4ffa7-2264-4a84-9ab2-2004342e3039",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -140,
+          -180
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 460,
+          "height": 360,
+          "content": "## 1. Load the video page\nOpen this node and replace the URL with the one of the video you want to download without a watermark.\n\nA Tiktok video URL looks like: {{ $env.WEBHOOK_URL }}\n\nOutputs the returned page HTML along with the session cookies\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "848fc04b-2620-4d83-8701-52c053f7c017",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          340,
+          -180
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 380,
+          "height": 360,
+          "content": "## 2. Find the raw video URL\nParses through all of the HTML and finds the section containing the video URL before the watermark is applied"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "40b3a2bd-5733-43a8-951c-d5fa26647615",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          740,
+          -180
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 400,
+          "height": 360,
+          "content": "## 3. Output video file without watermark\nUsing the cookies from step 1, a request is made to access the original video file as shown on TikTok"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "36629265-f139-433f-9603-0670a08be1ed",
+        "name": "Upload to Google Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          300,
+          360
+        ],
+        "parameters": {
+          "name": "={{ $node[\"Get TikTok Video Page Data\"].parameter[\"url\"].match(/\\/video\\/(\\d+)/)[1] + \".mp4\" }}",
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "options": {},
+          "folderId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "root",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "/ (Root folder)"
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "ZvDuyVfbZJbDJXcS",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "94364c83-14ce-48c3-afe5-b7cd8addd2a0",
+        "name": "Set file permissions to public with link",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          560,
+          360
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "options": {},
+          "operation": "share",
+          "permissionsUi": {
+            "permissionsValues": {
+              "role": "writer",
+              "type": "anyone",
+              "allowFileDiscovery": true
+            }
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "ZvDuyVfbZJbDJXcS",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d37ad36c-0b7f-4c2c-9538-dc8bf75e997f",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          260,
+          200
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 500,
+          "height": 320,
+          "content": "## (Optional) Upload video to Google Drive\nAn expression is used to save the file to your Google Drive as Video_ID.mp4\n\nNote: Must have Google Drive API enabled in [Google Cloud Console]({{ $env.API_BASE_URL }} OAuth ClientID and Client Secret credentials setup"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "70234bbb-ccaf-4291-a50b-063e07303678",
+    "connections": {
+      "5598aa10-f667-4023-b9de-fe07e86badec": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-748f1624",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-8b337b92",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-9e582d90",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-07edffc3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-749f902a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-b4d54ef8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-a8b29389",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-4eaf7d7d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-9e9326ba",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-40b97422",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-4d5cf7e4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-ed647df1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-784f3341",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-7f3ca945",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-0e3f7173",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-e16d2592",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "36629265-f139-433f-9603-0670a08be1ed": {
+        "main": [
+          [
+            {
+              "node": "error-handler-36629265-f139-433f-9603-0670a08be1ed-1e804dbc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "94364c83-14ce-48c3-afe5-b7cd8addd2a0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-94364c83-14ce-48c3-afe5-b7cd8addd2a0-0d8f723c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Tiktok Downloader. This workflow integrates 6 different services: stickyNote, httpRequest, code, googleDrive, stopAndError. It contains 16 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Tiktok Downloader. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "36629265-f139-433f-9603-0670a08be1ed": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-36629265-f139-433f-9603-0670a08be1ed-1e804dbc"
+            }
+          ]
+        ]
+      },
+      "5598aa10-f667-4023-b9de-fe07e86badec": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-748f1624"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-8b337b92"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-9e582d90"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-07edffc3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-749f902a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-b4d54ef8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-a8b29389"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5598aa10-f667-4023-b9de-fe07e86badec-4eaf7d7d"
+            }
+          ]
+        ]
+      },
+      "94364c83-14ce-48c3-afe5-b7cd8addd2a0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-94364c83-14ce-48c3-afe5-b7cd8addd2a0-0d8f723c"
+            }
+          ]
+        ]
+      },
+      "f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-9e9326ba"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-40b97422"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-4d5cf7e4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-ed647df1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-784f3341"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-7f3ca945"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-0e3f7173"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f574ccb8-6f5f-4e55-a2d5-7ad775d3c4e5-e16d2592"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Tiktok Downloader",
+    "nodes": [
+      {
+        "name": "Get TikTok Video Page Data",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "responseFormat": "text"
+              }
+            }
+          },
+          "sendHeaders": true,
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Output video file without watermark",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+              },
+              {
+                "name": "Referer",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              },
+              {
+                "name": "Accept",
+                "value": "video/mp4,video/webm,video/*;q=0.9,application/octet-stream;q=0.8"
+              },
+              {
+                "name": "Accept-Language",
+                "value": "en-US,en;q=0.5"
+              },
+              {
+                "name": "Connection",
+                "value": "keep-alive"
+              },
+              {
+                "name": "Cookie",
+                "value": "={{ $json.cookies }}"
+              }
+            ]
+          },
+          "options": {
+            "allowUnauthorizedCerts": true,
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Scrape raw video URL",
+        "parameters": {
+          "jsCode": "const html = $input.first().json.data;\nconst headers = $input.first().json.headers || {};\nconst cookies = headers['set-cookie'] || [];\n\nif (!html) {\n  throw new Error(\"HTML body is undefined. Check the previous node's output.\");\n}\nconst regex = /<script id=\"__UNIVERSAL_DATA_FOR_REHYDRATION__\" type=\"application\\/json\">([\\s\\S]*?)<\\/script>/;\nconst match = html.match(regex);\n\nif (match) {\n  const jsonStr = match[1];\n  const data = JSON.parse(jsonStr);\n  const videoUrl = data?.__DEFAULT_SCOPE__?.[\"webapp.video-detail\"]?.itemInfo?.itemStruct?.video?.playAddr;\n  if (!videoUrl) {\n    throw new Error(\"Could not find video URL in the JSON data.\");\n  }\n  return [{ json: { videoUrl, cookies: cookies.join('; ') } }];\n} else {\n  throw new Error(\"Could not find __UNIVERSAL_DATA_FOR_REHYDRATION__ script in the HTML.\");\n}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Set file permissions to public with link",
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "operation": "share",
+          "options": {},
+          "permissionsUi": {
+            "permissionsValues": {
+              "allowFileDiscovery": true,
+              "role": "writer",
+              "type": "anyone"
+            }
+          }
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 6,
+          "content": "## 1. Load the video page\nOpen this node and replace the URL with the one of the video you want to download without a watermark.\n\nA Tiktok video URL looks like: {{ $env.WEBHOOK_URL }}\n\nOutputs the returned page HTML along with the session cookies\n\n",
+          "height": 360,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "## 2. Find the raw video URL\nParses through all of the HTML and finds the section containing the video URL before the watermark is applied",
+          "height": 360,
+          "width": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "## 3. Output video file without watermark\nUsing the cookies from step 1, a request is made to access the original video file as shown on TikTok",
+          "height": 360,
+          "width": 400
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 7,
+          "content": "## (Optional) Upload video to Google Drive\nAn expression is used to save the file to your Google Drive as Video_ID.mp4\n\nNote: Must have Google Drive API enabled in [Google Cloud Console]({{ $env.API_BASE_URL }} OAuth ClientID and Client Secret credentials setup",
+          "height": 320,
+          "width": 500
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Upload to Google Drive",
+        "parameters": {
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "cachedResultName": "/ (Root folder)",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "root"
+          },
+          "name": "={{ $node[\"Get TikTok Video Page Data\"].parameter[\"url\"].match(/\\/video\\/(\\d+)/)[1] + \".mp4\" }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Google Drive"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 133,
+  "viewCount": 425,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Google Drive Account"
+    ],
+    "requiredCredentials": [
+      "google Drive  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Get TikTok Video Page Data\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Output video file without watermark\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Upload to Google Drive\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set file permissions to public with link\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-qzg1q6c2o",
+      "workflowId": "tiktok-downloader-3qle0",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/1802_Code_Manual_Import_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\1802_Code_Manual_Import_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:18.472Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:18.472Z",
+  "updatedAt": "2026-07-15T11:18:18.472Z"
+}

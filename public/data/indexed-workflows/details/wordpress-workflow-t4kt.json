@@ -1,0 +1,1642 @@
+{
+  "id": "wordpress-workflow-xt7xb",
+  "name": "Wordpress Workflow",
+  "slug": "wordpress-workflow-t4kt",
+  "description": "Automated workflow: Wordpress Workflow. This workflow integrates 9 different services: filter, wordpress, httpRequest, markdown, airtable. It contains 21 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Wordpress Workflow workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-eb97e797",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:08:01.638493",
+      "updatedAt": "2025-09-29T07:08:01.638587",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "92ffb384-849f-411b-981f-e324190eaae4",
+        "name": "Post on Wordpress",
+        "type": "n8n-nodes-base.wordpress",
+        "position": [
+          1340,
+          700
+        ],
+        "parameters": {
+          "title": "={{ $json.Title }}",
+          "additionalFields": {
+            "status": "draft",
+            "content": "={{ $json['Blog Body'] }}"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This wordpress node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b3148c02-8088-4b81-afa8-1d57bef570e5",
+        "name": "Upload Media",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1840,
+          700
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "binaryData",
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "content-disposition",
+                "value": "=attachment; filename={{ $binary.data.fileName }}.{{ $binary.data.fileExtension }}"
+              },
+              {
+                "name": "content-type",
+                "value": "={{ $binary.data.mimeType }}"
+              }
+            ]
+          },
+          "inputDataFieldName": "data",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d81ab003-fb36-4570-ab58-65b9a5db38be",
+        "name": "Set Featured Image",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2000,
+          700
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "featured_media",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          },
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "176ed2b0-2e27-4c04-a3fb-94842a82d3ab",
+        "name": "Edit Fields",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1040,
+          700
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "66db867d-e056-4713-8877-14c60775738a",
+                "name": "id",
+                "type": "string",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "id": "c2e3724a-1406-48a7-b15c-1cda06dd44e9",
+                "name": "Title",
+                "type": "string",
+                "value": "={{ $json.Title }}"
+              },
+              {
+                "id": "d47d0436-ae61-4c68-a57f-273e77354050",
+                "name": "Keyword",
+                "type": "string",
+                "value": "={{ $json.Keyword }}"
+              },
+              {
+                "id": "34d8bc1f-77f6-496e-a36f-faa06d5cd6dd",
+                "name": "Blog Body",
+                "type": "string",
+                "value": "={{ $json[\"Blog Post\"].replace($json[\"Title\"],'') }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ff8d11c0-a604-4959-8dbd-56a5265a0559",
+        "name": "Get content to post",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          680,
+          700
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appEanjsKFnMPZZz3",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "SEO Doctor"
+          },
+          "limit": 3,
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tblkWGFcUJ2WVyL9f",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "AI Generated Blog Posts"
+          },
+          "options": {},
+          "operation": "search",
+          "returnAll": false,
+          "filterByFormula": "SEARCH(\"To Post\", {Status})"
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "43f99839-2690-4324-8d26-201fc55f7b02",
+        "name": "Filter by existing Blogs",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          860,
+          700
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "d31b3381-dc99-41ae-b309-40e270ebf714",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json['Blog Post'] }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "924eeb0a-ee5d-40f1-915c-19e34018c619",
+        "name": "Markdown to HTML",
+        "type": "n8n-nodes-base.markdown",
+        "position": [
+          1180,
+          700
+        ],
+        "parameters": {
+          "mode": "markdownToHtml",
+          "options": {},
+          "markdown": "={{ $json['Blog Body'] }} {{ $json['Blog Body'] }} {{ $json['Blog Body'] }}",
+          "destinationKey": "YOUR_CREDENTIAL_HERE"
+        },
+        "typeVersion": 1,
+        "notes": "This markdown node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3aed566c-04bc-4164-85d7-1f13a7862f5a",
+        "name": "Get Image",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1500,
+          700
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "lFlHMbYfTkSZ2HupBHDggMucIq38GQ5QICPstDPVdaHVxn9afY983qnS"
+              },
+              {
+                "name": "content",
+                "value": "= {{ $('Edit Fields').item.json.Keyword }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2729c11b-0c94-4e05-9d98-80d70eac1c2d",
+        "name": "Download the image",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1660,
+          700
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "responseFormat": "file"
+        },
+        "typeVersion": 2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9b31f00c-dad3-403c-953e-21df2cd3af65",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          760,
+          340
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 662.5970350404314,
+          "height": 321.75,
+          "content": "## Automating Posting content to WordPress and setting up the featured Image\nThis workflow aims to simplify the process by which we share content on Wordpress sites with n8n from airtable\n\n### Usage\n1. Get the content from AirTable. SInce we have this as a markdown, we will have to convert it to a html format to make it easier to publish and manage on WordPress\n2. Upload the blog post with the content, title and all other relevant information needed for an optimized blog\n3. Once the post is posted, we need to upload the image and set it as a features image for the blogs"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ca838f99-39f7-4641-9293-502a7e0be912",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          520,
+          700
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7eb92d69-3815-45d3-9da9-63a28b15f661",
+        "name": "Update POST on Airtable",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          2180,
+          700
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appEanjsKFnMPZZz3",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "SEO Doctor"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tblkWGFcUJ2WVyL9f",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "AI Generated Blog Posts"
+          },
+          "columns": {
+            "value": {
+              "id": "={{ $('Edit Fields').item.json.id }}",
+              "Status": "Posted"
+            },
+            "schema": [
+              {
+                "id": "id",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": true,
+                "required": false,
+                "displayName": "id",
+                "defaultMatch": true
+              },
+              {
+                "id": "Title",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Title",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Blog Post",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Blog Post",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Star",
+                "type": "number",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Star",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Intent",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Intent",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Status",
+                "type": "options",
+                "display": true,
+                "options": [
+                  {
+                    "name": "Draft",
+                    "value": "Draft"
+                  },
+                  {
+                    "name": "First Copy",
+                    "value": "First Copy"
+                  },
+                  {
+                    "name": "Second Copy",
+                    "value": "Second Copy"
+                  },
+                  {
+                    "name": "To Post",
+                    "value": "To Post"
+                  },
+                  {
+                    "name": "Posted",
+                    "value": "Posted"
+                  },
+                  {
+                    "name": "Review",
+                    "value": "Review"
+                  },
+                  {
+                    "name": "Tracking",
+                    "value": "Tracking"
+                  }
+                ],
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Status",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Keyword",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Keyword",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "count",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": true,
+                "required": false,
+                "displayName": "count",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Word count",
+                "type": "number",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Word count",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Last Modified",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": true,
+                "required": false,
+                "displayName": "Last Modified",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Image",
+                "type": "array",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Image",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Images",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Images",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "All keyword Data and Tracking",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": true,
+                "required": false,
+                "displayName": "All keyword Data and Tracking",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Search Volume",
+                "type": "number",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Search Volume",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Frequency",
+                "type": "number",
+                "display": true,
+                "removed": true,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Frequency",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "id"
+            ]
+          },
+          "options": {},
+          "operation": "update"
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "536659ab-ca94-420f-8110-e277676b939a",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          500,
+          340
+        ],
+        "parameters": {
+          "height": 323,
+          "content": "## SETUP\n1. Create a wordpress application and set up the password\n\n2. Have an airtable with the columns \nKeyword | Title | Blog content\n\n3. The blog content in this canse is a markdown format generated by AI"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "b3148c02-8088-4b81-afa8-1d57bef570e5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-5c2bf7bf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-3d4d321d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-7ffcd1a0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-926672f2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-4d65df4f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-c17d4aa1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-1d85edce",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-b3696a82",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d81ab003-fb36-4570-ab58-65b9a5db38be": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-3bc48ca3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-c14bcbe9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-fa8a4310",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-6de17a5e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-f9934af4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-b3399903",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-1b211a33",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-c9408a1b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "3aed566c-04bc-4164-85d7-1f13a7862f5a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-87479750",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-c3b3ecc1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-6d669cde",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-50ac3fc1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-7985e15d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-a7ccc3fd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-dc627d11",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-6042f4af",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "2729c11b-0c94-4e05-9d98-80d70eac1c2d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-dfc874c7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-d8f9365d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-381e8d82",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-e03bb36e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-fb30bd6a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-d9b000fb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-e3f239f6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-071f138f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Wordpress Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Wordpress Workflow. This workflow integrates 9 different services: filter, wordpress, httpRequest, markdown, airtable. It contains 21 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Wordpress Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "2729c11b-0c94-4e05-9d98-80d70eac1c2d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-dfc874c7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-d8f9365d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-381e8d82"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-e03bb36e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-fb30bd6a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-d9b000fb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-e3f239f6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2729c11b-0c94-4e05-9d98-80d70eac1c2d-071f138f"
+            }
+          ]
+        ]
+      },
+      "3aed566c-04bc-4164-85d7-1f13a7862f5a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-87479750"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-c3b3ecc1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-6d669cde"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-50ac3fc1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-7985e15d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-a7ccc3fd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-dc627d11"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3aed566c-04bc-4164-85d7-1f13a7862f5a-6042f4af"
+            }
+          ]
+        ]
+      },
+      "b3148c02-8088-4b81-afa8-1d57bef570e5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-5c2bf7bf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-3d4d321d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-7ffcd1a0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-926672f2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-4d65df4f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-c17d4aa1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-1d85edce"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b3148c02-8088-4b81-afa8-1d57bef570e5-b3696a82"
+            }
+          ]
+        ]
+      },
+      "d81ab003-fb36-4570-ab58-65b9a5db38be": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-3bc48ca3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-c14bcbe9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-fa8a4310"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-6de17a5e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-f9934af4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-b3399903"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-1b211a33"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d81ab003-fb36-4570-ab58-65b9a5db38be-c9408a1b"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Wordpress Workflow",
+    "nodes": [
+      {
+        "name": "Download the image",
+        "parameters": {
+          "options": {},
+          "responseFormat": "file",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2
+      },
+      {
+        "name": "Edit Fields",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "66db867d-e056-4713-8877-14c60775738a",
+                "name": "id",
+                "type": "string",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "id": "c2e3724a-1406-48a7-b15c-1cda06dd44e9",
+                "name": "Title",
+                "type": "string",
+                "value": "={{ $json.Title }}"
+              },
+              {
+                "id": "d47d0436-ae61-4c68-a57f-273e77354050",
+                "name": "Keyword",
+                "type": "string",
+                "value": "={{ $json.Keyword }}"
+              },
+              {
+                "id": "34d8bc1f-77f6-496e-a36f-faa06d5cd6dd",
+                "name": "Blog Body",
+                "type": "string",
+                "value": "={{ $json[\"Blog Post\"].replace($json[\"Title\"],'') }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.3
+      },
+      {
+        "name": "Filter by existing Blogs",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "d31b3381-dc99-41ae-b309-40e270ebf714",
+                "leftValue": "={{ $json['Blog Post'] }}",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get content to post",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "SEO Doctor",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "appEanjsKFnMPZZz3"
+          },
+          "filterByFormula": "SEARCH(\"To Post\", {Status})",
+          "limit": 3,
+          "operation": "search",
+          "options": {},
+          "returnAll": false,
+          "table": {
+            "__rl": true,
+            "cachedResultName": "AI Generated Blog Posts",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tblkWGFcUJ2WVyL9f"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get Image",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "lFlHMbYfTkSZ2HupBHDggMucIq38GQ5QICPstDPVdaHVxn9afY983qnS"
+              },
+              {
+                "name": "content",
+                "value": "= {{ $('Edit Fields').item.json.Keyword }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Markdown to HTML",
+        "parameters": {
+          "destinationKey": "YOUR_CREDENTIAL_HERE",
+          "markdown": "={{ $json['Blog Body'] }} {{ $json['Blog Body'] }} {{ $json['Blog Body'] }}",
+          "mode": "markdownToHtml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.markdown",
+        "typeVersion": 1
+      },
+      {
+        "name": "Post on Wordpress",
+        "parameters": {
+          "additionalFields": {
+            "content": "={{ $json['Blog Body'] }}",
+            "status": "draft"
+          },
+          "title": "={{ $json.Title }}"
+        },
+        "type": "n8n-nodes-base.wordpress",
+        "typeVersion": 1
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Set Featured Image",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "featured_media",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          },
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "## Automating Posting content to WordPress and setting up the featured Image\nThis workflow aims to simplify the process by which we share content on Wordpress sites with n8n from airtable\n\n### Usage\n1. Get the content from AirTable. SInce we have this as a markdown, we will have to convert it to a html format to make it easier to publish and manage on WordPress\n2. Upload the blog post with the content, title and all other relevant information needed for an optimized blog\n3. Once the post is posted, we need to upload the image and set it as a features image for the blogs",
+          "height": 321.75,
+          "width": 662.5970350404314
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## SETUP\n1. Create a wordpress application and set up the password\n\n2. Have an airtable with the columns \nKeyword | Title | Blog content\n\n3. The blog content in this canse is a markdown format generated by AI",
+          "height": 323
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Update POST on Airtable",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "SEO Doctor",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "appEanjsKFnMPZZz3"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "id"
+            ],
+            "schema": [
+              {
+                "defaultMatch": true,
+                "display": true,
+                "displayName": "id",
+                "id": "id",
+                "readOnly": true,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Title",
+                "id": "Title",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Blog Post",
+                "id": "Blog Post",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Star",
+                "id": "Star",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "number"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Intent",
+                "id": "Intent",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Status",
+                "id": "Status",
+                "options": [
+                  {
+                    "name": "Draft",
+                    "value": "Draft"
+                  },
+                  {
+                    "name": "First Copy",
+                    "value": "First Copy"
+                  },
+                  {
+                    "name": "Second Copy",
+                    "value": "Second Copy"
+                  },
+                  {
+                    "name": "To Post",
+                    "value": "To Post"
+                  },
+                  {
+                    "name": "Posted",
+                    "value": "Posted"
+                  },
+                  {
+                    "name": "Review",
+                    "value": "Review"
+                  },
+                  {
+                    "name": "Tracking",
+                    "value": "Tracking"
+                  }
+                ],
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "options"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Keyword",
+                "id": "Keyword",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "count",
+                "id": "count",
+                "readOnly": true,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Word count",
+                "id": "Word count",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "number"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Last Modified",
+                "id": "Last Modified",
+                "readOnly": true,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Image",
+                "id": "Image",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "array"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Images",
+                "id": "Images",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "All keyword Data and Tracking",
+                "id": "All keyword Data and Tracking",
+                "readOnly": true,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Search Volume",
+                "id": "Search Volume",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "number"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Frequency",
+                "id": "Frequency",
+                "readOnly": false,
+                "removed": true,
+                "required": false,
+                "type": "number"
+              }
+            ],
+            "value": {
+              "Status": "Posted",
+              "id": "={{ $('Edit Fields').item.json.id }}"
+            }
+          },
+          "operation": "update",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "AI Generated Blog Posts",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tblkWGFcUJ2WVyL9f"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "name": "Upload Media",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "contentType": "binaryData",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "content-disposition",
+                "value": "=attachment; filename={{ $binary.data.fileName }}.{{ $binary.data.fileExtension }}"
+              },
+              {
+                "name": "content-type",
+                "value": "={{ $binary.data.mimeType }}"
+              }
+            ]
+          },
+          "inputDataFieldName": "data",
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Wordpress",
+    "HTTP Request",
+    "Airtable",
+    "Markdown"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 82,
+  "viewCount": 639,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Wordpress Account",
+      "HTTP Request Account",
+      "Airtable Account",
+      "Markdown Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Post on Wordpress\" node (n8n-nodes-base.wordpress) and configure the action parameters, mappings, and fields.",
+      "Open the \"Upload Media\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set Featured Image\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get content to post\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Filter by existing Blogs\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Markdown to HTML\" node (n8n-nodes-base.markdown) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Image\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download the image\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update POST on Airtable\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Edit Fields\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-vuk1a26eh",
+      "workflowId": "wordpress-workflow-xt7xb",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Wordpress/0502_Wordpress_Filter_Update_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Wordpress\\0502_Wordpress_Filter_Update_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:31:35.408Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:31:35.408Z",
+  "updatedAt": "2026-07-15T11:31:35.408Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

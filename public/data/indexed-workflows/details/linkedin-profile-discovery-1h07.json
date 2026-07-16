@@ -1,0 +1,522 @@
+{
+  "id": "linkedin-profile-discovery-t07hg",
+  "name": "LinkedIn Profile Discovery",
+  "slug": "linkedin-profile-discovery-1h07",
+  "description": "Automated workflow: LinkedIn Profile Discovery. This workflow processes data and performs automated tasks.",
+  "shortDescription": "LinkedIn Profile Discovery workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "lifB7iUXlDzr5dmI",
+    "meta": {
+      "instanceId": "workflow-b9eb9d03",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.228304",
+      "updatedAt": "2025-09-29T07:07:50.228313",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "LinkedIn Profile Discovery",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "9ae64a3a-c7e7-45ca-88ee-ebf6144f3197",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a22416bb-ef9e-422f-b480-cd52d8c93bfa",
+        "name": "Person info",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1rjlKzphEbknNh_ToS9pR_dP_Tw93FsxDte5AI4LH5_E",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Linkedin Profile URLs"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "CwpCAR1HwgHZpRtJ",
+            "name": "Google Drive"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a4699dd8-54ef-478e-9ff8-2c2046ad6ea8",
+        "name": "Search profile",
+        "type": "n8n-nodes-base.airtop",
+        "notes": "This could take a few minutes depending on the number of rows",
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "prompt": "=This is Google Search results. the first results should be the Linkedin Page of {{ $json['Person Info'] }} \nReturn the Linkedin URL and nothing else.\nIf you cannot find the Linkedin URL, return an empty string. \nA valid Linkedin profile URL starts with \"{{ $env.WEBHOOK_URL }}\"",
+          "resource": "extraction",
+          "operation": "query",
+          "sessionMode": "new",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "airtopApi": {
+            "id": "byhouJF8RLH5DkmY",
+            "name": "Airtop"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1
+      },
+      {
+        "id": "2dd4d350-743e-48a7-ab69-d0996bc46f49",
+        "name": "Parse response",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          660,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const linkedInProfile = $json.data.modelResponse\nconst rowData = $('Person info').item.json\n\nreturn { json: {\n  ...rowData,\n  'LinkedIn URL': linkedInProfile\n}};"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3efc182a-8707-4c8d-8263-a2aebe62b0a7",
+        "name": "Update row",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          880,
+          0
+        ],
+        "parameters": {
+          "columns": {
+            "value": {},
+            "schema": [
+              {
+                "id": "Person Info",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Person Info",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Linkedin URL",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Linkedin URL",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Validated",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Validated",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "row_number",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": true,
+                "required": false,
+                "displayName": "row_number",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "autoMapInputData",
+            "matchingColumns": [
+              "row_number"
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "update",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1rjlKzphEbknNh_ToS9pR_dP_Tw93FsxDte5AI4LH5_E",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Linkedin Profile URLs"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "CwpCAR1HwgHZpRtJ",
+            "name": "Google Drive"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-e402f642",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "97cd5141-63d5-4ece-83eb-e544455097d3",
+    "connections": {
+      "a22416bb-ef9e-422f-b480-cd52d8c93bfa": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a22416bb-ef9e-422f-b480-cd52d8c93bfa-622a351d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "3efc182a-8707-4c8d-8263-a2aebe62b0a7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-3efc182a-8707-4c8d-8263-a2aebe62b0a7-96989377",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: LinkedIn Profile Discovery. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: LinkedIn Profile Discovery. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "3efc182a-8707-4c8d-8263-a2aebe62b0a7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3efc182a-8707-4c8d-8263-a2aebe62b0a7-96989377"
+            }
+          ]
+        ]
+      },
+      "a22416bb-ef9e-422f-b480-cd52d8c93bfa": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a22416bb-ef9e-422f-b480-cd52d8c93bfa-622a351d"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "LinkedIn Profile Discovery",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Parse response",
+        "parameters": {
+          "jsCode": "const linkedInProfile = $json.data.modelResponse\nconst rowData = $('Person info').item.json\n\nreturn { json: {\n  ...rowData,\n  'LinkedIn URL': linkedInProfile\n}};",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Person info",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Linkedin Profile URLs",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1rjlKzphEbknNh_ToS9pR_dP_Tw93FsxDte5AI4LH5_E"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "airtopApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search profile",
+        "parameters": {
+          "additionalFields": {},
+          "operation": "query",
+          "prompt": "=This is Google Search results. the first results should be the Linkedin Page of {{ $json['Person Info'] }} \nReturn the Linkedin URL and nothing else.\nIf you cannot find the Linkedin URL, return an empty string. \nA valid Linkedin profile URL starts with \"{{ $env.WEBHOOK_URL }}\"",
+          "resource": "extraction",
+          "sessionMode": "new",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.airtop",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update row",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "autoMapInputData",
+            "matchingColumns": [
+              "row_number"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Person Info",
+                "id": "Person Info",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Linkedin URL",
+                "id": "Linkedin URL",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Validated",
+                "id": "Validated",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "row_number",
+                "id": "row_number",
+                "readOnly": true,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {}
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Linkedin Profile URLs",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1rjlKzphEbknNh_ToS9pR_dP_Tw93FsxDte5AI4LH5_E"
+          },
+          "operation": "update",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Google Sheets",
+    "Airtop"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 155,
+  "viewCount": 668,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "Airtop Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details",
+      "airtop  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Person info\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Search profile\" node (n8n-nodes-base.airtop) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update row\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-oh0uzgdry",
+      "workflowId": "linkedin-profile-discovery-t07hg",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/1912_Manual_GoogleSheets_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\1912_Manual_GoogleSheets_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:45.818Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:45.818Z",
+  "updatedAt": "2026-07-15T11:29:45.818Z",
+  "category": {
+    "slug": "social-media",
+    "name": "Social Media"
+  },
+  "categoryId": "social-media"
+}

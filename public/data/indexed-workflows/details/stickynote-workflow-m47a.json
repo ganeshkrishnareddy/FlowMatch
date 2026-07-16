@@ -1,0 +1,739 @@
+{
+  "id": "stickynote-workflow-c9l8k",
+  "name": "Stickynote Workflow",
+  "slug": "stickynote-workflow-m47a",
+  "description": "Automated workflow: Stickynote Workflow. This workflow integrates 13 different services: stickyNote, code, merge, summarize, set. It contains 16 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Stickynote Workflow workflow containing 16 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-19d3dd5c",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.525225",
+      "updatedAt": "2025-09-29T07:07:44.525237",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "79573e58-f33f-445a-ad9a-0a92fde845c2",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -280,
+          480
+        ],
+        "parameters": {
+          "width": 1174.6162657502882,
+          "height": 578.9520146851776,
+          "content": "## Sub-workflow: Return the capitals of fictional countries\nIt can either list the countries it knows about or return the capital of a specific country"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5eddcce9-7ee5-4ec7-a0a1-525a9b806994",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -280,
+          -80
+        ],
+        "parameters": {
+          "width": 1168,
+          "height": 528,
+          "content": "## Main workflow: Chat with OpenAI Assistant\nClick the 'Chat' button at the bottom of the screen to try"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a6c38394-1be1-4002-a9b7-c4672823aaa5",
+        "name": "When chat message received",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -180,
+          40
+        ],
+        "webhookId": "91f22813-2f7b-4ff9-a3e6-9d53fc86fbd9",
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1.1,
+        "notes": "This chatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "de0398ea-c2ad-49b9-860b-695149b94590",
+        "name": "OpenAI",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          100,
+          40
+        ],
+        "parameters": {
+          "options": {},
+          "resource": "assistant",
+          "assistantId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "asst_BWy0154vMGMdrX7MjCYaYv6a"
+          }
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.8,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "050042f4-f5ff-433a-9651-43cbec8eafb6",
+        "name": "Simple Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          360,
+          260
+        ],
+        "parameters": {},
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e4ed4cfe-78fb-44a5-8bef-67168dac95ec",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -180,
+          740
+        ],
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "query"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a3a1059c-5c36-4d90-90e2-98e37f62bdd2",
+        "name": "Tool to call the workflow below",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          40,
+          260
+        ],
+        "parameters": {
+          "name": "country_capitals_tool",
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $workflow.id }}"
+          },
+          "description": "This tool has two modes:\n1. Pass 'list' to the tool to get a list of countries that the tool has the capitals for (one per line). This is useful if you can't find a match, to see if the country being asked about might have been misspelled.\n2. Pass one of the country names in the list to the tool to get the capital of that country. Note that the country must be spelled exactly as it is in the list of countries returned in mode 1",
+          "workflowInputs": {
+            "value": {
+              "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}"
+            },
+            "schema": [
+              {
+                "id": "query",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "query",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This toolWorkflow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "80924ec9-5e82-4e90-8b72-42fc805d83c0",
+        "name": "Tool: Get current date and time",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          200,
+          260
+        ],
+        "parameters": {
+          "name": "date_tool",
+          "jsCode": "let now = DateTime.now()\nreturn now.toISO()",
+          "description": "Call this tool to get the current timestamp (in ISO format). No parameters necessary"
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolCode node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8f6a83bd-71eb-4f2d-b906-a18476f18f40",
+        "name": "List countries?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          40,
+          740
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "ca43a9bd-5db3-4240-ae46-0402c8411818",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.query }}",
+                "rightValue": "list"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "40d93a59-4c91-43e4-a4a3-3732475617d6",
+        "name": "Mapping data",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          260,
+          600
+        ],
+        "parameters": {
+          "jsCode": "return [\n    {\n        \"country\": \"Wakanda\",\n        \"capital\": \"Birnin Zana\"\n    },\n    {\n        \"country\": \"Narnia\",\n        \"capital\": \"Cair Paravel\"\n    },\n    {\n        \"country\": \"Gondor\",\n        \"capital\": \"Minas Tirith\"\n    },\n    {\n        \"country\": \"Oz\",\n        \"capital\": \"The Emerald City\"\n    },\n    {\n        \"country\": \"Westeros\",\n        \"capital\": \"King's Landing\"\n    },\n    {\n        \"country\": \"Panem\",\n        \"capital\": \"The Capitol\"\n    },\n    {\n        \"country\": \"Ruritania\",\n        \"capital\": \"Strelsau\"\n    },\n    {\n        \"country\": \"Mordor\",\n        \"capital\": \"Barad-dûr\"\n    },\n    {\n        \"country\": \"Latveria\",\n        \"capital\": \"Doomstadt\"\n    },\n    {\n        \"country\": \"Atlantis\",\n        \"capital\": \"Poseidonis\"\n    }\n]\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8765b405-8991-421c-bdc5-3eb6d3757fcb",
+        "name": "Concatenate country names",
+        "type": "n8n-nodes-base.summarize",
+        "position": [
+          460,
+          600
+        ],
+        "parameters": {
+          "options": {},
+          "fieldsToSummarize": {
+            "values": [
+              {
+                "field": "country",
+                "separateBy": "\n",
+                "aggregation": "concatenate"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This summarize node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c0b21934-8518-49b4-bbab-f13ad0a74343",
+        "name": "Return country list",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          660,
+          600
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c97c3abc-40b2-4238-912d-030eb9ca3440",
+                "name": "response",
+                "type": "string",
+                "value": "={{ $json.concatenated_country }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5d4f05cc-f4e3-4ce6-9ea8-a324257fa7c3",
+        "name": "Mapping data1",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          260,
+          880
+        ],
+        "parameters": {
+          "jsCode": "return [\n    {\n        \"country\": \"Wakanda\",\n        \"capital\": \"Birnin Zana\"\n    },\n    {\n        \"country\": \"Narnia\",\n        \"capital\": \"Cair Paravel\"\n    },\n    {\n        \"country\": \"Gondor\",\n        \"capital\": \"Minas Tirith\"\n    },\n    {\n        \"country\": \"Oz\",\n        \"capital\": \"The Emerald City\"\n    },\n    {\n        \"country\": \"Westeros\",\n        \"capital\": \"King's Landing\"\n    },\n    {\n        \"country\": \"Panem\",\n        \"capital\": \"The Capitol\"\n    },\n    {\n        \"country\": \"Ruritania\",\n        \"capital\": \"Strelsau\"\n    },\n    {\n        \"country\": \"Mordor\",\n        \"capital\": \"Barad-dûr\"\n    },\n    {\n        \"country\": \"Latveria\",\n        \"capital\": \"Doomstadt\"\n    },\n    {\n        \"country\": \"Atlantis\",\n        \"capital\": \"Poseidonis\"\n    }\n]\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5ed65e2c-b56d-49d9-a205-1e4cc8914fa9",
+        "name": "Get the matching country's details",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          460,
+          820
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "advanced": true,
+          "joinMode": "enrichInput1",
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "query",
+                "field2": "country"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "313775a0-a4ce-488e-a7db-b1ddd49dc3cd",
+        "name": "Return specific capital",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          660,
+          820
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "03ac1883-126f-4419-93e4-c5062b2d766d",
+                "name": "response",
+                "type": "string",
+                "value": "={{ $ifEmpty($json.capital, 'Capital not found') }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-e09fc1c3",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "de0398ea-c2ad-49b9-860b-695149b94590": {
+        "main": [
+          [
+            {
+              "node": "error-handler-de0398ea-c2ad-49b9-860b-695149b94590-94f702c0",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Stickynote Workflow. This workflow integrates 13 different services: stickyNote, code, merge, summarize, set. It contains 16 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stickynote Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "de0398ea-c2ad-49b9-860b-695149b94590": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-de0398ea-c2ad-49b9-860b-695149b94590-94f702c0"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "nodes": [
+      {
+        "name": "Concatenate country names",
+        "parameters": {
+          "fieldsToSummarize": {
+            "values": [
+              {
+                "aggregation": "concatenate",
+                "field": "country",
+                "separateBy": "\n"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.summarize",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get the matching country's details",
+        "parameters": {
+          "advanced": true,
+          "joinMode": "enrichInput1",
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "query",
+                "field2": "country"
+              }
+            ]
+          },
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "List countries?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "ca43a9bd-5db3-4240-ae46-0402c8411818",
+                "leftValue": "={{ $json.query }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "list"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Mapping data",
+        "parameters": {
+          "jsCode": "return [\n    {\n        \"country\": \"Wakanda\",\n        \"capital\": \"Birnin Zana\"\n    },\n    {\n        \"country\": \"Narnia\",\n        \"capital\": \"Cair Paravel\"\n    },\n    {\n        \"country\": \"Gondor\",\n        \"capital\": \"Minas Tirith\"\n    },\n    {\n        \"country\": \"Oz\",\n        \"capital\": \"The Emerald City\"\n    },\n    {\n        \"country\": \"Westeros\",\n        \"capital\": \"King's Landing\"\n    },\n    {\n        \"country\": \"Panem\",\n        \"capital\": \"The Capitol\"\n    },\n    {\n        \"country\": \"Ruritania\",\n        \"capital\": \"Strelsau\"\n    },\n    {\n        \"country\": \"Mordor\",\n        \"capital\": \"Barad-dûr\"\n    },\n    {\n        \"country\": \"Latveria\",\n        \"capital\": \"Doomstadt\"\n    },\n    {\n        \"country\": \"Atlantis\",\n        \"capital\": \"Poseidonis\"\n    }\n]\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Mapping data1",
+        "parameters": {
+          "jsCode": "return [\n    {\n        \"country\": \"Wakanda\",\n        \"capital\": \"Birnin Zana\"\n    },\n    {\n        \"country\": \"Narnia\",\n        \"capital\": \"Cair Paravel\"\n    },\n    {\n        \"country\": \"Gondor\",\n        \"capital\": \"Minas Tirith\"\n    },\n    {\n        \"country\": \"Oz\",\n        \"capital\": \"The Emerald City\"\n    },\n    {\n        \"country\": \"Westeros\",\n        \"capital\": \"King's Landing\"\n    },\n    {\n        \"country\": \"Panem\",\n        \"capital\": \"The Capitol\"\n    },\n    {\n        \"country\": \"Ruritania\",\n        \"capital\": \"Strelsau\"\n    },\n    {\n        \"country\": \"Mordor\",\n        \"capital\": \"Barad-dûr\"\n    },\n    {\n        \"country\": \"Latveria\",\n        \"capital\": \"Doomstadt\"\n    },\n    {\n        \"country\": \"Atlantis\",\n        \"capital\": \"Poseidonis\"\n    }\n]\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI",
+        "parameters": {
+          "assistantId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "asst_BWy0154vMGMdrX7MjCYaYv6a"
+          },
+          "options": {},
+          "resource": "assistant"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "name": "Return country list",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c97c3abc-40b2-4238-912d-030eb9ca3440",
+                "name": "response",
+                "type": "string",
+                "value": "={{ $json.concatenated_country }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Return specific capital",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "03ac1883-126f-4419-93e4-c5062b2d766d",
+                "name": "response",
+                "type": "string",
+                "value": "={{ $ifEmpty($json.capital, 'Capital not found') }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Simple Memory",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Sub-workflow: Return the capitals of fictional countries\nIt can either list the countries it knows about or return the capital of a specific country",
+          "height": 578.9520146851776,
+          "width": 1174.6162657502882
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Main workflow: Chat with OpenAI Assistant\nClick the 'Chat' button at the bottom of the screen to try",
+          "height": 528,
+          "width": 1168
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Tool to call the workflow below",
+        "parameters": {
+          "description": "This tool has two modes:\n1. Pass 'list' to the tool to get a list of countries that the tool has the capitals for (one per line). This is useful if you can't find a match, to see if the country being asked about might have been misspelled.\n2. Pass one of the country names in the list to the tool to get the capital of that country. Note that the country must be spelled exactly as it is in the list of countries returned in mode 1",
+          "name": "country_capitals_tool",
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $workflow.id }}"
+          },
+          "workflowInputs": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "query",
+                "id": "query",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}"
+            }
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 2
+      },
+      {
+        "name": "Tool: Get current date and time",
+        "parameters": {
+          "description": "Call this tool to get the current timestamp (in ISO format). No parameters necessary",
+          "jsCode": "let now = DateTime.now()\nreturn now.toISO()",
+          "name": "date_tool"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When chat message received",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When Executed by Another Workflow",
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "query"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 16,
+  "integrationCount": 0,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 85,
+  "viewCount": 180,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [],
+    "requiredCredentials": [
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When Executed by Another Workflow\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"When chat message received\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Simple Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Tool to call the workflow below\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Tool: Get current date and time\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"List countries?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Concatenate country names\" node (n8n-nodes-base.summarize) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get the matching country's details\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Return country list\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Return specific capital\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 96,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-e5zmrzqnh",
+      "workflowId": "stickynote-workflow-c9l8k",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Executeworkflow/0371_Executeworkflow_Summarize_Send_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Executeworkflow\\0371_Executeworkflow_Summarize_Send_Triggered.json",
+      "discoveredAt": "2026-07-15T11:28:59.223Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:59.223Z",
+  "updatedAt": "2026-07-15T11:28:59.223Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

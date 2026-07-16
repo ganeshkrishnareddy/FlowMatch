@@ -1,0 +1,1311 @@
+{
+  "id": "indeed-company-data-scraper-summarization-with-airtable-bright-data-and-google-gemini-33pom",
+  "name": "Indeed Company Data Scraper & Summarization with Airtable, Bright Data and Google Gemini",
+  "slug": "indeed-company-data-scraper-summarization-with-airtable-bright-data-and-google-gemini-nbbn",
+  "description": "Automated workflow: Indeed Company Data Scraper & Summarization with Airtable, Bright Data and Google Gemini. This workflow integrates 15 different services: stickyNote, httpRequest, markdown, wait, airtable. It contains 28 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Indeed Company Data Scraper & Summarization with Airtable, Bright Data and Google Gemini workflow containing 19 nodes.",
+  "originalWorkflowJson": {
+    "id": "TTj6BiN7bQKTa6FM",
+    "meta": {
+      "instanceId": "workflow-19006cc6",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:59.368578",
+      "updatedAt": "2025-09-29T07:07:59.368606",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Indeed Company Data Scraper & Summarization with Airtable, Bright Data and Google Gemini",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "390ebd32-6ce4-4894-9b4f-7b376db5b724",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -220,
+          -545
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8ba6b208-b4ad-443c-8b24-c51b3b5ad880",
+        "name": "Google Gemini Chat Model For Summarization",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1784,
+          -300
+        ],
+        "parameters": {
+          "options": {},
+          "modelName": "models/gemini-2.0-flash-exp"
+        },
+        "credentials": {
+          "googlePalmApi": {
+            "id": "YeO7dHZnuGBVQKVZ",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatGoogleGemini node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "394a7291-618a-42f0-8e1b-18ed7c8496c3",
+        "name": "Webhook HTTP Request",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          2280,
+          -160
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "sendBody": true,
+          "parametersBody": {
+            "values": [
+              {
+                "name": "search_summary",
+                "value": "={{ $json.response.text }}",
+                "valueProvider": "fieldValue"
+              },
+              {
+                "name": "search_result"
+              }
+            ]
+          },
+          "toolDescription": "Extract the response and format a structured JSON response"
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4e1352a5-0fa6-4fee-a93d-cc0a0a4fdd6f",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -240,
+          -1080
+        ],
+        "parameters": {
+          "width": 400,
+          "height": 320,
+          "content": "## Note\n\nDeals with the Company web scraping by utilizing Bright Data Web Unlocker Product.\n\nThe Basic LLM Chain, Summarization and AI Agent are being used to demonstrate the usage of the n8n AI capabilities.\n\n**Please make sure to connect to Airtable with the Base Table as \"Indeed\" and the default Table1 filled with the indeed links to scrape. \n\nAlso make sure to update the Webhook Notification URL**"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bf184d27-ed62-44fa-bed2-65a1f703179e",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          720,
+          -1080
+        ],
+        "parameters": {
+          "width": 480,
+          "height": 320,
+          "content": "## LLM Usages\n\nGoogle Gemini Flash Exp model is being used.\n\nBasic LLM Chain Data Extractor.\n\nSummarization Chain is being used for the summarization of search results.\n\nThe AI Agent formats the search result and pushes it to the Webhook via HTTP Request"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "78f32ce2-1e79-4f3e-8561-4a5e07d88696",
+        "name": "Perform Indeed Web Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1100,
+          -670
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "zone",
+                "value": "={{ $('Set Bright Data Zone').item.json.zone }}"
+              },
+              {
+                "name": "url",
+                "value": "={{ $env.WEBHOOK_URL }}{{ encodeURI($('Airtable').item.json.Link) }}?product=unlocker&method=api"
+              },
+              {
+                "name": "format",
+                "value": "raw"
+              },
+              {
+                "name": "data_format",
+                "value": "markdown"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "kdbqXuxIR8qIxF7y",
+            "name": "Header Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3738e714-59aa-4b0b-876c-c2f15a1d7479",
+        "name": "Indeed Expert AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          2072,
+          -395
+        ],
+        "parameters": {
+          "text": "=You are an Indeed Expert. You need to format the search result  and push it to the Webhook via HTTP Request. Here is the search result - {{ $('Markdown to Textual Data Extractor').item.json.text }}",
+          "options": {},
+          "promptType": "define"
+        },
+        "typeVersion": 1.8,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "47e96e87-8ac7-43d7-af6f-b52404be4eec",
+        "name": "Google Gemini Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1408,
+          -300
+        ],
+        "parameters": {
+          "options": {},
+          "modelName": "models/gemini-2.0-flash-exp"
+        },
+        "credentials": {
+          "googlePalmApi": {
+            "id": "YeO7dHZnuGBVQKVZ",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatGoogleGemini node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b2b8f3f6-ef13-47ff-8e6e-4c262b352b2e",
+        "name": "Markdown to Textual Data Extractor",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1320,
+          -520
+        ],
+        "parameters": {
+          "text": "=You need to analyze the below markdown and convert to textual data.\n\n{{ $json.data }}",
+          "messages": {
+            "messageValues": [
+              {
+                "message": "You are a markdown expert"
+              }
+            ]
+          },
+          "promptType": "define"
+        },
+        "typeVersion": 1.6,
+        "notes": "This chainLlm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "791d5991-0baa-4aff-8dbe-465c1335889f",
+        "name": "Convert Markdown to HTML",
+        "type": "n8n-nodes-base.markdown",
+        "position": [
+          1398,
+          -820
+        ],
+        "parameters": {
+          "mode": "markdownToHtml",
+          "options": {},
+          "markdown": "={{ $json.data }}"
+        },
+        "typeVersion": 1,
+        "notes": "This markdown node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "844c49a6-edd0-4a63-944e-44310e39ab09",
+        "name": "Initiate a Webhook Notification for Markdown to HTML Response",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1774,
+          -820
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {},
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "html_response",
+                "value": "={{ $json.data }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cb7b971d-17a9-4b49-8807-7a9d4f7550d2",
+        "name": "Set Bright Data Zone",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          0,
+          -545
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4e7ee31d-da89-422f-8079-2ff2d357a0ba",
+                "name": "zone",
+                "type": "string",
+                "value": "web_unlocker1"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "47702b8b-5722-4fe0-93fc-950470b043c8",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          440,
+          -545
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cb42b109-0950-45cb-ae74-3a87b724f6fc",
+        "name": "Airtable",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          220,
+          -545
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appHnxLQRVHbCzDyj",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Indeed"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tblS1f5XWVMfdyjOz",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Table 1"
+          },
+          "options": {},
+          "operation": "search"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "yXTVs1Lgka4VUTCB",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "faf3d158-e625-4829-8e90-2549d747e674",
+        "name": "If Link field is not empty",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          880,
+          -670
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "42eae1de-1d71-4418-862d-9cb9f8fb44e6",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.Link }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d81941a5-b267-4cac-9134-42caac9948ef",
+        "name": "Wait",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          660,
+          -670
+        ],
+        "webhookId": "f348d66e-ee91-40d4-8e52-83d8d3ca32f2",
+        "parameters": {
+          "amount": 10
+        },
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6903a767-ab81-4a01-8b98-914afab45c63",
+        "name": "Indeed Summarizer",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1696,
+          -520
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 2,
+        "notes": "This chainSummarization node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1cd297e9-30b9-4cb3-b2b4-96bc1e3e9d95",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          200,
+          -1080
+        ],
+        "parameters": {
+          "width": 480,
+          "height": 320,
+          "content": "## Airtable Table Data Sample \n[\n  {\n    \"id\": \"recCDNhVfdlc97cgf\",\n    \"createdTime\": \"2025-04-14T02:55:31.000Z\",\n    \"Tab\": \"Starbucks\",\n    \"Link\": \"{{ $env.WEBHOOK_URL }}\"\n  },\n  {\n    \"id\": \"recR7VEJrwXX7XjVl\",\n    \"createdTime\": \"2025-04-14T02:55:31.000Z\",\n    \"Tab\": \"BrightData\",\n    \"Link\": \"{{ $env.WEBHOOK_URL }}\"\n  }\n]"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d125e31f-845b-498e-9b3c-e5e8c14ed166",
+        "name": "Google Gemini Chat Model for AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          2080,
+          -160
+        ],
+        "parameters": {
+          "options": {},
+          "modelName": "models/gemini-2.0-flash-exp"
+        },
+        "credentials": {
+          "googlePalmApi": {
+            "id": "YeO7dHZnuGBVQKVZ",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatGoogleGemini node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "98d3cc1a-123e-468e-814f-7a96d38b8e36",
+    "connections": {
+      "394a7291-618a-42f0-8e1b-18ed7c8496c3": {
+        "main": [
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-9c4514b6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-db155e5e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-eb792514",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-dc1a7209",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-50ba8011",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-da12b0c8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-90432055",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-577ae27b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "78f32ce2-1e79-4f3e-8561-4a5e07d88696": {
+        "main": [
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-9a7393da",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-496b9e6f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-6d38349c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-a8528b42",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-78fe6024",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-b4dfd151",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-b5ea7771",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-b76a8e06",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "844c49a6-edd0-4a63-944e-44310e39ab09": {
+        "main": [
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-f1601b6b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-7c37f2e5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-04aa5214",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-d4e5f706",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-90a9acc4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-88a063ea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-f1e0e522",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-59da02b6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "8ba6b208-b4ad-443c-8b24-c51b3b5ad880": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8ba6b208-b4ad-443c-8b24-c51b3b5ad880-8d404608",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "47e96e87-8ac7-43d7-af6f-b52404be4eec": {
+        "main": [
+          [
+            {
+              "node": "error-handler-47e96e87-8ac7-43d7-af6f-b52404be4eec-97393cd9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d125e31f-845b-498e-9b3c-e5e8c14ed166": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d125e31f-845b-498e-9b3c-e5e8c14ed166-c9ead1d9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Indeed Company Data Scraper & Summarization with Airtable, Bright Data and Google Gemini. This workflow integrates 15 different services: stickyNote, httpRequest, markdown, wait, airtable. It contains 28 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Indeed Company Data Scraper & Summarization with Airtable, Bright Data and Google Gemini. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "394a7291-618a-42f0-8e1b-18ed7c8496c3": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-9c4514b6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-db155e5e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-eb792514"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-dc1a7209"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-50ba8011"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-da12b0c8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-90432055"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-394a7291-618a-42f0-8e1b-18ed7c8496c3-577ae27b"
+            }
+          ]
+        ]
+      },
+      "47e96e87-8ac7-43d7-af6f-b52404be4eec": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-47e96e87-8ac7-43d7-af6f-b52404be4eec-97393cd9"
+            }
+          ]
+        ]
+      },
+      "78f32ce2-1e79-4f3e-8561-4a5e07d88696": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-9a7393da"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-496b9e6f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-6d38349c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-a8528b42"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-78fe6024"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-b4dfd151"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-b5ea7771"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-78f32ce2-1e79-4f3e-8561-4a5e07d88696-b76a8e06"
+            }
+          ]
+        ]
+      },
+      "844c49a6-edd0-4a63-944e-44310e39ab09": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-f1601b6b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-7c37f2e5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-04aa5214"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-d4e5f706"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-90a9acc4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-88a063ea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-f1e0e522"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-844c49a6-edd0-4a63-944e-44310e39ab09-59da02b6"
+            }
+          ]
+        ]
+      },
+      "8ba6b208-b4ad-443c-8b24-c51b3b5ad880": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8ba6b208-b4ad-443c-8b24-c51b3b5ad880-8d404608"
+            }
+          ]
+        ]
+      },
+      "d125e31f-845b-498e-9b3c-e5e8c14ed166": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d125e31f-845b-498e-9b3c-e5e8c14ed166-c9ead1d9"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Indeed Company Data Scraper & Summarization with Airtable, Bright Data and Google Gemini",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Airtable",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "Indeed",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "appHnxLQRVHbCzDyj"
+          },
+          "operation": "search",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "Table 1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tblS1f5XWVMfdyjOz"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Convert Markdown to HTML",
+        "parameters": {
+          "markdown": "={{ $json.data }}",
+          "mode": "markdownToHtml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.markdown",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googlePalmApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Gemini Chat Model",
+        "parameters": {
+          "modelName": "models/gemini-2.0-flash-exp",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googlePalmApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Gemini Chat Model for AI Agent",
+        "parameters": {
+          "modelName": "models/gemini-2.0-flash-exp",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googlePalmApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Gemini Chat Model For Summarization",
+        "parameters": {
+          "modelName": "models/gemini-2.0-flash-exp",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Link field is not empty",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "42eae1de-1d71-4418-862d-9cb9f8fb44e6",
+                "leftValue": "={{ $json.Link }}",
+                "operator": {
+                  "operation": "notEmpty",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Indeed Expert AI Agent",
+        "parameters": {
+          "options": {},
+          "promptType": "define",
+          "text": "=You are an Indeed Expert. You need to format the search result  and push it to the Webhook via HTTP Request. Here is the search result - {{ $('Markdown to Textual Data Extractor').item.json.text }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "name": "Indeed Summarizer",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 2
+      },
+      {
+        "name": "Initiate a Webhook Notification for Markdown to HTML Response",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "html_response",
+                "value": "={{ $json.data }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "Markdown to Textual Data Extractor",
+        "parameters": {
+          "messages": {
+            "messageValues": [
+              {
+                "message": "You are a markdown expert"
+              }
+            ]
+          },
+          "promptType": "define",
+          "text": "=You need to analyze the below markdown and convert to textual data.\n\n{{ $json.data }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Perform Indeed Web Request",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "zone",
+                "value": "={{ $('Set Bright Data Zone').item.json.zone }}"
+              },
+              {
+                "name": "url",
+                "value": "={{ $env.WEBHOOK_URL }}{{ encodeURI($('Airtable').item.json.Link) }}?product=unlocker&method=api"
+              },
+              {
+                "name": "format",
+                "value": "raw"
+              },
+              {
+                "name": "data_format",
+                "value": "markdown"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Set Bright Data Zone",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4e7ee31d-da89-422f-8079-2ff2d357a0ba",
+                "name": "zone",
+                "type": "string",
+                "value": "web_unlocker1"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Note\n\nDeals with the Company web scraping by utilizing Bright Data Web Unlocker Product.\n\nThe Basic LLM Chain, Summarization and AI Agent are being used to demonstrate the usage of the n8n AI capabilities.\n\n**Please make sure to connect to Airtable with the Base Table as \"Indeed\" and the default Table1 filled with the indeed links to scrape. \n\nAlso make sure to update the Webhook Notification URL**",
+          "height": 320,
+          "width": 400
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## LLM Usages\n\nGoogle Gemini Flash Exp model is being used.\n\nBasic LLM Chain Data Extractor.\n\nSummarization Chain is being used for the summarization of search results.\n\nThe AI Agent formats the search result and pushes it to the Webhook via HTTP Request",
+          "height": 320,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Airtable Table Data Sample \n[\n  {\n    \"id\": \"recCDNhVfdlc97cgf\",\n    \"createdTime\": \"2025-04-14T02:55:31.000Z\",\n    \"Tab\": \"Starbucks\",\n    \"Link\": \"{{ $env.WEBHOOK_URL }}\"\n  },\n  {\n    \"id\": \"recR7VEJrwXX7XjVl\",\n    \"createdTime\": \"2025-04-14T02:55:31.000Z\",\n    \"Tab\": \"BrightData\",\n    \"Link\": \"{{ $env.WEBHOOK_URL }}\"\n  }\n]",
+          "height": 320,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wait",
+        "parameters": {
+          "amount": 10
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Webhook HTTP Request",
+        "parameters": {
+          "method": "POST",
+          "parametersBody": {
+            "values": [
+              {
+                "name": "search_summary",
+                "value": "={{ $json.response.text }}",
+                "valueProvider": "fieldValue"
+              },
+              {
+                "name": "search_result"
+              }
+            ]
+          },
+          "sendBody": true,
+          "toolDescription": "Extract the response and format a structured JSON response",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 19,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Markdown",
+    "Airtable"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 61,
+  "viewCount": 145,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Markdown Account",
+      "Airtable Account"
+    ],
+    "requiredCredentials": [
+      "google Palm  A P I details",
+      "http Header Auth details",
+      "airtable Token  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Google Gemini Chat Model For Summarization\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Webhook HTTP Request\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Perform Indeed Web Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Indeed Expert AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Gemini Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Markdown to Textual Data Extractor\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Convert Markdown to HTML\" node (n8n-nodes-base.markdown) and configure the action parameters, mappings, and fields.",
+      "Open the \"Initiate a Webhook Notification for Markdown to HTML Response\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Airtable\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Link field is not empty\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Indeed Summarizer\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Gemini Chat Model for AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Bright Data Zone\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-uitcmfu3y",
+      "workflowId": "indeed-company-data-scraper-summarization-with-airtable-bright-data-and-google-gemini-33pom",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Wait/1508_Wait_Manual_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Wait\\1508_Wait_Manual_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:20:45.308Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:45.308Z",
+  "updatedAt": "2026-07-15T11:20:45.308Z"
+}

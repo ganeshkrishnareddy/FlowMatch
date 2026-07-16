@@ -1,0 +1,875 @@
+{
+  "id": "production-workflow-lmrix",
+  "name": "Production Workflow",
+  "slug": "production-workflow-dl5k",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 26 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "HTML Extract",
+        "type": "n8n-nodes-base.htmlExtract",
+        "position": [
+          -220,
+          -390
+        ],
+        "parameters": {
+          "options": {},
+          "extractionValues": {
+            "values": [
+              {
+                "key": "price",
+                "cssSelector": "={{$node[\"initItem\"].json[\"selector\"]}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-72975390"
+      },
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          -1290,
+          -390
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 15
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-67bc1b83"
+      },
+      {
+        "name": "getActualPrice",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          -20,
+          -390
+        ],
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nvar price = String(item.price).replace(\",\", \".\");\nprice = parseFloat(price);\n//price = price.replace(/\\D/g, '');\n//item.price = String(item.price).replace(\",\", \".\");\n//item.price = parseFloat(item.price);\n\nitem.priceExists = (price > 0 ? true : false)\nitem.price = price;\n\n// Update its data\nglobalData.actualPrice = item;\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "id": "node-65c51a08"
+      },
+      {
+        "name": "fetchWeb",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -410,
+          -390
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "responseFormat": "string"
+        },
+        "typeVersion": 1,
+        "id": "node-9c733189"
+      },
+      {
+        "name": "FunctionItem",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          1020,
+          -390
+        ],
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nglobalData.iteration = 0;\n//var thiselem = $node[\"initItem\"].json;\n\n//const s1 = {'slug': thiselem.slug, \"link\": thiselem.link, \"selector\": thiselem.selector, \"price\":$node[\"getActualPrice\"].json.price, \"currency\": thiselem.currency};\n//const s2 = {'slug': thiselem.slug+'2', \"link\": thiselem.link, \"selector\": thiselem.selector, \"price\":$node[\"getActualPrice\"].json.price, \"currency\": thiselem.currency};\n//const s3 = {'slug': thiselem.slug+'3', \"link\": thiselem.link, \"selector\": thiselem.selector, \"price\":$node[\"getActualPrice\"].json.price, \"currency\": thiselem.currency};\n\nreturn $node[\"changeME\"].json.myWatchers;\n"
+        },
+        "typeVersion": 1,
+        "id": "node-973cbffd"
+      },
+      {
+        "name": "Write Binary File1",
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "position": [
+          1850,
+          -390
+        ],
+        "parameters": {
+          "fileName": "/data/kopacky.json",
+          "dataPropertyName": "=price"
+        },
+        "typeVersion": 1,
+        "id": "node-09b5463d"
+      },
+      {
+        "name": "Move Binary Data1",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          1420,
+          -390
+        ],
+        "parameters": {
+          "mode": "jsonToBinary",
+          "options": {},
+          "destinationKey": "price"
+        },
+        "typeVersion": 1,
+        "id": "node-88afaca0"
+      },
+      {
+        "name": "IF1",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          550,
+          -370
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"checkifexists\"].json[\"stdout\"]}}",
+                "value2": "Exists",
+                "operation": "notEqual"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-9d6abda6"
+      },
+      {
+        "name": "checkifexists",
+        "type": "n8n-nodes-base.executeCommand",
+        "position": [
+          410,
+          -370
+        ],
+        "parameters": {
+          "command": "if [ -r /data/kopacky.json ]; then echo Exists; fi"
+        },
+        "typeVersion": 1,
+        "id": "node-b10ce6e5"
+      },
+      {
+        "name": "IF3",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          680,
+          110
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"checkifexists\"].json[\"stdout\"]}}",
+                "value2": "Exists"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-42955e40"
+      },
+      {
+        "name": "SaveToFile",
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "position": [
+          1650,
+          110
+        ],
+        "parameters": {
+          "fileName": "/data/kopacky.json",
+          "dataPropertyName": "=price"
+        },
+        "typeVersion": 1,
+        "id": "node-1d89385c"
+      },
+      {
+        "name": "JsonToBinary",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          1500,
+          110
+        ],
+        "parameters": {
+          "mode": "jsonToBinary",
+          "options": {},
+          "destinationKey": "price"
+        },
+        "typeVersion": 1,
+        "id": "node-8affa0be"
+      },
+      {
+        "name": "changeME",
+        "type": "n8n-nodes-base.functionItem",
+        "color": "#3BDD33",
+        "position": [
+          -830,
+          -390
+        ],
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\n//{'slug': 'kopacky', 'link': 'https://www.adsport.sk/kopacky-lisovky-adidas-x-19-3-ll-fg-ef0598/#1131861', 'currency': 'EUR'}[]\nvar myWatchers = [\n{'slug': 'kopacky', 'link': 'https://www.adsport.sk/kopacky-lisovky-adidas-x-19-3-ll-fg-ef0598/#1131861', 'selector':'.prices > strong:nth-child(1) > span:nth-child(1)', 'currency': 'EUR'},\n{'slug': 'kopacky2', 'link': 'https://www.adsport.sk/turfy-adidas-ace-tango-17-3-tf-by2203/', 'selector':'.col-xs-4 > strong:nth-child(1) > span:nth-child(1)', 'currency': 'EUR'},\n{'slug': 'mobilcek', 'link': 'https://mobil.bazos.sk/inzerat/112253662/predam-odolny-doogee-s60-52-4g-lte-nfc.php', 'selector':'.listadvlevo > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(5) > td:nth-child(2) > b:nth-child(2)', 'currency': 'EUR'},\n{'slug': 'ADIZERO RC 2', 'link': 'https://www.adsport.sk/panske-bezecke-topanky-adidas-adizero-rc-2-eg1187/', 'selector':'.col-xs-4 > strong:nth-child(1) > span:nth-child(1)', 'currency': 'EUR'}\n];\n\nitem.myWatchers = myWatchers;\nitem.watchersCount = myWatchers.length;\nglobalData.myWatchers = myWatchers;\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "id": "node-e766605b"
+      },
+      {
+        "name": "initItem",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          -620,
+          -390
+        ],
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nvar counter = globalData.iteration;\n\nitem.myWatchers[counter].watchersCount = item.watchersCount;\nitem.myWatchers[counter].canContinue = (globalData.iteration < item.watchersCount-1 ? true : false);\n//item.myWatchers[counter].canContinue = false;\n\nglobalData.iteration = counter + 1;\n\nreturn item.myWatchers[counter];"
+        },
+        "typeVersion": 1,
+        "id": "node-26f66a47"
+      },
+      {
+        "name": "savedItems",
+        "type": "n8n-nodes-base.readBinaryFile",
+        "position": [
+          850,
+          -20
+        ],
+        "parameters": {
+          "filePath": "/data/kopacky.json",
+          "dataPropertyName": "savedItems"
+        },
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "alwaysOutputData": true,
+        "id": "node-6925aade"
+      },
+      {
+        "name": "itemsToJSON",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          1020,
+          -20
+        ],
+        "parameters": {
+          "options": {},
+          "sourceKey": "savedItems"
+        },
+        "typeVersion": 1,
+        "id": "node-f0c97aa6"
+      },
+      {
+        "name": "IF",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          2190,
+          -90
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [],
+            "boolean": [
+              {
+                "value1": "={{$node[\"initItem\"].json[\"canContinue\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-e72fe6ec"
+      },
+      {
+        "name": "initItem1",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          -1060,
+          -390
+        ],
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nglobalData.iteration = 0;\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "id": "node-5cabbdd1"
+      },
+      {
+        "name": "IF2",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1850,
+          110
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$node[\"getActualPrice\"].json[\"price\"]}}",
+                "value2": "={{$node[\"updateSavedItems1\"].json[\"oldPrice\"]}}"
+              }
+            ],
+            "string": []
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-aee9a0de"
+      },
+      {
+        "name": "updateSavedItems",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          1350,
+          110
+        ],
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nvar myitems = [];\nvar i;\nfor (i = 0; i < item.items.length; i++) { \n  if($node[\"initItem\"].json.slug == item.items[i].slug && $node[\"getActualPrice\"].json.price < item.items[i].price) {\n    item.items[i].price = $node[\"getActualPrice\"].json.price;\n  }\n  myitems.push(item.items[i]);\n} \n\nreturn myitems;\n"
+        },
+        "typeVersion": 1,
+        "id": "node-5c779ea4"
+      },
+      {
+        "name": "updateSavedItems1",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          1200,
+          -20
+        ],
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\nvar oldPrice = null;\nvar myitems = [];\nvar i;\nfor (i = 0; i < item.length; i++) {\n  if($node[\"initItem\"].json.slug == item[i].slug) {\n\n    item[i].link = $node[\"initItem\"].json.link;\n    item[i].selector = $node[\"initItem\"].json.selector;\n    item[i].currency = $node[\"initItem\"].json.currency;\n    \n    if(!item[i].price){\n      item[i].price = $node[\"getActualPrice\"].json.price;\n    }\n    \n    if($node[\"getActualPrice\"].json.price < item[i].price){\n      oldPrice = item[i].price;\n      item[i].price = $node[\"getActualPrice\"].json.price;\n    }\n    \n    \n  }\n  \n  myitems.push(item[i]);\n} \n\n//item.somar = $node[\"initItem\"].json;\n//return globalData.actualPrice;\n\nvar itemm = {};\nitemm.items = myitems;\nitemm.oldPrice = oldPrice;\nreturn itemm;\n"
+        },
+        "typeVersion": 1,
+        "id": "node-683db61d"
+      },
+      {
+        "name": "cleanData",
+        "type": "n8n-nodes-base.executeCommand",
+        "notes": "This will remove all storaged data.",
+        "position": [
+          -1290,
+          -560
+        ],
+        "parameters": {
+          "command": "file=\"/data/kopacky.json\"\n[ -f $file ] && rm $file"
+        },
+        "typeVersion": 1,
+        "id": "node-630c1a0a"
+      },
+      {
+        "name": "IF4",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          150,
+          -390
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [],
+            "boolean": [
+              {
+                "value1": "={{$node[\"getActualPrice\"].json[\"priceExists\"]}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-16a1013f"
+      },
+      {
+        "name": "NotifyBetterPrice",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          1850,
+          -90
+        ],
+        "parameters": {
+          "html": "=<h2>Nová cena je: {{$node[\"getActualPrice\"].json[\"price\"]}} {{$node[\"initItem\"].json[\"currency\"]}}</h2><br>\nPôvodná cena bola: {{$node[\"updateSavedItems1\"].json[\"oldPrice\"]}} {{$node[\"initItem\"].json[\"currency\"]}}<br>\nURL: {{$node[\"initItem\"].json[\"link\"]}}",
+          "text": "=",
+          "options": {},
+          "subject": "=Nová cena - {{$node[\"initItem\"].json[\"slug\"]}} - {{$node[\"getActualPrice\"].json[\"price\"]}} {{$node[\"initItem\"].json[\"currency\"]}}",
+          "toEmail": "sthosstudio@gmail.com",
+          "fromEmail": "hostovecky@weyou.sk"
+        },
+        "credentials": {
+          "smtp": "hostovecky@weyou.sk"
+        },
+        "typeVersion": 1,
+        "id": "node-6df8bbdd"
+      },
+      {
+        "name": "NotifyIncorrectPrice",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          270,
+          -690
+        ],
+        "parameters": {
+          "html": "=Please check the link or selector for the item with slug <strong>{{$node[\"initItem\"].json[\"slug\"]}}</strong><br>\nURL: {{$node[\"initItem\"].json[\"link\"]}}",
+          "text": "=",
+          "options": {},
+          "subject": "={{$node[\"initItem\"].json[\"slug\"]}} - Getting price issue.",
+          "toEmail": "sthosstudio@gmail.com",
+          "fromEmail": "hostovecky@weyou.sk"
+        },
+        "credentials": {
+          "smtp": "hostovecky@weyou.sk"
+        },
+        "typeVersion": 1,
+        "id": "node-ca4f72c2"
+      },
+      {
+        "id": "error-c42b7024",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-6422958b",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.106160",
+      "updatedAt": "2025-09-29T07:07:45.106167",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "changeME",
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\n//{'slug': 'kopacky', 'link': 'https://www.adsport.sk/kopacky-lisovky-adidas-x-19-3-ll-fg-ef0598/#1131861', 'currency': 'EUR'}[]\nvar myWatchers = [\n{'slug': 'kopacky', 'link': 'https://www.adsport.sk/kopacky-lisovky-adidas-x-19-3-ll-fg-ef0598/#1131861', 'selector':'.prices > strong:nth-child(1) > span:nth-child(1)', 'currency': 'EUR'},\n{'slug': 'kopacky2', 'link': 'https://www.adsport.sk/turfy-adidas-ace-tango-17-3-tf-by2203/', 'selector':'.col-xs-4 > strong:nth-child(1) > span:nth-child(1)', 'currency': 'EUR'},\n{'slug': 'mobilcek', 'link': 'https://mobil.bazos.sk/inzerat/112253662/predam-odolny-doogee-s60-52-4g-lte-nfc.php', 'selector':'.listadvlevo > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(5) > td:nth-child(2) > b:nth-child(2)', 'currency': 'EUR'},\n{'slug': 'ADIZERO RC 2', 'link': 'https://www.adsport.sk/panske-bezecke-topanky-adidas-adizero-rc-2-eg1187/', 'selector':'.col-xs-4 > strong:nth-child(1) > span:nth-child(1)', 'currency': 'EUR'}\n];\n\nitem.myWatchers = myWatchers;\nitem.watchersCount = myWatchers.length;\nglobalData.myWatchers = myWatchers;\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "checkifexists",
+        "parameters": {
+          "command": "if [ -r /data/kopacky.json ]; then echo Exists; fi"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1
+      },
+      {
+        "name": "cleanData",
+        "parameters": {
+          "command": "file=\"/data/kopacky.json\"\n[ -f $file ] && rm $file"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1
+      },
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 15
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "fetchWeb",
+        "parameters": {
+          "options": {},
+          "responseFormat": "string",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "FunctionItem",
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nglobalData.iteration = 0;\n//var thiselem = $node[\"initItem\"].json;\n\n//const s1 = {'slug': thiselem.slug, \"link\": thiselem.link, \"selector\": thiselem.selector, \"price\":$node[\"getActualPrice\"].json.price, \"currency\": thiselem.currency};\n//const s2 = {'slug': thiselem.slug+'2', \"link\": thiselem.link, \"selector\": thiselem.selector, \"price\":$node[\"getActualPrice\"].json.price, \"currency\": thiselem.currency};\n//const s3 = {'slug': thiselem.slug+'3', \"link\": thiselem.link, \"selector\": thiselem.selector, \"price\":$node[\"getActualPrice\"].json.price, \"currency\": thiselem.currency};\n\nreturn $node[\"changeME\"].json.myWatchers;\n"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "getActualPrice",
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nvar price = String(item.price).replace(\",\", \".\");\nprice = parseFloat(price);\n//price = price.replace(/\\D/g, '');\n//item.price = String(item.price).replace(\",\", \".\");\n//item.price = parseFloat(item.price);\n\nitem.priceExists = (price > 0 ? true : false)\nitem.price = price;\n\n// Update its data\nglobalData.actualPrice = item;\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTML Extract",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "={{$node[\"initItem\"].json[\"selector\"]}}",
+                "key": "price"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.htmlExtract",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"initItem\"].json[\"canContinue\"]}}",
+                "value2": true
+              }
+            ],
+            "string": []
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF1",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "notEqual",
+                "value1": "={{$node[\"checkifexists\"].json[\"stdout\"]}}",
+                "value2": "Exists"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF2",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$node[\"getActualPrice\"].json[\"price\"]}}",
+                "value2": "={{$node[\"updateSavedItems1\"].json[\"oldPrice\"]}}"
+              }
+            ],
+            "string": []
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF3",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"checkifexists\"].json[\"stdout\"]}}",
+                "value2": "Exists"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF4",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"getActualPrice\"].json[\"priceExists\"]}}"
+              }
+            ],
+            "string": []
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "initItem",
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nvar counter = globalData.iteration;\n\nitem.myWatchers[counter].watchersCount = item.watchersCount;\nitem.myWatchers[counter].canContinue = (globalData.iteration < item.watchersCount-1 ? true : false);\n//item.myWatchers[counter].canContinue = false;\n\nglobalData.iteration = counter + 1;\n\nreturn item.myWatchers[counter];"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "initItem1",
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nglobalData.iteration = 0;\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "itemsToJSON",
+        "parameters": {
+          "options": {},
+          "sourceKey": "savedItems"
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "name": "JsonToBinary",
+        "parameters": {
+          "destinationKey": "price",
+          "mode": "jsonToBinary",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "name": "Move Binary Data1",
+        "parameters": {
+          "destinationKey": "price",
+          "mode": "jsonToBinary",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "NotifyBetterPrice",
+        "parameters": {
+          "fromEmail": "hostovecky@weyou.sk",
+          "html": "=<h2>Nová cena je: {{$node[\"getActualPrice\"].json[\"price\"]}} {{$node[\"initItem\"].json[\"currency\"]}}</h2><br>\nPôvodná cena bola: {{$node[\"updateSavedItems1\"].json[\"oldPrice\"]}} {{$node[\"initItem\"].json[\"currency\"]}}<br>\nURL: {{$node[\"initItem\"].json[\"link\"]}}",
+          "options": {},
+          "subject": "=Nová cena - {{$node[\"initItem\"].json[\"slug\"]}} - {{$node[\"getActualPrice\"].json[\"price\"]}} {{$node[\"initItem\"].json[\"currency\"]}}",
+          "text": "=",
+          "toEmail": "sthosstudio@gmail.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "NotifyIncorrectPrice",
+        "parameters": {
+          "fromEmail": "hostovecky@weyou.sk",
+          "html": "=Please check the link or selector for the item with slug <strong>{{$node[\"initItem\"].json[\"slug\"]}}</strong><br>\nURL: {{$node[\"initItem\"].json[\"link\"]}}",
+          "options": {},
+          "subject": "={{$node[\"initItem\"].json[\"slug\"]}} - Getting price issue.",
+          "text": "=",
+          "toEmail": "sthosstudio@gmail.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "name": "savedItems",
+        "parameters": {
+          "dataPropertyName": "savedItems",
+          "filePath": "/data/kopacky.json"
+        },
+        "type": "n8n-nodes-base.readBinaryFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "SaveToFile",
+        "parameters": {
+          "dataPropertyName": "=price",
+          "fileName": "/data/kopacky.json"
+        },
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "updateSavedItems",
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\n\nvar myitems = [];\nvar i;\nfor (i = 0; i < item.items.length; i++) { \n  if($node[\"initItem\"].json.slug == item.items[i].slug && $node[\"getActualPrice\"].json.price < item.items[i].price) {\n    item.items[i].price = $node[\"getActualPrice\"].json.price;\n  }\n  myitems.push(item.items[i]);\n} \n\nreturn myitems;\n"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "updateSavedItems1",
+        "parameters": {
+          "functionCode": "const globalData = getWorkflowStaticData('global');\nvar oldPrice = null;\nvar myitems = [];\nvar i;\nfor (i = 0; i < item.length; i++) {\n  if($node[\"initItem\"].json.slug == item[i].slug) {\n\n    item[i].link = $node[\"initItem\"].json.link;\n    item[i].selector = $node[\"initItem\"].json.selector;\n    item[i].currency = $node[\"initItem\"].json.currency;\n    \n    if(!item[i].price){\n      item[i].price = $node[\"getActualPrice\"].json.price;\n    }\n    \n    if($node[\"getActualPrice\"].json.price < item[i].price){\n      oldPrice = item[i].price;\n      item[i].price = $node[\"getActualPrice\"].json.price;\n    }\n    \n    \n  }\n  \n  myitems.push(item[i]);\n} \n\n//item.somar = $node[\"initItem\"].json;\n//return globalData.actualPrice;\n\nvar itemm = {};\nitemm.items = myitems;\nitemm.oldPrice = oldPrice;\nreturn itemm;\n"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "Write Binary File1",
+        "parameters": {
+          "dataPropertyName": "=price",
+          "fileName": "/data/kopacky.json"
+        },
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 26,
+  "integrationCount": 5,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "40 Mins",
+  "integrations": [
+    "Htmlextract",
+    "Functionitem",
+    "HTTP Request",
+    "Movebinarydata",
+    "Emailsend"
+  ],
+  "securityStatus": "Potential Risk",
+  "verified": false,
+  "featured": true,
+  "downloadCount": 35,
+  "viewCount": 102,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Htmlextract Account",
+      "Functionitem Account",
+      "HTTP Request Account",
+      "Movebinarydata Account",
+      "Emailsend Account"
+    ],
+    "requiredCredentials": [
+      "smtp details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"HTML Extract\" node (n8n-nodes-base.htmlExtract) and configure the action parameters, mappings, and fields.",
+      "Open the \"getActualPrice\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"fetchWeb\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"FunctionItem\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Write Binary File1\" node (n8n-nodes-base.writeBinaryFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Move Binary Data1\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF1\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"checkifexists\" node (n8n-nodes-base.executeCommand) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF3\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"SaveToFile\" node (n8n-nodes-base.writeBinaryFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"JsonToBinary\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"changeME\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"initItem\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"savedItems\" node (n8n-nodes-base.readBinaryFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"itemsToJSON\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"initItem1\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF2\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"updateSavedItems\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"updateSavedItems1\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"cleanData\" node (n8n-nodes-base.executeCommand) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF4\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"NotifyBetterPrice\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"NotifyIncorrectPrice\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 90,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-8mqejigfw",
+      "workflowId": "production-workflow-lmrix",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Functionitem/1157_Functionitem_Executecommand_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Functionitem\\1157_Functionitem_Executecommand_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:25.308Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:25.308Z",
+  "updatedAt": "2026-07-15T11:18:25.308Z"
+}

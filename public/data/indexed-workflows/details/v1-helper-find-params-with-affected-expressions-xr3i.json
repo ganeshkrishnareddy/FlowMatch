@@ -1,0 +1,265 @@
+{
+  "id": "v1-helper-find-params-with-affected-expressions-4dkqf",
+  "name": "v1 helper - Find params with affected expressions",
+  "slug": "v1-helper-find-params-with-affected-expressions-xr3i",
+  "description": "Automated workflow: v1 helper - Find params with affected expressions. This workflow integrates 4 different services: stickyNote, manualTrigger, n8n, code. It contains 4 nodes and follows best practices for error handling and security.",
+  "shortDescription": "v1 helper - Find params with affected expressions workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "id": "zlHbtHIcCZ9enKwg",
+    "meta": {
+      "instanceId": "workflow-ef0f9c8a",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.783163",
+      "updatedAt": "2025-09-29T07:07:50.783178",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "v1 helper - Find params with affected expressions",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "b3dd44ca-960f-4689-9545-30a05dc0441e",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          580,
+          320
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "96db239d-05b6-4e1d-b101-e66c2a9708f6",
+        "name": "n8n",
+        "type": "n8n-nodes-base.n8n",
+        "position": [
+          800,
+          320
+        ],
+        "parameters": {
+          "filters": {
+            "activeWorkflows": true
+          }
+        },
+        "credentials": {
+          "n8nApi": {
+            "id": "hcJ2iZYYgs54eCaT",
+            "name": "n8n account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This n8n node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b2286f6b-ba37-433c-b22a-95032bc25b6e",
+        "name": "Find params with affected expressions",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1040,
+          320
+        ],
+        "parameters": {
+          "jsCode": "const AFFECTED_EXTENSIONS = ['beginningOf', 'endOfMonth', 'minus', 'plus'];\n\nconst isExpression = (value) => typeof value === 'string' && value.startsWith('={{');\n\nconst containsAny = (str, substrings) => {\n  for (const substring of substrings) {\n    if (str.includes(substring)) return true;\n  }\n  \n  return false;\n}\n\nconst isAffected = (value) => isExpression(value) && containsAny(value, AFFECTED_EXTENSIONS);\n\nfunction findParamsByTest(target, test) {\n  const parameterNames = [];\n\n  function search(obj) {\n    if (typeof obj === 'object') {\n      for (const key in obj) {\n        const value = obj[key];\n\n        if (test(value)) {\n          parameterNames.push(key);\n        } else if (typeof value === 'object') {\n          search(value);\n        }\n      }\n    }\n  }\n\n  search(target);\n\n  return parameterNames;\n}\n\nreturn $input.all().reduce((allLocations, { json: workflow }) => {\n  const perWorkflow = workflow.nodes.reduce((allLocationsPerWorkflow, node) => {\n    const perNode = findParamsByTest(node.parameters, isAffected).map(\n      (parameterName) => {\n\t\treturn {\n\t\t\tworkflowName: workflow.name,\n\t\t\tnodeName: node.name,\n\t\t\tparameterName,\n        };\n      },\n    );\n\n    return [...allLocationsPerWorkflow, ...perNode];\n  }, []);\n\n  return [...allLocations, ...perWorkflow];\n}, []);"
+        },
+        "typeVersion": 1,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ee189fa0-cf89-4b8d-8351-ed9598f18502",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          600,
+          92
+        ],
+        "parameters": {
+          "width": 548.6551724137931,
+          "height": 191.08045977011497,
+          "content": "## v1 Helper\n\nℹ️ This workflow is to be run **after upgrading to n8n v1**.\n\nThis workflow returns all locations where a node in an active workflow contains a parameter using an **expression extension affected by [v1 changes]({{ $env.WEBHOOK_URL }} For every location, please check that the workflow still behaves as intended."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-8fb657c9",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "da694734-30ae-46b1-8e29-877c95b670ab",
+    "connections": {},
+    "description": "Automated workflow: v1 helper - Find params with affected expressions. This workflow integrates 4 different services: stickyNote, manualTrigger, n8n, code. It contains 4 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: v1 helper - Find params with affected expressions. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "v1 helper - Find params with affected expressions",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Find params with affected expressions",
+        "parameters": {
+          "jsCode": "const AFFECTED_EXTENSIONS = ['beginningOf', 'endOfMonth', 'minus', 'plus'];\n\nconst isExpression = (value) => typeof value === 'string' && value.startsWith('={{');\n\nconst containsAny = (str, substrings) => {\n  for (const substring of substrings) {\n    if (str.includes(substring)) return true;\n  }\n  \n  return false;\n}\n\nconst isAffected = (value) => isExpression(value) && containsAny(value, AFFECTED_EXTENSIONS);\n\nfunction findParamsByTest(target, test) {\n  const parameterNames = [];\n\n  function search(obj) {\n    if (typeof obj === 'object') {\n      for (const key in obj) {\n        const value = obj[key];\n\n        if (test(value)) {\n          parameterNames.push(key);\n        } else if (typeof value === 'object') {\n          search(value);\n        }\n      }\n    }\n  }\n\n  search(target);\n\n  return parameterNames;\n}\n\nreturn $input.all().reduce((allLocations, { json: workflow }) => {\n  const perWorkflow = workflow.nodes.reduce((allLocationsPerWorkflow, node) => {\n    const perNode = findParamsByTest(node.parameters, isAffected).map(\n      (parameterName) => {\n\t\treturn {\n\t\t\tworkflowName: workflow.name,\n\t\t\tnodeName: node.name,\n\t\t\tparameterName,\n        };\n      },\n    );\n\n    return [...allLocationsPerWorkflow, ...perNode];\n  }, []);\n\n  return [...allLocations, ...perWorkflow];\n}, []);"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "n8nApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "n8n",
+        "parameters": {
+          "filters": {
+            "activeWorkflows": true
+          }
+        },
+        "type": "n8n-nodes-base.n8n",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## v1 Helper\n\nℹ️ This workflow is to be run **after upgrading to n8n v1**.\n\nThis workflow returns all locations where a node in an active workflow contains a parameter using an **expression extension affected by [v1 changes]({{ $env.WEBHOOK_URL }} For every location, please check that the workflow still behaves as intended.",
+          "height": 191.08045977011497,
+          "width": 548.6551724137931
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 1,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "N8n"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 168,
+  "viewCount": 255,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "N8n Account"
+    ],
+    "requiredCredentials": [
+      "n8n  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"n8n\" node (n8n-nodes-base.n8n) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 90,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-chhpe0j1b",
+      "workflowId": "v1-helper-find-params-with-affected-expressions-4dkqf",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/2037_Manual_N8N_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\2037_Manual_N8N_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:47.078Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:47.078Z",
+  "updatedAt": "2026-07-15T11:29:47.078Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

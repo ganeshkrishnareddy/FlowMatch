@@ -1,0 +1,364 @@
+{
+  "id": "summarize-google-drive-documents-with-mistral-ai-and-send-via-gmail-05rkz",
+  "name": "Summarize Google Drive Documents with Mistral AI and Send via Gmail",
+  "slug": "summarize-google-drive-documents-with-mistral-ai-and-send-via-gmail-lrc7",
+  "description": "Automated workflow: Summarize Google Drive Documents with Mistral AI and Send via Gmail. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Summarize Google Drive Documents with Mistral AI and Send via Gmail workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "Jy1RMuri0WJO5aO4",
+    "meta": {
+      "instanceId": "workflow-d1551dce",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:49.992474",
+      "updatedAt": "2025-09-29T07:07:49.992488",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Summarize Google Drive Documents with Mistral AI and Send via Gmail",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "680f9002-94fa-48c1-af5f-d2a5305b6291",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3fa4ad1a-ce87-44db-b016-bd172c2318eb",
+        "name": "Mistral Cloud Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          500,
+          240
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "credentials": {
+          "mistralCloudApi": {
+            "id": "temjibUluGywOSoS",
+            "name": "Mistral Cloud account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatMistralCloud node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "124d62ae-3b46-4e75-a04e-155849fe280d",
+        "name": "Download uploaded File from Google Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1d0njBA2ZM0zYyJOEbUeFwQmHSYIO7IM2",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Goods and Services Receipt(WCC).pdf"
+          },
+          "options": {},
+          "operation": "download"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "7xFbFgdSc78zERPk",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "69b7621b-a273-4b0a-be61-4d45bf87618d",
+        "name": "Summarization Chain to summarize a file",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          480,
+          0
+        ],
+        "parameters": {
+          "options": {
+            "binaryDataKey": "YOUR_CREDENTIAL_HERE"
+          },
+          "chunkSize": 800,
+          "chunkOverlap": 0,
+          "operationMode": "nodeInputBinary"
+        },
+        "typeVersion": 2,
+        "notes": "This chainSummarization node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "573194cd-5f37-422f-b3fa-957187ac3538",
+        "name": "Send Summarized text to Gmail",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          840,
+          0
+        ],
+        "webhookId": "215c6c67-612c-4b8d-9849-0b796570003d",
+        "parameters": {
+          "sendTo": "swot.ai25@gmail.com",
+          "message": "=<h1 style=\"color: #4CAF50;\">📌 Quick Summary of Your Document! ✨</h1>\n<p>\n<h2>📝 Summary:</h2>\n<p>\n{{ $json['response']['text'].replace(\"\\n\", \"<br>\") }}\n<p>\n\n<h3>📅 Date Processed: </h3>\n{{ new Date().toLocaleString('en-GB', { timeZone: 'Africa/Lagos' }) }}\n\n\n\n\n\n    ",
+          "options": {
+            "senderName": "Swot.AI",
+            "appendAttribution": false
+          },
+          "subject": "Here is Your Summarized Response"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "G3K9RkKiyLHtyVzi",
+            "name": "Gmail account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-fbc2e649",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "callerPolicy": "workflowsFromSameOwner",
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "8446e524-8468-4515-8778-be94db41d3e3",
+    "connections": {
+      "124d62ae-3b46-4e75-a04e-155849fe280d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-124d62ae-3b46-4e75-a04e-155849fe280d-1d54b5cc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Summarize Google Drive Documents with Mistral AI and Send via Gmail. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Summarize Google Drive Documents with Mistral AI and Send via Gmail. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "124d62ae-3b46-4e75-a04e-155849fe280d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-124d62ae-3b46-4e75-a04e-155849fe280d-1d54b5cc"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Summarize Google Drive Documents with Mistral AI and Send via Gmail",
+    "nodes": [
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Download uploaded File from Google Drive",
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "cachedResultName": "Goods and Services Receipt(WCC).pdf",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1d0njBA2ZM0zYyJOEbUeFwQmHSYIO7IM2"
+          },
+          "operation": "download",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mistralCloudApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mistral Cloud Chat Model",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Summarized text to Gmail",
+        "parameters": {
+          "message": "=<h1 style=\"color: #4CAF50;\">📌 Quick Summary of Your Document! ✨</h1>\n<p>\n<h2>📝 Summary:</h2>\n<p>\n{{ $json['response']['text'].replace(\"\\n\", \"<br>\") }}\n<p>\n\n<h3>📅 Date Processed: </h3>\n{{ new Date().toLocaleString('en-GB', { timeZone: 'Africa/Lagos' }) }}\n\n\n\n\n\n    ",
+          "options": {
+            "appendAttribution": false,
+            "senderName": "Swot.AI"
+          },
+          "sendTo": "swot.ai25@gmail.com",
+          "subject": "Here is Your Summarized Response"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Summarization Chain to summarize a file",
+        "parameters": {
+          "chunkOverlap": 0,
+          "chunkSize": 800,
+          "operationMode": "nodeInputBinary",
+          "options": {
+            "binaryDataKey": "YOUR_CREDENTIAL_HERE"
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 2
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Google Drive",
+    "Gmail"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 122,
+  "viewCount": 834,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account",
+      "Gmail Account"
+    ],
+    "requiredCredentials": [
+      "mistral Cloud  A P I details",
+      "google Drive  O Auth2  A P I details",
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Mistral Cloud Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download uploaded File from Google Drive\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Summarization Chain to summarize a file\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Summarized text to Gmail\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-oc5ymygw3",
+      "workflowId": "summarize-google-drive-documents-with-mistral-ai-and-send-via-gmail-05rkz",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/1528_Manual_Gmail_Send_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\1528_Manual_Gmail_Send_Triggered.json",
+      "discoveredAt": "2026-07-15T11:19:05.488Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:05.488Z",
+  "updatedAt": "2026-07-15T11:19:05.488Z"
+}

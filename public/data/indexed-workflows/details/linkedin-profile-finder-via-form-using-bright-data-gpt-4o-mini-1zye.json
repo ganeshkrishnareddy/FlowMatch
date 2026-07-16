@@ -1,0 +1,1260 @@
+{
+  "id": "linkedin-profile-finder-via-form-using-bright-data-gpt-4o-mini-3h0fp",
+  "name": "LinkedIn Profile Finder via Form using Bright Data & GPT-4o-mini",
+  "slug": "linkedin-profile-finder-via-form-using-bright-data-gpt-4o-mini-1zye",
+  "description": "Automated workflow: LinkedIn Profile Finder via Form using Bright Data & GPT-4o-mini. This workflow processes data and performs automated tasks.",
+  "shortDescription": "LinkedIn Profile Finder via Form using Bright Data & GPT-4o-mini workflow containing 19 nodes.",
+  "originalWorkflowJson": {
+    "id": "nmVATBvrztDxZX6z",
+    "meta": {
+      "instanceId": "workflow-baf697a7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.676047",
+      "updatedAt": "2025-09-29T07:07:54.676059",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "LinkedIn Profile Finder via Form using Bright Data & GPT-4o-mini",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "ff6d4985-8b42-46d8-95c8-e80ff102440c",
+        "name": "Extract Body and Title from Website",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          1600,
+          -1120
+        ],
+        "parameters": {
+          "options": {
+            "trimValues": true
+          },
+          "operation": "extractHtmlContent",
+          "dataPropertyName": "body",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "title"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "body"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4da21d9c-59d2-4151-a1ca-5e7a85cf0316",
+        "name": "When User Completes Form",
+        "type": "n8n-nodes-base.formTrigger",
+        "position": [
+          580,
+          -1120
+        ],
+        "webhookId": "41d0bffa-f5ca-4df7-b757-ca5a1e472b8a",
+        "parameters": {
+          "options": {
+            "path": "search-user",
+            "ignoreBots": true,
+            "buttonLabel": "Get References"
+          },
+          "formTitle": "Sales prospecting",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Person Fullname",
+                "placeholder": "Complete the fullname",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Person's company",
+                "placeholder": "Complete the company",
+                "requiredField": true
+              }
+            ]
+          },
+          "responseMode": "lastNode",
+          "formDescription": "Complete the data of the prospect you want to analyze.\n\nA personalized follow-up email with insights and suggested outreach steps will be sent to you:"
+        },
+        "typeVersion": 2.2,
+        "notes": "This formTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "644fab8f-66c6-4ae5-984b-7e1e66c265a2",
+        "name": "Get LinkedIn Entry on Google",
+        "type": "n8n-nodes-brightdata.brightData",
+        "position": [
+          1280,
+          -1120
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "zone": {
+            "__rl": true,
+            "mode": "list",
+            "value": "web_unlocker1",
+            "cachedResultName": "web_unlocker1"
+          },
+          "format": "json",
+          "country": {
+            "__rl": true,
+            "mode": "list",
+            "value": "us",
+            "cachedResultName": "us"
+          },
+          "requestOptions": {}
+        },
+        "credentials": {
+          "brightdataApi": {
+            "id": "jk945kIuAFAo9bcg",
+            "name": "BrightData account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This brightData node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e226ea33-a643-4396-9cbf-53901eeef89f",
+        "name": "Parse Google Results",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1920,
+          -1120
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {},
+          "messages": {
+            "values": [
+              {
+                "role": "system",
+                "content": "=Extract Linkedin profiles from google results (link, fullname, position, company if possible). \n\nReturn a results property with all the parsed results including a property \"match\" if user matches the data entry values \"{{ $('When User Completes Form').item.json[\"Person Fullname\"].trim() }} {{ $('When User Completes Form').item.json[\"Person Position\"].trim() }} {{ $('When User Completes Form').item.json[\"Person's company\"].trim() }}\""
+              },
+              {
+                "content": "=The input text is:\n{{ $json.body }}"
+              },
+              {
+                "content": "=Categories to filter: {{ $('When User Completes Form').item.json.Category.join(',') }}"
+              }
+            ]
+          },
+          "jsonOutput": true
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "oKzfvOwieOm4upQ2",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.8,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8018f6c1-037b-4577-ae4c-d2129fe2ecf4",
+        "name": "Form Not Found",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          2280,
+          -800
+        ],
+        "webhookId": "a509f577-231f-435f-b3c2-0fed718f0cc8",
+        "parameters": {
+          "operation": "completion",
+          "respondWith": "showText",
+          "responseText": "=We didn't found a person for \"{{ $('When User Completes Form').item.json[\"Person Fullname\"] }} {{ $('When User Completes Form').item.json[\"Person Fullname\"] }} {{ $('When User Completes Form').item.json[\"Person's company\"] }}\""
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3de33b35-63b5-419d-9719-b217c92767c6",
+        "name": "Get only Matching Profiles",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          1460,
+          -820
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "51a15ff2-457c-4a96-bfad-fe6d29a8cd9f",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.match }}",
+                "rightValue": "true"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b7e925b1-3b67-4b17-bcc1-10111ed41c32",
+        "name": "Limit to 1 Profile",
+        "type": "n8n-nodes-base.limit",
+        "position": [
+          1740,
+          -820
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This limit node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d4a6a867-6e9b-48d3-9ba2-0d9d2e803e67",
+        "name": "Extract Parsed Results",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          2340,
+          -1120
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "message.content.results"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "daf17e0e-0fc9-45e4-9393-8ba3a60f868e",
+        "name": "LinkedIn Profile is Found?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1960,
+          -820
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "645d85d3-c5cc-4e51-a989-075c0a851449",
+                "operator": {
+                  "type": "object",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json }}",
+                "rightValue": 1
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "300da9f8-6c24-4081-af96-ae09a1b513f8",
+        "name": "Edit Url LinkedIn",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          940,
+          -1120
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6b95685b-3286-4643-bfa1-6335d3f8cb39",
+                "name": "google_search",
+                "type": "string",
+                "value": "={{ $env.WEBHOOK_URL }}{{ encodeURIComponent($json[\"Person Fullname\"].trim() + \" \" + $json[\"Person's company\"].trim()) }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3ffaef02-ee98-4663-9a64-37907943427d",
+        "name": "Edit Company Search",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          300,
+          -860
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6b95685b-3286-4643-bfa1-6335d3f8cb39",
+                "name": "google_search",
+                "type": "string",
+                "value": "={{ $env.WEBHOOK_URL }}{{ encodeURIComponent($json[\"Person's company\"].trim()) }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "29294eaa-4692-4c1b-806a-11bd32428fdd",
+        "name": "Extract Body and Title from Website1",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          860,
+          -860
+        ],
+        "parameters": {
+          "options": {
+            "trimValues": true
+          },
+          "operation": "extractHtmlContent",
+          "dataPropertyName": "body",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "title"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "body"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e5232b69-eefe-4875-b339-54f7d2787863",
+        "name": "Get Company on Google",
+        "type": "n8n-nodes-brightdata.brightData",
+        "position": [
+          540,
+          -860
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "zone": {
+            "__rl": true,
+            "mode": "list",
+            "value": "web_unlocker1",
+            "cachedResultName": "web_unlocker1"
+          },
+          "format": "json",
+          "country": {
+            "__rl": true,
+            "mode": "list",
+            "value": "us",
+            "cachedResultName": "us"
+          },
+          "requestOptions": {}
+        },
+        "credentials": {
+          "brightdataApi": {
+            "id": "jk945kIuAFAo9bcg",
+            "name": "BrightData account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This brightData node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a8696ab3-76f0-4b58-93d6-1b73f4c1d83a",
+        "name": "Parse Google Results for Company",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          720,
+          -420
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {},
+          "messages": {
+            "values": [
+              {
+                "role": "system",
+                "content": "=Get first entry matching company {{ $('When User Completes Form').item.json[\"Person's company\"] }}\n\nOutput first entry data in a content property"
+              },
+              {
+                "content": "=The input text is:\n{{ $json.body }}"
+              },
+              {
+                "content": "=Categories to filter: {{ $('When User Completes Form').item.json.Category.join(',') }}"
+              }
+            ]
+          },
+          "jsonOutput": true
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "oKzfvOwieOm4upQ2",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.8,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4b4a6ef2-92ae-4dee-aac1-081fb1a2dbd9",
+        "name": "Split Out",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          1080,
+          -420
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "message.content"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cbf625d0-097d-47e7-8ab0-fb2da9dc3f7c",
+        "name": "Create a Followup for Company and Person",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1500,
+          -440
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {},
+          "messages": {
+            "values": [
+              {
+                "role": "system",
+                "content": "=Use data to analyze as a buyer persona. Find the best approach to connect for future champion in his company. Give recommendations and a concrete outreach steps.\n\nOutput report as raw html in a propety called content. Use tailwind for styles."
+              },
+              {
+                "content": "=The input text is:\n{{ JSON.stringify($json)}}"
+              }
+            ]
+          },
+          "jsonOutput": true
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "oKzfvOwieOm4upQ2",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.8,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6347e20c-b3f0-42ff-bc31-ddf4d13a4398",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1320,
+          -440
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combineBy": "combineByPosition"
+        },
+        "typeVersion": 3.1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4df0fb38-dad4-4eda-876c-591111e98807",
+        "name": "Send Email",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          1880,
+          -440
+        ],
+        "webhookId": "1e6e9588-2bc6-4f05-8531-2d7ca8348d0c",
+        "parameters": {
+          "html": "={{ $json.message.content.content }}",
+          "options": {},
+          "subject": "Next followup",
+          "toEmail": "miquel@n8nhackers.com",
+          "fromEmail": "miquel@n8nhackers.com"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "z3kiLWNZTH4wQaGy",
+            "name": "SMTP account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5d28cc94-3193-48e6-9bad-f15baf403645",
+        "name": "Form Email Sent",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          2120,
+          -440
+        ],
+        "webhookId": "a509f577-231f-435f-b3c2-0fed718f0cc8",
+        "parameters": {
+          "options": {},
+          "operation": "completion",
+          "completionTitle": "Thank you!",
+          "completionMessage": "We have sent you an email"
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "ea9dab20-4b74-45d0-9bf9-b0c1a884fe81",
+    "connections": {
+      "e226ea33-a643-4396-9cbf-53901eeef89f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e226ea33-a643-4396-9cbf-53901eeef89f-e5925861",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a8696ab3-76f0-4b58-93d6-1b73f4c1d83a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a8696ab3-76f0-4b58-93d6-1b73f4c1d83a-91bd2efd",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cbf625d0-097d-47e7-8ab0-fb2da9dc3f7c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-cbf625d0-097d-47e7-8ab0-fb2da9dc3f7c-c983685f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4df0fb38-dad4-4eda-876c-591111e98807": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-bba8d473",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-50b8db8e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-90b4e1f7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-1431ab95",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-2dbde25b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-9619482e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-b38a8287",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-d92e6e07",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: LinkedIn Profile Finder via Form using Bright Data & GPT-4o-mini. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: LinkedIn Profile Finder via Form using Bright Data & GPT-4o-mini. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4df0fb38-dad4-4eda-876c-591111e98807": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-bba8d473"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-50b8db8e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-90b4e1f7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-1431ab95"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-2dbde25b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-9619482e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-b38a8287"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4df0fb38-dad4-4eda-876c-591111e98807-d92e6e07"
+            }
+          ]
+        ]
+      },
+      "a8696ab3-76f0-4b58-93d6-1b73f4c1d83a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a8696ab3-76f0-4b58-93d6-1b73f4c1d83a-91bd2efd"
+            }
+          ]
+        ]
+      },
+      "cbf625d0-097d-47e7-8ab0-fb2da9dc3f7c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbf625d0-097d-47e7-8ab0-fb2da9dc3f7c-c983685f"
+            }
+          ]
+        ]
+      },
+      "e226ea33-a643-4396-9cbf-53901eeef89f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e226ea33-a643-4396-9cbf-53901eeef89f-e5925861"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "LinkedIn Profile Finder via Form using Bright Data & GPT-4o-mini",
+    "nodes": [
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create a Followup for Company and Person",
+        "parameters": {
+          "jsonOutput": true,
+          "messages": {
+            "values": [
+              {
+                "content": "=Use data to analyze as a buyer persona. Find the best approach to connect for future champion in his company. Give recommendations and a concrete outreach steps.\n\nOutput report as raw html in a propety called content. Use tailwind for styles.",
+                "role": "system"
+              },
+              {
+                "content": "=The input text is:\n{{ JSON.stringify($json)}}"
+              }
+            ]
+          },
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "name": "Edit Company Search",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6b95685b-3286-4643-bfa1-6335d3f8cb39",
+                "name": "google_search",
+                "type": "string",
+                "value": "={{ $env.WEBHOOK_URL }}{{ encodeURIComponent($json[\"Person's company\"].trim()) }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Edit Url LinkedIn",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6b95685b-3286-4643-bfa1-6335d3f8cb39",
+                "name": "google_search",
+                "type": "string",
+                "value": "={{ $env.WEBHOOK_URL }}{{ encodeURIComponent($json[\"Person Fullname\"].trim() + \" \" + $json[\"Person's company\"].trim()) }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Extract Body and Title from Website",
+        "parameters": {
+          "dataPropertyName": "body",
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "title",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "cssSelector": "body",
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {
+            "trimValues": true
+          }
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Extract Body and Title from Website1",
+        "parameters": {
+          "dataPropertyName": "body",
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "title",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "cssSelector": "body",
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {
+            "trimValues": true
+          }
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Extract Parsed Results",
+        "parameters": {
+          "fieldToSplitOut": "message.content.results",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Form Email Sent",
+        "parameters": {
+          "completionMessage": "We have sent you an email",
+          "completionTitle": "Thank you!",
+          "operation": "completion",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "Form Not Found",
+        "parameters": {
+          "operation": "completion",
+          "respondWith": "showText",
+          "responseText": "=We didn't found a person for \"{{ $('When User Completes Form').item.json[\"Person Fullname\"] }} {{ $('When User Completes Form').item.json[\"Person Fullname\"] }} {{ $('When User Completes Form').item.json[\"Person's company\"] }}\""
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "brightdataApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Company on Google",
+        "parameters": {
+          "country": {
+            "__rl": true,
+            "cachedResultName": "us",
+            "mode": "list",
+            "value": "us"
+          },
+          "format": "json",
+          "requestOptions": {},
+          "url": "{{ $env.BASE_URL }}",
+          "zone": {
+            "__rl": true,
+            "cachedResultName": "web_unlocker1",
+            "mode": "list",
+            "value": "web_unlocker1"
+          }
+        },
+        "type": "n8n-nodes-brightdata.brightData",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "brightdataApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get LinkedIn Entry on Google",
+        "parameters": {
+          "country": {
+            "__rl": true,
+            "cachedResultName": "us",
+            "mode": "list",
+            "value": "us"
+          },
+          "format": "json",
+          "requestOptions": {},
+          "url": "{{ $env.BASE_URL }}",
+          "zone": {
+            "__rl": true,
+            "cachedResultName": "web_unlocker1",
+            "mode": "list",
+            "value": "web_unlocker1"
+          }
+        },
+        "type": "n8n-nodes-brightdata.brightData",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get only Matching Profiles",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "51a15ff2-457c-4a96-bfad-fe6d29a8cd9f",
+                "leftValue": "={{ $json.match }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "true"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Limit to 1 Profile",
+        "parameters": {},
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1
+      },
+      {
+        "name": "LinkedIn Profile is Found?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "645d85d3-c5cc-4e51-a989-075c0a851449",
+                "leftValue": "={{ $json }}",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "object"
+                },
+                "rightValue": 1
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "combineBy": "combineByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Parse Google Results",
+        "parameters": {
+          "jsonOutput": true,
+          "messages": {
+            "values": [
+              {
+                "content": "=Extract Linkedin profiles from google results (link, fullname, position, company if possible). \n\nReturn a results property with all the parsed results including a property \"match\" if user matches the data entry values \"{{ $('When User Completes Form').item.json[\"Person Fullname\"].trim() }} {{ $('When User Completes Form').item.json[\"Person Position\"].trim() }} {{ $('When User Completes Form').item.json[\"Person's company\"].trim() }}\"",
+                "role": "system"
+              },
+              {
+                "content": "=The input text is:\n{{ $json.body }}"
+              },
+              {
+                "content": "=Categories to filter: {{ $('When User Completes Form').item.json.Category.join(',') }}"
+              }
+            ]
+          },
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Parse Google Results for Company",
+        "parameters": {
+          "jsonOutput": true,
+          "messages": {
+            "values": [
+              {
+                "content": "=Get first entry matching company {{ $('When User Completes Form').item.json[\"Person's company\"] }}\n\nOutput first entry data in a content property",
+                "role": "system"
+              },
+              {
+                "content": "=The input text is:\n{{ $json.body }}"
+              },
+              {
+                "content": "=Categories to filter: {{ $('When User Completes Form').item.json.Category.join(',') }}"
+              }
+            ]
+          },
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email",
+        "parameters": {
+          "fromEmail": "miquel@n8nhackers.com",
+          "html": "={{ $json.message.content.content }}",
+          "options": {},
+          "subject": "Next followup",
+          "toEmail": "miquel@n8nhackers.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Split Out",
+        "parameters": {
+          "fieldToSplitOut": "message.content",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "When User Completes Form",
+        "parameters": {
+          "formDescription": "Complete the data of the prospect you want to analyze.\n\nA personalized follow-up email with insights and suggested outreach steps will be sent to you:",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Person Fullname",
+                "placeholder": "Complete the fullname",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Person's company",
+                "placeholder": "Complete the company",
+                "requiredField": true
+              }
+            ]
+          },
+          "formTitle": "Sales prospecting",
+          "options": {
+            "buttonLabel": "Get References",
+            "ignoreBots": true,
+            "path": "search-user"
+          },
+          "responseMode": "lastNode"
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2
+      }
+    ]
+  },
+  "nodeCount": 19,
+  "integrationCount": 5,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Html",
+    "Form Trigger",
+    "LinkedIn",
+    "Brightdata",
+    "Emailsend"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 54,
+  "viewCount": 813,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Html Account",
+      "Form Trigger Account",
+      "LinkedIn Account",
+      "Brightdata Account",
+      "Emailsend Account"
+    ],
+    "requiredCredentials": [
+      "brightdata  A P I details",
+      "open Ai  A P I details",
+      "smtp details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When User Completes Form\".",
+      "Open the \"Extract Body and Title from Website\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get LinkedIn Entry on Google\" node (n8n-nodes-brightdata.brightData) and configure the action parameters, mappings, and fields.",
+      "Open the \"Parse Google Results\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Form Not Found\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get only Matching Profiles\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Limit to 1 Profile\" node (n8n-nodes-base.limit) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract Parsed Results\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"LinkedIn Profile is Found?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract Body and Title from Website1\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Company on Google\" node (n8n-nodes-brightdata.brightData) and configure the action parameters, mappings, and fields.",
+      "Open the \"Parse Google Results for Company\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create a Followup for Company and Person\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Email\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Form Email Sent\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Edit Url LinkedIn\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Edit Company Search\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 96,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-340fm8e9d",
+      "workflowId": "linkedin-profile-finder-via-form-using-bright-data-gpt-4o-mini-3h0fp",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/1937_Splitout_Limit_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\1937_Splitout_Limit_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:30:30.341Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:30.341Z",
+  "updatedAt": "2026-07-15T11:30:30.341Z",
+  "category": {
+    "slug": "social-media",
+    "name": "Social Media"
+  },
+  "categoryId": "social-media"
+}

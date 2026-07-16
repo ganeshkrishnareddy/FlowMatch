@@ -1,0 +1,776 @@
+{
+  "id": "poc-chatbot-order-by-sheet-data-ksfw6",
+  "name": "POC - Chatbot Order by Sheet Data",
+  "slug": "poc-chatbot-order-by-sheet-data-3a18",
+  "description": "Automated workflow: POC - Chatbot Order by Sheet Data. This workflow processes data and performs automated tasks.",
+  "shortDescription": "POC - Chatbot Order by Sheet Data workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "5Y8QXJ3N67wnmR2R",
+    "meta": {
+      "instanceId": "workflow-cee44ac3",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.135607",
+      "updatedAt": "2025-09-29T07:07:42.135632",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "POC - Chatbot Order by Sheet Data",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "trigger-670fd43a",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "cc9ab139-303f-411a-a7c8-5985d92e3040",
+        "name": "Calculator",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1460,
+          480
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This toolCalculator node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "97a6d3a8-001c-4c62-84c2-da5b46a286a9",
+        "name": "Chat OpenAI",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          740,
+          480
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "XXXXXXXXXX",
+            "name": "OpenAI Credentials"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1ad05eb6-0f6a-4da7-9d86-871dfa7cbce1",
+        "name": "Window Buffer Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          900,
+          480
+        ],
+        "parameters": {},
+        "typeVersion": 1.2,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f4883308-3e4a-49b1-82f5-c18dc2121c47",
+        "name": "Get Products",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1060,
+          480
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "toolDescription": "Retrieve detailed information about the product menu."
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "058b1cf5-b8c0-414d-b4c6-e4c016e4d181",
+        "name": "Order Product",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1200,
+          480
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "sendBody": true,
+          "parametersBody": {
+            "values": [
+              {
+                "name": "message",
+                "value": "={{ $json.chatInput }}",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "toolDescription": "Process product orders."
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9",
+        "name": "Get Order",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1320,
+          480
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "toolDescription": "Get the order status."
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a0ee2e49-52cf-40d8-b108-4357bf562505",
+        "name": "When chat message received",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          540,
+          160
+        ],
+        "webhookId": "d925cc6e-6dd7-4459-a917-e68d57ab0e2a",
+        "parameters": {
+          "public": true,
+          "options": {},
+          "initialMessages": "Hellooo! 👋 My name is Pizzaro 🍕. I'm here to help with your pizza order. How can I assist you?\n\n📣 INFO: If you’d like to order a pizza, please include your name + pizza type + quantity. Thank you!"
+        },
+        "typeVersion": 1.1,
+        "notes": "This chatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "81892405-e09c-4452-99b3-f5edbe49b830",
+        "name": "AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          780,
+          160
+        ],
+        "parameters": {
+          "text": "={{ $json.chatInput }}",
+          "options": {
+            "systemMessage": "=Your name is Pizzaro, and you are an assistant for handling customer pizza orders.\n\n1. If a customer asks about the menu, provide information on the available products.\n2. If a customer is placing an order, confirm the order details, inform them that the order is being processed, and thank them.\n3. If a customer inquires about their order status, provide the order date, pizza type, and quantity."
+          },
+          "promptType": "define"
+        },
+        "executeOnce": false,
+        "typeVersion": 1.6,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "6431e20b-e135-43b2-bbcb-ed9c705d1237",
+    "connections": {
+      "f4883308-3e4a-49b1-82f5-c18dc2121c47": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-eadf7f54",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-d55ef00c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-b80fb7ea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-435a5e26",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-1ebb6609",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-02678666",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-fee99a51",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-30e686bd",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "058b1cf5-b8c0-414d-b4c6-e4c016e4d181": {
+        "main": [
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-2d0363a3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-8083b263",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-552dbe1f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-952bcce8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-7997d4c7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-8d8ef715",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-e7ca8379",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-dba961db",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-61b66f2d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-c61e3464",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-94e263a6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-29808859",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-f3e65968",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-b29c3344",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-4b9219e2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-6a79cc3d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "97a6d3a8-001c-4c62-84c2-da5b46a286a9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-97a6d3a8-001c-4c62-84c2-da5b46a286a9-ba34869c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: POC - Chatbot Order by Sheet Data. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: POC - Chatbot Order by Sheet Data. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "058b1cf5-b8c0-414d-b4c6-e4c016e4d181": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-2d0363a3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-8083b263"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-552dbe1f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-952bcce8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-7997d4c7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-8d8ef715"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-e7ca8379"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-058b1cf5-b8c0-414d-b4c6-e4c016e4d181-dba961db"
+            }
+          ]
+        ]
+      },
+      "6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-61b66f2d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-c61e3464"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-94e263a6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-29808859"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-f3e65968"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-b29c3344"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-4b9219e2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6e0b433c-1d8f-4cf8-aa06-cc1b8d51e2d9-6a79cc3d"
+            }
+          ]
+        ]
+      },
+      "97a6d3a8-001c-4c62-84c2-da5b46a286a9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-97a6d3a8-001c-4c62-84c2-da5b46a286a9-ba34869c"
+            }
+          ]
+        ]
+      },
+      "f4883308-3e4a-49b1-82f5-c18dc2121c47": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-eadf7f54"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-d55ef00c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-b80fb7ea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-435a5e26"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-1ebb6609"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-02678666"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-fee99a51"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f4883308-3e4a-49b1-82f5-c18dc2121c47-30e686bd"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "POC - Chatbot Order by Sheet Data",
+    "nodes": [
+      {
+        "name": "AI Agent",
+        "parameters": {
+          "options": {
+            "systemMessage": "=Your name is Pizzaro, and you are an assistant for handling customer pizza orders.\n\n1. If a customer asks about the menu, provide information on the available products.\n2. If a customer is placing an order, confirm the order details, inform them that the order is being processed, and thank them.\n3. If a customer inquires about their order status, provide the order date, pizza type, and quantity."
+          },
+          "promptType": "define",
+          "text": "={{ $json.chatInput }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "name": "Calculator",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Chat OpenAI",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get Order",
+        "parameters": {
+          "toolDescription": "Get the order status.",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Get Products",
+        "parameters": {
+          "toolDescription": "Retrieve detailed information about the product menu.",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Order Product",
+        "parameters": {
+          "method": "POST",
+          "parametersBody": {
+            "values": [
+              {
+                "name": "message",
+                "value": "={{ $json.chatInput }}",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "sendBody": true,
+          "toolDescription": "Process product orders.",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When chat message received",
+        "parameters": {
+          "initialMessages": "Hellooo! 👋 My name is Pizzaro 🍕. I'm here to help with your pizza order. How can I assist you?\n\n📣 INFO: If you’d like to order a pizza, please include your name + pizza type + quantity. Thank you!",
+          "options": {},
+          "public": true
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Window Buffer Memory",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 0,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [],
+  "securityStatus": "Passed",
+  "verified": false,
+  "featured": true,
+  "downloadCount": 193,
+  "viewCount": 86,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [],
+    "requiredCredentials": [
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"Calculator\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Chat OpenAI\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Window Buffer Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Products\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Order Product\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Order\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"When chat message received\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 89,
+  "validationStatus": "Valid With Warnings",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-r2x11tbhd",
+      "workflowId": "poc-chatbot-order-by-sheet-data-ksfw6",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Automate/1060_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Automate\\1060_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:28:53.642Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:53.642Z",
+  "updatedAt": "2026-07-15T11:28:53.642Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

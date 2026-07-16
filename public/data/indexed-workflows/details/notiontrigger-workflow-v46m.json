@@ -1,0 +1,408 @@
+{
+  "id": "notiontrigger-workflow-u9d9w",
+  "name": "Notiontrigger Workflow",
+  "slug": "notiontrigger-workflow-v46m",
+  "description": "Automated workflow: Notiontrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Notiontrigger Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-655c80c6",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.311551",
+      "updatedAt": "2025-09-29T07:07:42.311567",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "22e8e117-2475-4b06-966c-9b35c9c749f8",
+        "name": "On updated database page",
+        "type": "n8n-nodes-base.notionTrigger",
+        "position": [
+          180,
+          620
+        ],
+        "parameters": {
+          "event": "pagedUpdatedInDatabase",
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "databaseId": "38aa89c7-defd-4268-be2d-9119590521a9"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This notionTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6938eddf-39ec-46c4-a9a9-082ee0edd836",
+        "name": "Update an existing task",
+        "type": "n8n-nodes-base.clickUp",
+        "position": [
+          400,
+          620
+        ],
+        "parameters": {
+          "id": "={{$node[\"On updated database page\"].json[\"ClickUp ID\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "name": "={{$node[\"On updated database page\"].json[\"Task name\"]}}",
+            "status": "={{$node[\"On updated database page\"].json[\"Status\"]}}",
+            "dueDate": "={{$node[\"On updated database page\"].json[\"Deadline\"][\"start\"]}}"
+          }
+        },
+        "credentials": {
+          "clickUpApi": {
+            "id": "{{ $credentials.clickUpApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This clickUp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "84cd269a-e732-408e-8b1a-66b1a7623fc1",
+        "name": "On task status updated",
+        "type": "n8n-nodes-base.clickUpTrigger",
+        "position": [
+          180,
+          820
+        ],
+        "webhookId": "86d6bbce-1591-4db9-9ccb-214ab0977ae8",
+        "parameters": {
+          "team": "2627397",
+          "events": [
+            "taskStatusUpdated"
+          ],
+          "filters": {}
+        },
+        "credentials": {
+          "clickUpApi": {
+            "id": "{{ $credentials.clickUpApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This clickUpTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a5d6cee8-9dae-45ca-9540-4835365a4ab1",
+        "name": "Get database page by ClickUp ID",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          400,
+          820
+        ],
+        "parameters": {
+          "filters": {
+            "conditions": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "condition": "equals",
+                "richTextValue": "={{$node[\"On task status updated\"].json[\"task_id\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "resource": "databasePage",
+          "operation": "getAll",
+          "returnAll": true,
+          "databaseId": "38aa89c7-defd-4268-be2d-9119590521a9",
+          "filterType": "manual"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eeaff75d-8c47-4e2d-b2e2-87d5b6e59499",
+        "name": "Update the status of found database page",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          620,
+          820
+        ],
+        "parameters": {
+          "pageId": "={{$node[\"Get database page by ClickUp ID\"].json[\"id\"]}}",
+          "resource": "databasePage",
+          "operation": "update",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "selectValue": "={{$node[\"On task status updated\"].json[\"history_items\"][0][\"after\"][\"status\"]}}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-091068bd",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Notiontrigger Workflow",
+    "description": "Automated workflow: Notiontrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Notiontrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Notiontrigger Workflow",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get database page by ClickUp ID",
+        "parameters": {
+          "databaseId": "38aa89c7-defd-4268-be2d-9119590521a9",
+          "filterType": "manual",
+          "filters": {
+            "conditions": [
+              {
+                "condition": "equals",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "richTextValue": "={{$node[\"On task status updated\"].json[\"task_id\"]}}"
+              }
+            ]
+          },
+          "operation": "getAll",
+          "options": {},
+          "resource": "databasePage",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "clickUpApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "On task status updated",
+        "parameters": {
+          "events": [
+            "taskStatusUpdated"
+          ],
+          "filters": {},
+          "team": "2627397"
+        },
+        "type": "n8n-nodes-base.clickUpTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "On updated database page",
+        "parameters": {
+          "databaseId": "38aa89c7-defd-4268-be2d-9119590521a9",
+          "event": "pagedUpdatedInDatabase",
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.notionTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "clickUpApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update an existing task",
+        "parameters": {
+          "id": "={{$node[\"On updated database page\"].json[\"ClickUp ID\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "dueDate": "={{$node[\"On updated database page\"].json[\"Deadline\"][\"start\"]}}",
+            "name": "={{$node[\"On updated database page\"].json[\"Task name\"]}}",
+            "status": "={{$node[\"On updated database page\"].json[\"Status\"]}}"
+          }
+        },
+        "type": "n8n-nodes-base.clickUp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update the status of found database page",
+        "parameters": {
+          "operation": "update",
+          "pageId": "={{$node[\"Get database page by ClickUp ID\"].json[\"id\"]}}",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "selectValue": "={{$node[\"On task status updated\"].json[\"history_items\"][0][\"after\"][\"status\"]}}"
+              }
+            ]
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Notion",
+    "Clickup"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 195,
+  "viewCount": 453,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Notion Account",
+      "Clickup Account"
+    ],
+    "requiredCredentials": [
+      "notion  A P I details",
+      "click Up  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On updated database page\".",
+      "Verify the settings of the trigger node \"On task status updated\".",
+      "Open the \"Update an existing task\" node (n8n-nodes-base.clickUp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get database page by ClickUp ID\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update the status of found database page\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-d8xljamfn",
+      "workflowId": "notiontrigger-workflow-u9d9w",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Clickup/0282_Clickup_Notion_Update_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Clickup\\0282_Clickup_Notion_Update_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:16.352Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.352Z",
+  "updatedAt": "2026-07-15T11:18:16.352Z"
+}

@@ -1,0 +1,1243 @@
+{
+  "id": "entra-user-to-zammad-user-sync-8d88r",
+  "name": "Entra User to Zammad User Sync",
+  "slug": "entra-user-to-zammad-user-sync-6l7s",
+  "description": "Automated workflow: Entra User to Zammad User Sync. This workflow integrates 10 different services: stickyNote, httpRequest, splitOut, merge, set. It contains 21 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Entra User to Zammad User Sync workflow containing 17 nodes.",
+  "originalWorkflowJson": {
+    "id": "KKCfXEpBjjhp1LC8",
+    "meta": {
+      "instanceId": "workflow-7e613cc8",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.076705",
+      "updatedAt": "2025-09-29T07:07:54.076711",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Entra User to Zammad User Sync",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "0007443e-b0d4-4f98-a613-3ec7c2842aa3",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -2140,
+          140
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2b285a4f-7e39-411b-88b9-cb55c5cf62e3",
+        "name": "Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1700,
+          380
+        ],
+        "parameters": {
+          "width": 1635.910561370123,
+          "height": 329.7269624573379,
+          "content": "## Select Entra Users in a named Entra Group that should be synced to Zammad\n\n\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "929e529e-a4a3-4663-b9dc-e2300a860fed",
+        "name": "Get Groups from Entra",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -1660,
+          480
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "microsoftOAuth2Api": {
+            "id": "U2E5p3lreqSi8v1N",
+            "name": "ms365test.zammad.org"
+          },
+          "microsoftGraphSecurityOAuth2Api": {
+            "id": "b09tqOxzkl0P8UQD",
+            "name": "ms365test.zammad.org"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3390b2ed-6070-429c-bc1a-f0ab324117c7",
+        "name": "Remove outer Array",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          -1400,
+          480
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "value"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b0e9531a-7fc0-4de0-8ec5-4be476b18a26",
+        "name": "Select Entra Zammad default Group",
+        "type": "n8n-nodes-base.if",
+        "notes": "Please enter the Entra group name of users to be synchronized.",
+        "position": [
+          -1120,
+          480
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "2dbb2484-2424-4095-a5a2-76ab4e3aaae8",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.displayName }}",
+                "rightValue": "ENTRA"
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2.2
+      },
+      {
+        "id": "1be2a745-aea3-46ec-ab84-be2e39358b95",
+        "name": "Remove outer Array from Entra User",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          -700,
+          460
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "value"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3b1fc962-7546-4bad-b637-e018649a0652",
+        "name": "Zammad Univeral User Object",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -240,
+          440
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "entra_key",
+                "value": "={{ $json.id }}"
+              }
+            ],
+            "string": [
+              {
+                "name": "email",
+                "value": "={{ $json.userPrincipalName }}"
+              },
+              {
+                "name": "lastname",
+                "value": "={{ $json.surname }}"
+              },
+              {
+                "name": "firstname",
+                "value": "={{ $json.givenName }}"
+              },
+              {
+                "name": "mobile",
+                "value": "={{ $json.mobilePhone }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json.businessPhones[0] }}"
+              },
+              {},
+              {}
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9e36e6a9-cf56-4548-a1af-b1e33dbc61dd",
+        "name": "Get Zammad Users",
+        "type": "n8n-nodes-base.zammad",
+        "position": [
+          -1020,
+          140
+        ],
+        "parameters": {
+          "filters": {},
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "zammadTokenAuthApi": {
+            "id": "fj5GuzcJuNLQeMxz",
+            "name": "Zammad Token Auth account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zammad node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c9a342b1-b5f2-4d31-9737-15f145dc7318",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          240,
+          140
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "fieldsToMatchString": "email"
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a04ebfea-e5fe-4903-841a-8ef29d75ff1a",
+        "name": "Get Members of the default group",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -880,
+          460
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "microsoftOAuth2Api": {
+            "id": "U2E5p3lreqSi8v1N",
+            "name": "ms365test.zammad.org"
+          },
+          "microsoftGraphSecurityOAuth2Api": {
+            "id": "b09tqOxzkl0P8UQD",
+            "name": "ms365test.zammad.org"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2e68992e-3080-41fd-9aae-c44dc60dc3b0",
+        "name": "Find new Zammad Users",
+        "type": "n8n-nodes-base.compareDatasets",
+        "position": [
+          240,
+          460
+        ],
+        "parameters": {
+          "options": {},
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "email",
+                "field2": "email"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.3,
+        "notes": "This compareDatasets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "86dc2c72-d54a-40a9-a64b-fc0bde9a2387",
+        "name": "Update Zammad User",
+        "type": "n8n-nodes-base.zammad",
+        "position": [
+          560,
+          140
+        ],
+        "parameters": {
+          "id": "={{ $json.id }}",
+          "operation": "update",
+          "updateFields": {
+            "phone": "={{ $json.phone }}",
+            "mobile": "={{ $json.mobile }}",
+            "lastname": "={{ $json.lastname }}",
+            "firstname": "={{ $json.firstname }}",
+            "customFieldsUi": {
+              "customFieldPairs": [
+                {
+                  "name": "entra_key",
+                  "value": "={{ $json.entra_key }}"
+                },
+                {
+                  "name": "entra_object_type",
+                  "value": "user"
+                }
+              ]
+            }
+          }
+        },
+        "credentials": {
+          "zammadTokenAuthApi": {
+            "id": "fj5GuzcJuNLQeMxz",
+            "name": "Zammad Token Auth account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zammad node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bc883c6d-ec53-4854-824a-bd76b28077d2",
+        "name": "Create Zammad User",
+        "type": "n8n-nodes-base.zammad",
+        "position": [
+          580,
+          540
+        ],
+        "parameters": {
+          "lastname": "={{ $json.lastname }}",
+          "firstname": "={{ $json.firstname }}",
+          "additionalFields": {
+            "email": "={{ $json.email }}",
+            "phone": "={{ $json.phone }}",
+            "mobile": "={{ $json.mobile }}",
+            "customFieldsUi": {
+              "customFieldPairs": [
+                {
+                  "name": "entra_key",
+                  "value": "={{ $json.entra_key }}"
+                },
+                {
+                  "name": "entra_object_type",
+                  "value": "user"
+                }
+              ]
+            }
+          }
+        },
+        "credentials": {
+          "zammadTokenAuthApi": {
+            "id": "fj5GuzcJuNLQeMxz",
+            "name": "Zammad Token Auth account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zammad node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3b57e278-e755-407c-b261-7fe76ce82bb5",
+        "name": "Deactivate Zammad User",
+        "type": "n8n-nodes-base.zammad",
+        "position": [
+          600,
+          840
+        ],
+        "parameters": {
+          "id": "={{ $json.id }}",
+          "operation": "update",
+          "updateFields": {
+            "phone": "={{ $json.phone }}",
+            "active": false,
+            "mobile": "={{ $json.mobile }}",
+            "lastname": "={{ $json.lastname }}",
+            "firstname": "={{ $json.firstname }}",
+            "customFieldsUi": {
+              "customFieldPairs": [
+                {
+                  "name": "entra_key",
+                  "value": "={{ $json.entra_key }}"
+                }
+              ]
+            }
+          }
+        },
+        "credentials": {
+          "zammadTokenAuthApi": {
+            "id": "fj5GuzcJuNLQeMxz",
+            "name": "Zammad Token Auth account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This zammad node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cdaf8b51-9b4c-4ad0-b8f0-c6921849ed4c",
+        "name": "Find removed Users",
+        "type": "n8n-nodes-base.compareDatasets",
+        "position": [
+          240,
+          880
+        ],
+        "parameters": {
+          "options": {},
+          "resolve": "preferInput1",
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "entra_key",
+                "field2": "entra_key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.3,
+        "notes": "This compareDatasets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9b37b75e-d694-441e-b5a5-8abeccbf4ed7",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -500,
+          460
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "15da9b4f-46fa-4e9b-bd33-40ae79b88cd5",
+                "operator": {
+                  "type": "object",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "13ac19a6-6689-4e75-86d4-02ec1c0c64cd",
+        "name": "Select only active Users and entra_obect_type=\"user\"",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -220,
+          140
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "1c9ca19d-18e3-470e-84cd-593794613c59",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.entra_object_type }}",
+                "rightValue": "user"
+              },
+              {
+                "id": "9187eea8-48ec-4488-9bc9-45235ff88114",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.active }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "b726c830-9d26-4289-8f66-485850762df7",
+    "connections": {
+      "929e529e-a4a3-4663-b9dc-e2300a860fed": {
+        "main": [
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-4023c508",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-8eb1b1b2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-a8bd2921",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-82076218",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-57271d58",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-af8061cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-dd2f9042",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-2383c7f8",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a04ebfea-e5fe-4903-841a-8ef29d75ff1a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-d0419b1e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-0107aab8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-8be70749",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-c30da4d2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-97749440",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-cabf7e9f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-5ca9b6af",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-123617b5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Entra User to Zammad User Sync. This workflow integrates 10 different services: stickyNote, httpRequest, splitOut, merge, set. It contains 21 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Entra User to Zammad User Sync. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "929e529e-a4a3-4663-b9dc-e2300a860fed": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-4023c508"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-8eb1b1b2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-a8bd2921"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-82076218"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-57271d58"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-af8061cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-dd2f9042"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-929e529e-a4a3-4663-b9dc-e2300a860fed-2383c7f8"
+            }
+          ]
+        ]
+      },
+      "a04ebfea-e5fe-4903-841a-8ef29d75ff1a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-d0419b1e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-0107aab8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-8be70749"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-c30da4d2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-97749440"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-cabf7e9f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-5ca9b6af"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a04ebfea-e5fe-4903-841a-8ef29d75ff1a-123617b5"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Entra User to Zammad User Sync",
+    "nodes": [
+      {
+        "credentials": {
+          "zammadTokenAuthApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Zammad User",
+        "parameters": {
+          "additionalFields": {
+            "customFieldsUi": {
+              "customFieldPairs": [
+                {
+                  "name": "entra_key",
+                  "value": "={{ $json.entra_key }}"
+                },
+                {
+                  "name": "entra_object_type",
+                  "value": "user"
+                }
+              ]
+            },
+            "email": "={{ $json.email }}",
+            "mobile": "={{ $json.mobile }}",
+            "phone": "={{ $json.phone }}"
+          },
+          "firstname": "={{ $json.firstname }}",
+          "lastname": "={{ $json.lastname }}"
+        },
+        "type": "n8n-nodes-base.zammad",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "zammadTokenAuthApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Deactivate Zammad User",
+        "parameters": {
+          "id": "={{ $json.id }}",
+          "operation": "update",
+          "updateFields": {
+            "active": false,
+            "customFieldsUi": {
+              "customFieldPairs": [
+                {
+                  "name": "entra_key",
+                  "value": "={{ $json.entra_key }}"
+                }
+              ]
+            },
+            "firstname": "={{ $json.firstname }}",
+            "lastname": "={{ $json.lastname }}",
+            "mobile": "={{ $json.mobile }}",
+            "phone": "={{ $json.phone }}"
+          }
+        },
+        "type": "n8n-nodes-base.zammad",
+        "typeVersion": 1
+      },
+      {
+        "name": "Find new Zammad Users",
+        "parameters": {
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "email",
+                "field2": "email"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.compareDatasets",
+        "typeVersion": 2.3
+      },
+      {
+        "name": "Find removed Users",
+        "parameters": {
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "entra_key",
+                "field2": "entra_key"
+              }
+            ]
+          },
+          "options": {},
+          "resolve": "preferInput1"
+        },
+        "type": "n8n-nodes-base.compareDatasets",
+        "typeVersion": 2.3
+      },
+      {
+        "credentials": {
+          "microsoftGraphSecurityOAuth2Api": {
+            "id": "REDACTED"
+          },
+          "microsoftOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Groups from Entra",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "microsoftGraphSecurityOAuth2Api": {
+            "id": "REDACTED"
+          },
+          "microsoftOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Members of the default group",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "zammadTokenAuthApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Zammad Users",
+        "parameters": {
+          "filters": {},
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.zammad",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "15da9b4f-46fa-4e9b-bd33-40ae79b88cd5",
+                "leftValue": "={{ $json }}",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "object"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "fieldsToMatchString": "email",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "Note1",
+        "parameters": {
+          "content": "## Select Entra Users in a named Entra Group that should be synced to Zammad\n\n\n\n",
+          "height": 329.7269624573379,
+          "width": 1635.910561370123
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Remove outer Array",
+        "parameters": {
+          "fieldToSplitOut": "value",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Remove outer Array from Entra User",
+        "parameters": {
+          "fieldToSplitOut": "value",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Select Entra Zammad default Group",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "2dbb2484-2424-4095-a5a2-76ab4e3aaae8",
+                "leftValue": "={{ $json.displayName }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "ENTRA"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Select only active Users and entra_obect_type=\"user\"",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "1c9ca19d-18e3-470e-84cd-593794613c59",
+                "leftValue": "={{ $json.entra_object_type }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "user"
+              },
+              {
+                "id": "9187eea8-48ec-4488-9bc9-45235ff88114",
+                "leftValue": "={{ $json.active }}",
+                "operator": {
+                  "operation": "true",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "zammadTokenAuthApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Zammad User",
+        "parameters": {
+          "id": "={{ $json.id }}",
+          "operation": "update",
+          "updateFields": {
+            "customFieldsUi": {
+              "customFieldPairs": [
+                {
+                  "name": "entra_key",
+                  "value": "={{ $json.entra_key }}"
+                },
+                {
+                  "name": "entra_object_type",
+                  "value": "user"
+                }
+              ]
+            },
+            "firstname": "={{ $json.firstname }}",
+            "lastname": "={{ $json.lastname }}",
+            "mobile": "={{ $json.mobile }}",
+            "phone": "={{ $json.phone }}"
+          }
+        },
+        "type": "n8n-nodes-base.zammad",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Zammad Univeral User Object",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "entra_key",
+                "value": "={{ $json.id }}"
+              }
+            ],
+            "string": [
+              {
+                "name": "email",
+                "value": "={{ $json.userPrincipalName }}"
+              },
+              {
+                "name": "lastname",
+                "value": "={{ $json.surname }}"
+              },
+              {
+                "name": "firstname",
+                "value": "={{ $json.givenName }}"
+              },
+              {
+                "name": "mobile",
+                "value": "={{ $json.mobilePhone }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json.businessPhones[0] }}"
+              },
+              {},
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 17,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Zammad",
+    "Comparedatasets"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 94,
+  "viewCount": 376,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Zammad Account",
+      "Comparedatasets Account"
+    ],
+    "requiredCredentials": [
+      "microsoft  O Auth2  A P I details",
+      "microsoft Graph Security  O Auth2  A P I details",
+      "zammad Token Auth  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Groups from Entra\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove outer Array\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Select Entra Zammad default Group\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove outer Array from Entra User\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Zammad Users\" node (n8n-nodes-base.zammad) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Members of the default group\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Zammad User\" node (n8n-nodes-base.zammad) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Zammad User\" node (n8n-nodes-base.zammad) and configure the action parameters, mappings, and fields.",
+      "Open the \"Deactivate Zammad User\" node (n8n-nodes-base.zammad) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Select only active Users and entra_obect_type=\"user\"\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Zammad Univeral User Object\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Find new Zammad Users\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Find removed Users\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 96,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ddnb1k6o3",
+      "workflowId": "entra-user-to-zammad-user-sync-8d88r",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/1531_Splitout_Comparedatasets_Sync_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\1531_Splitout_Comparedatasets_Sync_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:24.290Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:24.290Z",
+  "updatedAt": "2026-07-15T11:30:24.290Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

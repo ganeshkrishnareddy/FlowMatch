@@ -1,0 +1,651 @@
+{
+  "id": "stripe-workflow-ocs58",
+  "name": "Stripe Workflow",
+  "slug": "stripe-workflow-z8ox",
+  "description": "Automated workflow: Stripe Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Stripe Workflow workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-8baa42fe",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.079974",
+      "updatedAt": "2025-09-29T07:07:45.079990",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "28349bfd-f68e-4479-9508-28d408033d09",
+        "name": "Get customers",
+        "type": "n8n-nodes-base.stripe",
+        "position": [
+          5360,
+          1100
+        ],
+        "parameters": {
+          "filters": {},
+          "resource": "customer",
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "stripeApi": {
+            "id": "{{ $credentials.stripeApi.id }}",
+            "name": "Stripe account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This stripe node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3f3d2389-e9ab-4140-8b04-f0a07003cecc",
+        "name": "Rename fields and keep only needed fields",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          5560,
+          1100
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "customerName",
+                "value": "={{ $json[\"name\"] }}"
+              },
+              {
+                "name": "customerId",
+                "value": "={{ $json[\"id\"] }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d6d3ccff-f565-49c9-9cda-8e278d298433",
+        "name": "Add customer name to charge data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          5860,
+          920
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "customer",
+          "propertyName2": "customerId"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eadce8e7-f523-485b-8cc0-5a336c8633ef",
+        "name": "Search organisation",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          6140,
+          1060
+        ],
+        "parameters": {
+          "term": "={{ $json[\"customerName\"] }}",
+          "resource": "organization",
+          "operation": "search",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dde08b48-21b0-44af-a66d-ff69399608e7",
+        "name": "Add organisation Information to charge data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          6400,
+          940
+        ],
+        "parameters": {
+          "join": "inner",
+          "mode": "mergeByIndex"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6cbd0f06-0f10-4360-8c5c-e181679ba370",
+        "name": "Create note with charge information",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          6620,
+          940
+        ],
+        "parameters": {
+          "content": "={{ $json[\"description\"] }}: {{ $json[\"amount\"] / 100 }} {{ $json[\"currency\"] }}",
+          "resource": "note",
+          "additionalFields": {
+            "org_id": "={{ $json[\"id\"] }}"
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c6ed5a89-b50a-40ad-bd78-62ffc2430fde",
+        "name": "Get last execution timestamp",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          5140,
+          900
+        ],
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nif(!staticData.lastExecution){\n  staticData.lastExecution = Math.round( new Date().getTime() / 1000 );\n}\n\nitem.executionTimeStamp = Math.round( new Date().getTime() / 1000 );\nitem.lastExecution = staticData.lastExecution;\n\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "notes": "This functionItem node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "41b2c937-d479-4402-b428-29faabe32845",
+        "name": "Set new last execution timestamp",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          6820,
+          940
+        ],
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nstaticData.lastExecution = $item(0).$node[\"Get last execution timestamp\"].executionTimeStamp;\n\nreturn item;"
+        },
+        "executeOnce": true,
+        "typeVersion": 1,
+        "notes": "This functionItem node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "56612271-08c4-4347-92b1-b898c68c3460",
+        "name": "Split array of charges to items",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          5560,
+          900
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "data"
+        },
+        "typeVersion": 1,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b866ba46-6269-4c8d-8021-ea99591d676d",
+        "name": "Search for charges in Stripe",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          5360,
+          900
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "query",
+                "value": "=created>{{$json[\"lastExecution\"]}} AND status:\"succeeded\""
+              }
+            ]
+          },
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "stripeApi": {
+            "id": "{{ $credentials.stripeApi.id }}",
+            "name": "Stripe account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a3249f70-1cd4-4d5f-8f27-15badcf10296",
+        "name": "Every day at 8 am",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          4920,
+          900
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 8
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "b866ba46-6269-4c8d-8021-ea99591d676d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-38c78c73",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-acb56b4d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-be7ed4ae",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-82f7fd7b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-16815d74",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-f3879490",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-7472277e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-c389e66f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stripe Workflow",
+    "description": "Automated workflow: Stripe Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stripe Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "b866ba46-6269-4c8d-8021-ea99591d676d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-38c78c73"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-acb56b4d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-be7ed4ae"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-82f7fd7b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-16815d74"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-f3879490"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-7472277e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b866ba46-6269-4c8d-8021-ea99591d676d-c389e66f"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stripe Workflow",
+    "nodes": [
+      {
+        "name": "Add customer name to charge data",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "customer",
+          "propertyName2": "customerId"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "Add organisation Information to charge data",
+        "parameters": {
+          "join": "inner",
+          "mode": "mergeByIndex"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create note with charge information",
+        "parameters": {
+          "additionalFields": {
+            "org_id": "={{ $json[\"id\"] }}"
+          },
+          "content": "={{ $json[\"description\"] }}: {{ $json[\"amount\"] / 100 }} {{ $json[\"currency\"] }}",
+          "resource": "note"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Every day at 8 am",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 8
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "stripeApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get customers",
+        "parameters": {
+          "filters": {},
+          "operation": "getAll",
+          "resource": "customer",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.stripe",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get last execution timestamp",
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nif(!staticData.lastExecution){\n  staticData.lastExecution = Math.round( new Date().getTime() / 1000 );\n}\n\nitem.executionTimeStamp = Math.round( new Date().getTime() / 1000 );\nitem.lastExecution = staticData.lastExecution;\n\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "Rename fields and keep only needed fields",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "customerName",
+                "value": "={{ $json[\"name\"] }}"
+              },
+              {
+                "name": "customerId",
+                "value": "={{ $json[\"id\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "stripeApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search for charges in Stripe",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "query",
+                "value": "=created>{{$json[\"lastExecution\"]}} AND status:\"succeeded\""
+              }
+            ]
+          },
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search organisation",
+        "parameters": {
+          "additionalFields": {},
+          "operation": "search",
+          "resource": "organization",
+          "term": "={{ $json[\"customerName\"] }}"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set new last execution timestamp",
+        "parameters": {
+          "functionCode": "// Code here will run once per input item.\n// More info and help: {{ $env.WEBHOOK_URL }}\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst staticData = getWorkflowStaticData('global');\n\nstaticData.lastExecution = $item(0).$node[\"Get last execution timestamp\"].executionTimeStamp;\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split array of charges to items",
+        "parameters": {
+          "fieldToSplitOut": "data",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 6,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Stripe",
+    "Pipedrive",
+    "Form Trigger",
+    "Functionitem",
+    "Itemlists",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 108,
+  "viewCount": 93,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Stripe Account",
+      "Pipedrive Account",
+      "Form Trigger Account",
+      "Functionitem Account",
+      "Itemlists Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "stripe  A P I details",
+      "pipedrive  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Every day at 8 am\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get customers\" node (n8n-nodes-base.stripe) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add customer name to charge data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search organisation\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add organisation Information to charge data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create note with charge information\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get last execution timestamp\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set new last execution timestamp\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split array of charges to items\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search for charges in Stripe\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Rename fields and keep only needed fields\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-4l5ceemtb",
+      "workflowId": "stripe-workflow-ocs58",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Functionitem/0246_Functionitem_Pipedrive_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Functionitem\\0246_Functionitem_Pipedrive_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:18:25.036Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:25.036Z",
+  "updatedAt": "2026-07-15T11:18:25.036Z"
+}

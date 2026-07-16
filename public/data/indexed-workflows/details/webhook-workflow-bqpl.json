@@ -1,0 +1,852 @@
+{
+  "id": "webhook-workflow-oqhig",
+  "name": "Webhook Workflow",
+  "slug": "webhook-workflow-bqpl",
+  "description": "Automated workflow: Webhook Workflow. This workflow integrates 7 different services: webhook, stickyNote, httpRequest, switch, set. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Webhook Workflow workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-32a1d593",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.822951",
+      "updatedAt": "2025-09-29T07:07:45.822969",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "ec952e64-698b-4e3a-a82d-4474a3bf8b6b",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          900,
+          460
+        ],
+        "webhookId": "0f85cfa2-29d7-48c8-bea1-298a61a07b77",
+        "parameters": {
+          "path": "slack-trigger",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c6bc7004-9bec-48a3-99f2-e0d89e32730c",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          380,
+          240
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 446,
+          "height": 321,
+          "content": "## Needed pre-work: Add a Slack App\n1. Visit {{ $env.API_BASE_URL }} click on `New App` and choose a name and workspace.\n2. Click on `OAuth & Permissions` and scroll down to Scopes -> Bot token Scopes\n3. Add the `chat:write` scope\n4. Head over to `Slash Commands` and click on `Create New Command`\n5. Use `/idea` as the command\n6. Copy the test URL from the **Webhook** node into `Request URL`\n7. Add whatever feels best to the description and usage hint\n8. Go to `Install app` and click install"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e8850a88-b91a-4496-b8d2-a391f17e67ad",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1100,
+          198.48837209302332
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 331,
+          "height": 404.36834060988355,
+          "content": "## Setup\n1. Create a Google Sheets document with the columns `Name` and `Creator`\n2. Add your Google Sheets credentials \n3. Fill the setup node below\n4. Create your Slack app (*see other sticky*)\n5. Click `Test` workflow and use the `/idea` comment in Slack\n6. Activate the workflow and exchange the Request URL with the production URL from the webhook"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f1814a18-9301-4e86-9023-e16c5704db65",
+        "name": "Set me up",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1220,
+          460
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "9bcc3fa7-a09e-48f0-b4ff-2c78264dec2d",
+                "name": "Google Sheets URL",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4824c23f-6477-4ee7-a6a0-2b83eaf61430",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1460,
+          380
+        ],
+        "parameters": {
+          "color": 7,
+          "height": 224.48192284396475,
+          "content": "You can easily support more commands, like `/bug` or `/pain` here"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f8966efa-0576-48b9-89fe-bf49f10d703b",
+        "name": "Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          1520,
+          460
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $('Webhook').item.json.body.command }}",
+                      "rightValue": "/idea"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "25221a2c-18e9-47f6-a112-0edc85b63cda",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $('Webhook').item.json.body.command }}",
+                      "rightValue": "/some-other-command"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1caf810e-8b40-4430-8840-8e17a176b67a",
+        "name": "Add to Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1780,
+          360
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Name": "={{ $('Webhook').item.json.body.text }}",
+              "Creator": "={{ $('Webhook').item.json.body.user_name }}"
+            },
+            "schema": [
+              {
+                "id": "Name",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "Name",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Creator",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Creator",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "Name"
+            ]
+          },
+          "options": {
+            "cellFormat": "USER_ENTERED"
+          },
+          "operation": "appendOrUpdate",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "={{ $json['Google Sheets URL'] }}"
+          }
+        },
+        "typeVersion": 4.3,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "51f80b29-4b8c-4e2a-9da9-a7409763af0c",
+        "name": "Hidden message to Slack to add feature details",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2000,
+          360
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "text",
+                "value": "=Thanks for adding the idea `{{ $('Webhook').item.json[\"body\"][\"text\"] }}` <@{{$('Webhook').item.json[\"body\"][\"user_id\"]}}> :rocket: Please make sure to add some details and a hypothesis to it to make it easier for us to work with it.\n\n:point_right: <{{ $('Set me up').item.json[\"Google Sheets URL\"] }}|Add your details here>"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "ec952e64-698b-4e3a-a82d-4474a3bf8b6b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-eb83085d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-2531c167",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-b3b2f8be",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-220a741e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-4d937da2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-e5145be6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-62e26129",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-87774201",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "51f80b29-4b8c-4e2a-9da9-a7409763af0c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-90618c04",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-865c5f98",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-518d4294",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-af300813",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-c30d9ff5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-a0448a40",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-98abe387",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-f6c09ea4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "1caf810e-8b40-4430-8840-8e17a176b67a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-1caf810e-8b40-4430-8840-8e17a176b67a-2f50ae64",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Webhook Workflow. This workflow integrates 7 different services: webhook, stickyNote, httpRequest, switch, set. It contains 13 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Webhook Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "1caf810e-8b40-4430-8840-8e17a176b67a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1caf810e-8b40-4430-8840-8e17a176b67a-2f50ae64"
+            }
+          ]
+        ]
+      },
+      "51f80b29-4b8c-4e2a-9da9-a7409763af0c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-90618c04"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-865c5f98"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-518d4294"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-af300813"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-c30d9ff5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-a0448a40"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-98abe387"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51f80b29-4b8c-4e2a-9da9-a7409763af0c-f6c09ea4"
+            }
+          ]
+        ]
+      },
+      "ec952e64-698b-4e3a-a82d-4474a3bf8b6b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-eb83085d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-2531c167"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-b3b2f8be"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-220a741e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-4d937da2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-e5145be6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-62e26129"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ec952e64-698b-4e3a-a82d-4474a3bf8b6b-87774201"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "nodes": [
+      {
+        "name": "Add to Google Sheets",
+        "parameters": {
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "Name"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Name",
+                "id": "Name",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Creator",
+                "id": "Creator",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Creator": "={{ $('Webhook').item.json.body.user_name }}",
+              "Name": "={{ $('Webhook').item.json.body.text }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "={{ $json['Google Sheets URL'] }}"
+          },
+          "operation": "appendOrUpdate",
+          "options": {
+            "cellFormat": "USER_ENTERED"
+          },
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.3
+      },
+      {
+        "name": "Hidden message to Slack to add feature details",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "text",
+                "value": "=Thanks for adding the idea `{{ $('Webhook').item.json[\"body\"][\"text\"] }}` <@{{$('Webhook').item.json[\"body\"][\"user_id\"]}}> :rocket: Please make sure to add some details and a hypothesis to it to make it easier for us to work with it.\n\n:point_right: <{{ $('Set me up').item.json[\"Google Sheets URL\"] }}|Add your details here>"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3
+      },
+      {
+        "name": "Set me up",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "9bcc3fa7-a09e-48f0-b4ff-2c78264dec2d",
+                "name": "Google Sheets URL",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "## Needed pre-work: Add a Slack App\n1. Visit {{ $env.API_BASE_URL }} click on `New App` and choose a name and workspace.\n2. Click on `OAuth & Permissions` and scroll down to Scopes -> Bot token Scopes\n3. Add the `chat:write` scope\n4. Head over to `Slash Commands` and click on `Create New Command`\n5. Use `/idea` as the command\n6. Copy the test URL from the **Webhook** node into `Request URL`\n7. Add whatever feels best to the description and usage hint\n8. Go to `Install app` and click install",
+          "height": 321,
+          "width": 446
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "## Setup\n1. Create a Google Sheets document with the columns `Name` and `Creator`\n2. Add your Google Sheets credentials \n3. Fill the setup node below\n4. Create your Slack app (*see other sticky*)\n5. Click `Test` workflow and use the `/idea` comment in Slack\n6. Activate the workflow and exchange the Request URL with the production URL from the webhook",
+          "height": 404.36834060988355,
+          "width": 331
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 7,
+          "content": "You can easily support more commands, like `/bug` or `/pain` here",
+          "height": 224.48192284396475
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Switch",
+        "parameters": {
+          "options": {},
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $('Webhook').item.json.body.command }}",
+                      "operator": {
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "/idea"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "25221a2c-18e9-47f6-a112-0edc85b63cda",
+                      "leftValue": "={{ $('Webhook').item.json.body.command }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "/some-other-command"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "slack-trigger"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "Google Sheets",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 62,
+  "viewCount": 644,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Google Sheets Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add to Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Hidden message to Slack to add feature details\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set me up\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-7egj15l9p",
+      "workflowId": "webhook-workflow-oqhig",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0441_HTTP_GoogleSheets_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0441_HTTP_GoogleSheets_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:08.530Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:08.530Z",
+  "updatedAt": "2026-07-15T11:29:08.530Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

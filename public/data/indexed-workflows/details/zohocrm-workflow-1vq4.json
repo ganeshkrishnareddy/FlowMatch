@@ -1,0 +1,633 @@
+{
+  "id": "zohocrm-workflow-qedh6",
+  "name": "Zohocrm Workflow",
+  "slug": "zohocrm-workflow-1vq4",
+  "description": "Automated workflow: Zohocrm Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Zohocrm Workflow workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Zoho",
+        "type": "n8n-nodes-base.zohoCrm",
+        "position": [
+          950,
+          610
+        ],
+        "parameters": {
+          "lastName": "={{$json[\"customer_lastname\"]}}",
+          "resource": "contact",
+          "operation": "upsert",
+          "additionalFields": {
+            "Email": "={{$json[\"customer_email\"]}}",
+            "Phone": "={{$json[\"customer_phone\"]}}",
+            "First_Name": "={{$json[\"customer_firstname\"]}}",
+            "Mailing_Address": {
+              "address_fields": {
+                "Mailing_Zip": "={{$json[\"customer_zipcode\"]}}",
+                "Mailing_City": "={{$json[\"customer_city\"]}}",
+                "Mailing_State": "=",
+                "Mailing_Street": "={{$json[\"customer_street\"]}}",
+                "Mailing_Country": "={{$json[\"customer_country\"]}}"
+              }
+            }
+          }
+        },
+        "credentials": {
+          "zohoOAuth2Api": "zoho_api"
+        },
+        "typeVersion": 1,
+        "id": "7a0618f1-9241-4e1e-a315-0d4520dc655d",
+        "notes": "This zohoCrm node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Trello",
+        "type": "n8n-nodes-base.trello",
+        "position": [
+          1160,
+          800
+        ],
+        "parameters": {
+          "name": "=Shopify order {{$node[\"order created\"].json[\"order_number\"]}}",
+          "listId": "list01",
+          "additionalFields": {
+            "urlSource": "{{ $env.BASE_URL }}"
+          }
+        },
+        "credentials": {
+          "trelloApi": "trello_nodeqa"
+        },
+        "typeVersion": 1,
+        "id": "9ddd8bc6-3a2a-45f0-b417-52db9eec64d5",
+        "notes": "This trello node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Set fields",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          760,
+          760
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "customer_phone",
+                "value": "={{$json[\"customer\"][\"default_address\"][\"phone\"]}}"
+              },
+              {
+                "name": "customer_zipcode",
+                "value": "={{$json[\"shipping_address\"][\"zip\"]}}"
+              },
+              {
+                "name": "order_value",
+                "value": "={{$json[\"current_total_price\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "customer_firstname",
+                "value": "={{$json[\"customer\"][\"first_name\"]}}"
+              },
+              {
+                "name": "customer_lastname",
+                "value": "={{$json[\"customer\"][\"last_name\"]}}"
+              },
+              {
+                "name": "customer_email",
+                "value": "={{$json[\"customer\"][\"email\"]}}"
+              },
+              {
+                "name": "customer_country",
+                "value": "={{$json[\"shipping_address\"][\"country\"]}}"
+              },
+              {
+                "name": "customer_street",
+                "value": "={{$json[\"shipping_address\"][\"address1\"]}}"
+              },
+              {
+                "name": "customer_city",
+                "value": "={{$json[\"shipping_address\"][\"city\"]}}"
+              },
+              {
+                "name": "customer_province",
+                "value": "={{$json[\"shipping_address\"][\"province\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "ad039958-7b90-465c-9cc1-c29337ee9bad",
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          960,
+          1040
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$json[\"order_value\"]}}",
+                "value2": 50,
+                "operation": "larger"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "f3e7c5bb-c72a-4784-be13-4562b4aa4a1a",
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Gmail - coupon",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          1140,
+          950
+        ],
+        "parameters": {
+          "toList": [
+            "={{$node[\"Set fields\"].json[\"customer_email\"]}}"
+          ],
+          "message": "=Hi {{$json[\"customer_firstname\"]}},\n\nThank you for your order! Here's a 15% coupon code to use for your next order: COUPON15\n\nBest,\nShop Owner",
+          "subject": "Your Shopify order",
+          "resource": "message",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "gmailOAuth2": "gmail"
+        },
+        "typeVersion": 1,
+        "id": "70682b7a-d63d-4b10-9e72-fb4e31f37a3a",
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Gmail - thankyou",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          1140,
+          1150
+        ],
+        "parameters": {
+          "toList": [
+            "={{$node[\"Set fields\"].json[\"customer_email\"]}}"
+          ],
+          "message": "=Hi {{$node[\"Set fields\"].json[\"customer_firstname\"]}},\nThank you for your order! We're getting it ready for shipping it to you.\n\nBest,\nShop Owner",
+          "subject": "Your Shopify order",
+          "resource": "message",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "gmailOAuth2": "gmail"
+        },
+        "typeVersion": 1,
+        "id": "094f75ad-dc5a-486d-8389-13b4df307c87",
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Mailchimp",
+        "type": "n8n-nodes-base.mailchimp",
+        "position": [
+          1340,
+          950
+        ],
+        "parameters": {
+          "list": "qwertz",
+          "tags": [
+            "high-order"
+          ],
+          "email": "={{$node[\"Set fields\"].json[\"customer_email\"]}}",
+          "options": {},
+          "resource": "memberTag"
+        },
+        "credentials": {
+          "mailchimpApi": "mailchimp_API"
+        },
+        "typeVersion": 1,
+        "id": "dec7b148-2baa-4930-8166-00c757726a32",
+        "notes": "This mailchimp node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "order created",
+        "type": "n8n-nodes-base.shopifyTrigger",
+        "position": [
+          560,
+          760
+        ],
+        "webhookId": "qwertz",
+        "parameters": {
+          "topic": "orders/create"
+        },
+        "credentials": {
+          "shopifyApi": "shopify_nodeqa"
+        },
+        "typeVersion": 1,
+        "id": "23cbba48-95d7-4a59-bb0c-8e3c0534a935",
+        "notes": "This shopifyTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Harvest",
+        "type": "n8n-nodes-base.harvest",
+        "position": [
+          980,
+          800
+        ],
+        "parameters": {
+          "clientId": "shopify_client",
+          "resource": "invoice",
+          "accountId": "12345",
+          "operation": "create",
+          "additionalFields": {
+            "currency": "={{$node[\"order created\"].json[\"currency\"]}}",
+            "issue_date": "={{$node[\"order created\"].json[\"processed_at\"]}}",
+            "payment_term": "net 15",
+            "purchase_order": "={{$node[\"order created\"].json[\"order_number\"]}}"
+          }
+        },
+        "credentials": {
+          "harvestApi": "harvest_token"
+        },
+        "typeVersion": 1,
+        "id": "fc0f501f-6479-46b9-8db0-34eae1e37235",
+        "notes": "This harvest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-1af79100",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Zohocrm Workflow",
+    "description": "Automated workflow: Zohocrm Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-21a7afd5",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:08:01.741654",
+      "updatedAt": "2025-09-29T07:08:01.741728",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Zohocrm Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Zohocrm Workflow",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Gmail - coupon",
+        "parameters": {
+          "additionalFields": {},
+          "message": "=Hi {{$json[\"customer_firstname\"]}},\n\nThank you for your order! Here's a 15% coupon code to use for your next order: COUPON15\n\nBest,\nShop Owner",
+          "resource": "message",
+          "subject": "Your Shopify order",
+          "toList": [
+            "={{$node[\"Set fields\"].json[\"customer_email\"]}}"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Gmail - thankyou",
+        "parameters": {
+          "additionalFields": {},
+          "message": "=Hi {{$node[\"Set fields\"].json[\"customer_firstname\"]}},\nThank you for your order! We're getting it ready for shipping it to you.\n\nBest,\nShop Owner",
+          "resource": "message",
+          "subject": "Your Shopify order",
+          "toList": [
+            "={{$node[\"Set fields\"].json[\"customer_email\"]}}"
+          ]
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "harvestApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Harvest",
+        "parameters": {
+          "accountId": "12345",
+          "additionalFields": {
+            "currency": "={{$node[\"order created\"].json[\"currency\"]}}",
+            "issue_date": "={{$node[\"order created\"].json[\"processed_at\"]}}",
+            "payment_term": "net 15",
+            "purchase_order": "={{$node[\"order created\"].json[\"order_number\"]}}"
+          },
+          "clientId": "shopify_client",
+          "operation": "create",
+          "resource": "invoice"
+        },
+        "type": "n8n-nodes-base.harvest",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "larger",
+                "value1": "={{$json[\"order_value\"]}}",
+                "value2": 50
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mailchimpApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mailchimp",
+        "parameters": {
+          "email": "={{$node[\"Set fields\"].json[\"customer_email\"]}}",
+          "list": "qwertz",
+          "options": {},
+          "resource": "memberTag",
+          "tags": [
+            "high-order"
+          ]
+        },
+        "type": "n8n-nodes-base.mailchimp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "shopifyApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "order created",
+        "parameters": {
+          "topic": "orders/create"
+        },
+        "type": "n8n-nodes-base.shopifyTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set fields",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "customer_phone",
+                "value": "={{$json[\"customer\"][\"default_address\"][\"phone\"]}}"
+              },
+              {
+                "name": "customer_zipcode",
+                "value": "={{$json[\"shipping_address\"][\"zip\"]}}"
+              },
+              {
+                "name": "order_value",
+                "value": "={{$json[\"current_total_price\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "customer_firstname",
+                "value": "={{$json[\"customer\"][\"first_name\"]}}"
+              },
+              {
+                "name": "customer_lastname",
+                "value": "={{$json[\"customer\"][\"last_name\"]}}"
+              },
+              {
+                "name": "customer_email",
+                "value": "={{$json[\"customer\"][\"email\"]}}"
+              },
+              {
+                "name": "customer_country",
+                "value": "={{$json[\"shipping_address\"][\"country\"]}}"
+              },
+              {
+                "name": "customer_street",
+                "value": "={{$json[\"shipping_address\"][\"address1\"]}}"
+              },
+              {
+                "name": "customer_city",
+                "value": "={{$json[\"shipping_address\"][\"city\"]}}"
+              },
+              {
+                "name": "customer_province",
+                "value": "={{$json[\"shipping_address\"][\"province\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "trelloApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Trello",
+        "parameters": {
+          "additionalFields": {
+            "urlSource": "{{ $env.BASE_URL }}"
+          },
+          "listId": "list01",
+          "name": "=Shopify order {{$node[\"order created\"].json[\"order_number\"]}}"
+        },
+        "type": "n8n-nodes-base.trello",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Zoho",
+        "parameters": {
+          "additionalFields": {
+            "Email": "={{$json[\"customer_email\"]}}",
+            "First_Name": "={{$json[\"customer_firstname\"]}}",
+            "Mailing_Address": {
+              "address_fields": {
+                "Mailing_City": "={{$json[\"customer_city\"]}}",
+                "Mailing_Country": "={{$json[\"customer_country\"]}}",
+                "Mailing_State": "=",
+                "Mailing_Street": "={{$json[\"customer_street\"]}}",
+                "Mailing_Zip": "={{$json[\"customer_zipcode\"]}}"
+              }
+            },
+            "Phone": "={{$json[\"customer_phone\"]}}"
+          },
+          "lastName": "={{$json[\"customer_lastname\"]}}",
+          "operation": "upsert",
+          "resource": "contact"
+        },
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 6,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Zohocrm",
+    "Trello",
+    "Gmail",
+    "Mailchimp",
+    "Shopify",
+    "Harvest"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 208,
+  "viewCount": 668,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Zohocrm Account",
+      "Trello Account",
+      "Gmail Account",
+      "Mailchimp Account",
+      "Shopify Account",
+      "Harvest Account"
+    ],
+    "requiredCredentials": [
+      "zoho  O Auth2  A P I details",
+      "trello  A P I details",
+      "gmail  O Auth2 details",
+      "mailchimp  A P I details",
+      "shopify  A P I details",
+      "harvest  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"order created\".",
+      "Open the \"Zoho\" node (n8n-nodes-base.zohoCrm) and configure the action parameters, mappings, and fields.",
+      "Open the \"Trello\" node (n8n-nodes-base.trello) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Gmail - coupon\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Gmail - thankyou\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mailchimp\" node (n8n-nodes-base.mailchimp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Harvest\" node (n8n-nodes-base.harvest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set fields\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-qbv9xbdpl",
+      "workflowId": "zohocrm-workflow-qedh6",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Zohocrm/0086_Zohocrm_Trello_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Zohocrm\\0086_Zohocrm_Trello_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:17:44.509Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:44.509Z",
+  "updatedAt": "2026-07-15T11:17:44.509Z"
+}

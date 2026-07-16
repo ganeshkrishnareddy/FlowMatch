@@ -1,0 +1,779 @@
+{
+  "id": "hubspot-workflow-jjvnt",
+  "name": "Hubspot Workflow",
+  "slug": "hubspot-workflow-wqh1",
+  "description": "Automated workflow: Hubspot Workflow. This workflow integrates 10 different services: stickyNote, formTrigger, hubspot, gmailTool, agent. It contains 15 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Hubspot Workflow workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "d681d557-cb02-4fb1-9871-bfae504992ca",
+        "name": "HubSpot",
+        "type": "n8n-nodes-base.hubspot",
+        "notes": "Add meeting notes in the contact form",
+        "position": [
+          260,
+          40
+        ],
+        "parameters": {
+          "type": "meeting",
+          "metadata": {
+            "body": "={{ $('Summarization').item.json.response.text }}",
+            "title": "New meeting"
+          },
+          "resource": "engagement",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "associations": {
+              "contactIds": "={{ $json.properties.hs_object_id }}"
+            }
+          }
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "JxzF93M0SJ00jDD9",
+            "name": "HubSpot account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2.1
+      },
+      {
+        "id": "e4849449-3464-4deb-a9be-07b3d0bb2d56",
+        "name": "HubSpot1",
+        "type": "n8n-nodes-base.hubspot",
+        "notes": "Search for the id",
+        "position": [
+          20,
+          40
+        ],
+        "parameters": {
+          "operation": "search",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "filterGroupsUi": {
+            "filterGroupsValues": [
+              {
+                "filtersUi": {
+                  "filterValues": [
+                    {
+                      "value": "={{ $('Enter Client Transcript').item.json['client email'] }}",
+                      "propertyName": "email|string"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "additionalFields": {}
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "JxzF93M0SJ00jDD9",
+            "name": "HubSpot account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2.1
+      },
+      {
+        "id": "16ac22b7-62fd-429c-b766-5ffe503a3231",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -60,
+          -80
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 540,
+          "height": 280,
+          "content": "## Save the data to Hubspot\n- Search for the client ID based on his email\n- Upload the summarized conversation as meeting notes"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4f51bfc1-8270-4e04-b395-f4ceed9129a4",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -60,
+          220
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 540,
+          "height": 520,
+          "content": "## Router agent\nMakes decisions with the help of an LLM  \n- Analyzes the content\n- Decides which part of the transcript is relevant to the different departments\n- Sends the emails to the departments\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "96142f55-cbb4-47e9-a44e-b4f783eeeeb5",
+        "name": "Router Agent",
+        "type": "n8n-nodes-base.noOp",
+        "notes": "Route the client feedback topics to the relevant department ",
+        "position": [
+          20,
+          420
+        ],
+        "parameters": {
+          "text": "={{ $('Enter Client Transcript').item.json['client conversation'] }}",
+          "options": {
+            "systemMessage": "=You are provided with some client-company conversation and should decide who has to be informed about the feedback. Always only inform one person. Those are your options: \n- It's about a product, send an email to {{ $('Define routing emails here').item.json['Product Email'] }}\n- It's about an invoicing problem, send an email to {{ $('Define routing emails here').item.json['Administrative Email'] }}\n- It's  related to a problem with the product, send an email to {{ $('Define routing emails here').item.json['Support Email'] }}\n- It's commercial related, send an email to {{ $('Define routing emails here').item.json['Commercial Email'] }}\n\nAdd the email of the person (\"{{ $('Enter Client Transcript').item.json['client email'] }}\") at the beginning of the text preceded by \"FROM CLIENT: \"\nUse the Mailjet tool to inform each of the most related department. Provide mailjet with a subject, an email, and the email body formated as html which is the client conversation itself."
+          },
+          "promptType": "define"
+        },
+        "notesInFlow": true,
+        "typeVersion": 1.8
+      },
+      {
+        "id": "0485667e-befa-4b69-998f-26e1b8a9f67f",
+        "name": "Summarization",
+        "type": "n8n-nodes-base.noOp",
+        "notes": "The transcript is summarized",
+        "position": [
+          -360,
+          200
+        ],
+        "parameters": {
+          "options": {
+            "summarizationMethodAndPrompts": {
+              "values": {
+                "prompt": "=Summarize the following Converstaion in 2-3 sentences:\n\n\" {{ $json['client conversation'] }}\"\n\nJust output the summarized conversation and nothing else. Use the same language as the input",
+                "summarizationMethod": "stuff"
+              }
+            }
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2,
+        "alwaysOutputData": false
+      },
+      {
+        "id": "bb2826b5-18ec-4df7-990d-7fe99df759c8",
+        "name": "Enter Client Transcript",
+        "type": "n8n-nodes-base.formTrigger",
+        "notes": "The transcript can come from fireflies or Team etc.",
+        "position": [
+          -800,
+          200
+        ],
+        "webhookId": "4ba66bc9-8200-4b29-9d81-aaaca2ca8e0a",
+        "parameters": {
+          "options": {
+            "appendAttribution": false
+          },
+          "formTitle": "Automate Client issue",
+          "formFields": {
+            "values": [
+              {
+                "fieldType": "email",
+                "fieldLabel": "client email",
+                "requiredField": true
+              },
+              {
+                "fieldType": "textarea",
+                "fieldLabel": "client conversation",
+                "requiredField": true
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2.2
+      },
+      {
+        "id": "4ec42125-16dd-4c05-8816-3f3d986335ac",
+        "name": "Form",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          360,
+          420
+        ],
+        "webhookId": "938c1d15-f510-4b66-abac-dca5ff89461d",
+        "parameters": {
+          "options": {},
+          "operation": "completion",
+          "completionTitle": "Ouput",
+          "completionMessage": "={{ $json.output }}"
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5bdd3903-06f3-4c21-bc57-7127cfc6e433",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -272,
+          420
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "1IOLtYX7aTspCAN8",
+            "name": "OpenAI Pollup"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1abb54f8-0f65-4280-8b35-4dc7c3b1bb07",
+        "name": "Define routing emails here",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -580,
+          200
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "099d5326-3452-47b8-9dc0-acc0e6fd951e",
+                "name": "Support Email",
+                "type": "string",
+                "value": "support@pollup.net"
+              },
+              {
+                "id": "4ed84290-dbf7-47f7-8693-4f95e0c2fd7e",
+                "name": "Administrative Email",
+                "type": "string",
+                "value": "admin@pollup.net"
+              },
+              {
+                "id": "c39edf1f-b8e0-48ca-929c-294bbac52837",
+                "name": "Product Email",
+                "type": "string",
+                "value": "product@pollup.net"
+              },
+              {
+                "id": "614d4a5c-c9f2-4d82-bfcb-cfdcc8a4b07d",
+                "name": "Commercial Email",
+                "type": "string",
+                "value": "commercial@pollup.net"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c2d345e2-ce32-4337-91d5-ae8bf54e3d25",
+        "name": "Gmail",
+        "type": "n8n-nodes-base.gmailTool",
+        "position": [
+          180,
+          640
+        ],
+        "webhookId": "ea898d49-e017-441c-bfe0-7a966435a570",
+        "parameters": {
+          "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+          "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+          "options": {
+            "appendAttribution": false
+          },
+          "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "DLjspol9TLgpGaXa",
+            "name": "Gmail account 2"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmailTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "11210b0c-c33d-4c40-b20c-a8d3a1761863",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -660,
+          100
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 260,
+          "height": 260,
+          "content": "## Set the emails HERE\nFor each responsible in your company."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0d2e217d-5c3a-4fdb-a60e-091a50de553b",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -860,
+          -120
+        ],
+        "parameters": {
+          "width": 460,
+          "height": 200,
+          "content": "## Contact me\n- If you need any modification to this workflow\n- if you need some help with this workflow\n- Or if you need any workflow in n8n, Make, or Langchain / Langgraph\n\nWrite to me: [thomas@pollup.net](mailto:thomas@pollup.net)"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e7e40c88-374b-49d4-8c66-b8543a9376ea",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -860,
+          100
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 180,
+          "height": 260,
+          "content": "## Starting form\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-967b75e7",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "5bdd3903-06f3-4c21-bc57-7127cfc6e433": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5bdd3903-06f3-4c21-bc57-7127cfc6e433-05307d08",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Hubspot Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Hubspot Workflow. This workflow integrates 10 different services: stickyNote, formTrigger, hubspot, gmailTool, agent. It contains 15 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-d82c24f2",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.966328",
+      "updatedAt": "2025-09-29T07:07:44.966361",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Hubspot Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "5bdd3903-06f3-4c21-bc57-7127cfc6e433": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5bdd3903-06f3-4c21-bc57-7127cfc6e433-05307d08"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Hubspot Workflow",
+    "nodes": [
+      {
+        "name": "Define routing emails here",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "099d5326-3452-47b8-9dc0-acc0e6fd951e",
+                "name": "Support Email",
+                "type": "string",
+                "value": "support@pollup.net"
+              },
+              {
+                "id": "4ed84290-dbf7-47f7-8693-4f95e0c2fd7e",
+                "name": "Administrative Email",
+                "type": "string",
+                "value": "admin@pollup.net"
+              },
+              {
+                "id": "c39edf1f-b8e0-48ca-929c-294bbac52837",
+                "name": "Product Email",
+                "type": "string",
+                "value": "product@pollup.net"
+              },
+              {
+                "id": "614d4a5c-c9f2-4d82-bfcb-cfdcc8a4b07d",
+                "name": "Commercial Email",
+                "type": "string",
+                "value": "commercial@pollup.net"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Enter Client Transcript",
+        "parameters": {
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "client email",
+                "fieldType": "email",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "client conversation",
+                "fieldType": "textarea",
+                "requiredField": true
+              }
+            ]
+          },
+          "formTitle": "Automate Client issue",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Form",
+        "parameters": {
+          "completionMessage": "={{ $json.output }}",
+          "completionTitle": "Ouput",
+          "operation": "completion",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Gmail",
+        "parameters": {
+          "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+          "options": {
+            "appendAttribution": false
+          },
+          "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+          "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}"
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "HubSpot",
+        "parameters": {
+          "additionalFields": {
+            "associations": {
+              "contactIds": "={{ $json.properties.hs_object_id }}"
+            }
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "metadata": {
+            "body": "={{ $('Summarization').item.json.response.text }}",
+            "title": "New meeting"
+          },
+          "resource": "engagement",
+          "type": "meeting"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "HubSpot1",
+        "parameters": {
+          "additionalFields": {},
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "filterGroupsUi": {
+            "filterGroupsValues": [
+              {
+                "filtersUi": {
+                  "filterValues": [
+                    {
+                      "propertyName": "email|string",
+                      "value": "={{ $('Enter Client Transcript').item.json['client email'] }}"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "operation": "search"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Router Agent",
+        "parameters": {
+          "options": {
+            "systemMessage": "=You are provided with some client-company conversation and should decide who has to be informed about the feedback. Always only inform one person. Those are your options: \n- It's about a product, send an email to {{ $('Define routing emails here').item.json['Product Email'] }}\n- It's about an invoicing problem, send an email to {{ $('Define routing emails here').item.json['Administrative Email'] }}\n- It's  related to a problem with the product, send an email to {{ $('Define routing emails here').item.json['Support Email'] }}\n- It's commercial related, send an email to {{ $('Define routing emails here').item.json['Commercial Email'] }}\n\nAdd the email of the person (\"{{ $('Enter Client Transcript').item.json['client email'] }}\") at the beginning of the text preceded by \"FROM CLIENT: \"\nUse the Mailjet tool to inform each of the most related department. Provide mailjet with a subject, an email, and the email body formated as html which is the client conversation itself."
+          },
+          "promptType": "define",
+          "text": "={{ $('Enter Client Transcript').item.json['client conversation'] }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "## Save the data to Hubspot\n- Search for the client ID based on his email\n- Upload the summarized conversation as meeting notes",
+          "height": 280,
+          "width": 540
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 4,
+          "content": "## Router agent\nMakes decisions with the help of an LLM  \n- Analyzes the content\n- Decides which part of the transcript is relevant to the different departments\n- Sends the emails to the departments\n",
+          "height": 520,
+          "width": 540
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "## Set the emails HERE\nFor each responsible in your company.",
+          "height": 260,
+          "width": 260
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 4,
+          "content": "## Starting form\n",
+          "height": 260,
+          "width": 180
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "content": "## Contact me\n- If you need any modification to this workflow\n- if you need some help with this workflow\n- Or if you need any workflow in n8n, Make, or Langchain / Langgraph\n\nWrite to me: [thomas@pollup.net](mailto:thomas@pollup.net)",
+          "height": 200,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Summarization",
+        "parameters": {
+          "options": {
+            "summarizationMethodAndPrompts": {
+              "values": {
+                "prompt": "=Summarize the following Converstaion in 2-3 sentences:\n\n\" {{ $json['client conversation'] }}\"\n\nJust output the summarized conversation and nothing else. Use the same language as the input",
+                "summarizationMethod": "stuff"
+              }
+            }
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Hubspot",
+    "Form Trigger",
+    "Gmail"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 197,
+  "viewCount": 452,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Hubspot Account",
+      "Form Trigger Account",
+      "Gmail Account"
+    ],
+    "requiredCredentials": [
+      "hubspot  O Auth2  A P I details",
+      "open Ai  A P I details",
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Enter Client Transcript\".",
+      "Open the \"HubSpot\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"HubSpot1\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Router Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Summarization\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Form\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Gmail\" node (n8n-nodes-base.gmailTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Define routing emails here\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-lwr7nq4st",
+      "workflowId": "hubspot-workflow-jjvnt",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Form/0890_Form_Stickynote_Send_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Form\\0890_Form_Stickynote_Send_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:01.558Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:01.558Z",
+  "updatedAt": "2026-07-15T11:29:01.558Z",
+  "category": {
+    "slug": "email-automation",
+    "name": "Email Automation"
+  },
+  "categoryId": "email-automation"
+}

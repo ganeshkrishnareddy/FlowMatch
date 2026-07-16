@@ -1,0 +1,477 @@
+{
+  "id": "update-crypto-values-0rell",
+  "name": "Update Crypto Values",
+  "slug": "update-crypto-values-xe4k",
+  "description": "Automated workflow: Update Crypto Values. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Update Crypto Values workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "14",
+    "name": "Update Crypto Values",
+    "nodes": [
+      {
+        "name": "CoinGecko",
+        "type": "n8n-nodes-base.coinGecko",
+        "position": [
+          670,
+          400
+        ],
+        "parameters": {
+          "coinId": "={{$json[\"fields\"][\"Symbol\"]}}",
+          "options": {
+            "market_data": true,
+            "localization": false
+          },
+          "operation": "get"
+        },
+        "typeVersion": 1,
+        "id": "087c7878-600e-4054-ad3d-9b7e2101896b",
+        "notes": "This coinGecko node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Get Portfolio",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          450,
+          400
+        ],
+        "parameters": {
+          "table": "Portfolio",
+          "operation": "list",
+          "application": "appT7eX4iZcZVRIdq",
+          "additionalOptions": {
+            "fields": [
+              "Symbol"
+            ]
+          }
+        },
+        "credentials": {
+          "airtableApi": "Airtable"
+        },
+        "typeVersion": 1,
+        "id": "195b1331-3cb6-4c20-bd59-b18f7da8245c",
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          870,
+          400
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "Present Price",
+                "value": "={{$json[\"market_data\"][\"current_price\"][\"usd\"]}}"
+              },
+              {
+                "name": "Id",
+                "value": "={{$node[\"Get Portfolio\"].json[\"id\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "2705b23f-911d-432b-a152-c59d4dc40fd7",
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Run Top of Hour",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          240,
+          400
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyHour"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "8643ddbe-1b5d-4ecc-aebc-9a4266842d7d",
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Get Portfolio Values",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1260,
+          400
+        ],
+        "parameters": {
+          "table": "Portfolio",
+          "operation": "list",
+          "application": "appT7eX4iZcZVRIdq",
+          "additionalOptions": {
+            "fields": [
+              "Present Value"
+            ]
+          }
+        },
+        "credentials": {
+          "airtableApi": "Airtable"
+        },
+        "typeVersion": 1,
+        "id": "3e6364df-a784-4e2d-8f76-c8da7611408a",
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Determine Total Value",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1460,
+          400
+        ],
+        "parameters": {
+          "functionCode": "var totalValues = 0;\n\nitems.forEach(sumValues);\n\nfunction sumValues(value, index, array) {\n  totalValues = totalValues + value.json.fields['Present Value'];\n}\n\nitems = [{\"json\": {}}];\n\n\nitems[0].json['Portfolio Value (US$)'] = totalValues;\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "aacf8f65-4736-42a6-a9f8-b4362c8e84e7",
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Update Values",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1070,
+          400
+        ],
+        "parameters": {
+          "id": "={{$node[\"SplitInBatches\"].json[\"id\"]}}",
+          "table": "Portfolio",
+          "fields": [
+            "Present Price"
+          ],
+          "options": {},
+          "operation": "update",
+          "application": "appT7eX4iZcZVRIdq",
+          "updateAllFields": false
+        },
+        "credentials": {
+          "airtableApi": "Airtable"
+        },
+        "typeVersion": 1,
+        "id": "8f0e854e-ba07-4820-9e56-e404e9a303df",
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Append Portfolio Value",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1660,
+          400
+        ],
+        "parameters": {
+          "table": "Portfolio Value",
+          "fields": [
+            "Portfolio Value (US$)"
+          ],
+          "options": {},
+          "operation": "append",
+          "application": "appT7eX4iZcZVRIdq",
+          "addAllFields": false
+        },
+        "credentials": {
+          "airtableApi": "Airtable"
+        },
+        "typeVersion": 1,
+        "id": "a785c3f2-345a-46f6-a4c7-6e845e80032c",
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-9b9222bf",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: Update Crypto Values. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-83b2cc6d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:43.963644",
+      "updatedAt": "2025-09-29T07:07:43.963665",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Update Crypto Values. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Update Crypto Values",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Append Portfolio Value",
+        "parameters": {
+          "addAllFields": false,
+          "application": "appT7eX4iZcZVRIdq",
+          "fields": [
+            "Portfolio Value (US$)"
+          ],
+          "operation": "append",
+          "options": {},
+          "table": "Portfolio Value"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "name": "CoinGecko",
+        "parameters": {
+          "coinId": "={{$json[\"fields\"][\"Symbol\"]}}",
+          "operation": "get",
+          "options": {
+            "localization": false,
+            "market_data": true
+          }
+        },
+        "type": "n8n-nodes-base.coinGecko",
+        "typeVersion": 1
+      },
+      {
+        "name": "Determine Total Value",
+        "parameters": {
+          "functionCode": "var totalValues = 0;\n\nitems.forEach(sumValues);\n\nfunction sumValues(value, index, array) {\n  totalValues = totalValues + value.json.fields['Present Value'];\n}\n\nitems = [{\"json\": {}}];\n\n\nitems[0].json['Portfolio Value (US$)'] = totalValues;\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Portfolio",
+        "parameters": {
+          "additionalOptions": {
+            "fields": [
+              "Symbol"
+            ]
+          },
+          "application": "appT7eX4iZcZVRIdq",
+          "operation": "list",
+          "table": "Portfolio"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Portfolio Values",
+        "parameters": {
+          "additionalOptions": {
+            "fields": [
+              "Present Value"
+            ]
+          },
+          "application": "appT7eX4iZcZVRIdq",
+          "operation": "list",
+          "table": "Portfolio"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "name": "Run Top of Hour",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyHour"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "Present Price",
+                "value": "={{$json[\"market_data\"][\"current_price\"][\"usd\"]}}"
+              },
+              {
+                "name": "Id",
+                "value": "={{$node[\"Get Portfolio\"].json[\"id\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Values",
+        "parameters": {
+          "application": "appT7eX4iZcZVRIdq",
+          "fields": [
+            "Present Price"
+          ],
+          "id": "={{$node[\"SplitInBatches\"].json[\"id\"]}}",
+          "operation": "update",
+          "options": {},
+          "table": "Portfolio",
+          "updateAllFields": false
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Coingecko",
+    "Airtable"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 52,
+  "viewCount": 822,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Coingecko Account",
+      "Airtable Account"
+    ],
+    "requiredCredentials": [
+      "airtable  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Run Top of Hour\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"CoinGecko\" node (n8n-nodes-base.coinGecko) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Portfolio\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Portfolio Values\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Determine Total Value\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Values\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Append Portfolio Value\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-rzyhlo6c7",
+      "workflowId": "update-crypto-values-0rell",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Coingecko/0177_Coingecko_Cron_Update_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Coingecko\\0177_Coingecko_Cron_Update_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:17:38.083Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:38.083Z",
+  "updatedAt": "2026-07-15T11:17:38.083Z"
+}

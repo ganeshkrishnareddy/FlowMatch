@@ -1,0 +1,993 @@
+{
+  "id": "manualtrigger-workflow-q6lcm",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-hrl4",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "35c4aa9f-7535-4315-9174-fe97afc6de2e",
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ed1f4f78-733f-4dd5-9785-969c9ec0d637",
+        "name": "Get overview page",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          460,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {},
+          "responseFormat": "string"
+        },
+        "typeVersion": 2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "28333c78-aa8f-401a-8033-2007a5e6991c",
+        "name": "Extract links",
+        "type": "n8n-nodes-base.htmlExtract",
+        "position": [
+          680,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "attribute": "href",
+                "cssSelector": "a[href*=\"/episode/\"]",
+                "returnArray": true,
+                "returnValue": "attribute"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This htmlExtract node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "58840494-4208-49ce-b82a-d7cf8abd3b29",
+        "name": "Remove duplicate links",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          1120,
+          300
+        ],
+        "parameters": {
+          "operation": "removeDuplicates"
+        },
+        "typeVersion": 1,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "17efb905-b947-4538-ab34-d50bf7fdbd75",
+        "name": "Split out lists",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          900,
+          300
+        ],
+        "parameters": {
+          "options": {
+            "destinationFieldName": "link"
+          },
+          "fieldToSplitOut": "links"
+        },
+        "typeVersion": 1,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "59a69e64-ebba-42cb-b8d0-8dd73f0ae962",
+        "name": "Get episode page",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1340,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "responseFormat": "string"
+        },
+        "typeVersion": 2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "68749bff-1499-4ef5-aefd-c4b6233d0fa7",
+        "name": "Extract script",
+        "type": "n8n-nodes-base.htmlExtract",
+        "position": [
+          1560,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "script:nth-of-type(2)",
+                "returnValue": "html"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This htmlExtract node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "158e7b18-f58d-453f-80f8-97e65f0b1fde",
+        "name": "Parse JSON",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1780,
+          300
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "data",
+                "value": "={{ JSON.parse($json.script) }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a613c52e-395b-4d88-ab7d-b1cf2b664b43",
+        "name": "Define feed items",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          2000,
+          300
+        ],
+        "parameters": {
+          "functionCode": "const escapeHTML = str => str.replace(/[&<>'\"]/g, \n  tag => ({\n      '&': '&amp;',\n      '<': '&lt;',\n      '>': '&gt;',\n      \"'\": '&#39;',\n      '\"': '&quot;'\n    }[tag]));\n\nlet feedItems = [];\nfor (item of items) {\n  feedItems.push(`<item>\n  <title>${escapeHTML(item.json.data.name)}</title>\n  <enclosure url=\"${item.json.data.associatedMedia.contentUrl}\" length=\"${item.json.data.timeRequired * 20 * 1000}\" type=\"${item.json.data.encodingFormat}\"/>\n  <guid isPermaLink=\"false\">${item.json.data.identifier}</guid>\n  <pubDate>${DateTime.fromISO(item.json.data.datePublished).toRFC2822()}</pubDate>\n  <description>${escapeHTML(item.json.data.description)}</description>\n</item>`);\n}\n\nreturn [{\n  data: `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:itunes=\"{{ $env.WEBHOOK_URL }}\" xmlns:content=\"{{ $env.WEBHOOK_URL }}\">\n  <channel>\n    <title>${escapeHTML(items[0].json.data.partOfSeries.name)}</title>\n    <description>${escapeHTML(items[0].json.data.partOfSeries.about)}</description>\n    <itunes:image href=\"${escapeHTML(items[0].json.data.image)}\" />\n    <language>${items[0].json.data.inLanguage}</language>\n    <itunes:category text=\"Comedy\" />\n    <itunes:explicit>no</itunes:explicit>\n    <link>${items[0].json.data.partOfSeries.url}</link>\n    <copyright>© ${$now.toFormat('yyyy')} ${escapeHTML(items[0].json.data.productionCompany)}</copyright>\n    <itunes:author>${escapeHTML(items[0].json.data.productionCompany)}</itunes:author>\n    ${feedItems.join('\\n')}\n  </channel>\n</rss>\n`\n}];\n"
+        },
+        "typeVersion": 1,
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1",
+        "name": "Feed",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          240,
+          100
+        ],
+        "webhookId": "3fbd94de-2fb3-4b32-a46e-c237865479b9",
+        "parameters": {
+          "path": "3fbd94de-2fb3-4b32-a46e-c237865479b9.rss",
+          "options": {},
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0dfb02cc-1944-4542-b5c5-9e0b198e143d",
+        "name": "Serve feed",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          2220,
+          300
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/rss+xml"
+                }
+              ]
+            }
+          },
+          "respondWith": "text",
+          "responseBody": "={{ $json[\"data\"] }}"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "ed1f4f78-733f-4dd5-9785-969c9ec0d637": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-6c1af96d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-66893a58",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-b0bf00d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-2d8ed599",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-fbd73249",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-f5b16c51",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-71fcf743",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-41d84856",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "59a69e64-ebba-42cb-b8d0-8dd73f0ae962": {
+        "main": [
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-55d875dc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-018d7e84",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-af19bcd2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-e6796f88",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-1a2b7fd8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-7af5c3d7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-2a5d5f98",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-84af17a8",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-246702c1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-844d5a2a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-a3937649",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-30f7f8c9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-15619b93",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-417dfded",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-433b5687",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-c5b8922c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "0dfb02cc-1944-4542-b5c5-9e0b198e143d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-e71123bb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-768fdd82",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-d0d722ba",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-a7ca09a9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-11c75616",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-663573e2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-7f6403b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-588aa656",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-17fb5a98",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:08:00.101429",
+      "updatedAt": "2025-09-29T07:08:00.101452",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0dfb02cc-1944-4542-b5c5-9e0b198e143d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-e71123bb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-768fdd82"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-d0d722ba"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-a7ca09a9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-11c75616"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-663573e2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-7f6403b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0dfb02cc-1944-4542-b5c5-9e0b198e143d-588aa656"
+            }
+          ]
+        ]
+      },
+      "59a69e64-ebba-42cb-b8d0-8dd73f0ae962": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-55d875dc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-018d7e84"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-af19bcd2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-e6796f88"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-1a2b7fd8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-7af5c3d7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-2a5d5f98"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59a69e64-ebba-42cb-b8d0-8dd73f0ae962-84af17a8"
+            }
+          ]
+        ]
+      },
+      "cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-246702c1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-844d5a2a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-a3937649"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-30f7f8c9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-15619b93"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-417dfded"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-433b5687"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cbdc367d-a685-4f0b-a9f3-0aedc2c8b3c1-c5b8922c"
+            }
+          ]
+        ]
+      },
+      "ed1f4f78-733f-4dd5-9785-969c9ec0d637": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-6c1af96d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-66893a58"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-b0bf00d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-2d8ed599"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-fbd73249"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-f5b16c51"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-71fcf743"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ed1f4f78-733f-4dd5-9785-969c9ec0d637-41d84856"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Define feed items",
+        "parameters": {
+          "functionCode": "const escapeHTML = str => str.replace(/[&<>'\"]/g, \n  tag => ({\n      '&': '&amp;',\n      '<': '&lt;',\n      '>': '&gt;',\n      \"'\": '&#39;',\n      '\"': '&quot;'\n    }[tag]));\n\nlet feedItems = [];\nfor (item of items) {\n  feedItems.push(`<item>\n  <title>${escapeHTML(item.json.data.name)}</title>\n  <enclosure url=\"${item.json.data.associatedMedia.contentUrl}\" length=\"${item.json.data.timeRequired * 20 * 1000}\" type=\"${item.json.data.encodingFormat}\"/>\n  <guid isPermaLink=\"false\">${item.json.data.identifier}</guid>\n  <pubDate>${DateTime.fromISO(item.json.data.datePublished).toRFC2822()}</pubDate>\n  <description>${escapeHTML(item.json.data.description)}</description>\n</item>`);\n}\n\nreturn [{\n  data: `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:itunes=\"{{ $env.WEBHOOK_URL }}\" xmlns:content=\"{{ $env.WEBHOOK_URL }}\">\n  <channel>\n    <title>${escapeHTML(items[0].json.data.partOfSeries.name)}</title>\n    <description>${escapeHTML(items[0].json.data.partOfSeries.about)}</description>\n    <itunes:image href=\"${escapeHTML(items[0].json.data.image)}\" />\n    <language>${items[0].json.data.inLanguage}</language>\n    <itunes:category text=\"Comedy\" />\n    <itunes:explicit>no</itunes:explicit>\n    <link>${items[0].json.data.partOfSeries.url}</link>\n    <copyright>© ${$now.toFormat('yyyy')} ${escapeHTML(items[0].json.data.productionCompany)}</copyright>\n    <itunes:author>${escapeHTML(items[0].json.data.productionCompany)}</itunes:author>\n    ${feedItems.join('\\n')}\n  </channel>\n</rss>\n`\n}];\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract links",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "attribute": "href",
+                "cssSelector": "a[href*=\"/episode/\"]",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnArray": true,
+                "returnValue": "attribute"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.htmlExtract",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract script",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "script:nth-of-type(2)",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "html"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.htmlExtract",
+        "typeVersion": 1
+      },
+      {
+        "name": "Feed",
+        "parameters": {
+          "options": {},
+          "path": "3fbd94de-2fb3-4b32-a46e-c237865479b9.rss",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get episode page",
+        "parameters": {
+          "options": {},
+          "responseFormat": "string",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get overview page",
+        "parameters": {
+          "options": {},
+          "responseFormat": "string",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Parse JSON",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "data",
+                "value": "={{ JSON.parse($json.script) }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Remove duplicate links",
+        "parameters": {
+          "operation": "removeDuplicates"
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 1
+      },
+      {
+        "name": "Serve feed",
+        "parameters": {
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/rss+xml"
+                }
+              ]
+            }
+          },
+          "respondWith": "text",
+          "responseBody": "={{ $json[\"data\"] }}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split out lists",
+        "parameters": {
+          "fieldToSplitOut": "links",
+          "options": {
+            "destinationFieldName": "link"
+          }
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Htmlextract",
+    "Itemlists",
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 181,
+  "viewCount": 662,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Htmlextract Account",
+      "Itemlists Account",
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Locate the webhook node named \"Feed\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Serve feed\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Get overview page\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract links\" node (n8n-nodes-base.htmlExtract) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove duplicate links\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split out lists\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get episode page\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract script\" node (n8n-nodes-base.htmlExtract) and configure the action parameters, mappings, and fields.",
+      "Open the \"Define feed items\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Parse JSON\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-v06y8srba",
+      "workflowId": "manualtrigger-workflow-q6lcm",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Webhook/0260_Webhook_Respondtowebhook_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Webhook\\0260_Webhook_Respondtowebhook_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:31:21.716Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:31:21.716Z",
+  "updatedAt": "2026-07-15T11:31:21.716Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

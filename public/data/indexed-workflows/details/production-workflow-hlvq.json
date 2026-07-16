@@ -1,0 +1,303 @@
+{
+  "id": "production-workflow-uuoi0",
+  "name": "Production Workflow",
+  "slug": "production-workflow-hlvq",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Function",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1470,
+          380
+        ],
+        "parameters": {
+          "functionCode": "const new_items = [];\n// Get static data stored with the workflow\nconst data = this.getWorkflowStaticData(\"node\");\ndata.timestamp = data.timestamp || [];\nfor (var i = items.length - 1; i >= 0; i--) {\n// Check if data is already present\n  if (data.timestamp.includes(items[i].json.timestamp)) {\n    break;\n  } else {\n// if new data then add it to an array\n    new_items.push({\n      json: {\n        timestamp: items[i].json.timestamp,\n        latitude: items[i].json.latitude,\n        longitude: items[i].json.longitude\n      },\n    });\n  }\n}\ndata.timestamp = items.map((item) => item.json.timestamp);\n// Check if array is empty\nif (new_items.length === 0) {\n  return [{ json: { message: \"No new items\" } }];\n} else {\n// return new items if array is not empty\nconsole.log(new_items);\n  return new_items;\n}\n"
+        },
+        "typeVersion": 1,
+        "id": "node-72cbf27d"
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1270,
+          380
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "latitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"latitude\"]}}"
+              },
+              {
+                "name": "longitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"longitude\"]}}"
+              },
+              {
+                "name": "timestamp",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"timestamp\"]}}"
+              }
+            ],
+            "string": []
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-aa2f838c"
+      },
+      {
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1070,
+          380
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "timestamps",
+                "value": "={{Date.now();}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-e5735ab2"
+      },
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          870,
+          380
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-07859817"
+      },
+      {
+        "id": "error-666cf06f",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-6c2d0dce",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.326010",
+      "updatedAt": "2025-09-29T07:07:46.326025",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Function",
+        "parameters": {
+          "functionCode": "const new_items = [];\n// Get static data stored with the workflow\nconst data = this.getWorkflowStaticData(\"node\");\ndata.timestamp = data.timestamp || [];\nfor (var i = items.length - 1; i >= 0; i--) {\n// Check if data is already present\n  if (data.timestamp.includes(items[i].json.timestamp)) {\n    break;\n  } else {\n// if new data then add it to an array\n    new_items.push({\n      json: {\n        timestamp: items[i].json.timestamp,\n        latitude: items[i].json.latitude,\n        longitude: items[i].json.longitude\n      },\n    });\n  }\n}\ndata.timestamp = items.map((item) => item.json.timestamp);\n// Check if array is empty\nif (new_items.length === 0) {\n  return [{ json: { message: \"No new items\" } }];\n} else {\n// return new items if array is not empty\nconsole.log(new_items);\n  return new_items;\n}\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTTP Request",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "timestamps",
+                "value": "={{Date.now();}}"
+              }
+            ]
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "latitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"latitude\"]}}"
+              },
+              {
+                "name": "longitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"longitude\"]}}"
+              },
+              {
+                "name": "timestamp",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"timestamp\"]}}"
+              }
+            ],
+            "string": []
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 1,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 104,
+  "viewCount": 276,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Function\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 91,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ak05w7srs",
+      "workflowId": "production-workflow-uuoi0",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1171_HTTP_Cron_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1171_HTTP_Cron_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:18:34.464Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:34.464Z",
+  "updatedAt": "2026-07-15T11:18:34.464Z"
+}

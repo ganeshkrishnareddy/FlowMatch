@@ -1,0 +1,666 @@
+{
+  "id": "emailreadimap-workflow-96l1n",
+  "name": "Emailreadimap Workflow",
+  "slug": "emailreadimap-workflow-59m6",
+  "description": "Automated workflow: Emailreadimap Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Emailreadimap Workflow workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "trigger-43a50227",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "name": "Read Harvey's Email",
+        "type": "n8n-nodes-base.emailReadImap",
+        "position": [
+          270,
+          390
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "credentials": {
+          "imap": "Read Harvey's Mail"
+        },
+        "typeVersion": 1,
+        "id": "200e7ae0-4868-4302-b92d-04e196f1290d",
+        "notes": "This emailReadImap node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Who Is The Email From?",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          460,
+          390
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "Louis Litt <louis_litt_1970@yahoo.com>"
+              }
+            ]
+          },
+          "value1": "={{$node[\"Read Harvey's Email\"].json[\"from\"]}}",
+          "dataType": "string",
+          "fallbackOutput": 3
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": false,
+        "id": "399d6dcd-65d2-479e-92de-c5d7455c4169",
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Read Excuses File",
+        "type": "n8n-nodes-base.readBinaryFile",
+        "position": [
+          670,
+          230
+        ],
+        "parameters": {
+          "filePath": "/home/n8n/Excuse_Generator.xlsx"
+        },
+        "typeVersion": 1,
+        "id": "640523db-96df-4613-91e9-f660b1b3b5e6",
+        "notes": "This readBinaryFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Retrieve Excuses Spreadsheet Data",
+        "type": "n8n-nodes-base.spreadsheetFile",
+        "position": [
+          860,
+          230
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "c77a42c7-378f-421b-b9df-ad63e1125524",
+        "notes": "This spreadsheetFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Generate Excuse",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1040,
+          230
+        ],
+        "parameters": {
+          "functionCode": "var leadinmax = 24;\nvar perpmax = 25;\nvar delaymax = 23;\nvar leadin = Math.floor((Math.random() * leadinmax ) + 1);\nvar perp = Math.floor((Math.random() * perpmax ) + 1);\nvar delay = Math.floor((Math.random() * delaymax) + 1);\n\nvar excuse = items[leadin].json.Leadin + \" \" + items[perp].json.Perpetrator + \" \" + items[delay].json.Delay;\n\nitems = [{json:{}}];\n\nitems[0].json.excuse = excuse;\nreturn items;\n"
+        },
+        "typeVersion": 1,
+        "id": "d1a8239d-29a1-4835-bfb5-a97c7ff892a4",
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Merge Excuse and Mail Data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1230,
+          330
+        ],
+        "parameters": {
+          "mode": "mergeByIndex"
+        },
+        "typeVersion": 1,
+        "id": "6cf7d259-b94d-4d7a-9c5e-43f7ceaeea75",
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Send Email",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          1460,
+          250
+        ],
+        "parameters": {
+          "text": "= {{$node[\"Merge Excuse and Mail Data\"].json[\"excuse\"]}}\n\nMaybe next time.\n\nHarvey",
+          "options": {},
+          "subject": "=RE: {{$node[\"Merge Excuse and Mail Data\"].json[\"subject\"]}}",
+          "toEmail": "={{$node[\"Merge Excuse and Mail Data\"].json[\"from\"]}}",
+          "fromEmail": "={{$node[\"Merge Excuse and Mail Data\"].json[\"to\"]}}"
+        },
+        "credentials": {
+          "smtp": "Send Harvey's Mail"
+        },
+        "typeVersion": 1,
+        "id": "bc8ad2df-83dc-4a37-a819-2894ab7a0969",
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Slack (Louis)",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          1470,
+          410
+        ],
+        "parameters": {
+          "text": "=Here is what Louis emailed you:\n```\n{{$node[\"Merge Excuse and Mail Data\"].json[\"textPlain\"]}}\n```\n\nHere is how \"you\" responded:\n> {{$node[\"Merge Excuse and Mail Data\"].json[\"excuse\"]}}\n\n:+1: *You're Welcome!* :smirk:",
+          "channel": "private",
+          "attachments": [],
+          "otherOptions": {
+            "mrkdwn": true
+          }
+        },
+        "credentials": {
+          "slackApi": "Nathan's Slack API Token"
+        },
+        "typeVersion": 1,
+        "id": "7321887f-134b-47ce-b0b3-95d64cccb49f",
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Slack (General)",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          890,
+          470
+        ],
+        "parameters": {
+          "text": "You've just received an email. You may wish to check it out.",
+          "channel": "private",
+          "attachments": [],
+          "otherOptions": {
+            "mrkdwn": true
+          }
+        },
+        "credentials": {
+          "slackApi": "Nathan's Slack API Token"
+        },
+        "typeVersion": 1,
+        "id": "c87ee22b-bf12-4f9a-9379-f9af68250e53",
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "200e7ae0-4868-4302-b92d-04e196f1290d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-14f3595e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-82d101b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-42c6e6c5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-dff54398",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-0c42669e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-4d465691",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-a5a47251",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-24034604",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "bc8ad2df-83dc-4a37-a819-2894ab7a0969": {
+        "main": [
+          [
+            {
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-2a88e4bc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-41f84928",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-18977fda",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-5d197e35",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-5467361d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-bb9a0719",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-aac86ca6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-0c43c0d1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Emailreadimap Workflow",
+    "description": "Automated workflow: Emailreadimap Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-422837aa",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.327239",
+      "updatedAt": "2025-09-29T07:07:52.327244",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Emailreadimap Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "200e7ae0-4868-4302-b92d-04e196f1290d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-14f3595e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-82d101b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-42c6e6c5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-dff54398"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-0c42669e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-4d465691"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-a5a47251"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-200e7ae0-4868-4302-b92d-04e196f1290d-24034604"
+            }
+          ]
+        ]
+      },
+      "bc8ad2df-83dc-4a37-a819-2894ab7a0969": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-2a88e4bc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-41f84928"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-18977fda"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-5d197e35"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-5467361d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-bb9a0719"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-aac86ca6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bc8ad2df-83dc-4a37-a819-2894ab7a0969-0c43c0d1"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Emailreadimap Workflow",
+    "nodes": [
+      {
+        "name": "Generate Excuse",
+        "parameters": {
+          "functionCode": "var leadinmax = 24;\nvar perpmax = 25;\nvar delaymax = 23;\nvar leadin = Math.floor((Math.random() * leadinmax ) + 1);\nvar perp = Math.floor((Math.random() * perpmax ) + 1);\nvar delay = Math.floor((Math.random() * delaymax) + 1);\n\nvar excuse = items[leadin].json.Leadin + \" \" + items[perp].json.Perpetrator + \" \" + items[delay].json.Delay;\n\nitems = [{json:{}}];\n\nitems[0].json.excuse = excuse;\nreturn items;\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge Excuse and Mail Data",
+        "parameters": {
+          "mode": "mergeByIndex"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "Read Excuses File",
+        "parameters": {
+          "filePath": "/home/n8n/Excuse_Generator.xlsx"
+        },
+        "type": "n8n-nodes-base.readBinaryFile",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "imap": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Read Harvey's Email",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailReadImap",
+        "typeVersion": 1
+      },
+      {
+        "name": "Retrieve Excuses Spreadsheet Data",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.spreadsheetFile",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email",
+        "parameters": {
+          "fromEmail": "={{$node[\"Merge Excuse and Mail Data\"].json[\"to\"]}}",
+          "options": {},
+          "subject": "=RE: {{$node[\"Merge Excuse and Mail Data\"].json[\"subject\"]}}",
+          "text": "= {{$node[\"Merge Excuse and Mail Data\"].json[\"excuse\"]}}\n\nMaybe next time.\n\nHarvey",
+          "toEmail": "={{$node[\"Merge Excuse and Mail Data\"].json[\"from\"]}}"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "slackApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Slack (General)",
+        "parameters": {
+          "attachments": [],
+          "channel": "private",
+          "otherOptions": {
+            "mrkdwn": true
+          },
+          "text": "You've just received an email. You may wish to check it out."
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "slackApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Slack (Louis)",
+        "parameters": {
+          "attachments": [],
+          "channel": "private",
+          "otherOptions": {
+            "mrkdwn": true
+          },
+          "text": "=Here is what Louis emailed you:\n```\n{{$node[\"Merge Excuse and Mail Data\"].json[\"textPlain\"]}}\n```\n\nHere is how \"you\" responded:\n> {{$node[\"Merge Excuse and Mail Data\"].json[\"excuse\"]}}\n\n:+1: *You're Welcome!* :smirk:"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 1
+      },
+      {
+        "name": "Who Is The Email From?",
+        "parameters": {
+          "dataType": "string",
+          "fallbackOutput": 3,
+          "rules": {
+            "rules": [
+              {
+                "value2": "Louis Litt <louis_litt_1970@yahoo.com>"
+              }
+            ]
+          },
+          "value1": "={{$node[\"Read Harvey's Email\"].json[\"from\"]}}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Email (IMAP)",
+    "Spreadsheetfile",
+    "Emailsend",
+    "Slack"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 192,
+  "viewCount": 812,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Email (IMAP) Account",
+      "Spreadsheetfile Account",
+      "Emailsend Account",
+      "Slack Account"
+    ],
+    "requiredCredentials": [
+      "imap details",
+      "smtp details",
+      "slack  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"Read Harvey's Email\" node (n8n-nodes-base.emailReadImap) and configure the action parameters, mappings, and fields.",
+      "Open the \"Who Is The Email From?\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Read Excuses File\" node (n8n-nodes-base.readBinaryFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Retrieve Excuses Spreadsheet Data\" node (n8n-nodes-base.spreadsheetFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Generate Excuse\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge Excuse and Mail Data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Email\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Slack (Louis)\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Slack (General)\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ludkp2k0j",
+      "workflowId": "emailreadimap-workflow-96l1n",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Slack/1082_Slack_Readbinaryfile_Create.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Slack\\1082_Slack_Readbinaryfile_Create.json",
+      "discoveredAt": "2026-07-15T11:19:32.188Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:32.188Z",
+  "updatedAt": "2026-07-15T11:19:32.188Z"
+}

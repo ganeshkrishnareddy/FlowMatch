@@ -1,0 +1,795 @@
+{
+  "id": "automated-work-attendance-with-location-triggers-1akm8",
+  "name": "Automated Work Attendance with Location Triggers",
+  "slug": "automated-work-attendance-with-location-triggers-hjrg",
+  "description": "Automated workflow: Automated Work Attendance with Location Triggers. This workflow integrates 8 different services: webhook, stickyNote, code, googleDrive, set. It contains 15 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Automated Work Attendance with Location Triggers workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "x2kgOnBLtqAjqUVS",
+    "meta": {
+      "instanceId": "workflow-d8be2030",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:43.900123",
+      "updatedAt": "2025-09-29T07:07:43.900150",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Automated Work Attendance with Location Triggers",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "b2cba308-6d47-432b-9296-58f233f15565",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "801c8367-af7b-4371-8684-cc699090b97f",
+        "parameters": {
+          "path": "time-track",
+          "options": {}
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "67354f1c-9dac-4edd-b07d-f1b0dbd80159",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          0,
+          -260
+        ],
+        "parameters": {
+          "width": 1120,
+          "height": 180,
+          "content": "## Check if the Worksheet Exists"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5fc5a1a6-f18d-4ee0-a70b-30de48a45dc7",
+        "name": "Google Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          220,
+          -220
+        ],
+        "parameters": {
+          "filter": {},
+          "options": {},
+          "resource": "fileFolder",
+          "returnAll": true,
+          "queryString": "WorkTimeTracking"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "U6W5tWhDvO7rQ73t",
+            "name": "Google Drive account"
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 3,
+        "alwaysOutputData": true,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a0b63be4-fa46-413f-82fe-42e6edc24f29",
+        "name": "Create Worksheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          800,
+          -240
+        ],
+        "parameters": {
+          "title": "WorkTimeTracking",
+          "options": {
+            "locale": ""
+          },
+          "resource": "spreadsheet",
+          "sheetsUi": {
+            "sheetValues": [
+              {
+                "title": "Worklog"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "TvzWrF2qPL7RjlJK",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "796e3ef6-3002-493e-8d89-10cba2d8026d",
+        "name": "Return if Null",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          400,
+          -220
+        ],
+        "parameters": {
+          "jsCode": "return [{json: {empty: items.length == 1 && Object.keys(items[0].json).length == 0}}];"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7af7ce4b-93e0-4058-8a45-9fd8269ddc77",
+        "name": "Doesn't exist?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          580,
+          -220
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "215b8ced-c6f5-4cf2-8755-9bba928dbe84",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{$json[\"empty\"]}}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f2bc21c6-805b-49e7-b026-a4de56dce1fa",
+        "name": "Set Logging Details",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          780,
+          20
+        ],
+        "parameters": {
+          "mode": "raw",
+          "options": {},
+          "jsonOutput": "={\n  \"Date\": \"{{ $now.format('yyyy-MM-dd') }}\",\n  \"Time\": \"{{ $now.format('hh:mm') }}\",\n  \"Direction\":\"Check-In\"\n}\n"
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "64bc8b93-a925-49d6-9e52-3f30f0c9e5a8",
+        "name": "Create Log",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1000,
+          20
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Date": "={{ $json.Date }}",
+              "Time": "={{ $json.Time }}",
+              "Direction": "={{ $('Webhook').item.json.headers.direction ? $('Webhook').item.json.headers.direction : \"\"}}"
+            },
+            "schema": [
+              {
+                "id": "Date",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Date",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Time",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Time",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Direction",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Direction",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": []
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 308318361,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Worklog"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Google Drive').item.json.id }}"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "TvzWrF2qPL7RjlJK",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cabca7d5-b4ae-45db-904d-f8efb37c4ab2",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          660,
+          -40
+        ],
+        "parameters": {
+          "width": 600,
+          "height": 280,
+          "content": "## Log Check-In or Check-Out"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5b9505fc-71a4-42c1-805f-c363384b4c8a",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          -320
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 380,
+          "height": 640,
+          "content": "## Location-Based Time Tracking\n\nThis automation streamlines your time tracking by using location triggers. Here's how it works:\n\nCreate two shortcuts in the iPhone Shortcuts app:\n\nName one \"Check-In\" and the other \"Check-Out.\"\nWithin each shortcut, use the \"Get Content from URL\" action to call the Webhook. Set the Header Direction for \"Check-In\" or \"Check-Out\"\n\n\nNow, whenever you enter or exit the specified location, your iPhone will automatically record the time in your Google Sheet. This creates a seamless and accurate log of your work hours or time spent at a particular place."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "timezone": "UTC",
+      "callerPolicy": "workflowsFromSameOwner",
+      "executionOrder": "v1",
+      "executionTimeout": 3600,
+      "saveManualExecutions": true,
+      "errorWorkflow": null,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "2de5264f-eb68-4919-a3f3-133a8ceb45bb",
+    "connections": {
+      "b2cba308-6d47-432b-9296-58f233f15565": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-092c1142",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-a77eacc6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-e0020f51",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-f938a25f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-7b031712",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-69381315",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-1ee61d63",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-4300d13e",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "5fc5a1a6-f18d-4ee0-a70b-30de48a45dc7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5fc5a1a6-f18d-4ee0-a70b-30de48a45dc7-d936140c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a0b63be4-fa46-413f-82fe-42e6edc24f29": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a0b63be4-fa46-413f-82fe-42e6edc24f29-d588f4a9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "64bc8b93-a925-49d6-9e52-3f30f0c9e5a8": {
+        "main": [
+          [
+            {
+              "node": "error-handler-64bc8b93-a925-49d6-9e52-3f30f0c9e5a8-06699c52",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Automated Work Attendance with Location Triggers. This workflow integrates 8 different services: webhook, stickyNote, code, googleDrive, set. It contains 15 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Automated Work Attendance with Location Triggers. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "5fc5a1a6-f18d-4ee0-a70b-30de48a45dc7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5fc5a1a6-f18d-4ee0-a70b-30de48a45dc7-d936140c"
+            }
+          ]
+        ]
+      },
+      "64bc8b93-a925-49d6-9e52-3f30f0c9e5a8": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-64bc8b93-a925-49d6-9e52-3f30f0c9e5a8-06699c52"
+            }
+          ]
+        ]
+      },
+      "a0b63be4-fa46-413f-82fe-42e6edc24f29": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a0b63be4-fa46-413f-82fe-42e6edc24f29-d588f4a9"
+            }
+          ]
+        ]
+      },
+      "b2cba308-6d47-432b-9296-58f233f15565": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-092c1142"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-a77eacc6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-e0020f51"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-f938a25f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-7b031712"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-69381315"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-1ee61d63"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b2cba308-6d47-432b-9296-58f233f15565-4300d13e"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Automated Work Attendance with Location Triggers",
+    "nodes": [
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Log",
+        "parameters": {
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Date",
+                "id": "Date",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Time",
+                "id": "Time",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Direction",
+                "id": "Direction",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Date": "={{ $json.Date }}",
+              "Direction": "={{ $('Webhook').item.json.headers.direction ? $('Webhook').item.json.headers.direction : \"\"}}",
+              "Time": "={{ $json.Time }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Google Drive').item.json.id }}"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Worklog",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 308318361
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Worksheet",
+        "parameters": {
+          "options": {
+            "locale": ""
+          },
+          "resource": "spreadsheet",
+          "sheetsUi": {
+            "sheetValues": [
+              {
+                "title": "Worklog"
+              }
+            ]
+          },
+          "title": "WorkTimeTracking"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "Doesn't exist?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "215b8ced-c6f5-4cf2-8755-9bba928dbe84",
+                "leftValue": "={{$json[\"empty\"]}}",
+                "operator": {
+                  "operation": "true",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive",
+        "parameters": {
+          "filter": {},
+          "options": {},
+          "queryString": "WorkTimeTracking",
+          "resource": "fileFolder",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Return if Null",
+        "parameters": {
+          "jsCode": "return [{json: {empty: items.length == 1 && Object.keys(items[0].json).length == 0}}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Set Logging Details",
+        "parameters": {
+          "jsonOutput": "={\n  \"Date\": \"{{ $now.format('yyyy-MM-dd') }}\",\n  \"Time\": \"{{ $now.format('hh:mm') }}\",\n  \"Direction\":\"Check-In\"\n}\n",
+          "mode": "raw",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Check if the Worksheet Exists",
+          "height": 180,
+          "width": 1120
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Log Check-In or Check-Out",
+          "height": 280,
+          "width": 600
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 3,
+          "content": "## Location-Based Time Tracking\n\nThis automation streamlines your time tracking by using location triggers. Here's how it works:\n\nCreate two shortcuts in the iPhone Shortcuts app:\n\nName one \"Check-In\" and the other \"Check-Out.\"\nWithin each shortcut, use the \"Get Content from URL\" action to call the Webhook. Set the Header Direction for \"Check-In\" or \"Check-Out\"\n\n\nNow, whenever you enter or exit the specified location, your iPhone will automatically record the time in your Google Sheet. This creates a seamless and accurate log of your work hours or time spent at a particular place.",
+          "height": 640,
+          "width": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "options": {},
+          "path": "time-track"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "Google Drive",
+    "Google Sheets"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 100,
+  "viewCount": 406,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Google Drive Account",
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "google Drive  O Auth2  A P I details",
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Drive\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Worksheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Doesn't exist?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Log\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Logging Details\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-eq24hfw03",
+      "workflowId": "automated-work-attendance-with-location-triggers-1akm8",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/2008_Code_Webhook_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\2008_Code_Webhook_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:28:56.636Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:56.636Z",
+  "updatedAt": "2026-07-15T11:28:56.636Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

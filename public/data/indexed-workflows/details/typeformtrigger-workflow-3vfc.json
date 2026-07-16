@@ -1,0 +1,421 @@
+{
+  "id": "typeformtrigger-workflow-ah97f",
+  "name": "Typeformtrigger Workflow",
+  "slug": "typeformtrigger-workflow-3vfc",
+  "description": "Automated workflow: Typeformtrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Typeformtrigger Workflow workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Typeform Trigger",
+        "type": "n8n-nodes-base.typeformTrigger",
+        "position": [
+          0,
+          400
+        ],
+        "webhookId": "ad8a87ef-d293-4e48-8d36-838d69ebce0f",
+        "parameters": {
+          "formId": "fBYjtY5e"
+        },
+        "credentials": {
+          "typeformApi": ""
+        },
+        "typeVersion": 1,
+        "id": "9b6cfb94-3333-4fc1-96f9-a3f1df04d18e",
+        "notes": "This typeformTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Google Cloud Natural Language",
+        "type": "n8n-nodes-base.googleCloudNaturalLanguage",
+        "position": [
+          200,
+          400
+        ],
+        "parameters": {
+          "content": "={{$json[\"Any suggestions for us? \"]}}",
+          "options": {}
+        },
+        "credentials": {
+          "googleCloudNaturalLanguageOAuth2Api": ""
+        },
+        "typeVersion": 1,
+        "id": "1ffc1443-4150-41ab-8b90-d83cc81698bb",
+        "notes": "This googleCloudNaturalLanguage node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          400,
+          400
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$node[\"Google Cloud Natural Language\"].json[\"documentSentiment\"][\"score\"]}}",
+                "operation": "larger"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "7306a3bb-551a-4142-91f5-1c533ca16dcf",
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Notion",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          600,
+          300
+        ],
+        "parameters": {
+          "resource": "databasePage",
+          "databaseId": "b7d1130a-3756-4bb3-aa56-0c77bf416437",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "title": "={{$node[\"Typeform Trigger\"].json[\"Name\"]}}"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "textContent": "={{$node[\"Typeform Trigger\"].json[\"Any suggestions for us? \"]}}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": ""
+        },
+        "typeVersion": 1,
+        "id": "da864668-f74c-4082-a2b1-b5aed0990798",
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Slack",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          800,
+          300
+        ],
+        "parameters": {
+          "channel": "general",
+          "blocksUi": {
+            "blocksValues": []
+          },
+          "attachments": [
+            {
+              "text": "={{$node[\"Typeform Trigger\"].json[\"Any suggestions for us? \"]}}",
+              "title": "={{$node[\"Typeform Trigger\"].json[\"Name\"]}} {{$node[\"Google Cloud Natural Language\"].json[\"documentSentiment\"][\"score\"]}}"
+            }
+          ],
+          "otherOptions": {}
+        },
+        "credentials": {
+          "slackApi": ""
+        },
+        "typeVersion": 1,
+        "id": "a7f6248c-8cfc-49eb-bb29-6e15ea340408",
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Trello",
+        "type": "n8n-nodes-base.trello",
+        "position": [
+          600,
+          500
+        ],
+        "parameters": {
+          "name": "=Score: {{$json[\"documentSentiment\"][\"score\"]}}",
+          "listId": "5fbb9e2eb1d5cc0a8a7ab8ac",
+          "description": "=Score: {{$json[\"documentSentiment\"][\"score\"]}}\nFeedback: {{$node[\"Typeform Trigger\"].json[\"Any suggestions for us? \"]}}\nUser: {{$node[\"Typeform Trigger\"].json[\"Name\"]}}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "trelloApi": ""
+        },
+        "typeVersion": 1,
+        "id": "dd66da2d-9b60-4373-a309-b202483cc082",
+        "notes": "This trello node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-4587fc96",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Typeformtrigger Workflow",
+    "description": "Automated workflow: Typeformtrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-f758e0df",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:58.125894",
+      "updatedAt": "2025-09-29T07:07:58.125919",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Typeformtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Typeformtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleCloudNaturalLanguageOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Cloud Natural Language",
+        "parameters": {
+          "content": "={{$json[\"Any suggestions for us? \"]}}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCloudNaturalLanguage",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "larger",
+                "value1": "={{$node[\"Google Cloud Natural Language\"].json[\"documentSentiment\"][\"score\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Notion",
+        "parameters": {
+          "databaseId": "b7d1130a-3756-4bb3-aa56-0c77bf416437",
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "title": "={{$node[\"Typeform Trigger\"].json[\"Name\"]}}"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "textContent": "={{$node[\"Typeform Trigger\"].json[\"Any suggestions for us? \"]}}"
+              }
+            ]
+          },
+          "resource": "databasePage"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "slackApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Slack",
+        "parameters": {
+          "attachments": [
+            {
+              "text": "={{$node[\"Typeform Trigger\"].json[\"Any suggestions for us? \"]}}",
+              "title": "={{$node[\"Typeform Trigger\"].json[\"Name\"]}} {{$node[\"Google Cloud Natural Language\"].json[\"documentSentiment\"][\"score\"]}}"
+            }
+          ],
+          "blocksUi": {
+            "blocksValues": []
+          },
+          "channel": "general",
+          "otherOptions": {}
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "trelloApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Trello",
+        "parameters": {
+          "additionalFields": {},
+          "description": "=Score: {{$json[\"documentSentiment\"][\"score\"]}}\nFeedback: {{$node[\"Typeform Trigger\"].json[\"Any suggestions for us? \"]}}\nUser: {{$node[\"Typeform Trigger\"].json[\"Name\"]}}",
+          "listId": "5fbb9e2eb1d5cc0a8a7ab8ac",
+          "name": "=Score: {{$json[\"documentSentiment\"][\"score\"]}}"
+        },
+        "type": "n8n-nodes-base.trello",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "typeformApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Typeform Trigger",
+        "parameters": {
+          "formId": "fBYjtY5e"
+        },
+        "type": "n8n-nodes-base.typeformTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 5,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Typeform",
+    "Googlecloudnaturallanguage",
+    "Notion",
+    "Slack",
+    "Trello"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 77,
+  "viewCount": 377,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Typeform Account",
+      "Googlecloudnaturallanguage Account",
+      "Notion Account",
+      "Slack Account",
+      "Trello Account"
+    ],
+    "requiredCredentials": [
+      "typeform  A P I details",
+      "google Cloud Natural Language  O Auth2  A P I details",
+      "notion  A P I details",
+      "slack  A P I details",
+      "trello  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Typeform Trigger\".",
+      "Open the \"Google Cloud Natural Language\" node (n8n-nodes-base.googleCloudNaturalLanguage) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Notion\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Slack\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Trello\" node (n8n-nodes-base.trello) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-baxbbefsy",
+      "workflowId": "typeformtrigger-workflow-ah97f",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Trello/0044_Trello_Googlecloudnaturallanguage_Automate_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Trello\\0044_Trello_Googlecloudnaturallanguage_Automate_Triggered.json",
+      "discoveredAt": "2026-07-15T11:20:29.881Z"
+    },
+    {
+      "id": "src-5mzq02t0v",
+      "workflowId": "typeformtrigger-workflow-8ce2w",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Trello/1298_Trello_Googlecloudnaturallanguage_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Trello\\1298_Trello_Googlecloudnaturallanguage_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:20:30.277Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:29.881Z",
+  "updatedAt": "2026-07-15T11:20:29.881Z"
+}

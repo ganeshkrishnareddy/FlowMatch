@@ -1,0 +1,538 @@
+{
+  "id": "manualchattrigger-workflow-8a01y",
+  "name": "Manualchattrigger Workflow",
+  "slug": "manualchattrigger-workflow-70ny",
+  "description": "Automated workflow: Manualchattrigger Workflow. This workflow integrates 10 different services: stickyNote, code, agent, set, hackerNews. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualchattrigger Workflow workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-3b0de6ff",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.907093",
+      "updatedAt": "2025-09-29T07:07:54.907109",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "4c52efcf-039b-4550-8a63-3d3d4dde488b",
+        "name": "On new manual Chat Message",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          740,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1.1,
+        "notes": "This manualChatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "adb528f1-b87b-4bb2-99e1-776fd839522e",
+        "name": "Execute Workflow Trigger",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          680,
+          940
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "092cf737-5b53-4fc8-82f5-c775b77ea0bd",
+        "name": "Hacker News",
+        "type": "n8n-nodes-base.hackerNews",
+        "position": [
+          900,
+          940
+        ],
+        "parameters": {
+          "limit": 50,
+          "resource": "all",
+          "additionalFields": {}
+        },
+        "typeVersion": 1,
+        "notes": "This hackerNews node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a0805137-630c-4065-826e-88afa000660f",
+        "name": "Clean up data",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1120,
+          940
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "title",
+                "stringValue": "={{ $json._highlightResult.title.value }}"
+              },
+              {
+                "name": "points",
+                "type": "numberValue",
+                "numberValue": "={{ $json.points }}"
+              },
+              {
+                "name": "url",
+                "stringValue": "={{ $json.url }}"
+              },
+              {
+                "name": "created_at",
+                "stringValue": "={{ $json.created_at }}"
+              },
+              {
+                "name": "author",
+                "stringValue": "={{ $json.author }}"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e1b255f4-e970-42d6-9870-4e302bf2da83",
+        "name": "AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          960,
+          300
+        ],
+        "parameters": {
+          "options": {
+            "maxIterations": 10
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "91e3391e-909e-4d63-9649-ff62781dbba9",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          960,
+          520
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "VQtv7frm7eLiEDnd",
+            "name": "OpenAi account 7"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cd1f0028-635e-48eb-ac38-4c6fb25ed63e",
+        "name": "Stringify",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1340,
+          940
+        ],
+        "parameters": {
+          "jsCode": "return {\n 'response': JSON.stringify($input.all().map(x => x.json))\n}"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7df241eb-67d3-4724-8b32-4b53561ed55f",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          880,
+          820
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 150,
+          "height": 293,
+          "content": "### Replace me\nwith any other service, e.g. fetching your own data"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "270845df-7c2d-4035-9ac0-e41d418b3026",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          600,
+          738.125
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 927.5,
+          "height": 406.875,
+          "content": "### Sub-workflow: Custom tool\nThis can be called by the agent above. This example fetches the top 50 posts ever on Hacker News"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1d796a86-45d1-4fc4-8245-893525505d1f",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          600,
+          200
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 927.5,
+          "height": 486.5625,
+          "content": "### Main workflow: AI agent using custom tool\nTry it out by clicking 'Chat' and entering 'What is the 5th most popular post ever on Hacker News?'"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "38ff64b5-6f47-4d2d-9051-caab418bb0e8",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          440,
+          300
+        ],
+        "parameters": {
+          "width": 185.9375,
+          "height": 218,
+          "content": "## Try me out\n\nClick the 'Chat' button and enter:\n\n_What is the 5th most popular post ever on Hacker News?_"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3532e461-bd74-48f7-93e1-96d608c88688",
+        "name": "Custom tool to call the wf below",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1120,
+          520
+        ],
+        "parameters": {
+          "name": "hn_tool",
+          "workflowId": "={{ $workflow.id }}",
+          "description": "Returns a list of the most popular posts ever on Hacker News, in json format"
+        },
+        "typeVersion": 1,
+        "notes": "This toolWorkflow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-72d2c622",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "91e3391e-909e-4d63-9649-ff62781dbba9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-91e3391e-909e-4d63-9649-ff62781dbba9-a9d835df",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualchattrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualchattrigger Workflow. This workflow integrates 10 different services: stickyNote, code, agent, set, hackerNews. It contains 13 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualchattrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "91e3391e-909e-4d63-9649-ff62781dbba9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-91e3391e-909e-4d63-9649-ff62781dbba9-a9d835df"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualchattrigger Workflow",
+    "nodes": [
+      {
+        "name": "AI Agent",
+        "parameters": {
+          "options": {
+            "maxIterations": 10
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Clean up data",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "title",
+                "stringValue": "={{ $json._highlightResult.title.value }}"
+              },
+              {
+                "name": "points",
+                "numberValue": "={{ $json.points }}",
+                "type": "numberValue"
+              },
+              {
+                "name": "url",
+                "stringValue": "={{ $json.url }}"
+              },
+              {
+                "name": "created_at",
+                "stringValue": "={{ $json.created_at }}"
+              },
+              {
+                "name": "author",
+                "stringValue": "={{ $json.author }}"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Custom tool to call the wf below",
+        "parameters": {
+          "description": "Returns a list of the most popular posts ever on Hacker News, in json format",
+          "name": "hn_tool",
+          "workflowId": "={{ $workflow.id }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Execute Workflow Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Hacker News",
+        "parameters": {
+          "additionalFields": {},
+          "limit": 50,
+          "resource": "all"
+        },
+        "type": "n8n-nodes-base.hackerNews",
+        "typeVersion": 1
+      },
+      {
+        "name": "On new manual Chat Message",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "### Replace me\nwith any other service, e.g. fetching your own data",
+          "height": 293,
+          "width": 150
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "### Sub-workflow: Custom tool\nThis can be called by the agent above. This example fetches the top 50 posts ever on Hacker News",
+          "height": 406.875,
+          "width": 927.5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 7,
+          "content": "### Main workflow: AI agent using custom tool\nTry it out by clicking 'Chat' and entering 'What is the 5th most popular post ever on Hacker News?'",
+          "height": 486.5625,
+          "width": 927.5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Try me out\n\nClick the 'Chat' button and enter:\n\n_What is the 5th most popular post ever on Hacker News?_",
+          "height": 218,
+          "width": 185.9375
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Stringify",
+        "parameters": {
+          "jsCode": "return {\n 'response': JSON.stringify($input.all().map(x => x.json))\n}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Hackernews"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 37,
+  "viewCount": 801,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Hackernews Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Execute Workflow Trigger\".",
+      "Open the \"On new manual Chat Message\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Hacker News\" node (n8n-nodes-base.hackerNews) and configure the action parameters, mappings, and fields.",
+      "Open the \"AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Custom tool to call the wf below\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Clean up data\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-5rt1xmu7e",
+      "workflowId": "manualchattrigger-workflow-8a01y",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stickynote/1268_Stickynote_Hackernews_Automate_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stickynote\\1268_Stickynote_Hackernews_Automate_Triggered.json",
+      "discoveredAt": "2026-07-15T11:20:00.341Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:00.341Z",
+  "updatedAt": "2026-07-15T11:20:00.341Z"
+}

@@ -1,0 +1,720 @@
+{
+  "id": "production-workflow-4cg6i",
+  "name": "Production Workflow",
+  "slug": "production-workflow-iy5y",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          880,
+          540
+        ],
+        "parameters": {
+          "content": "## Edit your own prompt ⬇️\n"
+        },
+        "typeVersion": 1,
+        "id": "node-0a48ef0d"
+      },
+      {
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -380,
+          580
+        ],
+        "parameters": {
+          "content": "## Filter comments and customize your trigger words ⬇️"
+        },
+        "typeVersion": 1,
+        "id": "node-4d7fbf82"
+      },
+      {
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -120,
+          560
+        ],
+        "parameters": {
+          "content": "## Replace your gitlab URL and token ⬇️"
+        },
+        "typeVersion": 1,
+        "id": "node-281e70f1"
+      },
+      {
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          -540,
+          760
+        ],
+        "webhookId": "6cfd2f23-6f45-47d4-9fe0-8f6f1c05829a",
+        "parameters": {
+          "path": "e21095c0-1876-4cd9-9e92-a2eac737f03e",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1.1,
+        "id": "node-b71228ac"
+      },
+      {
+        "name": "Code",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          720,
+          540
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nvar diff = $input.item.json.gitDiff\n\nlet lines = diff.trimEnd().split('\\n');\n\nlet originalCode = '';\nlet newCode = '';\n\nlines.forEach(line => {\n console.log(line)\n if (line.startsWith('-')) {\n originalCode += line + \"\\n\";\n } else if (line.startsWith('+')) {\n newCode += line + \"\\n\";\n } else {\n originalCode += line + \"\\n\";\n newCode += line + \"\\n\";\n }\n});\n\nreturn {\n originalCode:originalCode,\n newCode:newCode\n};\n\n"
+        },
+        "typeVersion": 2,
+        "id": "node-8c29c20e"
+      },
+      {
+        "name": "Split Out1",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          140,
+          740
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "changes"
+        },
+        "typeVersion": 1,
+        "id": "node-fe635f1d"
+      },
+      {
+        "name": "OpenAI Chat Model1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          900,
+          860
+        ],
+        "parameters": {
+          "options": {
+            "baseURL": ""
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-c4e95eba"
+      },
+      {
+        "name": "Get Changes1",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -60,
+          740
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "PRIVATE-TOKEN"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.1,
+        "id": "node-42c47fb7"
+      },
+      {
+        "name": "Skip File Change1",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          340,
+          740
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.renamed_file }}",
+                "rightValue": ""
+              },
+              {
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.deleted_file }}",
+                "rightValue": ""
+              },
+              {
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                },
+                "leftValue": "={{ $json.diff }}",
+                "rightValue": "@@"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "id": "node-043f2b79"
+      },
+      {
+        "name": "Parse Last Diff Line1",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          540,
+          540
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const parseLastDiff = (gitDiff) => {\n gitDiff = gitDiff.replace(/\\n\\\\ No newline at end of file/, '')\n \n const diffList = gitDiff.trimEnd().split('\\n').reverse();\n const lastLineFirstChar = diffList?.[0]?.[0];\n const lastDiff =\n diffList.find((item) => {\n return /^@@ \\-\\d+,\\d+ \\+\\d+,\\d+ @@/g.test(item);\n }) || '';\n\n const [lastOldLineCount, lastNewLineCount] = lastDiff\n .replace(/@@ \\-(\\d+),(\\d+) \\+(\\d+),(\\d+) @@.*/g, ($0, $1, $2, $3, $4) => {\n return `${+$1 + +$2},${+$3 + +$4}`;\n })\n .split(',');\n \n if (!/^\\d+$/.test(lastOldLineCount) || !/^\\d+$/.test(lastNewLineCount)) {\n return {\n lastOldLine: -1,\n lastNewLine: -1,\n gitDiff,\n };\n }\n\n\n const lastOldLine = lastLineFirstChar === '+' ? null : (parseInt(lastOldLineCount) || 0) - 1;\n const lastNewLine = lastLineFirstChar === '-' ? null : (parseInt(lastNewLineCount) || 0) - 1;\n\n return {\n lastOldLine,\n lastNewLine,\n gitDiff,\n };\n};\n\nreturn parseLastDiff($input.item.json.diff)\n"
+        },
+        "typeVersion": 2,
+        "id": "node-83b7c9f1"
+      },
+      {
+        "name": "Post Discussions1",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1280,
+          720
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "body",
+                "value": "={{ $('Basic LLM Chain1').item.json[\"text\"] }}"
+              },
+              {
+                "name": "position[position_type]",
+                "value": "text"
+              },
+              {
+                "name": "position[old_path]",
+                "value": "={{ $('Split Out1').item.json.old_path }}"
+              },
+              {
+                "name": "position[new_path]",
+                "value": "={{ $('Split Out1').item.json.new_path }}"
+              },
+              {
+                "name": "position[start_sha]",
+                "value": "={{ $('Get Changes1').item.json.diff_refs.start_sha }}"
+              },
+              {
+                "name": "position[head_sha]",
+                "value": "={{ $('Get Changes1').item.json.diff_refs.head_sha }}"
+              },
+              {
+                "name": "position[base_sha]",
+                "value": "={{ $('Get Changes1').item.json.diff_refs.base_sha }}"
+              },
+              {
+                "name": "position[new_line]",
+                "value": "={{ $('Parse Last Diff Line1').item.json.lastNewLine || '' }}"
+              },
+              {
+                "name": "position[old_line]",
+                "value": "={{ $('Parse Last Diff Line1').item.json.lastOldLine || '' }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "PRIVATE-TOKEN"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.1,
+        "id": "node-0d308613"
+      },
+      {
+        "name": "Need Review1",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -320,
+          760
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.body.object_attributes.note }}",
+                "rightValue": "+0"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "id": "node-06901d3f"
+      },
+      {
+        "name": "Basic LLM Chain1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          880,
+          720
+        ],
+        "parameters": {
+          "prompt": "=File path：{{ $('Skip File Change1').item.json.new_path }}\n\n```Original code\n {{ $json.originalCode }}\n```\nchange to\n```New code\n {{ $json.newCode }}\n```\nPlease review the code changes in this section:",
+          "messages": {
+            "messageValues": [
+              {
+                "message": "# Overview:\n You are a senior programming expert Bot, responsible for reviewing code changes and providing review recommendations.\n At the beginning of the suggestion, it is necessary to clearly make a decision to \"reject\" or \"accept\" the code change, and rate the change in the format \"Change Score: Actual Score\", with a score range of 0-100 points.\n Then, point out the existing problems in concise language and a stern tone.\n If you feel it is necessary, you can directly provide the modified content.\n Your review proposal must use rigorous Markdown format."
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "id": "node-85026d80"
+      },
+      {
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1200,
+          540
+        ],
+        "parameters": {
+          "content": "## Replace your gitlab URL and token ⬇️"
+        },
+        "typeVersion": 1,
+        "id": "node-f6e35f37"
+      },
+      {
+        "id": "error-76c729ac",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-9f26a395",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:53.844165",
+      "updatedAt": "2025-09-29T07:07:53.844178",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "Basic LLM Chain1",
+        "parameters": {
+          "messages": {
+            "messageValues": [
+              {
+                "message": "# Overview:\n You are a senior programming expert Bot, responsible for reviewing code changes and providing review recommendations.\n At the beginning of the suggestion, it is necessary to clearly make a decision to \"reject\" or \"accept\" the code change, and rate the change in the format \"Change Score: Actual Score\", with a score range of 0-100 points.\n Then, point out the existing problems in concise language and a stern tone.\n If you feel it is necessary, you can directly provide the modified content.\n Your review proposal must use rigorous Markdown format."
+              }
+            ]
+          },
+          "prompt": "=File path：{{ $('Skip File Change1').item.json.new_path }}\n\n```Original code\n {{ $json.originalCode }}\n```\nchange to\n```New code\n {{ $json.newCode }}\n```\nPlease review the code changes in this section:"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Code",
+        "parameters": {
+          "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nvar diff = $input.item.json.gitDiff\n\nlet lines = diff.trimEnd().split('\\n');\n\nlet originalCode = '';\nlet newCode = '';\n\nlines.forEach(line => {\n console.log(line)\n if (line.startsWith('-')) {\n originalCode += line + \"\\n\";\n } else if (line.startsWith('+')) {\n newCode += line + \"\\n\";\n } else {\n originalCode += line + \"\\n\";\n newCode += line + \"\\n\";\n }\n});\n\nreturn {\n originalCode:originalCode,\n newCode:newCode\n};\n\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get Changes1",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "PRIVATE-TOKEN"
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Need Review1",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "leftValue": "={{ $json.body.object_attributes.note }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "+0"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "OpenAI Chat Model1",
+        "parameters": {
+          "options": {
+            "baseURL": ""
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Parse Last Diff Line1",
+        "parameters": {
+          "jsCode": "const parseLastDiff = (gitDiff) => {\n gitDiff = gitDiff.replace(/\\n\\\\ No newline at end of file/, '')\n \n const diffList = gitDiff.trimEnd().split('\\n').reverse();\n const lastLineFirstChar = diffList?.[0]?.[0];\n const lastDiff =\n diffList.find((item) => {\n return /^@@ \\-\\d+,\\d+ \\+\\d+,\\d+ @@/g.test(item);\n }) || '';\n\n const [lastOldLineCount, lastNewLineCount] = lastDiff\n .replace(/@@ \\-(\\d+),(\\d+) \\+(\\d+),(\\d+) @@.*/g, ($0, $1, $2, $3, $4) => {\n return `${+$1 + +$2},${+$3 + +$4}`;\n })\n .split(',');\n \n if (!/^\\d+$/.test(lastOldLineCount) || !/^\\d+$/.test(lastNewLineCount)) {\n return {\n lastOldLine: -1,\n lastNewLine: -1,\n gitDiff,\n };\n }\n\n\n const lastOldLine = lastLineFirstChar === '+' ? null : (parseInt(lastOldLineCount) || 0) - 1;\n const lastNewLine = lastLineFirstChar === '-' ? null : (parseInt(lastNewLineCount) || 0) - 1;\n\n return {\n lastOldLine,\n lastNewLine,\n gitDiff,\n };\n};\n\nreturn parseLastDiff($input.item.json.diff)\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Post Discussions1",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "body",
+                "value": "={{ $('Basic LLM Chain1').item.json[\"text\"] }}"
+              },
+              {
+                "name": "position[position_type]",
+                "value": "text"
+              },
+              {
+                "name": "position[old_path]",
+                "value": "={{ $('Split Out1').item.json.old_path }}"
+              },
+              {
+                "name": "position[new_path]",
+                "value": "={{ $('Split Out1').item.json.new_path }}"
+              },
+              {
+                "name": "position[start_sha]",
+                "value": "={{ $('Get Changes1').item.json.diff_refs.start_sha }}"
+              },
+              {
+                "name": "position[head_sha]",
+                "value": "={{ $('Get Changes1').item.json.diff_refs.head_sha }}"
+              },
+              {
+                "name": "position[base_sha]",
+                "value": "={{ $('Get Changes1').item.json.diff_refs.base_sha }}"
+              },
+              {
+                "name": "position[new_line]",
+                "value": "={{ $('Parse Last Diff Line1').item.json.lastNewLine || '' }}"
+              },
+              {
+                "name": "position[old_line]",
+                "value": "={{ $('Parse Last Diff Line1').item.json.lastOldLine || '' }}"
+              }
+            ]
+          },
+          "contentType": "multipart-form-data",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "PRIVATE-TOKEN"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Skip File Change1",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "leftValue": "={{ $json.renamed_file }}",
+                "operator": {
+                  "operation": "false",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              },
+              {
+                "leftValue": "={{ $json.deleted_file }}",
+                "operator": {
+                  "operation": "false",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              },
+              {
+                "leftValue": "={{ $json.diff }}",
+                "operator": {
+                  "operation": "startsWith",
+                  "type": "string"
+                },
+                "rightValue": "@@"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "Split Out1",
+        "parameters": {
+          "fieldToSplitOut": "changes",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Edit your own prompt ⬇️\n"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Filter comments and customize your trigger words ⬇️"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Replace your gitlab URL and token ⬇️"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "## Replace your gitlab URL and token ⬇️"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "e21095c0-1876-4cd9-9e92-a2eac737f03e"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Webhook",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 80,
+  "viewCount": 444,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out1\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Changes1\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Skip File Change1\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post Discussions1\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Need Review1\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Basic LLM Chain1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-64yh1nxvg",
+      "workflowId": "production-workflow-4cg6i",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/1381_Splitout_Code_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\1381_Splitout_Code_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:46.889Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:46.889Z",
+  "updatedAt": "2026-07-15T11:19:46.889Z"
+}

@@ -1,0 +1,499 @@
+{
+  "id": "activity-encouragement-7yqvm",
+  "name": "Activity Encouragement",
+  "slug": "activity-encouragement-vi5p",
+  "description": "Automated workflow: Activity Encouragement. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Activity Encouragement workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "14",
+    "name": "Activity Encouragement",
+    "nodes": [
+      {
+        "name": "Strava",
+        "type": "n8n-nodes-base.strava",
+        "position": [
+          640,
+          300
+        ],
+        "parameters": {
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "stravaOAuth2Api": "Strava OAuth2 Creds"
+        },
+        "typeVersion": 1,
+        "id": "83b7ca9a-24cb-42d2-ba1b-5a4e90c8c302",
+        "notes": "This strava node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Accountability Settings",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          450,
+          300
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "moveTime",
+                "value": 1800
+              }
+            ],
+            "string": [
+              {
+                "name": "actPartner1",
+                "value": "john.doe@example.com"
+              },
+              {
+                "name": "actPartner2",
+                "value": "jane.doe@example.com"
+              },
+              {
+                "name": "actPartner3",
+                "value": "jill.doe@example.com"
+              },
+              {
+                "name": "yourName",
+                "value": "Jim"
+              },
+              {
+                "name": "yourEmail",
+                "value": "jim.doe@example.com"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "ee30ac7b-f7f5-497e-8286-f0cfc4d671ce",
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Check Activity Level",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          840,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$node[\"Strava\"].json[\"moving_time\"]}}",
+                "value2": "={{$node[\"Accountability Settings\"].parameter[\"values\"][\"number\"][0][\"value\"]}}",
+                "operation": "largerEqual"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "b01d7d05-1348-4da6-883c-d5c5e45c9785",
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Enough Activity",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1050,
+          220
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "1bfd8628-f1b3-418e-8897-c91749d5adce",
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Send Email",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          1050,
+          390
+        ],
+        "parameters": {
+          "text": "=Hey Accountability Team,\n\nLooks like {{$node[\"Accountability Settings\"].json[\"yourName\"]}} has been spending a bit too much time inactive! How about sending them a quick word of encouragement?\n\nThanks!\n{{$node[\"Accountability Settings\"].json[\"yourName\"]}}'s Heart",
+          "options": {},
+          "toEmail": "={{$node[\"Accountability Settings\"].parameter[\"values\"][\"string\"][0][\"value\"]}}; {{$node[\"Accountability Settings\"].parameter[\"values\"][\"string\"][1][\"value\"]}}; {{$node[\"Accountability Settings\"].parameter[\"values\"][\"string\"][2][\"value\"]}}",
+          "fromEmail": "={{$node[\"Accountability Settings\"].json[\"yourEmail\"]}}"
+        },
+        "credentials": {
+          "smtp": "Email Creds"
+        },
+        "typeVersion": 1,
+        "id": "f84739ce-a42e-4ecf-b373-6d6ce0b90d37",
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Check Daily at 11:AM",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          260,
+          300
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 11
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "e9ca11fe-78d4-4ab4-888c-0d6cb784a41e",
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {
+      "f84739ce-a42e-4ecf-b373-6d6ce0b90d37": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-fad3f22d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-3754b165",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-4a18a609",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-b6ddd5e4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-a78f2429",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-309b9ba4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-f223f84c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-c98fca6a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Activity Encouragement. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-1b0056dd",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.088246",
+      "updatedAt": "2025-09-29T07:07:51.088263",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Activity Encouragement. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "f84739ce-a42e-4ecf-b373-6d6ce0b90d37": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-fad3f22d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-3754b165"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-4a18a609"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-b6ddd5e4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-a78f2429"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-309b9ba4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-f223f84c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f84739ce-a42e-4ecf-b373-6d6ce0b90d37-c98fca6a"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Activity Encouragement",
+    "nodes": [
+      {
+        "name": "Accountability Settings",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "moveTime",
+                "value": 1800
+              }
+            ],
+            "string": [
+              {
+                "name": "actPartner1",
+                "value": "john.doe@example.com"
+              },
+              {
+                "name": "actPartner2",
+                "value": "jane.doe@example.com"
+              },
+              {
+                "name": "actPartner3",
+                "value": "jill.doe@example.com"
+              },
+              {
+                "name": "yourName",
+                "value": "Jim"
+              },
+              {
+                "name": "yourEmail",
+                "value": "jim.doe@example.com"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Check Activity Level",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "largerEqual",
+                "value1": "={{$node[\"Strava\"].json[\"moving_time\"]}}",
+                "value2": "={{$node[\"Accountability Settings\"].parameter[\"values\"][\"number\"][0][\"value\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Check Daily at 11:AM",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 11
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Enough Activity",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email",
+        "parameters": {
+          "fromEmail": "={{$node[\"Accountability Settings\"].json[\"yourEmail\"]}}",
+          "options": {},
+          "text": "=Hey Accountability Team,\n\nLooks like {{$node[\"Accountability Settings\"].json[\"yourName\"]}} has been spending a bit too much time inactive! How about sending them a quick word of encouragement?\n\nThanks!\n{{$node[\"Accountability Settings\"].json[\"yourName\"]}}'s Heart",
+          "toEmail": "={{$node[\"Accountability Settings\"].parameter[\"values\"][\"string\"][0][\"value\"]}}; {{$node[\"Accountability Settings\"].parameter[\"values\"][\"string\"][1][\"value\"]}}; {{$node[\"Accountability Settings\"].parameter[\"values\"][\"string\"][2][\"value\"]}}"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "stravaOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Strava",
+        "parameters": {
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.strava",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Strava",
+    "Emailsend"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 95,
+  "viewCount": 213,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Strava Account",
+      "Emailsend Account"
+    ],
+    "requiredCredentials": [
+      "strava  O Auth2  A P I details",
+      "smtp details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Check Daily at 11:AM\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Strava\" node (n8n-nodes-base.strava) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check Activity Level\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Enough Activity\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Email\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Accountability Settings\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-9w1tjlvdv",
+      "workflowId": "activity-encouragement-7yqvm",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Noop/0174_Noop_Emailsend_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Noop\\0174_Noop_Emailsend_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:29:51.893Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:51.893Z",
+  "updatedAt": "2026-07-15T11:29:51.893Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

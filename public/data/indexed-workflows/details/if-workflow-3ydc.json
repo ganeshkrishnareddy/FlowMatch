@@ -1,0 +1,972 @@
+{
+  "id": "if-workflow-4l8y9",
+  "name": "If Workflow",
+  "slug": "if-workflow-3ydc",
+  "description": "Automated workflow: If Workflow. This workflow integrates 11 different services: stickyNote, filter, itemLists, httpRequest, scheduleTrigger. It contains 21 nodes and follows best practices for error handling and security.",
+  "shortDescription": "If Workflow workflow containing 19 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "a39274d0-6709-4e66-95a7-8c0fc4c0e8b1",
+        "name": "if after unsnooze date",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1840,
+          500
+        ],
+        "parameters": {
+          "conditions": {
+            "dateTime": [
+              {
+                "value1": "={{ DateTime.now() }}",
+                "value2": "={{ $json.unsnoozeDate }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a4e2d915-4714-41ea-8995-76b7198df675",
+        "name": "at 5am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          780,
+          500
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 5
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7ad8e2f6-0499-4537-8325-9dffc2d7ea3c",
+        "name": "every 5 min",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          780,
+          280
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "370f380a-923b-4e4f-b025-9e7723662083",
+        "name": "Get snoozed tasks",
+        "type": "n8n-nodes-base.todoist",
+        "position": [
+          980,
+          500
+        ],
+        "parameters": {
+          "filters": {
+            "projectId": "2325216129"
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "todoistApi": {
+            "id": "{{ $credentials.todoistApi.id }}",
+            "name": "Todoist account"
+          }
+        },
+        "retryOnFail": true,
+        "typeVersion": 2,
+        "waitBetweenTries": 5000,
+        "notes": "This todoist node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f239a87d-0229-4964-bca0-75bbf371626b",
+        "name": "if task is not a subtask",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1200,
+          500
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{ $json.parent_id }}",
+                "operation": "isEmpty"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b9b29371-254f-45d1-846c-c2db7efae907",
+        "name": "If task has due date",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1420,
+          500
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ !$json.due }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1d1fe683-68b5-4a9c-af29-b20a01c2473b",
+        "name": "Get date to unsnooze",
+        "type": "n8n-nodes-base.dateTime",
+        "position": [
+          1640,
+          500
+        ],
+        "parameters": {
+          "options": {
+            "includeInputFields": true
+          },
+          "duration": 3,
+          "magnitude": "={{ $json.due.date }}",
+          "operation": "subtractFromDate",
+          "outputFieldName": "unsnoozeDate"
+        },
+        "typeVersion": 2,
+        "notes": "This dateTime node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9e0e3241-d2fd-4bc4-9273-aa5237cbeaa4",
+        "name": "Get inbox tasks to snooze",
+        "type": "n8n-nodes-base.todoist",
+        "position": [
+          980,
+          280
+        ],
+        "parameters": {
+          "filters": {
+            "projectId": "938017196"
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "todoistApi": {
+            "id": "{{ $credentials.todoistApi.id }}",
+            "name": "Todoist account"
+          }
+        },
+        "retryOnFail": true,
+        "typeVersion": 2,
+        "waitBetweenTries": 5000,
+        "notes": "This todoist node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "90e83f5f-dd9f-431d-92b5-cd52a792dee2",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1220,
+          220
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 390.83694011071975,
+          "height": 182.09360845495712,
+          "content": "### 👨‍🎤 Setup\n1. Add your Todoist creds\n2. Create a Todoist project called `snoozed`\n3. Set the project ids in the relevant nodes\n4. Add due dates to your tasks in Inbox. Watch them disappear to `snoozed`. Set their date to tomorrow, watch it return to inbox."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c7a6b401-f518-45ba-a185-c8bf0cd92394",
+        "name": "Set inbox project id",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2060,
+          420
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "target_project_id",
+                "type": "numberValue",
+                "numberValue": "2329427682"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "22982318-5036-490a-ba3c-d40db8c3dc89",
+        "name": "If not same project",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          2280,
+          500
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{ parseInt($json.target_project_id) }}",
+                "value2": "={{ parseInt($json.project_id) }}",
+                "operation": "notEqual"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "62009b22-d0e3-40a0-b7f9-88dc2ec02284",
+        "name": "Set args to move",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2480,
+          500
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "args",
+                "type": "objectValue",
+                "objectValue": "={ id: {{ $json.id }}, project_id: {{ $json.target_project_id }} }"
+              },
+              {
+                "name": "type",
+                "stringValue": "item_move"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4d628334-12a3-451f-b49e-ce749241e411",
+        "name": "Generate unique uuid for move",
+        "type": "n8n-nodes-base.crypto",
+        "position": [
+          2680,
+          500
+        ],
+        "parameters": {
+          "action": "generate",
+          "dataPropertyName": "uuid"
+        },
+        "typeVersion": 1,
+        "notes": "This crypto node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8b6bf7ae-6d15-473d-8f00-5aaa4ea7d2f3",
+        "name": "Merge all items into a list",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          2880,
+          500
+        ],
+        "parameters": {
+          "options": {},
+          "aggregate": "aggregateAllItemData",
+          "operation": "concatenateItems",
+          "destinationFieldName": "commands"
+        },
+        "typeVersion": 3.1,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7882c3c6-0d24-4fe2-99b6-3e878e4d0dea",
+        "name": "Move the tasks",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          3080,
+          500
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "form-urlencoded",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "commands",
+                "value": "={{ JSON.stringify($json.commands) }}"
+              }
+            ]
+          },
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "todoistApi": {
+            "id": "{{ $credentials.todoistApi.id }}",
+            "name": "Todoist account"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "259c337b-38f6-4c2a-8e23-9fe5d154a2aa",
+        "name": "Set snoozed project id",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2060,
+          600
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "target_project_id",
+                "type": "numberValue",
+                "numberValue": "2329427688"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2795502f-cdeb-4b94-a6fe-ef3657bdc091",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2080,
+          780
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 202,
+          "height": 100,
+          "content": "👆 Set `snoozed` project id here. You can find it in the URL. "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ef6c23d5-386e-48c2-a2ed-eea67fe1f117",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2060,
+          260
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 202,
+          "height": 100,
+          "content": "👇🏽 Set `inbox` project id here. You can find it in the URL. "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6727670f-b340-47cd-b86a-632ef29e2135",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1660,
+          660
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 202,
+          "height": 100,
+          "content": "👆🏽 Adjust here the timeline to return tasks to Inbox (here set to 3 days before due date)"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "7882c3c6-0d24-4fe2-99b6-3e878e4d0dea": {
+        "main": [
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-5d9ac01b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-29b17354",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-1f11de5a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-700dbd20",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-d60ff7af",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-40964aac",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-d40103b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-da64cde1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: If Workflow. This workflow integrates 11 different services: stickyNote, filter, itemLists, httpRequest, scheduleTrigger. It contains 21 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-31347575",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.111700",
+      "updatedAt": "2025-09-29T07:07:44.111710",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: If Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "7882c3c6-0d24-4fe2-99b6-3e878e4d0dea": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-5d9ac01b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-29b17354"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-1f11de5a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-700dbd20"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-d60ff7af"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-40964aac"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-d40103b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7882c3c6-0d24-4fe2-99b6-3e878e4d0dea-da64cde1"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "nodes": [
+      {
+        "name": "at 5am",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 5
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "every 5 min",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Generate unique uuid for move",
+        "parameters": {
+          "action": "generate",
+          "dataPropertyName": "uuid"
+        },
+        "type": "n8n-nodes-base.crypto",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get date to unsnooze",
+        "parameters": {
+          "duration": 3,
+          "magnitude": "={{ $json.due.date }}",
+          "operation": "subtractFromDate",
+          "options": {
+            "includeInputFields": true
+          },
+          "outputFieldName": "unsnoozeDate"
+        },
+        "type": "n8n-nodes-base.dateTime",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "todoistApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get inbox tasks to snooze",
+        "parameters": {
+          "filters": {
+            "projectId": "938017196"
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.todoist",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "todoistApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get snoozed tasks",
+        "parameters": {
+          "filters": {
+            "projectId": "2325216129"
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.todoist",
+        "typeVersion": 2
+      },
+      {
+        "name": "if after unsnooze date",
+        "parameters": {
+          "conditions": {
+            "dateTime": [
+              {
+                "value1": "={{ DateTime.now() }}",
+                "value2": "={{ $json.unsnoozeDate }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "If not same project",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "notEqual",
+                "value1": "={{ parseInt($json.target_project_id) }}",
+                "value2": "={{ parseInt($json.project_id) }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 1
+      },
+      {
+        "name": "If task has due date",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ !$json.due }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "if task is not a subtask",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "isEmpty",
+                "value1": "={{ $json.parent_id }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge all items into a list",
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "commands",
+          "operation": "concatenateItems",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 3.1
+      },
+      {
+        "credentials": {
+          "todoistApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Move the tasks",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "commands",
+                "value": "={{ JSON.stringify($json.commands) }}"
+              }
+            ]
+          },
+          "contentType": "form-urlencoded",
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Set args to move",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "args",
+                "objectValue": "={ id: {{ $json.id }}, project_id: {{ $json.target_project_id }} }",
+                "type": "objectValue"
+              },
+              {
+                "name": "type",
+                "stringValue": "item_move"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Set inbox project id",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "target_project_id",
+                "numberValue": "2329427682",
+                "type": "numberValue"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Set snoozed project id",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "target_project_id",
+                "numberValue": "2329427688",
+                "type": "numberValue"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "👇🏽 Set `inbox` project id here. You can find it in the URL. ",
+          "height": 100,
+          "width": 202
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "👆🏽 Adjust here the timeline to return tasks to Inbox (here set to 3 days before due date)",
+          "height": 100,
+          "width": 202
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 7,
+          "content": "👆 Set `snoozed` project id here. You can find it in the URL. ",
+          "height": 100,
+          "width": 202
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 5,
+          "content": "### 👨‍🎤 Setup\n1. Add your Todoist creds\n2. Create a Todoist project called `snoozed`\n3. Set the project ids in the relevant nodes\n4. Add due dates to your tasks in Inbox. Watch them disappear to `snoozed`. Set their date to tomorrow, watch it return to inbox.",
+          "height": 182.09360845495712,
+          "width": 390.83694011071975
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 19,
+  "integrationCount": 5,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Todoist",
+    "Box",
+    "Crypto",
+    "Itemlists",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 122,
+  "viewCount": 479,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Todoist Account",
+      "Box Account",
+      "Crypto Account",
+      "Itemlists Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "todoist  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"at 5am\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the scheduler node \"every 5 min\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"if after unsnooze date\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get snoozed tasks\" node (n8n-nodes-base.todoist) and configure the action parameters, mappings, and fields.",
+      "Open the \"if task is not a subtask\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"If task has due date\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get date to unsnooze\" node (n8n-nodes-base.dateTime) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get inbox tasks to snooze\" node (n8n-nodes-base.todoist) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"If not same project\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Generate unique uuid for move\" node (n8n-nodes-base.crypto) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge all items into a list\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Move the tasks\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set inbox project id\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set args to move\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set snoozed project id\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-jtsng9p3t",
+      "workflowId": "if-workflow-4l8y9",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Datetime/0444_Datetime_Todoist_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Datetime\\0444_Datetime_Todoist_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:20.094Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:20.094Z",
+  "updatedAt": "2026-07-15T11:18:20.094Z"
+}

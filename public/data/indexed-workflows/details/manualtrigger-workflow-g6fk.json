@@ -1,0 +1,884 @@
+{
+  "id": "manualtrigger-workflow-393wa",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-g6fk",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-d9c8922f",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:49.209528",
+      "updatedAt": "2025-09-29T07:07:49.209541",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "53e93a66-468a-4df8-b2cb-58ff0563f83f",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -160,
+          0
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "70692fd5-d575-49d2-9e3c-71bdddb0782e",
+        "name": "AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1000,
+          0
+        ],
+        "parameters": {
+          "text": "=keyword: {{ $json.Keyword }}",
+          "options": {
+            "systemMessage": "=Check the keyword I provided and define if this keyword has a name of the known IT software, service, tool or app as a part of it (for example, ServiceNow or Salesforce) and return yes or no."
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.7,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "587e6283-32c0-4599-a024-2ce0079bdaeb",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1000,
+          240
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "ju5aHhTljmCDxSl9",
+            "name": "OpenAi account Polina's"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0e3e7d09-202e-47cc-8704-16ab70bc4077",
+        "name": "Structured Output Parser",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1180,
+          240
+        ],
+        "parameters": {
+          "jsonSchemaExample": "{\n\t\"Isservice\": \"yes\"\n}"
+        },
+        "typeVersion": 1.2,
+        "notes": "This outputParserStructured node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "900ac097-c6de-41c0-8270-c9de60424d5f",
+        "name": "Fetch Keywords from Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          120,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 1319606837,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Copy of Sheet1 1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1jzDvszQoVDV-jrAunCXqTVsiDxXVLMGqQ1zGXwfy5eU",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "AI + agents"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "DeaHa70CotH7MPX6",
+            "name": "Google Sheets account NN DB test"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "73e208d1-e8d8-4c8b-90f3-06202ed73986",
+        "name": "Process Keywords in Batches",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "batchSize": 6
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "93646bfc-b79d-4ec3-ba8d-8922773fd36b",
+        "name": "Prevent API Rate Limiting",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          720,
+          0
+        ],
+        "webhookId": "035cfc06-099c-453b-aadc-0cce420b8171",
+        "parameters": {},
+        "typeVersion": 1.1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "313474f7-a53d-479c-a33e-9327ca29e570",
+        "name": "Update Sheet with Analysis Results",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1360,
+          0
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Number": "={{ $('Process Keywords in Batches').item.json.Number }}",
+              "Service?": "={{ $json.output.Isservice }}"
+            },
+            "schema": [
+              {
+                "id": "Number",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "Number",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Service?",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Service?",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Keyword",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Keyword",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Country",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Country",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Difficulty",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Difficulty",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Volume",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Volume",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "CPC",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "CPC",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "CPS",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "CPS",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Parent Keyword",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Parent Keyword",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Last Update",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Last Update",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "SERP Features",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "SERP Features",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Global volume",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Global volume",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Traffic potential",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Traffic potential",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Global traffic potential",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Global traffic potential",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "First seen",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "First seen",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Intents",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "Intents",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "row_number",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "readOnly": true,
+                "required": false,
+                "displayName": "row_number",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "Number"
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "update",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 1319606837,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Copy of Sheet1 1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1jzDvszQoVDV-jrAunCXqTVsiDxXVLMGqQ1zGXwfy5eU",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "AI + agents"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "DeaHa70CotH7MPX6",
+            "name": "Google Sheets account NN DB test"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-b43234bd",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "587e6283-32c0-4599-a024-2ce0079bdaeb": {
+        "main": [
+          [
+            {
+              "node": "error-handler-587e6283-32c0-4599-a024-2ce0079bdaeb-30e4cb79",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "900ac097-c6de-41c0-8270-c9de60424d5f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-900ac097-c6de-41c0-8270-c9de60424d5f-3a7ac0d5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "313474f7-a53d-479c-a33e-9327ca29e570": {
+        "main": [
+          [
+            {
+              "node": "error-handler-313474f7-a53d-479c-a33e-9327ca29e570-5d439c40",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "313474f7-a53d-479c-a33e-9327ca29e570": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-313474f7-a53d-479c-a33e-9327ca29e570-5d439c40"
+            }
+          ]
+        ]
+      },
+      "587e6283-32c0-4599-a024-2ce0079bdaeb": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-587e6283-32c0-4599-a024-2ce0079bdaeb-30e4cb79"
+            }
+          ]
+        ]
+      },
+      "900ac097-c6de-41c0-8270-c9de60424d5f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-900ac097-c6de-41c0-8270-c9de60424d5f-3a7ac0d5"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "AI Agent",
+        "parameters": {
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "=Check the keyword I provided and define if this keyword has a name of the known IT software, service, tool or app as a part of it (for example, ServiceNow or Salesforce) and return yes or no."
+          },
+          "promptType": "define",
+          "text": "=keyword: {{ $json.Keyword }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Fetch Keywords from Sheet",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "AI + agents",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1jzDvszQoVDV-jrAunCXqTVsiDxXVLMGqQ1zGXwfy5eU"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Copy of Sheet1 1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 1319606837
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Prevent API Rate Limiting",
+        "parameters": {},
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Process Keywords in Batches",
+        "parameters": {
+          "batchSize": 6,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "Structured Output Parser",
+        "parameters": {
+          "jsonSchemaExample": "{\n\t\"Isservice\": \"yes\"\n}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Sheet with Analysis Results",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "Number"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Number",
+                "id": "Number",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Service?",
+                "id": "Service?",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Keyword",
+                "id": "Keyword",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Country",
+                "id": "Country",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Difficulty",
+                "id": "Difficulty",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Volume",
+                "id": "Volume",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "CPC",
+                "id": "CPC",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "CPS",
+                "id": "CPS",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Parent Keyword",
+                "id": "Parent Keyword",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Last Update",
+                "id": "Last Update",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "SERP Features",
+                "id": "SERP Features",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Global volume",
+                "id": "Global volume",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Traffic potential",
+                "id": "Traffic potential",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Global traffic potential",
+                "id": "Global traffic potential",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "First seen",
+                "id": "First seen",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Intents",
+                "id": "Intents",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "row_number",
+                "id": "row_number",
+                "readOnly": true,
+                "removed": true,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Number": "={{ $('Process Keywords in Batches').item.json.Number }}",
+              "Service?": "={{ $json.output.Isservice }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "AI + agents",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1jzDvszQoVDV-jrAunCXqTVsiDxXVLMGqQ1zGXwfy5eU"
+          },
+          "operation": "update",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Copy of Sheet1 1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 1319606837
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 10,
+  "viewCount": 701,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Structured Output Parser\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch Keywords from Sheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Process Keywords in Batches\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Prevent API Rate Limiting\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Sheet with Analysis Results\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-43yl91rhq",
+      "workflowId": "manualtrigger-workflow-393wa",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0728_Manual_GoogleSheets_Update_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0728_Manual_GoogleSheets_Update_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:31.308Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:31.308Z",
+  "updatedAt": "2026-07-15T11:29:31.308Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

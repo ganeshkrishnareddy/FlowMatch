@@ -1,0 +1,466 @@
+{
+  "id": "screenshot-r3rgh",
+  "name": "screenshot",
+  "slug": "screenshot-mz3a",
+  "description": "Production-ready workflow: screenshot. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "screenshot workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "id": "105",
+    "name": "screenshot",
+    "nodes": [
+      {
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          440,
+          580
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-66019e36"
+      },
+      {
+        "name": "Create Web + Email Item",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          630,
+          580
+        ],
+        "parameters": {
+          "functionCode": "item.website = \"https://uproc.io\";\nitem.email = \"miquel@uproc.io\";\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "id": "node-d947873b"
+      },
+      {
+        "name": "Send Email",
+        "type": "n8n-nodes-base.awsSes",
+        "position": [
+          1660,
+          600
+        ],
+        "parameters": {
+          "body": "=Hi,\n<br><br>\nThese are your screenshots:<br>\n<table border=\"0\">\n<tr>\n<th>Simple screenshot</th><th>Fullpage screenshot</th>\n<tr>\n<td style=\"vertical-align: top; text-align: center\"><img src=\"{{$node[\"Generate Screenshot\"].json[\"message\"][\"result\"]}}\" width=\"320\"></td>\n<td style=\"vertical-align: top; text-align: center\"><img src=\"{{$node[\"Generate FullPage\"].json[\"message\"][\"result\"]}}\" width=\"320\"></td>\n</tr>\n</table>\n<br><br>\nThank you!",
+          "subject": "Your screenshots!",
+          "fromEmail": "miquel@uproc.io",
+          "isBodyHtml": true,
+          "toAddresses": [
+            "={{$node[\"Create Web + Email Item\"].json[\"email\"]}}"
+          ],
+          "additionalFields": {}
+        },
+        "credentials": {
+          "aws": "ses"
+        },
+        "typeVersion": 1,
+        "id": "node-183fd16f"
+      },
+      {
+        "name": "Generate FullPage",
+        "type": "n8n-nodes-base.uproc",
+        "position": [
+          850,
+          510
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "tool": "getUrlScreenshot",
+          "group": "image",
+          "width": "640",
+          "fullpage": "yes",
+          "additionalOptions": {}
+        },
+        "credentials": {
+          "uprocApi": "miquel-uproc"
+        },
+        "typeVersion": 1,
+        "id": "node-64e98504"
+      },
+      {
+        "name": "Generate Screenshot",
+        "type": "n8n-nodes-base.uproc",
+        "position": [
+          840,
+          680
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "tool": "getUrlScreenshot",
+          "group": "image",
+          "width": "640",
+          "fullpage": "no",
+          "additionalOptions": {}
+        },
+        "credentials": {
+          "uprocApi": "miquel-uproc"
+        },
+        "typeVersion": 1,
+        "id": "node-215522f5"
+      },
+      {
+        "name": "Get File",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1050,
+          510
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "responseFormat": "file",
+          "allowUnauthorizedCerts": true
+        },
+        "typeVersion": 1,
+        "id": "node-ea8154fd"
+      },
+      {
+        "name": "Get File1",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1050,
+          680
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "responseFormat": "file",
+          "allowUnauthorizedCerts": true
+        },
+        "typeVersion": 1,
+        "id": "node-6e19f858"
+      },
+      {
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1460,
+          600
+        ],
+        "parameters": {
+          "mode": "passThrough"
+        },
+        "typeVersion": 1,
+        "id": "node-af608d90"
+      },
+      {
+        "name": "Upload Screenshot",
+        "type": "n8n-nodes-base.dropbox",
+        "position": [
+          1270,
+          680
+        ],
+        "parameters": {
+          "path": "/screenshots/sample.png",
+          "binaryData": true
+        },
+        "credentials": {
+          "dropboxApi": "dropbox-miquel"
+        },
+        "typeVersion": 1,
+        "id": "node-3eb4a970"
+      },
+      {
+        "name": "Upload fullpage",
+        "type": "n8n-nodes-base.dropbox",
+        "position": [
+          1270,
+          510
+        ],
+        "parameters": {
+          "path": "/screenshots/sample_fullpage.png",
+          "binaryData": true
+        },
+        "credentials": {
+          "dropboxApi": "dropbox-miquel"
+        },
+        "typeVersion": 1,
+        "id": "node-0ed2d693"
+      },
+      {
+        "id": "error-f503688e",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-7040e18e",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.044680",
+      "updatedAt": "2025-09-29T07:07:45.044686",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: screenshot. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "screenshot",
+    "nodes": [
+      {
+        "name": "Create Web + Email Item",
+        "parameters": {
+          "functionCode": "item.website = \"https://uproc.io\";\nitem.email = \"miquel@uproc.io\";\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "uprocApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Generate FullPage",
+        "parameters": {
+          "additionalOptions": {},
+          "fullpage": "yes",
+          "group": "image",
+          "tool": "getUrlScreenshot",
+          "url": "{{ $env.BASE_URL }}",
+          "width": "640"
+        },
+        "type": "n8n-nodes-base.uproc",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "uprocApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Generate Screenshot",
+        "parameters": {
+          "additionalOptions": {},
+          "fullpage": "no",
+          "group": "image",
+          "tool": "getUrlScreenshot",
+          "url": "{{ $env.BASE_URL }}",
+          "width": "640"
+        },
+        "type": "n8n-nodes-base.uproc",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get File",
+        "parameters": {
+          "allowUnauthorizedCerts": true,
+          "options": {},
+          "responseFormat": "file",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get File1",
+        "parameters": {
+          "allowUnauthorizedCerts": true,
+          "options": {},
+          "responseFormat": "file",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "mode": "passThrough"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "aws": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email",
+        "parameters": {
+          "additionalFields": {},
+          "body": "=Hi,\n<br><br>\nThese are your screenshots:<br>\n<table border=\"0\">\n<tr>\n<th>Simple screenshot</th><th>Fullpage screenshot</th>\n<tr>\n<td style=\"vertical-align: top; text-align: center\"><img src=\"{{$node[\"Generate Screenshot\"].json[\"message\"][\"result\"]}}\" width=\"320\"></td>\n<td style=\"vertical-align: top; text-align: center\"><img src=\"{{$node[\"Generate FullPage\"].json[\"message\"][\"result\"]}}\" width=\"320\"></td>\n</tr>\n</table>\n<br><br>\nThank you!",
+          "fromEmail": "miquel@uproc.io",
+          "isBodyHtml": true,
+          "subject": "Your screenshots!",
+          "toAddresses": [
+            "={{$node[\"Create Web + Email Item\"].json[\"email\"]}}"
+          ]
+        },
+        "type": "n8n-nodes-base.awsSes",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "dropboxApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Upload fullpage",
+        "parameters": {
+          "binaryData": true,
+          "path": "/screenshots/sample_fullpage.png"
+        },
+        "type": "n8n-nodes-base.dropbox",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "dropboxApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Upload Screenshot",
+        "parameters": {
+          "binaryData": true,
+          "path": "/screenshots/sample.png"
+        },
+        "type": "n8n-nodes-base.dropbox",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 5,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Functionitem",
+    "Awsses",
+    "Uproc",
+    "HTTP Request",
+    "Dropbox"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 124,
+  "viewCount": 824,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Functionitem Account",
+      "Awsses Account",
+      "Uproc Account",
+      "HTTP Request Account",
+      "Dropbox Account"
+    ],
+    "requiredCredentials": [
+      "aws details",
+      "uproc  A P I details",
+      "dropbox  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the \"Create Web + Email Item\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Email\" node (n8n-nodes-base.awsSes) and configure the action parameters, mappings, and fields.",
+      "Open the \"Generate FullPage\" node (n8n-nodes-base.uproc) and configure the action parameters, mappings, and fields.",
+      "Open the \"Generate Screenshot\" node (n8n-nodes-base.uproc) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get File\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get File1\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Upload Screenshot\" node (n8n-nodes-base.dropbox) and configure the action parameters, mappings, and fields.",
+      "Open the \"Upload fullpage\" node (n8n-nodes-base.dropbox) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-m71tgrfn3",
+      "workflowId": "screenshot-r3rgh",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Functionitem/0031_Functionitem_Dropbox_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Functionitem\\0031_Functionitem_Dropbox_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:24.851Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:24.851Z",
+  "updatedAt": "2026-07-15T11:18:24.851Z"
+}

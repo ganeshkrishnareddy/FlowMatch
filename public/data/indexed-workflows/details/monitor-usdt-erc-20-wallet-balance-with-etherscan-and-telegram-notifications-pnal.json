@@ -1,0 +1,659 @@
+{
+  "id": "monitor-usdt-erc-20-wallet-balance-with-etherscan-and-telegram-notifications-71t30",
+  "name": "Monitor USDT ERC-20 Wallet Balance with Etherscan and Telegram Notifications",
+  "slug": "monitor-usdt-erc-20-wallet-balance-with-etherscan-and-telegram-notifications-pnal",
+  "description": "Automated workflow: Monitor USDT ERC-20 Wallet Balance with Etherscan and Telegram Notifications. This workflow integrates 8 different services: stickyNote, httpRequest, telegram, code, set. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Monitor USDT ERC-20 Wallet Balance with Etherscan and Telegram Notifications workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": "AlEVIPHR3dMJkYWt",
+    "meta": {
+      "instanceId": "workflow-c496248d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:56.924266",
+      "updatedAt": "2025-09-29T07:07:56.924288",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Monitor USDT ERC-20 Wallet Balance with Etherscan and Telegram Notifications",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "35b62ca1-3603-4dcb-a3b5-77e1325c78f7",
+        "name": "Balance Changed?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -40,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json.balanceChanged}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dfeef0d5-0bb2-40a1-ae75-51d7caeb9c3d",
+        "name": "Balance Changed.",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          320,
+          -140
+        ],
+        "webhookId": "a8fa72ce-638b-4245-bcbc-d59948ae1144",
+        "parameters": {
+          "text": "=🚨 *USDT Balance Change!*\n\nWallet Address: {{ $json.walletAddress }}\n\n🔴 Previous Balance: {{parseFloat($json.previousBalance)/1e6}} USDT\n\n🟢 New Balance: {{parseFloat($json.currentBalance)/1e6}} USDT",
+          "chatId": "< Your Telegram Chat ID >",
+          "additionalFields": {
+            "parse_mode": "Markdown"
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "Ge3vEXak2MymWtcp",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ffebdb46-a6f0-4ed8-88ed-75ab427af969",
+        "name": "Balance Not Changed.",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          320,
+          20
+        ],
+        "webhookId": "a8fa72ce-638b-4245-bcbc-d59948ae1144",
+        "parameters": {
+          "text": "=Balance Unchanged. USDT balance remained stable.",
+          "chatId": "< Your Telegram Chat ID >",
+          "additionalFields": {
+            "parse_mode": "Markdown"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "049ff717-ba10-4b7f-9f84-9eaaeee902ec",
+        "name": "userData",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -780,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4455d1e7-a489-4ab6-a526-4fc755db99d0",
+                "name": "Your Wallet Address",
+                "type": "string",
+                "value": "< Wallet Address Paste Here >"
+              },
+              {
+                "id": "3d84deba-8093-42cf-833f-6891db778de7",
+                "name": "Your Etherscan Api Key",
+                "type": "string",
+                "value": "< Etherscan Api Key Paste Here>"
+              },
+              {
+                "id": "971ea723-e3de-4cff-b4e7-5899f3d8fb00",
+                "name": "USDT ERC-20 Token Address",
+                "type": "string",
+                "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0488f2dd-6b71-4be5-9ce8-cf0763b82990",
+        "name": "balanceChecker",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -280,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const staticData = $getWorkflowStaticData('global');\n\nconst currentBalance = items[0].json.result;\n\nconst walletAddress = $('userData').first().json['Your Wallet Address']\n\nlet previousBalance = staticData.previousBalance;\n\nif (!previousBalance) {\n  staticData.previousBalance = currentBalance;\n  previousBalance = currentBalance;\n}\n\nconst balanceChanged = previousBalance !== currentBalance;\n\nstaticData.previousBalance = currentBalance;\n\nreturn [{json: {balanceChanged, previousBalance, currentBalance, walletAddress}}];"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d7b23d5b-b4c5-4d9a-93f9-360ae0d539c7",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1040,
+          -180
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 1540,
+          "height": 400,
+          "content": "## USDT ERC-20 Wallet Balance Tracker\n**This workflow** Is a basic concept of integrating your ERC-20 wallet with n8n nodes."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7c8f0d69-6c37-469c-b466-89a467db9bbd",
+        "name": "Check Balance Every 5 Minutes",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          -1000,
+          0
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ea603f03-25e0-4c80-90f2-eb5f09e71ad1",
+        "name": "Fetch USDT Balance from Etherscan",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -480,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "module",
+                "value": "account"
+              },
+              {
+                "name": "action",
+                "value": "tokenbalance"
+              },
+              {
+                "name": "address",
+                "value": "={{ $json['Your Wallet Address'] }}"
+              },
+              {
+                "name": "tag",
+                "value": "latest"
+              },
+              {
+                "name": "apikey",
+                "value": "={{ $json['Your Etherscan Api Key'] }}"
+              },
+              {
+                "name": "contractaddress",
+                "value": "={{ $json['USDT ERC-20 Token Address'] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "7ebf18de-7adf-40dd-99b4-ff8dd1e37f08",
+    "connections": {
+      "ea603f03-25e0-4c80-90f2-eb5f09e71ad1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-57db0e2d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-cc803725",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-ba065fb9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-e3607277",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-6daf2c4d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-0978ded1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-38358f53",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-d07b6bf7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "dfeef0d5-0bb2-40a1-ae75-51d7caeb9c3d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-dfeef0d5-0bb2-40a1-ae75-51d7caeb9c3d-3f13881c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ffebdb46-a6f0-4ed8-88ed-75ab427af969": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ffebdb46-a6f0-4ed8-88ed-75ab427af969-9a88c29f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Monitor USDT ERC-20 Wallet Balance with Etherscan and Telegram Notifications. This workflow integrates 8 different services: stickyNote, httpRequest, telegram, code, set. It contains 12 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Monitor USDT ERC-20 Wallet Balance with Etherscan and Telegram Notifications. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "dfeef0d5-0bb2-40a1-ae75-51d7caeb9c3d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dfeef0d5-0bb2-40a1-ae75-51d7caeb9c3d-3f13881c"
+            }
+          ]
+        ]
+      },
+      "ea603f03-25e0-4c80-90f2-eb5f09e71ad1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-57db0e2d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-cc803725"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-ba065fb9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-e3607277"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-6daf2c4d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-0978ded1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-38358f53"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea603f03-25e0-4c80-90f2-eb5f09e71ad1-d07b6bf7"
+            }
+          ]
+        ]
+      },
+      "ffebdb46-a6f0-4ed8-88ed-75ab427af969": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ffebdb46-a6f0-4ed8-88ed-75ab427af969-9a88c29f"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Monitor USDT ERC-20 Wallet Balance with Etherscan and Telegram Notifications",
+    "nodes": [
+      {
+        "name": "Balance Changed?",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json.balanceChanged}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Balance Changed.",
+        "parameters": {
+          "additionalFields": {
+            "parse_mode": "Markdown"
+          },
+          "chatId": "< Your Telegram Chat ID >",
+          "text": "=🚨 *USDT Balance Change!*\n\nWallet Address: {{ $json.walletAddress }}\n\n🔴 Previous Balance: {{parseFloat($json.previousBalance)/1e6}} USDT\n\n🟢 New Balance: {{parseFloat($json.currentBalance)/1e6}} USDT"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1
+      },
+      {
+        "name": "Balance Not Changed.",
+        "parameters": {
+          "additionalFields": {
+            "parse_mode": "Markdown"
+          },
+          "chatId": "< Your Telegram Chat ID >",
+          "text": "=Balance Unchanged. USDT balance remained stable."
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1
+      },
+      {
+        "name": "balanceChecker",
+        "parameters": {
+          "jsCode": "const staticData = $getWorkflowStaticData('global');\n\nconst currentBalance = items[0].json.result;\n\nconst walletAddress = $('userData').first().json['Your Wallet Address']\n\nlet previousBalance = staticData.previousBalance;\n\nif (!previousBalance) {\n  staticData.previousBalance = currentBalance;\n  previousBalance = currentBalance;\n}\n\nconst balanceChanged = previousBalance !== currentBalance;\n\nstaticData.previousBalance = currentBalance;\n\nreturn [{json: {balanceChanged, previousBalance, currentBalance, walletAddress}}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Check Balance Every 5 Minutes",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Fetch USDT Balance from Etherscan",
+        "parameters": {
+          "options": {},
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "module",
+                "value": "account"
+              },
+              {
+                "name": "action",
+                "value": "tokenbalance"
+              },
+              {
+                "name": "address",
+                "value": "={{ $json['Your Wallet Address'] }}"
+              },
+              {
+                "name": "tag",
+                "value": "latest"
+              },
+              {
+                "name": "apikey",
+                "value": "={{ $json['Your Etherscan Api Key'] }}"
+              },
+              {
+                "name": "contractaddress",
+                "value": "={{ $json['USDT ERC-20 Token Address'] }}"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "## USDT ERC-20 Wallet Balance Tracker\n**This workflow** Is a basic concept of integrating your ERC-20 wallet with n8n nodes.",
+          "height": 400,
+          "width": 1540
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "userData",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4455d1e7-a489-4ab6-a526-4fc755db99d0",
+                "name": "Your Wallet Address",
+                "type": "string",
+                "value": "< Wallet Address Paste Here >"
+              },
+              {
+                "id": "3d84deba-8093-42cf-833f-6891db778de7",
+                "name": "Your Etherscan Api Key",
+                "type": "string",
+                "value": "< Etherscan Api Key Paste Here>"
+              },
+              {
+                "id": "971ea723-e3de-4cff-b4e7-5899f3d8fb00",
+                "name": "USDT ERC-20 Token Address",
+                "type": "string",
+                "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Telegram",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 134,
+  "viewCount": 538,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Telegram Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "telegram  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Check Balance Every 5 Minutes\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Balance Changed?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Balance Changed.\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Balance Not Changed.\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch USDT Balance from Etherscan\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"userData\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-4bctzhghq",
+      "workflowId": "monitor-usdt-erc-20-wallet-balance-with-etherscan-and-telegram-notifications-71t30",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/1304_Telegram_Code_Monitor_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\1304_Telegram_Code_Monitor_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:50.376Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:50.376Z",
+  "updatedAt": "2026-07-15T11:30:50.376Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

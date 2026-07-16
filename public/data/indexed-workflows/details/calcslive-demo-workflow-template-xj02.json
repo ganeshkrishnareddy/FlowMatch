@@ -1,0 +1,525 @@
+{
+  "id": "calcslive-demo-workflow-template-s1rjr",
+  "name": "CalcsLive Demo Workflow Template",
+  "slug": "calcslive-demo-workflow-template-xj02",
+  "description": "Demonstrates @calcslive/n8n-nodes-calcslive custom node ({{ $env.WEBHOOK_URL }} that brings unit-aware physical quantities (PQ) and calculations to the n8n ecosystem in a composable manner. Example workflow with cylinder mass calculations.",
+  "shortDescription": "CalcsLive Demo Workflow Template workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "name": "CalcsLive Demo Workflow Template",
+    "description": "Demonstrates @calcslive/n8n-nodes-calcslive custom node ({{ $env.WEBHOOK_URL }} that brings unit-aware physical quantities (PQ) and calculations to the n8n ecosystem in a composable manner. Example workflow with cylinder mass calculations.",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -128,
+          -192
+        ],
+        "id": "c6331ca9-2a74-419e-a15f-a11e5f3c0583",
+        "name": "When clicking 'Execute workflow'",
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "articleId": "3M6UW7CQB-2AP",
+          "inputPQs": {
+            "pq": [
+              {
+                "symbol": "D",
+                "value": 200,
+                "unit": "mm"
+              },
+              {
+                "symbol": "h",
+                "value": 20,
+                "unit": "cm"
+              }
+            ]
+          },
+          "outputPQs": {
+            "pq": [
+              {
+                "symbol": "A",
+                "unit": "m^2"
+              },
+              {
+                "symbol": "V",
+                "unit": "m^3"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          128,
+          -80
+        ],
+        "id": "c22f212e-52ef-4d4f-b398-0bd4f2250705",
+        "name": "Cylinder Calcs: (D, h) => (A, V)",
+        "credentials": {
+          "calcsLiveApi": {
+            "id": "REPLACE_WITH_YOUR_CALCSLIVE_CREDENTIAL_ID",
+            "name": "Your CalcsLive API Credential"
+          }
+        },
+        "notes": "This calcsLive node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "articleId": "3M6UW7CQB-2AP",
+          "inputPQs": {
+            "pq": [
+              {
+                "symbol": "d",
+                "value": 360,
+                "unit": "km"
+              },
+              {
+                "symbol": "t",
+                "value": 10,
+                "unit": "h"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          336,
+          -288
+        ],
+        "id": "9b8cc0ea-d130-48a3-8552-4346f20a5ad0",
+        "name": "Speed Calc: (d, t) => v",
+        "credentials": {
+          "calcsLiveApi": {
+            "id": "REPLACE_WITH_YOUR_CALCSLIVE_CREDENTIAL_ID",
+            "name": "Your CalcsLive API Credential"
+          }
+        },
+        "notes": "This calcsLive node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "articleId": "3M6VLSBHB-3HT",
+          "inputPQs": {
+            "pq": [
+              {
+                "symbol": "ρ",
+                "value": 1000,
+                "unit": "kg/m^3"
+              },
+              {
+                "symbol": "V",
+                "value": "={{ $json.data.calculation.outputs.V.value }}",
+                "unit": "={{ $json.data.calculation.outputs.V.unit }}"
+              }
+            ]
+          },
+          "outputPQs": {
+            "pq": [
+              {
+                "symbol": "m",
+                "unit": "kg"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          336,
+          -80
+        ],
+        "id": "5bf3e5ab-d1f6-42e7-9e64-b4b78bcbfa99",
+        "name": "Mass Calc: (ρ, V) => m",
+        "credentials": {
+          "calcsLiveApi": {
+            "id": "REPLACE_WITH_YOUR_CALCSLIVE_CREDENTIAL_ID",
+            "name": "Your CalcsLive API Credential"
+          }
+        },
+        "notes": "This calcsLive node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a026dc84-665f-4898-8de9-ccdbaa530bfa",
+                "name": "Distance",
+                "value": 360,
+                "type": "number"
+              },
+              {
+                "id": "de7d6d3e-151c-4390-b2d9-bf78da0159eb",
+                "name": "DistanceUnit",
+                "value": "km",
+                "type": "string"
+              },
+              {
+                "id": "49c1e979-a0c2-403e-bed1-ef28eb8513ad",
+                "name": "Time",
+                "value": 2,
+                "type": "number"
+              },
+              {
+                "id": "54ae6f42-844f-4bf2-b6d3-a6e159d46e9e",
+                "name": "TimeUnit",
+                "value": "h",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          128,
+          -288
+        ],
+        "id": "8b83b9e5-d7a4-4f74-b5bc-e6012a0f606a",
+        "name": "Fields: (d, t)",
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "parameters": {
+          "sendTo": "user@example.com",
+          "subject": "CalcsLive Calculation Results",
+          "message": "=Hello!\n\nThis is an automated email from your n8n workflow using @calcslive/n8n-nodes-calcslive.\n\nCalculation Results:\n- Total Physical Quantities: {{ $json.data.calculation.totalPQs }}\n- Mass Result: {{ $json.data.calculation.outputs.m.value }} {{ $json.data.calculation.outputs.m.unit }}\n\nBest regards,\nYour CalcsLive Workflow",
+          "options": {
+            "attachmentsUi": {
+              "attachmentsBinary": []
+            }
+          }
+        },
+        "id": "2b48a81e-84f8-439d-aa58-6cc7b1c00480",
+        "name": "Send Email",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          528,
+          -80
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REPLACE_WITH_YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Your Gmail Account"
+          }
+        },
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-c9eac119",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {},
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-7a116310",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.233715",
+      "updatedAt": "2025-09-29T07:07:42.233734",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: CalcsLive Demo Workflow Template. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "CalcsLive Demo Workflow Template",
+    "nodes": [
+      {
+        "credentials": {
+          "calcsLiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Cylinder Calcs: (D, h) => (A, V)",
+        "parameters": {
+          "articleId": "3M6UW7CQB-2AP",
+          "inputPQs": {
+            "pq": [
+              {
+                "symbol": "D",
+                "unit": "mm",
+                "value": 200
+              },
+              {
+                "symbol": "h",
+                "unit": "cm",
+                "value": 20
+              }
+            ]
+          },
+          "outputPQs": {
+            "pq": [
+              {
+                "symbol": "A",
+                "unit": "m^2"
+              },
+              {
+                "symbol": "V",
+                "unit": "m^3"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Fields: (d, t)",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a026dc84-665f-4898-8de9-ccdbaa530bfa",
+                "name": "Distance",
+                "type": "number",
+                "value": 360
+              },
+              {
+                "id": "de7d6d3e-151c-4390-b2d9-bf78da0159eb",
+                "name": "DistanceUnit",
+                "type": "string",
+                "value": "km"
+              },
+              {
+                "id": "49c1e979-a0c2-403e-bed1-ef28eb8513ad",
+                "name": "Time",
+                "type": "number",
+                "value": 2
+              },
+              {
+                "id": "54ae6f42-844f-4bf2-b6d3-a6e159d46e9e",
+                "name": "TimeUnit",
+                "type": "string",
+                "value": "h"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "calcsLiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mass Calc: (ρ, V) => m",
+        "parameters": {
+          "articleId": "3M6VLSBHB-3HT",
+          "inputPQs": {
+            "pq": [
+              {
+                "symbol": "ρ",
+                "unit": "kg/m^3",
+                "value": 1000
+              },
+              {
+                "symbol": "V",
+                "unit": "={{ $json.data.calculation.outputs.V.unit }}",
+                "value": "={{ $json.data.calculation.outputs.V.value }}"
+              }
+            ]
+          },
+          "outputPQs": {
+            "pq": [
+              {
+                "symbol": "m",
+                "unit": "kg"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email",
+        "parameters": {
+          "message": "=Hello!\n\nThis is an automated email from your n8n workflow using @calcslive/n8n-nodes-calcslive.\n\nCalculation Results:\n- Total Physical Quantities: {{ $json.data.calculation.totalPQs }}\n- Mass Result: {{ $json.data.calculation.outputs.m.value }} {{ $json.data.calculation.outputs.m.unit }}\n\nBest regards,\nYour CalcsLive Workflow",
+          "options": {
+            "attachmentsUi": {
+              "attachmentsBinary": []
+            }
+          },
+          "sendTo": "user@example.com",
+          "subject": "CalcsLive Calculation Results"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "calcsLiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Speed Calc: (d, t) => v",
+        "parameters": {
+          "articleId": "3M6UW7CQB-2AP",
+          "inputPQs": {
+            "pq": [
+              {
+                "symbol": "d",
+                "unit": "km",
+                "value": 360
+              },
+              {
+                "symbol": "t",
+                "unit": "h",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking 'Execute workflow'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Gmail"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 64,
+  "viewCount": 157,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Gmail Account"
+    ],
+    "requiredCredentials": [
+      "calcs Live  A P I details",
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking 'Execute workflow'\".",
+      "Open the \"Cylinder Calcs: (D, h) => (A, V)\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Speed Calc: (d, t) => v\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mass Calc: (ρ, V) => m\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Email\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Fields: (d, t)\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-cx8j5r9mz",
+      "workflowId": "calcslive-demo-workflow-template-s1rjr",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Calcslive/2058_Calcslive_Engineering_Calculations_Manual.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Calcslive\\2058_Calcslive_Engineering_Calculations_Manual.json",
+      "discoveredAt": "2026-07-15T11:17:37.980Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:37.980Z",
+  "updatedAt": "2026-07-15T11:17:37.980Z"
+}

@@ -1,0 +1,1505 @@
+{
+  "id": "opensea-analytics-agent-tool-azzo8",
+  "name": "OpenSea Analytics Agent Tool",
+  "slug": "opensea-analytics-agent-tool-2r14",
+  "description": "Automated workflow: OpenSea Analytics Agent Tool. This workflow integrates 7 different services: stickyNote, toolHttpRequest, agent, stopAndError, lmChatOpenAi. It contains 23 nodes and follows best practices for error handling and security.",
+  "shortDescription": "OpenSea Analytics Agent Tool workflow containing 12 nodes.",
+  "originalWorkflowJson": {
+    "id": "yRMCUm6oJEMknhbw",
+    "meta": {
+      "instanceId": "workflow-b4b81adf",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:55.201857",
+      "updatedAt": "2025-09-29T07:07:55.201881",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "OpenSea Analytics Agent Tool",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "9478ead9-7f35-49b5-aff7-401ce9b8f4af",
+        "name": "Analytics Agent Brain",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          300,
+          40
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "yUizd8t0sD5wMYVG",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "80910bd9-7889-4185-8cfd-31a6aca270ff",
+        "name": "Analytics Agent Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          440,
+          40
+        ],
+        "parameters": {},
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b810757e-caa3-4987-be0a-66284e01d6b9",
+        "name": "OpenSea Get Collection Stats",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          600,
+          40
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}{collection_slug}/stats",
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "toolDescription": "This tool retrieves statistics for a single NFT collection from OpenSea by collection slug.",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "3v99GVMGF4tKP5nM",
+            "name": "OpenSea"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "288220ab-4321-4916-8ea1-bd27495b3b57",
+        "name": "OpenSea Analytics Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          600,
+          -200
+        ],
+        "parameters": {
+          "text": "={{ $json.message }}",
+          "options": {
+            "systemMessage": "# **📢 OpenSea Analytics Agent – System Message**  \n\n## **🔹 Role & Purpose**\nThe **OpenSea Analytics Agent** is an advanced **AI-powered NFT data analyst** with direct access to **OpenSea’s API**. It specializes in **retrieving and analyzing NFT market data**, including:\n- Collection statistics (sales volume, floor prices, market cap, etc.)\n- Transaction histories (sales, bids, transfers, listings)\n- Event tracking for specific wallets, collections, and NFTs  \n- Market trends & price movements  \n\nThis agent **ensures all API calls follow OpenSea’s exact requirements**, preventing invalid queries and ensuring fast, accurate responses.  \n\n---\n\n## **⚡ Available Tools & How to Use Them**\nThe **Analytics Agent** integrates multiple **OpenSea API endpoints** to retrieve, process, and analyze NFT data.\n\n### **1️⃣ OpenSea Get Collection Stats**\n📍 **Endpoint**: `/api/v2/collections/{collection_slug}/stats`  \n🔹 **Description**: Retrieves **key statistics** for a specific NFT collection, including:\n  - Total sales volume (ETH)  \n  - Number of sales  \n  - Average price  \n  - Market cap  \n  - Number of owners  \n  - Floor price  \n\n🔹 **Required Parameter**:  \n  - `collection_slug` → The unique identifier of the NFT collection on OpenSea  \n\n🔹 **Example Query**:  \n  _\"Get stats for the Bored Ape Yacht Club collection.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n### **2️⃣ OpenSea Get Events**\n📍 **Endpoint**: `/api/v2/events`  \n🔹 **Description**: Retrieves **NFT-related events** (sales, transfers, listings, bids, and redemptions) that occurred within a specific timeframe.  \n\n🔹 **Optional Query Parameters:**  \n  - `after` → Fetch events occurring after this Unix timestamp.  \n  - `before` → Fetch events occurring before this Unix timestamp.  \n  - `event_type` → Filter by event types (`sale`, `transfer`, `redemption`).  \n  - `limit` → Number of results (1-50, default: 50).  \n  - `next` → Cursor for pagination.  \n\n🔹 **Example Query**:  \n  _\"Show me all NFT sales from the last 24 hours.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n### **3️⃣ OpenSea Get Events (by Account)**\n📍 **Endpoint**: `/api/v2/events/accounts/{address}`  \n🔹 **Description**: Retrieves **all events related to a specific wallet address**.  \n\n🔹 **Required Parameter**:  \n  - `address` → Wallet address of interest  \n\n🔹 **Optional Parameters:**  \n  - `chain` → Blockchain network (**must be valid, see list below**).  \n  - `event_type` → Filter events (`sale`, `transfer`, `redemption`).  \n  - `limit` → Number of results (1-50, default: 50).  \n  - `next` → Cursor for pagination.  \n\n🔹 **Example Query**:  \n  _\"Fetch all NFT transfers for wallet `0x123...abc` on Ethereum.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n### **4️⃣ OpenSea Get Events (by Collection)**\n📍 **Endpoint**: `/api/v2/events/collection/{collection_slug}`  \n🔹 **Description**: Retrieves **all NFT events related to a specific collection**.  \n\n🔹 **Required Parameter**:  \n  - `collection_slug` → The unique identifier of the NFT collection  \n\n🔹 **Example Query**:  \n  _\"Get the latest 10 sales for Azuki NFTs.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n### **5️⃣ OpenSea Get Events (by NFT)**\n📍 **Endpoint**: `/api/v2/events/chain/{chain}/contract/{address}/nfts/{identifier}`  \n🔹 **Description**: Retrieves **all historical events for a specific NFT** based on:\n  - **Blockchain**  \n  - **Smart contract address**  \n  - **Token ID**  \n\n🔹 **Required Parameters**:  \n  - `chain` → Blockchain network (**must be valid, see list below**).  \n  - `address` → Smart contract address of the NFT.  \n  - `identifier` → Unique NFT token ID.  \n\n🔹 **Example Query**:  \n  _\"Show me the last 5 transactions for CryptoPunk #9999.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n## **⚠️ Important Rules & Restrictions**\n### **🚨 1. Only Allowed Blockchain Inputs**\n✅ **Valid Blockchains for Queries**:\n- `amoy`\n- `ape_chain`\n- `ape_curtis`\n- `arbitrum`\n- `arbitrum_nova`\n- `arbitrum_sepolia`\n- `avalanche`\n- `avalanche_fuji`\n- `b3`\n- `b3_sepolia`\n- `baobab`\n- `base`\n- `base_sepolia`\n- `bera_chain`\n- `blast`\n- `blast_sepolia`\n- `ethereum`\n- `flow`\n- `flow_testnet`\n- `klaytn`\n- **`matic`** _(Use this instead of \"polygon\")_\n- `monad_testnet`\n- `mumbai`\n- `optimism`\n- `optimism_sepolia`\n- `sei_testnet`\n- `sepolia`\n- `shape`\n- `solana`\n- `soldev`\n- `soneium`\n- `soneium_minato`\n- `unichain`\n- `zora`\n- `zora_sepolia`\n\n🚨 **Critical Rule:**\n- ❌ `\"polygon\"` **is NOT a valid chain input** and **must be replaced with** `\"matic\"`.  \n- ❌ Using an unsupported blockchain **will cause an error**.  \n- ✅ Always verify blockchain names before executing a query.\n\n---\n\n## **📌 Example Queries**\n✅ _\"Get NFT sales data for the past 7 days.\"_  \n✅ _\"Fetch the top 5 trending collections by volume.\"_  \n✅ _\"Track all NFT transactions for my wallet `0xabc...xyz`.\"_  \n✅ _\"Show me the most expensive sale in the last 24 hours.\"_  \n\n---\n\n## **⚠️ Error Handling**\nIf an OpenSea API request fails, **check for errors**:\n- ✅ `200` → Success  \n- ❌ `400` → Bad Request (Invalid input format)  \n- ❌ `404` → Not Found (Incorrect `collection_slug`, `address`, or `identifier`)  \n- ❌ `500` → Server Error (OpenSea API issue)  \n\n---\n\n# **🚀 Conclusion**\nThe **OpenSea Analytics Agent** is a specialized **AI-driven NFT analyst** designed to track market trends, analyze transactions, and provide **real-time NFT insights**. Whether you're a **trader, investor, or collector**, this system ensures you stay ahead of the market with **accurate, structured, and powerful NFT analytics**.  \n\n🔥 **Follow all rules to ensure successful API queries!** 🔥"
+          },
+          "promptType": "define"
+        },
+        "typeVersion": 1.8,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c055762a-8fe7-4141-a639-df2372f30060",
+        "name": "Workflow Input Trigger",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          140,
+          -200
+        ],
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "message"
+              },
+              {
+                "name": "sessionId"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b",
+        "name": "OpenSea Get Events",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          780,
+          40
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "sendQuery": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "event_type",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "after",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "before",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "limit",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "next",
+                "valueProvider": "modelOptional"
+              }
+            ]
+          },
+          "toolDescription": "This tool retrieves a list of OpenSea events based on timestamps, event type, and pagination.",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "3v99GVMGF4tKP5nM",
+            "name": "OpenSea"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d18c5b15-bc5d-4053-8364-9ecedc36483a",
+        "name": "OpenSea Get Events by Account",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          960,
+          40
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}{address}",
+          "sendQuery": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "after",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "before",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "chain",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "event_type",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "limit",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "next",
+                "valueProvider": "modelOptional"
+              }
+            ]
+          },
+          "toolDescription": "This tool retrieves a list of OpenSea events for a specific account based on timestamps, chain, event type, and pagination.",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "3v99GVMGF4tKP5nM",
+            "name": "OpenSea"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "74b00939-5c0f-4974-8d6e-35cfb9dc5c79",
+        "name": "OpenSea Get Events by Collection",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1160,
+          40
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}{collection_slug}",
+          "sendQuery": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "after",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "before",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "event_type",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "limit",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "next",
+                "valueProvider": "modelOptional"
+              }
+            ]
+          },
+          "toolDescription": "This tool retrieves a list of OpenSea events for a specific collection based on timestamps, event type, and pagination.",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "3v99GVMGF4tKP5nM",
+            "name": "OpenSea"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "79af849c-af1b-40a2-861f-91c6217c7a99",
+        "name": "OpenSea Get Events by NFT",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1360,
+          40
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}{chain}/contract/{address}/nfts/{identifier}",
+          "sendQuery": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "after",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "before",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "event_type",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "limit",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "next",
+                "valueProvider": "modelOptional"
+              }
+            ]
+          },
+          "toolDescription": "This tool retrieves a list of OpenSea events for a single NFT based on chain, contract address, token ID, timestamps, and event type.",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "3v99GVMGF4tKP5nM",
+            "name": "OpenSea"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c268e4cc-2a31-4d0d-b155-bf38c8bb8840",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1260,
+          -1260
+        ],
+        "parameters": {
+          "color": 2,
+          "width": 980,
+          "height": 1320,
+          "content": "# OpenSea Analytics Agent Tool (n8n Workflow) Guide\n\n## 🚀 Workflow Overview\nThe **OpenSea Analytics Agent Tool** is an AI-powered NFT analytics system built using **n8n**. It integrates directly with **OpenSea's API** to fetch and analyze market data, collection stats, wallet transactions, and event logs. This tool is designed to provide real-time insights into the NFT ecosystem.\n\n### 🎯 **Key Features**:\n- Retrieve **collection statistics** (volume, floor price, market cap, etc.).\n- Track **NFT events** (sales, transfers, listings, bids, redemptions).\n- Monitor **wallet transactions** (account-specific event tracking).\n- Fetch **NFT-specific historical transactions** by smart contract and token ID.\n- Ensure **API compliance**, preventing invalid queries and errors.\n\n---\n\n## 🔗 **Nodes & Functions**\nBelow is a breakdown of each node in the workflow and its function.\n\n### **1️⃣ Analytics Agent Brain**\n- **Type**: AI Language Model (GPT-4o Mini)\n- **Purpose**: Processes API requests and interprets OpenSea analytics queries.\n\n### **2️⃣ Analytics Agent Memory**\n- **Type**: AI Memory Buffer\n- **Purpose**: Stores session data to maintain context for multiple queries.\n\n### **3️⃣ OpenSea Get Collection Stats**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/collections/{collection_slug}/stats`\n- **Function**: Fetches collection-wide statistics such as floor price, total volume, number of sales, and market cap.\n\n### **4️⃣ OpenSea Get Events**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/events`\n- **Function**: Retrieves NFT-related events within a given timeframe, filtered by event type (sale, transfer, listing, etc.).\n\n### **5️⃣ OpenSea Get Events by Account**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/events/accounts/{address}`\n- **Function**: Tracks all NFT events related to a specific wallet address.\n\n### **6️⃣ OpenSea Get Events by Collection**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/events/collection/{collection_slug}`\n- **Function**: Fetches the latest events for a particular NFT collection.\n\n### **7️⃣ OpenSea Get Events by NFT**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/events/chain/{chain}/contract/{address}/nfts/{identifier}`\n- **Function**: Retrieves all historical events for a single NFT based on blockchain, smart contract, and token ID.\n\n---\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ef15cdff-2e09-4ae9-8c7f-a01119020a29",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -160,
+          -1260
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 920,
+          "height": 940,
+          "content": "## 📌 **How to Use the Workflow**\n\n### ✅ **Step 1: Input Data**\n- Provide the necessary parameters like `collection_slug`, `address`, `event_type`, `chain`, and `identifier`.\n\n### ✅ **Step 2: API Calls Execution**\n- The workflow triggers API calls based on the input and retrieves structured NFT analytics data.\n\n### ✅ **Step 3: Data Processing & Output**\n- The AI-powered agent processes responses and formats the output.\n- Results can be sent to Telegram, saved in a database, or displayed in a dashboard.\n\n---\n\n## ⚠️ **Common API Queries & Examples**\n\n### **1️⃣ Get Collection Stats**\n```plaintext\nGET {{ $env.API_BASE_URL }}\n```\n\n### **2️⃣ Get Events (Last 24 Hours NFT Sales)**\n```plaintext\nGET {{ $env.API_BASE_URL }}\n```\n\n### **3️⃣ Get Events by Wallet Address**\n```plaintext\nGET {{ $env.API_BASE_URL }}\n```\n\n### **4️⃣ Get Events by NFT**\n```plaintext\nGET {{ $env.API_BASE_URL }}\n```\n\n---\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "03ec28f4-c2bc-4cfe-a799-c0ad5190d77a",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          960,
+          -1260
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 820,
+          "height": 460,
+          "content": "## ⚡ **Error Handling & Troubleshooting**\n| **Error Code** | **Description** |\n|--------------|----------------|\n| `200` | Success |\n| `400` | Bad Request (Invalid input) |\n| `404` | Not Found (Incorrect slug, address, or identifier) |\n| `500` | Server Error (OpenSea API issue) |\n\n### 🔹 **Fixing Common Errors**\n- Ensure correct `collection_slug` or `wallet address` is provided.\n- Check if the blockchain name is valid (`matic` instead of `polygon`).\n- If the OpenSea API is down, retry after some time.\n\n---\n\n## 🚀 **Connect with Me for Support**\nIf you need assistance, custom OpenSea insights, or automation support, feel free to connect with me on LinkedIn:\n\n🌐 **Don Jayamaha – LinkedIn**  \n🔗 [{{ $env.WEBHOOK_URL }}]({{ $env.WEBHOOK_URL }}\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "59a62d76-59a4-4615-a546-6e3810ca81f2",
+    "connections": {
+      "b810757e-caa3-4987-be0a-66284e01d6b9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-dc4809c7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-d2c79e22",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-68ebd620",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-071ea260",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-06d70ba8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-ad75dfed",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-13e9a75c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-ec0697a6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-07a624e8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-ba6e2f48",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-20721e3e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-1bc08a24",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-9e6df87c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-f65da41a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-78462bfa",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-86572b85",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d18c5b15-bc5d-4053-8364-9ecedc36483a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-78726b0c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-ca67ef1d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-3f573e37",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-903ae19b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-b4f1a377",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-55aa96b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-d8bd2fae",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-ce129ece",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "74b00939-5c0f-4974-8d6e-35cfb9dc5c79": {
+        "main": [
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-5ad46534",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-6f542ce8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-ebcfc493",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-a986ad2c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-c8c72ac9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-ffaf8a40",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-dc6998ba",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-73f34a15",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "79af849c-af1b-40a2-861f-91c6217c7a99": {
+        "main": [
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-c4b9e14b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-d9c63875",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-68cc15dc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-0260c672",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-20ed390e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-b78176b0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-81b95627",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-919f3adb",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9478ead9-7f35-49b5-aff7-401ce9b8f4af": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9478ead9-7f35-49b5-aff7-401ce9b8f4af-5f7dc11d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: OpenSea Analytics Agent Tool. This workflow integrates 7 different services: stickyNote, toolHttpRequest, agent, stopAndError, lmChatOpenAi. It contains 23 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: OpenSea Analytics Agent Tool. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "74b00939-5c0f-4974-8d6e-35cfb9dc5c79": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-5ad46534"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-6f542ce8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-ebcfc493"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-a986ad2c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-c8c72ac9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-ffaf8a40"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-dc6998ba"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-74b00939-5c0f-4974-8d6e-35cfb9dc5c79-73f34a15"
+            }
+          ]
+        ]
+      },
+      "79af849c-af1b-40a2-861f-91c6217c7a99": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-c4b9e14b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-d9c63875"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-68cc15dc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-0260c672"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-20ed390e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-b78176b0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-81b95627"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79af849c-af1b-40a2-861f-91c6217c7a99-919f3adb"
+            }
+          ]
+        ]
+      },
+      "9478ead9-7f35-49b5-aff7-401ce9b8f4af": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9478ead9-7f35-49b5-aff7-401ce9b8f4af-5f7dc11d"
+            }
+          ]
+        ]
+      },
+      "b810757e-caa3-4987-be0a-66284e01d6b9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-dc4809c7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-d2c79e22"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-68ebd620"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-071ea260"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-06d70ba8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-ad75dfed"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-13e9a75c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b810757e-caa3-4987-be0a-66284e01d6b9-ec0697a6"
+            }
+          ]
+        ]
+      },
+      "d18c5b15-bc5d-4053-8364-9ecedc36483a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-78726b0c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-ca67ef1d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-3f573e37"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-903ae19b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-b4f1a377"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-55aa96b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-d8bd2fae"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d18c5b15-bc5d-4053-8364-9ecedc36483a-ce129ece"
+            }
+          ]
+        ]
+      },
+      "ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-07a624e8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-ba6e2f48"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-20721e3e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-1bc08a24"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-9e6df87c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-f65da41a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-78462bfa"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ea5f7259-ff8b-48bc-9bde-01b7d2d42d2b-86572b85"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "OpenSea Analytics Agent Tool",
+    "nodes": [
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Analytics Agent Brain",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Analytics Agent Memory",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      },
+      {
+        "name": "OpenSea Analytics Agent",
+        "parameters": {
+          "options": {
+            "systemMessage": "# **📢 OpenSea Analytics Agent – System Message**  \n\n## **🔹 Role & Purpose**\nThe **OpenSea Analytics Agent** is an advanced **AI-powered NFT data analyst** with direct access to **OpenSea’s API**. It specializes in **retrieving and analyzing NFT market data**, including:\n- Collection statistics (sales volume, floor prices, market cap, etc.)\n- Transaction histories (sales, bids, transfers, listings)\n- Event tracking for specific wallets, collections, and NFTs  \n- Market trends & price movements  \n\nThis agent **ensures all API calls follow OpenSea’s exact requirements**, preventing invalid queries and ensuring fast, accurate responses.  \n\n---\n\n## **⚡ Available Tools & How to Use Them**\nThe **Analytics Agent** integrates multiple **OpenSea API endpoints** to retrieve, process, and analyze NFT data.\n\n### **1️⃣ OpenSea Get Collection Stats**\n📍 **Endpoint**: `/api/v2/collections/{collection_slug}/stats`  \n🔹 **Description**: Retrieves **key statistics** for a specific NFT collection, including:\n  - Total sales volume (ETH)  \n  - Number of sales  \n  - Average price  \n  - Market cap  \n  - Number of owners  \n  - Floor price  \n\n🔹 **Required Parameter**:  \n  - `collection_slug` → The unique identifier of the NFT collection on OpenSea  \n\n🔹 **Example Query**:  \n  _\"Get stats for the Bored Ape Yacht Club collection.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n### **2️⃣ OpenSea Get Events**\n📍 **Endpoint**: `/api/v2/events`  \n🔹 **Description**: Retrieves **NFT-related events** (sales, transfers, listings, bids, and redemptions) that occurred within a specific timeframe.  \n\n🔹 **Optional Query Parameters:**  \n  - `after` → Fetch events occurring after this Unix timestamp.  \n  - `before` → Fetch events occurring before this Unix timestamp.  \n  - `event_type` → Filter by event types (`sale`, `transfer`, `redemption`).  \n  - `limit` → Number of results (1-50, default: 50).  \n  - `next` → Cursor for pagination.  \n\n🔹 **Example Query**:  \n  _\"Show me all NFT sales from the last 24 hours.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n### **3️⃣ OpenSea Get Events (by Account)**\n📍 **Endpoint**: `/api/v2/events/accounts/{address}`  \n🔹 **Description**: Retrieves **all events related to a specific wallet address**.  \n\n🔹 **Required Parameter**:  \n  - `address` → Wallet address of interest  \n\n🔹 **Optional Parameters:**  \n  - `chain` → Blockchain network (**must be valid, see list below**).  \n  - `event_type` → Filter events (`sale`, `transfer`, `redemption`).  \n  - `limit` → Number of results (1-50, default: 50).  \n  - `next` → Cursor for pagination.  \n\n🔹 **Example Query**:  \n  _\"Fetch all NFT transfers for wallet `0x123...abc` on Ethereum.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n### **4️⃣ OpenSea Get Events (by Collection)**\n📍 **Endpoint**: `/api/v2/events/collection/{collection_slug}`  \n🔹 **Description**: Retrieves **all NFT events related to a specific collection**.  \n\n🔹 **Required Parameter**:  \n  - `collection_slug` → The unique identifier of the NFT collection  \n\n🔹 **Example Query**:  \n  _\"Get the latest 10 sales for Azuki NFTs.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n### **5️⃣ OpenSea Get Events (by NFT)**\n📍 **Endpoint**: `/api/v2/events/chain/{chain}/contract/{address}/nfts/{identifier}`  \n🔹 **Description**: Retrieves **all historical events for a specific NFT** based on:\n  - **Blockchain**  \n  - **Smart contract address**  \n  - **Token ID**  \n\n🔹 **Required Parameters**:  \n  - `chain` → Blockchain network (**must be valid, see list below**).  \n  - `address` → Smart contract address of the NFT.  \n  - `identifier` → Unique NFT token ID.  \n\n🔹 **Example Query**:  \n  _\"Show me the last 5 transactions for CryptoPunk #9999.\"_  \n\n✅ **API Call Example:**  \n```plaintext\nGET {{ $env.API_BASE_URL }}\n```  \n\n---\n\n## **⚠️ Important Rules & Restrictions**\n### **🚨 1. Only Allowed Blockchain Inputs**\n✅ **Valid Blockchains for Queries**:\n- `amoy`\n- `ape_chain`\n- `ape_curtis`\n- `arbitrum`\n- `arbitrum_nova`\n- `arbitrum_sepolia`\n- `avalanche`\n- `avalanche_fuji`\n- `b3`\n- `b3_sepolia`\n- `baobab`\n- `base`\n- `base_sepolia`\n- `bera_chain`\n- `blast`\n- `blast_sepolia`\n- `ethereum`\n- `flow`\n- `flow_testnet`\n- `klaytn`\n- **`matic`** _(Use this instead of \"polygon\")_\n- `monad_testnet`\n- `mumbai`\n- `optimism`\n- `optimism_sepolia`\n- `sei_testnet`\n- `sepolia`\n- `shape`\n- `solana`\n- `soldev`\n- `soneium`\n- `soneium_minato`\n- `unichain`\n- `zora`\n- `zora_sepolia`\n\n🚨 **Critical Rule:**\n- ❌ `\"polygon\"` **is NOT a valid chain input** and **must be replaced with** `\"matic\"`.  \n- ❌ Using an unsupported blockchain **will cause an error**.  \n- ✅ Always verify blockchain names before executing a query.\n\n---\n\n## **📌 Example Queries**\n✅ _\"Get NFT sales data for the past 7 days.\"_  \n✅ _\"Fetch the top 5 trending collections by volume.\"_  \n✅ _\"Track all NFT transactions for my wallet `0xabc...xyz`.\"_  \n✅ _\"Show me the most expensive sale in the last 24 hours.\"_  \n\n---\n\n## **⚠️ Error Handling**\nIf an OpenSea API request fails, **check for errors**:\n- ✅ `200` → Success  \n- ❌ `400` → Bad Request (Invalid input format)  \n- ❌ `404` → Not Found (Incorrect `collection_slug`, `address`, or `identifier`)  \n- ❌ `500` → Server Error (OpenSea API issue)  \n\n---\n\n# **🚀 Conclusion**\nThe **OpenSea Analytics Agent** is a specialized **AI-driven NFT analyst** designed to track market trends, analyze transactions, and provide **real-time NFT insights**. Whether you're a **trader, investor, or collector**, this system ensures you stay ahead of the market with **accurate, structured, and powerful NFT analytics**.  \n\n🔥 **Follow all rules to ensure successful API queries!** 🔥"
+          },
+          "promptType": "define",
+          "text": "={{ $json.message }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenSea Get Collection Stats",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "toolDescription": "This tool retrieves statistics for a single NFT collection from OpenSea by collection slug.",
+          "url": "{{ $env.API_BASE_URL }}{collection_slug}/stats"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenSea Get Events",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "event_type",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "after",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "before",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "limit",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "next",
+                "valueProvider": "modelOptional"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "toolDescription": "This tool retrieves a list of OpenSea events based on timestamps, event type, and pagination.",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenSea Get Events by Account",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "after",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "before",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "chain",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "event_type",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "limit",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "next",
+                "valueProvider": "modelOptional"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "toolDescription": "This tool retrieves a list of OpenSea events for a specific account based on timestamps, chain, event type, and pagination.",
+          "url": "{{ $env.API_BASE_URL }}{address}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenSea Get Events by Collection",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "after",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "before",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "event_type",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "limit",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "next",
+                "valueProvider": "modelOptional"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "toolDescription": "This tool retrieves a list of OpenSea events for a specific collection based on timestamps, event type, and pagination.",
+          "url": "{{ $env.API_BASE_URL }}{collection_slug}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenSea Get Events by NFT",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "after",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "before",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "event_type",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "limit",
+                "valueProvider": "modelOptional"
+              },
+              {
+                "name": "next",
+                "valueProvider": "modelOptional"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "toolDescription": "This tool retrieves a list of OpenSea events for a single NFT based on chain, contract address, token ID, timestamps, and event type.",
+          "url": "{{ $env.API_BASE_URL }}{chain}/contract/{address}/nfts/{identifier}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 2,
+          "content": "# OpenSea Analytics Agent Tool (n8n Workflow) Guide\n\n## 🚀 Workflow Overview\nThe **OpenSea Analytics Agent Tool** is an AI-powered NFT analytics system built using **n8n**. It integrates directly with **OpenSea's API** to fetch and analyze market data, collection stats, wallet transactions, and event logs. This tool is designed to provide real-time insights into the NFT ecosystem.\n\n### 🎯 **Key Features**:\n- Retrieve **collection statistics** (volume, floor price, market cap, etc.).\n- Track **NFT events** (sales, transfers, listings, bids, redemptions).\n- Monitor **wallet transactions** (account-specific event tracking).\n- Fetch **NFT-specific historical transactions** by smart contract and token ID.\n- Ensure **API compliance**, preventing invalid queries and errors.\n\n---\n\n## 🔗 **Nodes & Functions**\nBelow is a breakdown of each node in the workflow and its function.\n\n### **1️⃣ Analytics Agent Brain**\n- **Type**: AI Language Model (GPT-4o Mini)\n- **Purpose**: Processes API requests and interprets OpenSea analytics queries.\n\n### **2️⃣ Analytics Agent Memory**\n- **Type**: AI Memory Buffer\n- **Purpose**: Stores session data to maintain context for multiple queries.\n\n### **3️⃣ OpenSea Get Collection Stats**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/collections/{collection_slug}/stats`\n- **Function**: Fetches collection-wide statistics such as floor price, total volume, number of sales, and market cap.\n\n### **4️⃣ OpenSea Get Events**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/events`\n- **Function**: Retrieves NFT-related events within a given timeframe, filtered by event type (sale, transfer, listing, etc.).\n\n### **5️⃣ OpenSea Get Events by Account**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/events/accounts/{address}`\n- **Function**: Tracks all NFT events related to a specific wallet address.\n\n### **6️⃣ OpenSea Get Events by Collection**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/events/collection/{collection_slug}`\n- **Function**: Fetches the latest events for a particular NFT collection.\n\n### **7️⃣ OpenSea Get Events by NFT**\n- **Type**: API Request\n- **Endpoint**: `/api/v2/events/chain/{chain}/contract/{address}/nfts/{identifier}`\n- **Function**: Retrieves all historical events for a single NFT based on blockchain, smart contract, and token ID.\n\n---\n\n",
+          "height": 1320,
+          "width": 980
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "## 📌 **How to Use the Workflow**\n\n### ✅ **Step 1: Input Data**\n- Provide the necessary parameters like `collection_slug`, `address`, `event_type`, `chain`, and `identifier`.\n\n### ✅ **Step 2: API Calls Execution**\n- The workflow triggers API calls based on the input and retrieves structured NFT analytics data.\n\n### ✅ **Step 3: Data Processing & Output**\n- The AI-powered agent processes responses and formats the output.\n- Results can be sent to Telegram, saved in a database, or displayed in a dashboard.\n\n---\n\n## ⚠️ **Common API Queries & Examples**\n\n### **1️⃣ Get Collection Stats**\n```plaintext\nGET {{ $env.API_BASE_URL }}\n```\n\n### **2️⃣ Get Events (Last 24 Hours NFT Sales)**\n```plaintext\nGET {{ $env.API_BASE_URL }}\n```\n\n### **3️⃣ Get Events by Wallet Address**\n```plaintext\nGET {{ $env.API_BASE_URL }}\n```\n\n### **4️⃣ Get Events by NFT**\n```plaintext\nGET {{ $env.API_BASE_URL }}\n```\n\n---\n\n",
+          "height": 940,
+          "width": 920
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 3,
+          "content": "## ⚡ **Error Handling & Troubleshooting**\n| **Error Code** | **Description** |\n|--------------|----------------|\n| `200` | Success |\n| `400` | Bad Request (Invalid input) |\n| `404` | Not Found (Incorrect slug, address, or identifier) |\n| `500` | Server Error (OpenSea API issue) |\n\n### 🔹 **Fixing Common Errors**\n- Ensure correct `collection_slug` or `wallet address` is provided.\n- Check if the blockchain name is valid (`matic` instead of `polygon`).\n- If the OpenSea API is down, retry after some time.\n\n---\n\n## 🚀 **Connect with Me for Support**\nIf you need assistance, custom OpenSea insights, or automation support, feel free to connect with me on LinkedIn:\n\n🌐 **Don Jayamaha – LinkedIn**  \n🔗 [{{ $env.WEBHOOK_URL }}]({{ $env.WEBHOOK_URL }}\n\n",
+          "height": 460,
+          "width": 820
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Workflow Input Trigger",
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "message"
+              },
+              {
+                "name": "sessionId"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 12,
+  "integrationCount": 0,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [],
+  "securityStatus": "Passed",
+  "verified": false,
+  "featured": true,
+  "downloadCount": 24,
+  "viewCount": 382,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Workflow Input Trigger\".",
+      "Open the \"Analytics Agent Brain\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Analytics Agent Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenSea Get Collection Stats\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenSea Analytics Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenSea Get Events\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenSea Get Events by Account\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenSea Get Events by Collection\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenSea Get Events by NFT\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid With Warnings",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-8swqb28mc",
+      "workflowId": "opensea-analytics-agent-tool-azzo8",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stickynote/2027_Stickynote_Executeworkflow_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stickynote\\2027_Stickynote_Executeworkflow_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:20:05.050Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:05.050Z",
+  "updatedAt": "2026-07-15T11:20:05.050Z"
+}

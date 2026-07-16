@@ -1,0 +1,909 @@
+{
+  "id": "scheduletrigger-workflow-p353b",
+  "name": "Scheduletrigger Workflow",
+  "slug": "scheduletrigger-workflow-tea5",
+  "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 11 different services: notionTrigger, stickyNote, httpRequest, scheduleTrigger, merge. It contains 16 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Scheduletrigger Workflow workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-2965a094",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.086479",
+      "updatedAt": "2025-09-29T07:07:44.086494",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "0bacf032-53d6-4ba6-ab71-e01625c49cc4",
+        "name": "On schedule",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -1960,
+          160
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 1
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2e0d9aef-0a60-4506-9c11-c6c2cccb16ea",
+        "name": "Derive last request time",
+        "type": "n8n-nodes-base.dateTime",
+        "position": [
+          -1740,
+          160
+        ],
+        "parameters": {
+          "duration": 1,
+          "timeUnit": "minutes",
+          "magnitude": "={{ $json.timestamp }}",
+          "operation": "subtractFromDate",
+          "outputFieldName": "last_request_time"
+        },
+        "typeVersion": 2,
+        "notes": "This dateTime node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f726c448-b4c4-4159-8ca5-c94c092127b7",
+        "name": "Get emails from label and last request time",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          -1520,
+          160
+        ],
+        "parameters": {
+          "filters": {
+            "labelIds": [
+              "Label_9178764513576607415"
+            ]
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "{{ $credentials.gmailOAuth2.id }}",
+            "name": "REPLACE ME"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9b86331f-d33b-4266-ba34-bc0491a0da24",
+        "name": "Create database page",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          -620,
+          60
+        ],
+        "parameters": {
+          "title": "={{ $('If database page not found').item.json.Subject }}",
+          "blockUi": {
+            "blockValues": [
+              {
+                "type": "heading_3",
+                "textContent": "Snippet"
+              },
+              {
+                "textContent": "={{ $('If database page not found').item.json.snippet }}"
+              },
+              {
+                "text": {
+                  "text": [
+                    {
+                      "text": "See more",
+                      "isLink": true,
+                      "textLink": "={{ $env.WEBHOOK_URL }}{{ $json.emailAddress }}/#all/{{ $('If database page not found').item.json.id }}",
+                      "annotationUi": {}
+                    }
+                  ]
+                },
+                "richText": true
+              }
+            ]
+          },
+          "options": {
+            "icon": "{{ $env.WEBHOOK_URL }}",
+            "iconType": "file"
+          },
+          "resource": "databasePage",
+          "databaseId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "e606a7c1-e93d-47fd-8b8d-8000cd6e7522",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Gmail"
+          },
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "textContent": "={{ $('If database page not found').item.json.id }}"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "urlValue": "{{ $env.BASE_URL }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d7198578-4c83-4f57-8eba-5b5a9b89195c",
+        "name": "Try get database page",
+        "type": "n8n-nodes-base.notion",
+        "position": [
+          -1360,
+          220
+        ],
+        "parameters": {
+          "filters": {
+            "conditions": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "condition": "equals",
+                "richTextValue": "={{ $json.id }}"
+              }
+            ]
+          },
+          "options": {},
+          "resource": "databasePage",
+          "operation": "getAll",
+          "returnAll": true,
+          "databaseId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "e606a7c1-e93d-47fd-8b8d-8000cd6e7522",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "My Gmail Tasks"
+          },
+          "filterType": "manual"
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 2,
+        "alwaysOutputData": true,
+        "notes": "This notion node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f8188ab9-9a80-4aa9-b773-73cd90b8dbd3",
+        "name": "If checked off",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -1740,
+          460
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.Complete }}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bfcfeeb1-ad8b-47fb-8a09-b58e7b649a25",
+        "name": "On updated database page",
+        "type": "n8n-nodes-base.notionTrigger",
+        "position": [
+          -1960,
+          460
+        ],
+        "parameters": {
+          "event": "pagedUpdatedInDatabase",
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "databaseId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "e606a7c1-e93d-47fd-8b8d-8000cd6e7522",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "My Gmail Tasks"
+          }
+        },
+        "credentials": {
+          "notionApi": {
+            "id": "{{ $credentials.notionApi.id }}",
+            "name": "[UPDATE ME]"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This notionTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dc2c59b8-6e0d-46b3-946a-e48b0461c48f",
+        "name": "Remove label from target email",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          -1520,
+          460
+        ],
+        "parameters": {
+          "labelIds": [
+            "Label_9178764513576607415"
+          ],
+          "messageId": "={{ $json['Thread ID'] }}",
+          "operation": "removeLabels"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "{{ $credentials.gmailOAuth2.id }}",
+            "name": "REPLACE ME"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0f693c2f-ce89-4a2f-a85f-9230b7bcb94d",
+        "name": "Not yet checked off, do nothing",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -1520,
+          660
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bf792470-fc0a-45a2-b655-df5c977faa97",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -1220,
+          100
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "joinMode": "enrichInput1",
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "id",
+                "field2": "property_thread_id"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f910c34c-4c3d-481f-8223-a8aae710dbbd",
+        "name": "If found, do nothing",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -840,
+          260
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7086cd15-9f2e-40e4-be3b-47d117dde670",
+        "name": "If database page not found",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -1060,
+          160
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json.property_thread_id }}",
+                "operation": "isEmpty"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "86ce380c-0810-4edb-94e4-fb67b0ca422c",
+        "name": "Find my email address",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -840,
+          60
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "{{ $credentials.gmailOAuth2.id }}",
+            "name": "REPLACE ME"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f576f785-49e4-4ed2-b83e-400b001b6c3a",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -2540,
+          100
+        ],
+        "parameters": {
+          "width": 501.0810810810809,
+          "height": 545.405405405404,
+          "content": "## Send labeled email to a Notion database\nThis workflow sends the contents of an email to a Notion database. The email must be labeled with a specific label for the workflow to trigger. The email subject will be the title of the Notion page, and a snippet of the email body will be the content of the Notion page. The email link will be added to the Notion page as a property.\n\n### How it works\nOn scheduled intervals, find all emails with a specific label. For each email, check if the email already exists in the Notion database. If it does not exist, create a new page in the Notion database, otherwise do nothing. When the task in the Notion database is checked off, the label will be removed from the email.\n\n### Setup\nThis workflow requires that you set up a Notion database or use an existing one with at least the following fields:\n- Title (title)\n- Thread ID (text)\n- Email thread (URL)\n\n\nAdditionally, create a label that will be used to trigger the workflow in Gmail. In this workflow, the label is called \"Notion\"."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "86ce380c-0810-4edb-94e4-fb67b0ca422c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-d64902d2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-56392d27",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-6a9a52b2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-92462b74",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-973766a5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-e152dd53",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-f5ebb6b5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-e3e0adb1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 11 different services: notionTrigger, stickyNote, httpRequest, scheduleTrigger, merge. It contains 16 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Scheduletrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "86ce380c-0810-4edb-94e4-fb67b0ca422c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-d64902d2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-56392d27"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-6a9a52b2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-92462b74"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-973766a5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-e152dd53"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-f5ebb6b5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86ce380c-0810-4edb-94e4-fb67b0ca422c-e3e0adb1"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create database page",
+        "parameters": {
+          "blockUi": {
+            "blockValues": [
+              {
+                "textContent": "Snippet",
+                "type": "heading_3"
+              },
+              {
+                "textContent": "={{ $('If database page not found').item.json.snippet }}"
+              },
+              {
+                "richText": true,
+                "text": {
+                  "text": [
+                    {
+                      "annotationUi": {},
+                      "isLink": true,
+                      "text": "See more",
+                      "textLink": "={{ $env.WEBHOOK_URL }}{{ $json.emailAddress }}/#all/{{ $('If database page not found').item.json.id }}"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "databaseId": {
+            "__rl": true,
+            "cachedResultName": "Gmail",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "e606a7c1-e93d-47fd-8b8d-8000cd6e7522"
+          },
+          "options": {
+            "icon": "{{ $env.WEBHOOK_URL }}",
+            "iconType": "file"
+          },
+          "propertiesUi": {
+            "propertyValues": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "textContent": "={{ $('If database page not found').item.json.id }}"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "urlValue": "{{ $env.BASE_URL }}"
+              }
+            ]
+          },
+          "resource": "databasePage",
+          "title": "={{ $('If database page not found').item.json.Subject }}"
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      },
+      {
+        "name": "Derive last request time",
+        "parameters": {
+          "duration": 1,
+          "magnitude": "={{ $json.timestamp }}",
+          "operation": "subtractFromDate",
+          "outputFieldName": "last_request_time",
+          "timeUnit": "minutes"
+        },
+        "type": "n8n-nodes-base.dateTime",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Find my email address",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get emails from label and last request time",
+        "parameters": {
+          "filters": {
+            "labelIds": [
+              "Label_9178764513576607415"
+            ]
+          },
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2
+      },
+      {
+        "name": "If checked off",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.Complete }}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "If database page not found",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "isEmpty",
+                "value1": "={{ $json.property_thread_id }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "If found, do nothing",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "joinMode": "enrichInput1",
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "id",
+                "field2": "property_thread_id"
+              }
+            ]
+          },
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Not yet checked off, do nothing",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "On schedule",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 1
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "On updated database page",
+        "parameters": {
+          "databaseId": {
+            "__rl": true,
+            "cachedResultName": "My Gmail Tasks",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "e606a7c1-e93d-47fd-8b8d-8000cd6e7522"
+          },
+          "event": "pagedUpdatedInDatabase",
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.notionTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Remove label from target email",
+        "parameters": {
+          "labelIds": [
+            "Label_9178764513576607415"
+          ],
+          "messageId": "={{ $json['Thread ID'] }}",
+          "operation": "removeLabels"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Send labeled email to a Notion database\nThis workflow sends the contents of an email to a Notion database. The email must be labeled with a specific label for the workflow to trigger. The email subject will be the title of the Notion page, and a snippet of the email body will be the content of the Notion page. The email link will be added to the Notion page as a property.\n\n### How it works\nOn scheduled intervals, find all emails with a specific label. For each email, check if the email already exists in the Notion database. If it does not exist, create a new page in the Notion database, otherwise do nothing. When the task in the Notion database is checked off, the label will be removed from the email.\n\n### Setup\nThis workflow requires that you set up a Notion database or use an existing one with at least the following fields:\n- Title (title)\n- Thread ID (text)\n- Email thread (URL)\n\n\nAdditionally, create a label that will be used to trigger the workflow in Gmail. In this workflow, the label is called \"Notion\".",
+          "height": 545.405405405404,
+          "width": 501.0810810810809
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "notionApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Try get database page",
+        "parameters": {
+          "databaseId": {
+            "__rl": true,
+            "cachedResultName": "My Gmail Tasks",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "e606a7c1-e93d-47fd-8b8d-8000cd6e7522"
+          },
+          "filterType": "manual",
+          "filters": {
+            "conditions": [
+              {
+                "condition": "equals",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "richTextValue": "={{ $json.id }}"
+              }
+            ]
+          },
+          "operation": "getAll",
+          "options": {},
+          "resource": "databasePage",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.notion",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Gmail",
+    "Notion",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 145,
+  "viewCount": 151,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Gmail Account",
+      "Notion Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "gmail  O Auth2 details",
+      "notion  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"On schedule\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Verify the settings of the trigger node \"On updated database page\".",
+      "Open the \"Derive last request time\" node (n8n-nodes-base.dateTime) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get emails from label and last request time\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create database page\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"Try get database page\" node (n8n-nodes-base.notion) and configure the action parameters, mappings, and fields.",
+      "Open the \"If checked off\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove label from target email\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Not yet checked off, do nothing\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"If found, do nothing\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"If database page not found\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Find my email address\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-zlyvno759",
+      "workflowId": "scheduletrigger-workflow-p353b",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Datetime/0311_Datetime_Schedule_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Datetime\\0311_Datetime_Schedule_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:28:57.388Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:57.388Z",
+  "updatedAt": "2026-07-15T11:28:57.388Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

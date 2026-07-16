@@ -1,0 +1,498 @@
+{
+  "id": "optimize-prompt-c5h9w",
+  "name": "Optimize Prompt",
+  "slug": "optimize-prompt-x08a",
+  "description": "Automated workflow: Optimize Prompt. This workflow integrates 8 different services: stickyNote, telegram, code, agent, stopAndError. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Optimize Prompt workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "id": "heyKyETy1uK0xoX4",
+    "meta": {
+      "instanceId": "workflow-b8bf4b6a",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:57.760319",
+      "updatedAt": "2025-09-29T07:07:57.760332",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Optimize Prompt",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "a58be0f5-d11d-4bec-bd8c-0c3a7325b22b",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -1880,
+          820
+        ],
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "typeVersion": 1.1,
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "67fe408f-e889-4eeb-9e48-f60a579c69f0",
+        "name": "AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -1600,
+          720
+        ],
+        "parameters": {
+          "text": "={{ $json.query }}",
+          "options": {
+            "systemMessage": "Given the user's initial prompt below, please enhance it. Start with a clear, precise instruction at the beginning. Include specific details about the desired context, outcome, length, format, and style. Provide examples of the desired output format, if applicable. Use appropriate leading words or phrases to guide the desired output, especially for code generation. Avoid any vague or imprecise language. Rather than only stating what not to do, provide guidance on what should be done instead. Ensure the revised prompt remains true to the user's original intent. Do not provide examples of desired prompt format, only describe it. Format your response in markdown."
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.7,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8a041b31-1873-4559-96d0-35d313bffbbd",
+        "name": "Telegram3",
+        "type": "n8n-nodes-base.telegram",
+        "onError": "continueErrorOutput",
+        "position": [
+          -1000,
+          820
+        ],
+        "webhookId": "4f57022f-14cf-4c3e-b810-ae9395bf3d04",
+        "parameters": {
+          "text": "={{ $json.text }}",
+          "chatId": "={{ $('When Executed by Another Workflow').item.json.chat_id }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "Vh36aBswWhClYxBM",
+            "name": "Telegram account 2"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5161b177-0663-41c5-b778-ac14756f699c",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -1680,
+          860
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "vIXW5likFrTSZUgz",
+            "name": "Litellm-account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d5f36955-74a0-4a9a-b49d-0230d6ee35bf",
+        "name": "Split into chunks1",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -1180,
+          820
+        ],
+        "parameters": {
+          "jsCode": "// Get the entire output of the previous node\nlet text = $input.all() || '';\n\n// Convert the output to a string if it's not already\nif (typeof text !== 'string') {\n  text = JSON.stringify(text, null, 2); // Pretty-print JSON objects\n}\n\n// Replace multiple newlines (\\n\\n+) with a single newline (\\n)\ntext = text.replace(/\\n{2,}/g, '\\n');\n\nconst maxLength = 3072; // Telegram message character limit\nconst messages = [];\n\n// Add an optional header for the first chunk\nconst header = `# Optimized prompt\\n\\n`;\nlet currentText = header + text;\n\n// Split the output into chunks of maxLength without splitting words\nwhile (currentText.length > 0) {\n  let chunk = currentText.slice(0, maxLength);\n\n  // Ensure we don't split in the middle of a word\n  if (chunk.length === maxLength && currentText[maxLength] !== ' ') {\n    const lastSpaceIndex = chunk.lastIndexOf(' ');\n    if (lastSpaceIndex > -1) {\n      chunk = chunk.slice(0, lastSpaceIndex);\n    }\n  }\n\n  messages.push(chunk.trim()); // Trim extra whitespace for cleaner output\n  currentText = currentText.slice(chunk.length).trim(); // Remove the chunk from the remaining text\n}\n\n// Return the split messages in Markdown format\nreturn messages.map((chunk) => ({ json: { text: `\\`\\`\\`markdown\\n${chunk}\\n\\`\\`\\`` } }));\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b22f3481-caeb-4506-8fe0-c7e2597772b9",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "disabled": true,
+        "position": [
+          -2120,
+          600
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 389,
+          "height": 381,
+          "content": "## Trigger\n\n- Trigger can be anything. For this example the trigger is a call from another workflow and a received Telegram message. \n\n- Note that this workflow can be integrated in the middle of another larger workflow."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2bf7ebcc-2d34-4c56-b9de-c930ccb4f30f",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "disabled": true,
+        "position": [
+          -1720,
+          600
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 489,
+          "height": 381,
+          "content": "# Inference / Optimization\n- Incoming trigger is processed by a LLM with a specific system prompt set aimed at improving the input prompt."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ccc5f97e-6215-41fc-9633-f57857743282",
+        "name": "Simple Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -1340,
+          860
+        ],
+        "parameters": {},
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3bfb31b6-add3-4d5b-989e-df88d69e07e8",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "disabled": true,
+        "position": [
+          -1220,
+          600
+        ],
+        "parameters": {
+          "width": 349,
+          "height": 381,
+          "content": "# Improved prompt:\n\n- Send as a response\n\n- Use as input for next nodes"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a36fdc9d-d000-4120-99e8-53d49edec74a",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "disabled": true,
+        "position": [
+          -2120,
+          1000
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 1249,
+          "height": 541,
+          "content": "# Workflow Documentation\n\n## Description:\nThis workflow is designed to optimize prompts by enhancing user inputs for clarity and specificity using AI. The workflow takes a user-provided prompt as input and uses a Natural Language Processing (NLP) model to refine and improve the prompt. The optimized prompt is then sent back to the user, ready for use in further workflows or processes.\n\n## Setup:\n1. This workflow is suitable for users who want to improve their prompts for better communication and understanding in their workflows.\n2. The workflow utilizes an AI Agent powered by an OpenAI Chat Model to enhance user prompts.\n3. A Telegram node is used to deliver the optimized prompt back to the user.\n4. Ensure you have the necessary credentials set up for Telegram and OpenAI accounts.\n5. Customize the workflow's settings, such as the AI model used for prompt optimization, to suit your requirements.\n6. Activate the workflow once all configurations are set to start optimizing prompts efficiently.\n\n## Expected Outcomes:\n- Users can provide vague or imprecise prompts as input to the workflow.\n- The AI Agent will refine and optimize the prompt, adding clarity and specific details.\n- The optimized prompt will be delivered back to the user via Telegram for further use in workflows or processes.\n\nFor more detailed instructions and guidelines on using this workflow, refer to the detailed setup guide above."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-0947ac73",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "05beb500-d266-45e7-8f5a-ad3a8c9a72e1",
+    "connections": {
+      "8a041b31-1873-4559-96d0-35d313bffbbd": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8a041b31-1873-4559-96d0-35d313bffbbd-648673a1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "5161b177-0663-41c5-b778-ac14756f699c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5161b177-0663-41c5-b778-ac14756f699c-6a70043e",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Optimize Prompt. This workflow integrates 8 different services: stickyNote, telegram, code, agent, stopAndError. It contains 12 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Optimize Prompt. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "5161b177-0663-41c5-b778-ac14756f699c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5161b177-0663-41c5-b778-ac14756f699c-6a70043e"
+            }
+          ]
+        ]
+      },
+      "8a041b31-1873-4559-96d0-35d313bffbbd": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8a041b31-1873-4559-96d0-35d313bffbbd-648673a1"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Optimize Prompt",
+    "nodes": [
+      {
+        "name": "AI Agent",
+        "parameters": {
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "Given the user's initial prompt below, please enhance it. Start with a clear, precise instruction at the beginning. Include specific details about the desired context, outcome, length, format, and style. Provide examples of the desired output format, if applicable. Use appropriate leading words or phrases to guide the desired output, especially for code generation. Avoid any vague or imprecise language. Rather than only stating what not to do, provide guidance on what should be done instead. Ensure the revised prompt remains true to the user's original intent. Do not provide examples of desired prompt format, only describe it. Format your response in markdown."
+          },
+          "promptType": "define",
+          "text": "={{ $json.query }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Simple Memory",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      },
+      {
+        "name": "Split into chunks1",
+        "parameters": {
+          "jsCode": "// Get the entire output of the previous node\nlet text = $input.all() || '';\n\n// Convert the output to a string if it's not already\nif (typeof text !== 'string') {\n  text = JSON.stringify(text, null, 2); // Pretty-print JSON objects\n}\n\n// Replace multiple newlines (\\n\\n+) with a single newline (\\n)\ntext = text.replace(/\\n{2,}/g, '\\n');\n\nconst maxLength = 3072; // Telegram message character limit\nconst messages = [];\n\n// Add an optional header for the first chunk\nconst header = `# Optimized prompt\\n\\n`;\nlet currentText = header + text;\n\n// Split the output into chunks of maxLength without splitting words\nwhile (currentText.length > 0) {\n  let chunk = currentText.slice(0, maxLength);\n\n  // Ensure we don't split in the middle of a word\n  if (chunk.length === maxLength && currentText[maxLength] !== ' ') {\n    const lastSpaceIndex = chunk.lastIndexOf(' ');\n    if (lastSpaceIndex > -1) {\n      chunk = chunk.slice(0, lastSpaceIndex);\n    }\n  }\n\n  messages.push(chunk.trim()); // Trim extra whitespace for cleaner output\n  currentText = currentText.slice(chunk.length).trim(); // Remove the chunk from the remaining text\n}\n\n// Return the split messages in Markdown format\nreturn messages.map((chunk) => ({ json: { text: `\\`\\`\\`markdown\\n${chunk}\\n\\`\\`\\`` } }));\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 5,
+          "content": "## Trigger\n\n- Trigger can be anything. For this example the trigger is a call from another workflow and a received Telegram message. \n\n- Note that this workflow can be integrated in the middle of another larger workflow.",
+          "height": 381,
+          "width": 389
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 6,
+          "content": "# Inference / Optimization\n- Incoming trigger is processed by a LLM with a specific system prompt set aimed at improving the input prompt.",
+          "height": 381,
+          "width": 489
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 7,
+          "content": "# Workflow Documentation\n\n## Description:\nThis workflow is designed to optimize prompts by enhancing user inputs for clarity and specificity using AI. The workflow takes a user-provided prompt as input and uses a Natural Language Processing (NLP) model to refine and improve the prompt. The optimized prompt is then sent back to the user, ready for use in further workflows or processes.\n\n## Setup:\n1. This workflow is suitable for users who want to improve their prompts for better communication and understanding in their workflows.\n2. The workflow utilizes an AI Agent powered by an OpenAI Chat Model to enhance user prompts.\n3. A Telegram node is used to deliver the optimized prompt back to the user.\n4. Ensure you have the necessary credentials set up for Telegram and OpenAI accounts.\n5. Customize the workflow's settings, such as the AI model used for prompt optimization, to suit your requirements.\n6. Activate the workflow once all configurations are set to start optimizing prompts efficiently.\n\n## Expected Outcomes:\n- Users can provide vague or imprecise prompts as input to the workflow.\n- The AI Agent will refine and optimize the prompt, adding clarity and specific details.\n- The optimized prompt will be delivered back to the user via Telegram for further use in workflows or processes.\n\nFor more detailed instructions and guidelines on using this workflow, refer to the detailed setup guide above.",
+          "height": 541,
+          "width": 1249
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "# Improved prompt:\n\n- Send as a response\n\n- Use as input for next nodes",
+          "height": 381,
+          "width": 349
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Telegram3",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "={{ $('When Executed by Another Workflow').item.json.chat_id }}",
+          "text": "={{ $json.text }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When Executed by Another Workflow",
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Telegram"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 64,
+  "viewCount": 439,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "telegram  A P I details",
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When Executed by Another Workflow\".",
+      "Open the \"AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Telegram3\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Simple Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-kdc20ymax",
+      "workflowId": "optimize-prompt-c5h9w",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/1877_Telegram_Stickynote_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\1877_Telegram_Stickynote_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:20:24.936Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:24.936Z",
+  "updatedAt": "2026-07-15T11:20:24.936Z"
+}

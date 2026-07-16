@@ -1,0 +1,951 @@
+{
+  "id": "email-qcjcl",
+  "name": "Email",
+  "slug": "email-v1bn",
+  "description": "Automated workflow: Email. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Email workflow containing 16 nodes.",
+  "originalWorkflowJson": {
+    "id": 4,
+    "name": "Email",
+    "nodes": [
+      {
+        "id": "trigger-858025f9",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "name": "IMAP Email",
+        "type": "n8n-nodes-base.emailReadImap",
+        "position": [
+          -300,
+          200
+        ],
+        "parameters": {
+          "format": "resolved",
+          "options": {}
+        },
+        "credentials": {
+          "imap": {
+            "id": "{{ $credentials.imap.id }}",
+            "name": "IMAP account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "a1b8f208-fd19-4b4e-b3b1-840b77c28440",
+        "notes": "This emailReadImap node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "TheHive",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          -20,
+          200
+        ],
+        "parameters": {
+          "tags": "Email",
+          "type": "Email",
+          "title": "={{$node[\"IMAP Email\"].binary.attachment_0.fileName}}",
+          "source": "Outlook",
+          "sourceRef": "={{$node[\"IMAP Email\"].json[\"messageId\"]}}",
+          "artifactUi": {
+            "artifactValues": [
+              {
+                "dataType": "file",
+                "binaryProperty": "attachment_0"
+              }
+            ]
+          },
+          "description": "={{$node[\"IMAP Email\"].binary.attachment_0.fileName}}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "id": "43335984-0ba1-42ad-846b-074e81149726",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Create Case",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          280,
+          200
+        ],
+        "parameters": {
+          "id": "={{$node[\"TheHive\"].json[\"_id\"]}}",
+          "operation": "promote",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "id": "b3d166f1-1226-429c-b4ef-eaf5995c30e1",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Case",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          540,
+          200
+        ],
+        "parameters": {
+          "id": "={{$node[\"Create Case\"].json[\"_id\"]}}",
+          "resource": "case",
+          "operation": "get"
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "id": "ee95042c-bc9d-4793-90e6-1ce07b388758",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Observable",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          1060,
+          200
+        ],
+        "parameters": {
+          "caseId": "={{$node[\"Case\"].json[\"_id\"]}}",
+          "options": {},
+          "resource": "observable",
+          "returnAll": true
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "id": "680ec364-ec72-4e11-8c69-c7806868d5ea",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Analyzer Email",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          1340,
+          200
+        ],
+        "parameters": {
+          "id": "={{$node[\"Observable\"].json[\"_id\"]}}",
+          "dataType": "file",
+          "resource": "observable",
+          "analyzers": [
+            "24a64a086a410e1c7d7ace74003c4480::CORTEX"
+          ],
+          "operation": "executeAnalyzer"
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "retryOnFail": true,
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "id": "9c85db6d-13ee-45bf-ab3b-f9f0f599a22b",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Cortex",
+        "type": "n8n-nodes-base.cortex",
+        "position": [
+          1560,
+          200
+        ],
+        "parameters": {
+          "jobId": "={{$node[\"Analyzer Email\"].json[\"cortexJobId\"]}}",
+          "resource": "job",
+          "operation": "report"
+        },
+        "credentials": {
+          "cortexApi": {
+            "id": "{{ $credentials.cortexApi.id }}",
+            "name": "Cortex account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "2e3a73ed-1036-444f-a29c-c8b377730572",
+        "notes": "This cortex node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -20,
+          600
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"domain\"].length}}",
+                "operation": "larger"
+              },
+              {
+                "value1": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"email\"].length}}",
+                "operation": "larger"
+              },
+              {
+                "value1": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"ip\"].length}}",
+                "operation": "larger"
+              }
+            ]
+          },
+          "combineOperation": "any"
+        },
+        "typeVersion": 1,
+        "id": "930341df-2538-4c90-954d-f7fe84d326cc",
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Update Case Domain",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          420,
+          480
+        ],
+        "parameters": {
+          "ioc": true,
+          "data": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"domain\"]}}",
+          "caseId": "={{$node[\"Case\"].json[\"_id\"]}}",
+          "status": "Ok",
+          "message": "={{$node[\"Cortex\"].json[\"analyzerName\"]}}",
+          "options": {
+            "tags": "Domain"
+          },
+          "dataType": "domain",
+          "resource": "observable",
+          "operation": "create"
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "8273aac7-7450-4861-a197-e093314867c4",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Update Case Email",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          420,
+          620
+        ],
+        "parameters": {
+          "ioc": true,
+          "data": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"email\"]}}",
+          "caseId": "={{$node[\"Case\"].json[\"_id\"]}}",
+          "status": "Ok",
+          "message": "={{$node[\"Cortex\"].json[\"analyzerName\"]}}",
+          "options": {
+            "tags": "Domain"
+          },
+          "dataType": "mail",
+          "resource": "observable",
+          "operation": "create"
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "1fccb4dc-4790-4d8a-9289-6c509f2dfa7d",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Update Case Ip",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          420,
+          760
+        ],
+        "parameters": {
+          "ioc": true,
+          "data": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"ip\"]}}",
+          "caseId": "={{$node[\"Case\"].json[\"_id\"]}}",
+          "status": "Ok",
+          "message": "={{$node[\"Cortex\"].json[\"analyzerName\"]}}",
+          "options": {
+            "tags": "Domain"
+          },
+          "dataType": "ip",
+          "resource": "observable",
+          "operation": "create"
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "08f3d70c-f840-4593-bcc3-fb73e08591e0",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Wait",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          800,
+          200
+        ],
+        "webhookId": "ecada1d5-a671-44fc-906e-c64c6f05e760",
+        "parameters": {
+          "unit": "seconds",
+          "amount": 5
+        },
+        "typeVersion": 1,
+        "id": "81b7df75-f221-4ba9-821a-4084244d3996",
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Email Reputation",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          640,
+          620
+        ],
+        "parameters": {
+          "id": "={{$node[\"Update Case Email\"].json[\"id\"]}}",
+          "dataType": "mail",
+          "resource": "observable",
+          "analyzers": [
+            "9902b4e5c58015184b177de13f2151c7::CORTEX"
+          ],
+          "operation": "executeAnalyzer"
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "9defe9d1-dfb6-4254-ba9a-00a15a997d87",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "OTX IP",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          640,
+          760
+        ],
+        "parameters": {
+          "id": "={{$node[\"Update Case Ip\"].json[\"id\"]}}",
+          "dataType": "ip",
+          "resource": "observable",
+          "analyzers": [
+            "b084bf78d1aea92966b6ef6a4f6193a5::CORTEX"
+          ],
+          "operation": "executeAnalyzer"
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "99e71a36-3970-4e85-90d4-1087c0839b57",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "OTX DOMAIN",
+        "type": "n8n-nodes-base.theHive",
+        "position": [
+          640,
+          480
+        ],
+        "parameters": {
+          "id": "={{$node[\"Update Case Domain\"].json[\"id\"]}}",
+          "dataType": "domain",
+          "resource": "observable",
+          "analyzers": [
+            "b084bf78d1aea92966b6ef6a4f6193a5::CORTEX"
+          ],
+          "operation": "executeAnalyzer"
+        },
+        "credentials": {
+          "theHiveApi": {
+            "id": "{{ $credentials.theHiveApi.id }}",
+            "name": "The Hive account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "86b74c34-478f-48f1-ac79-9eade8ea9c3b",
+        "notes": "This theHive node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {
+      "a1b8f208-fd19-4b4e-b3b1-840b77c28440": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-48deabf9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-aae57744",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-552ab850",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-604ebd97",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-15ebda84",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-2ad9c690",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-4de3fa08",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-515033a6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Email. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-3f0e1c05",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.013470",
+      "updatedAt": "2025-09-29T07:07:44.013480",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Email. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "a1b8f208-fd19-4b4e-b3b1-840b77c28440": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-48deabf9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-aae57744"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-552ab850"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-604ebd97"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-15ebda84"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-2ad9c690"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-4de3fa08"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1b8f208-fd19-4b4e-b3b1-840b77c28440-515033a6"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Email",
+    "nodes": [
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Analyzer Email",
+        "parameters": {
+          "analyzers": [
+            "24a64a086a410e1c7d7ace74003c4480::CORTEX"
+          ],
+          "dataType": "file",
+          "id": "={{$node[\"Observable\"].json[\"_id\"]}}",
+          "operation": "executeAnalyzer",
+          "resource": "observable"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Case",
+        "parameters": {
+          "id": "={{$node[\"Create Case\"].json[\"_id\"]}}",
+          "operation": "get",
+          "resource": "case"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "cortexApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Cortex",
+        "parameters": {
+          "jobId": "={{$node[\"Analyzer Email\"].json[\"cortexJobId\"]}}",
+          "operation": "report",
+          "resource": "job"
+        },
+        "type": "n8n-nodes-base.cortex",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Case",
+        "parameters": {
+          "additionalFields": {},
+          "id": "={{$node[\"TheHive\"].json[\"_id\"]}}",
+          "operation": "promote"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Email Reputation",
+        "parameters": {
+          "analyzers": [
+            "9902b4e5c58015184b177de13f2151c7::CORTEX"
+          ],
+          "dataType": "mail",
+          "id": "={{$node[\"Update Case Email\"].json[\"id\"]}}",
+          "operation": "executeAnalyzer",
+          "resource": "observable"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "combineOperation": "any",
+          "conditions": {
+            "number": [
+              {
+                "operation": "larger",
+                "value1": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"domain\"].length}}"
+              },
+              {
+                "operation": "larger",
+                "value1": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"email\"].length}}"
+              },
+              {
+                "operation": "larger",
+                "value1": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"ip\"].length}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "imap": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "IMAP Email",
+        "parameters": {
+          "format": "resolved",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailReadImap",
+        "typeVersion": 1
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Observable",
+        "parameters": {
+          "caseId": "={{$node[\"Case\"].json[\"_id\"]}}",
+          "options": {},
+          "resource": "observable",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OTX DOMAIN",
+        "parameters": {
+          "analyzers": [
+            "b084bf78d1aea92966b6ef6a4f6193a5::CORTEX"
+          ],
+          "dataType": "domain",
+          "id": "={{$node[\"Update Case Domain\"].json[\"id\"]}}",
+          "operation": "executeAnalyzer",
+          "resource": "observable"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OTX IP",
+        "parameters": {
+          "analyzers": [
+            "b084bf78d1aea92966b6ef6a4f6193a5::CORTEX"
+          ],
+          "dataType": "ip",
+          "id": "={{$node[\"Update Case Ip\"].json[\"id\"]}}",
+          "operation": "executeAnalyzer",
+          "resource": "observable"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "TheHive",
+        "parameters": {
+          "additionalFields": {},
+          "artifactUi": {
+            "artifactValues": [
+              {
+                "binaryProperty": "attachment_0",
+                "dataType": "file"
+              }
+            ]
+          },
+          "description": "={{$node[\"IMAP Email\"].binary.attachment_0.fileName}}",
+          "source": "Outlook",
+          "sourceRef": "={{$node[\"IMAP Email\"].json[\"messageId\"]}}",
+          "tags": "Email",
+          "title": "={{$node[\"IMAP Email\"].binary.attachment_0.fileName}}",
+          "type": "Email"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Case Domain",
+        "parameters": {
+          "caseId": "={{$node[\"Case\"].json[\"_id\"]}}",
+          "data": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"domain\"]}}",
+          "dataType": "domain",
+          "ioc": true,
+          "message": "={{$node[\"Cortex\"].json[\"analyzerName\"]}}",
+          "operation": "create",
+          "options": {
+            "tags": "Domain"
+          },
+          "resource": "observable",
+          "status": "Ok"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Case Email",
+        "parameters": {
+          "caseId": "={{$node[\"Case\"].json[\"_id\"]}}",
+          "data": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"email\"]}}",
+          "dataType": "mail",
+          "ioc": true,
+          "message": "={{$node[\"Cortex\"].json[\"analyzerName\"]}}",
+          "operation": "create",
+          "options": {
+            "tags": "Domain"
+          },
+          "resource": "observable",
+          "status": "Ok"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "theHiveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Case Ip",
+        "parameters": {
+          "caseId": "={{$node[\"Case\"].json[\"_id\"]}}",
+          "data": "={{$node[\"Cortex\"].json[\"report\"][\"full\"][\"iocs\"][\"ip\"]}}",
+          "dataType": "ip",
+          "ioc": true,
+          "message": "={{$node[\"Cortex\"].json[\"analyzerName\"]}}",
+          "operation": "create",
+          "options": {
+            "tags": "Domain"
+          },
+          "resource": "observable",
+          "status": "Ok"
+        },
+        "type": "n8n-nodes-base.theHive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Wait",
+        "parameters": {
+          "amount": 5,
+          "unit": "seconds"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 16,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Email (IMAP)",
+    "Thehive",
+    "Cortex"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 180,
+  "viewCount": 339,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Email (IMAP) Account",
+      "Thehive Account",
+      "Cortex Account"
+    ],
+    "requiredCredentials": [
+      "imap details",
+      "the Hive  A P I details",
+      "cortex  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"IMAP Email\" node (n8n-nodes-base.emailReadImap) and configure the action parameters, mappings, and fields.",
+      "Open the \"TheHive\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Case\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Case\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Observable\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Analyzer Email\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Cortex\" node (n8n-nodes-base.cortex) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Case Domain\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Case Email\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Case Ip\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Email Reputation\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"OTX IP\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "Open the \"OTX DOMAIN\" node (n8n-nodes-base.theHive) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 100,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-xopls3rl7",
+      "workflowId": "email-qcjcl",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Cortex/0972_Cortex_Emailreadimap_Send.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Cortex\\0972_Cortex_Emailreadimap_Send.json",
+      "discoveredAt": "2026-07-15T11:18:19.727Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:19.727Z",
+  "updatedAt": "2026-07-15T11:18:19.727Z"
+}

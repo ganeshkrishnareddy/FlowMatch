@@ -1,0 +1,664 @@
+{
+  "id": "daylight-saving-time-notification-gf6hz",
+  "name": "Daylight Saving Time Notification",
+  "slug": "daylight-saving-time-notification-ej8b",
+  "description": "Automated workflow: Daylight Saving Time Notification. This workflow integrates 10 different services: stickyNote, code, scheduleTrigger, set, stopAndError. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Daylight Saving Time Notification workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "JIegnKLVXTkkTzfO",
+    "meta": {
+      "instanceId": "workflow-696ed548",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.201904",
+      "updatedAt": "2025-09-29T07:07:44.201921",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Daylight Saving Time Notification",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "87b11535-a9ae-49d4-a33f-b895274643e5",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d1cd9157-9948-43fd-a725-2a82a21a82c6",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          340,
+          -300
+        ],
+        "parameters": {
+          "width": 394,
+          "height": 264,
+          "content": "## How it works\n- check list of timezones\n- check if any timezone switches from/to Daylight Saving Time\n- notify on Slack\n\n## Remember to set up\n- Add timezones to \"Timezones List\"\n- Slack notification channel\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0f4369fc-80b6-4fd6-8533-4aacbf4c9c65",
+        "name": "Timezones List",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "jsCode": "return [\n\t{\n      timezone : \"America/New_York\"\n\t},\n\t{\n      timezone : \"Europe/Warsaw\"\n\t},\n];"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3c1e6cd7-3812-4670-a53f-7270e29574f9",
+        "name": "Calculate Zone Date and Time",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4e9f973f-a11f-474b-89ce-dac4a77a7c68",
+                "name": "datetime_zone",
+                "type": "string",
+                "value": "={{ $now.setZone( $json.timezone ) }}"
+              }
+            ]
+          },
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7f49ac42-afcb-4552-84da-180bc65b84b0",
+        "name": "Check If Daylight Saving Time",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          40,
+          280
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4e9f973f-a11f-474b-89ce-dac4a77a7c68",
+                "name": "datetime_zone_dst",
+                "type": "string",
+                "value": "={{ $json.datetime_zone.toDateTime().setZone($json.timezone).isInDST }}"
+              },
+              {
+                "id": "ff13ee6d-c146-4dcb-98c4-6cb9b2474b1d",
+                "name": "datetime_zone_tomorrow_dst",
+                "type": "string",
+                "value": "={{ $json.datetime_zone_tomorrow.toDateTime().setZone($json.timezone).isInDST }}"
+              }
+            ]
+          },
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f3596b52-03af-4a07-be04-a7300fc7b239",
+        "name": "Check If Change Tomorrow",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          240,
+          280
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "1f49e05d-d36e-4652-8ad3-b2266d750d94",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "notEquals"
+                },
+                "leftValue": "={{ $json.datetime_zone_dst }}",
+                "rightValue": "={{ $json.datetime_zone_tomorrow_dst }}"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "612e2e06-0283-4acd-8d85-cba16acb7126",
+        "name": "Send Notification On Upcoming Change",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          660,
+          240
+        ],
+        "webhookId": "871515be-56fc-4de7-835b-119d394fea47",
+        "parameters": {
+          "text": "=Tomorrow is Daylight Saving Time change in zone {{ $json.timezone }} - remember to adjust meeting times!",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "otherOptions": {},
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "slackOAuth2Api": {
+            "id": "B0jUtT53pVAEPaQM",
+            "name": "Slack Oauth"
+          }
+        },
+        "typeVersion": 2.3,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d5e47ff8-d530-47ee-a98d-3a50a7054cb0",
+        "name": "Calculate Tomorrow's Date",
+        "type": "n8n-nodes-base.dateTime",
+        "position": [
+          660,
+          0
+        ],
+        "parameters": {
+          "options": {
+            "includeInputFields": true
+          },
+          "duration": 1,
+          "magnitude": "={{ $json.datetime_zone }}",
+          "operation": "addToDate",
+          "outputFieldName": "datetime_zone_tomorrow"
+        },
+        "typeVersion": 2,
+        "notes": "This dateTime node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5ae0aa75-515d-4025-901e-82693f697436",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          0,
+          -160
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e233c67c-a79b-4c96-a172-0465021d3911",
+        "name": "Send Email On Upcoming Change",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          660,
+          420
+        ],
+        "webhookId": "40cc0fc1-c135-44fc-b3cb-dfec6fc1ce75",
+        "parameters": {
+          "text": "=Tomorrow is Daylight Saving Time change in zone {{ $json.timezone }} - remember to adjust meeting times!",
+          "options": {},
+          "subject": "DST change tomorrow in {{ $json.timezone }}",
+          "emailFormat": "text"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "tkdzDgcUAt04af3B",
+            "name": "SMTP account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "7605726a-1a09-4564-b60f-aee3ac0b8c70",
+    "connections": {
+      "612e2e06-0283-4acd-8d85-cba16acb7126": {
+        "main": [
+          [
+            {
+              "node": "error-handler-612e2e06-0283-4acd-8d85-cba16acb7126-4705e772",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e233c67c-a79b-4c96-a172-0465021d3911": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-90690491",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-2b1f0046",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-109abef3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-eb169c96",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-aa703af6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-2f31a6c6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-a5cf7ff6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-2c8b6061",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Daylight Saving Time Notification. This workflow integrates 10 different services: stickyNote, code, scheduleTrigger, set, stopAndError. It contains 12 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Daylight Saving Time Notification. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "612e2e06-0283-4acd-8d85-cba16acb7126": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-612e2e06-0283-4acd-8d85-cba16acb7126-4705e772"
+            }
+          ]
+        ]
+      },
+      "e233c67c-a79b-4c96-a172-0465021d3911": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-90690491"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-2b1f0046"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-109abef3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-eb169c96"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-aa703af6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-2f31a6c6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-a5cf7ff6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e233c67c-a79b-4c96-a172-0465021d3911-2c8b6061"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Daylight Saving Time Notification",
+    "nodes": [
+      {
+        "name": "Calculate Tomorrow's Date",
+        "parameters": {
+          "duration": 1,
+          "magnitude": "={{ $json.datetime_zone }}",
+          "operation": "addToDate",
+          "options": {
+            "includeInputFields": true
+          },
+          "outputFieldName": "datetime_zone_tomorrow"
+        },
+        "type": "n8n-nodes-base.dateTime",
+        "typeVersion": 2
+      },
+      {
+        "name": "Calculate Zone Date and Time",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4e9f973f-a11f-474b-89ce-dac4a77a7c68",
+                "name": "datetime_zone",
+                "type": "string",
+                "value": "={{ $now.setZone( $json.timezone ) }}"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Check If Change Tomorrow",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "1f49e05d-d36e-4652-8ad3-b2266d750d94",
+                "leftValue": "={{ $json.datetime_zone_dst }}",
+                "operator": {
+                  "operation": "notEquals",
+                  "type": "boolean"
+                },
+                "rightValue": "={{ $json.datetime_zone_tomorrow_dst }}"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Check If Daylight Saving Time",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4e9f973f-a11f-474b-89ce-dac4a77a7c68",
+                "name": "datetime_zone_dst",
+                "type": "string",
+                "value": "={{ $json.datetime_zone.toDateTime().setZone($json.timezone).isInDST }}"
+              },
+              {
+                "id": "ff13ee6d-c146-4dcb-98c4-6cb9b2474b1d",
+                "name": "datetime_zone_tomorrow_dst",
+                "type": "string",
+                "value": "={{ $json.datetime_zone_tomorrow.toDateTime().setZone($json.timezone).isInDST }}"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email On Upcoming Change",
+        "parameters": {
+          "emailFormat": "text",
+          "options": {},
+          "subject": "DST change tomorrow in {{ $json.timezone }}",
+          "text": "=Tomorrow is Daylight Saving Time change in zone {{ $json.timezone }} - remember to adjust meeting times!"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "slackOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Notification On Upcoming Change",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "channelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "otherOptions": {},
+          "select": "channel",
+          "text": "=Tomorrow is Daylight Saving Time change in zone {{ $json.timezone }} - remember to adjust meeting times!"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.3
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## How it works\n- check list of timezones\n- check if any timezone switches from/to Daylight Saving Time\n- notify on Slack\n\n## Remember to set up\n- Add timezones to \"Timezones List\"\n- Slack notification channel\n",
+          "height": 264,
+          "width": 394
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Timezones List",
+        "parameters": {
+          "jsCode": "return [\n\t{\n      timezone : \"America/New_York\"\n\t},\n\t{\n      timezone : \"Europe/Warsaw\"\n\t},\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Slack",
+    "Emailsend"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 173,
+  "viewCount": 198,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Slack Account",
+      "Emailsend Account"
+    ],
+    "requiredCredentials": [
+      "slack  O Auth2  A P I details",
+      "smtp details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check If Change Tomorrow\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Notification On Upcoming Change\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Calculate Tomorrow's Date\" node (n8n-nodes-base.dateTime) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Email On Upcoming Change\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Calculate Zone Date and Time\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Check If Daylight Saving Time\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-j4ff72m6v",
+      "workflowId": "daylight-saving-time-notification-gf6hz",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Datetime/1523_Datetime_Code_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Datetime\\1523_Datetime_Code_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:18:20.306Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:20.306Z",
+  "updatedAt": "2026-07-15T11:18:20.306Z"
+}

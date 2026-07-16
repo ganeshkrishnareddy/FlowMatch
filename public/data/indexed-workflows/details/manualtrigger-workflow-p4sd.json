@@ -1,0 +1,603 @@
+{
+  "id": "manualtrigger-workflow-mkgfq",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-p4sd",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-f3c7eb2c",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.073546",
+      "updatedAt": "2025-09-29T07:07:45.073563",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "4704e44a-80c6-41b4-a0b9-ece060d53836",
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -220,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "74a78b35-b453-4345-8cd9-9d8a62961c29",
+        "name": "Customer Datastore",
+        "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
+        "position": [
+          20,
+          300
+        ],
+        "parameters": {
+          "operation": "getAllPeople",
+          "returnAll": true
+        },
+        "typeVersion": 1,
+        "notes": "This n8nTrainingCustomerDatastore node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "10b633de-e5e5-4fd2-bb4b-7a16bac5f69c",
+        "name": "Item Lists",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          220,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "sort",
+          "sortFieldsUi": {
+            "sortField": [
+              {
+                "fieldName": "name"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "aa90be4e-f548-459f-822b-a3dc1d20d58e",
+        "name": "One item per template",
+        "type": "n8n-nodes-document-generator.DocumentGenerator",
+        "position": [
+          660,
+          160
+        ],
+        "parameters": {
+          "template": "Date: {{created}}\nTo: {{name}} <{{email}}>\nAddress: {{country}}\nDetails:\n{{#each lines}}\n- \"{{description}}\" x {{quantity}} = {{amount}}€ + {{vat}}€ = {{total}}€\n{{/each}}\nTotal invoice: {{total}}€"
+        },
+        "typeVersion": 1,
+        "notes": "This DocumentGenerator node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "914c4c67-81df-45ec-9eea-3efb96383dfc",
+        "name": "All items, one template",
+        "type": "n8n-nodes-document-generator.DocumentGenerator",
+        "position": [
+          660,
+          400
+        ],
+        "parameters": {
+          "template": "<html>\n<head>\n</head>\n<body>\nNew customers in last 24h:\n<ul id=\"customer_list\">\n  {{#each items}}\n  <li>{{name}}: {{email}}</li>\n  {{/each}}\n</ul>\n</body>\n</html>",
+          "oneTemplate": true
+        },
+        "typeVersion": 1,
+        "notes": "This DocumentGenerator node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bc1821d1-7d08-4208-aa5e-7290f5604e91",
+        "name": "Add lines",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          440,
+          160
+        ],
+        "parameters": {
+          "functionCode": "item.lines = [\n  {\n    concept: \"Service\",\n    description: \"Design of HTML banners\",\n    quantity: 1,\n    amount: 22,\n    vat: 22 * 0.21,\n    total: 22 * 1.21\n  },\n  {\n    concept: \"Service\",\n    description: \"Design of PNG banners\",\n    quantity: 1,\n    amount: 33,\n    vat: 33 * 0.21,\n    total: 33 * 1.21\n  }\n]\n\nitem.date = \"2022-01-12\";\nitem.total = 133.10;\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "notes": "This functionItem node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "99ccf5f0-6d82-4a9c-a314-711249fbdfc9",
+        "name": "Send one TEXT email per item",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          880,
+          160
+        ],
+        "parameters": {
+          "html": "={{ $json[\"text\"] }}",
+          "options": {},
+          "subject": "=Invoice for {{ $node[\"Add lines\"].json[\"name\"] }}",
+          "toEmail": "mcolomer@n8nhackers.com",
+          "fromEmail": "mcolomer@n8nhackers.com"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "{{ $credentials.smtp.id }}",
+            "name": "SMTP account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3bc12345-da46-4c1f-8fe3-5bb0683cbcda",
+        "name": "Send one HTML Email per list",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          880,
+          400
+        ],
+        "parameters": {
+          "html": "={{ $json[\"text\"] }}",
+          "options": {},
+          "subject": "New customers",
+          "toEmail": "mcolomer@n8nhackers.com",
+          "fromEmail": "mcolomer@n8nhackers.com"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "{{ $credentials.smtp.id }}",
+            "name": "SMTP account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This emailSend node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "99ccf5f0-6d82-4a9c-a314-711249fbdfc9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-284c77e8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-10202702",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-6c463ae8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-6eae7d3c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-1738b02c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-cc2a6bbb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-7b04d837",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-413fdec5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "3bc12345-da46-4c1f-8fe3-5bb0683cbcda": {
+        "main": [
+          [
+            {
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-e08d4d81",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-8722417b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-4eb2cf19",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-4090271f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-c70cc8ef",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-cbc8aecf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-145ff8f6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-5a74e271",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "3bc12345-da46-4c1f-8fe3-5bb0683cbcda": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-e08d4d81"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-8722417b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-4eb2cf19"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-4090271f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-c70cc8ef"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-cbc8aecf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-145ff8f6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3bc12345-da46-4c1f-8fe3-5bb0683cbcda-5a74e271"
+            }
+          ]
+        ]
+      },
+      "99ccf5f0-6d82-4a9c-a314-711249fbdfc9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-284c77e8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-10202702"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-6c463ae8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-6eae7d3c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-1738b02c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-cc2a6bbb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-7b04d837"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-99ccf5f0-6d82-4a9c-a314-711249fbdfc9-413fdec5"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Add lines",
+        "parameters": {
+          "functionCode": "item.lines = [\n  {\n    concept: \"Service\",\n    description: \"Design of HTML banners\",\n    quantity: 1,\n    amount: 22,\n    vat: 22 * 0.21,\n    total: 22 * 1.21\n  },\n  {\n    concept: \"Service\",\n    description: \"Design of PNG banners\",\n    quantity: 1,\n    amount: 33,\n    vat: 33 * 0.21,\n    total: 33 * 1.21\n  }\n]\n\nitem.date = \"2022-01-12\";\nitem.total = 133.10;\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "All items, one template",
+        "parameters": {
+          "oneTemplate": true,
+          "template": "<html>\n<head>\n</head>\n<body>\nNew customers in last 24h:\n<ul id=\"customer_list\">\n  {{#each items}}\n  <li>{{name}}: {{email}}</li>\n  {{/each}}\n</ul>\n</body>\n</html>"
+        },
+        "type": "n8n-nodes-document-generator.DocumentGenerator",
+        "typeVersion": 1
+      },
+      {
+        "name": "Customer Datastore",
+        "parameters": {
+          "operation": "getAllPeople",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
+        "typeVersion": 1
+      },
+      {
+        "name": "Item Lists",
+        "parameters": {
+          "operation": "sort",
+          "options": {},
+          "sortFieldsUi": {
+            "sortField": [
+              {
+                "fieldName": "name"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "One item per template",
+        "parameters": {
+          "template": "Date: {{created}}\nTo: {{name}} <{{email}}>\nAddress: {{country}}\nDetails:\n{{#each lines}}\n- \"{{description}}\" x {{quantity}} = {{amount}}€ + {{vat}}€ = {{total}}€\n{{/each}}\nTotal invoice: {{total}}€"
+        },
+        "type": "n8n-nodes-document-generator.DocumentGenerator",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send one HTML Email per list",
+        "parameters": {
+          "fromEmail": "mcolomer@n8nhackers.com",
+          "html": "={{ $json[\"text\"] }}",
+          "options": {},
+          "subject": "New customers",
+          "toEmail": "mcolomer@n8nhackers.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send one TEXT email per item",
+        "parameters": {
+          "fromEmail": "mcolomer@n8nhackers.com",
+          "html": "={{ $json[\"text\"] }}",
+          "options": {},
+          "subject": "=Invoice for {{ $node[\"Add lines\"].json[\"name\"] }}",
+          "toEmail": "mcolomer@n8nhackers.com"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 5,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "N8ntrainingcustomerdatastore",
+    "Itemlists",
+    "Document-generator",
+    "Functionitem",
+    "Emailsend"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 11,
+  "viewCount": 234,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "N8ntrainingcustomerdatastore Account",
+      "Itemlists Account",
+      "Document-generator Account",
+      "Functionitem Account",
+      "Emailsend Account"
+    ],
+    "requiredCredentials": [
+      "smtp details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the \"Customer Datastore\" node (n8n-nodes-base.n8nTrainingCustomerDatastore) and configure the action parameters, mappings, and fields.",
+      "Open the \"Item Lists\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"One item per template\" node (n8n-nodes-document-generator.DocumentGenerator) and configure the action parameters, mappings, and fields.",
+      "Open the \"All items, one template\" node (n8n-nodes-document-generator.DocumentGenerator) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add lines\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send one TEXT email per item\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send one HTML Email per list\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ux384jrex",
+      "workflowId": "manualtrigger-workflow-mkgfq",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Functionitem/0255_Functionitem_Manual_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Functionitem\\0255_Functionitem_Manual_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:02.540Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:02.540Z",
+  "updatedAt": "2026-07-15T11:29:02.540Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

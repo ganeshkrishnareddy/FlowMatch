@@ -1,0 +1,930 @@
+{
+  "id": "crypto-workflow-lmml4",
+  "name": "Crypto Workflow",
+  "slug": "crypto-workflow-s8tl",
+  "description": "Automated workflow: Crypto Workflow. This workflow integrates 9 different services: webhook, filemaker, stickyNote, respondToWebhook, set. It contains 19 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Crypto Workflow workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-b1d28790",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:08:00.278689",
+      "updatedAt": "2025-09-29T07:08:00.278700",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "9bd2c2f7-d837-451e-8a25-a185713edefb",
+        "name": "Crypto",
+        "type": "n8n-nodes-base.crypto",
+        "position": [
+          1640,
+          660
+        ],
+        "parameters": {
+          "type": "SHA256",
+          "value": "={{$json[\"source_data\"]}}",
+          "action": "hmac",
+          "secret": "YOUR_CREDENTIAL_HERE",
+          "encoding": "base64",
+          "dataPropertyName": "target_data"
+        },
+        "typeVersion": 1,
+        "notes": "This crypto node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "75aca737-5e31-4022-8827-375cf8717a06",
+        "name": "Move Binary Data",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          1240,
+          660
+        ],
+        "parameters": {
+          "options": {},
+          "setAllData": false,
+          "destinationKey": "YOUR_CREDENTIAL_HERE"
+        },
+        "typeVersion": 1,
+        "notes": "This moveBinaryData node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f1ece5d1-a38f-4548-80b4-a77f07c0cc95",
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1440,
+          660
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "source_data",
+                "value": "={{$json[\"raw_data\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "251bd7d1-e955-4b2c-a020-e0b2e3ebb5cc",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1860,
+          660
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Crypto\"].json[\"target_data\"]}}",
+                "value2": "={{$node[\"Xero Webhook\"].json[\"headers\"][\"x-xero-signature\"]}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3a7041d6-e86b-414f-9d26-94c1ffe893cc",
+        "name": "Success",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          2080,
+          540
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 200
+          },
+          "respondWith": "noData"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8dfe4916-2fce-4d51-8a41-66cb4e31bdf5",
+        "name": "Unauthorised",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          2080,
+          740
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 401
+          },
+          "respondWith": "noData"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "81b08d6b-065c-4e61-87b7-6428963339e2",
+        "name": "Create webhook record",
+        "type": "n8n-nodes-base.filemaker",
+        "position": [
+          2320,
+          540
+        ],
+        "parameters": {
+          "action": "create",
+          "layout": "Webhooks",
+          "fieldsParametersUi": {
+            "fields": [
+              {
+                "name": "json",
+                "value": "={{$node[\"Set\"].json[\"source_data\"]}}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "fileMaker": {
+            "id": "T1MTy9Xu5m7Nubie",
+            "name": "Kounio FileMaker"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This filemaker node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "48d977ee-64df-4788-8808-70cd6c7bf5f7",
+        "name": "Perform processWebhook script",
+        "type": "n8n-nodes-base.filemaker",
+        "position": [
+          2540,
+          540
+        ],
+        "parameters": {
+          "action": "performscript",
+          "layout": "Webhooks",
+          "script": "processWebhook",
+          "scriptParam": "={{ $json.response.recordId }}"
+        },
+        "credentials": {
+          "fileMaker": {
+            "id": "T1MTy9Xu5m7Nubie",
+            "name": "Kounio FileMaker"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This filemaker node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d6f4d1d4-4e69-4279-88e2-ea27036cea20",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2600,
+          420
+        ],
+        "parameters": {
+          "content": "## Script Parameter\nPasses the record id as script parameter to be used in your processWebhook script"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "72b3f208-803b-45c5-b38d-eeef4425a2ba",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1620,
+          540
+        ],
+        "parameters": {
+          "width": 158.74371859296477,
+          "height": 121.3065326633166,
+          "content": "## Input\nAdd your Xero webhook secret here"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "54f36def-0ac9-4769-818f-2e8991f196a5",
+        "name": "Xero Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          1040,
+          660
+        ],
+        "webhookId": "4cf50a61-b550-4ee6-984d-ad8c94e2b5c2",
+        "parameters": {
+          "path": "4cf50a61-b550-4ee6-984d-ad8c94e2b5c2",
+          "options": {
+            "rawBody": true
+          },
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "3a7041d6-e86b-414f-9d26-94c1ffe893cc": {
+        "main": [
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-793bf411",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-eb1a18c8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-143cd046",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-8c35aea3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-74210218",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-e849d556",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-83051275",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-003fafdf",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "8dfe4916-2fce-4d51-8a41-66cb4e31bdf5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-85489472",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-19218e5a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-64ec1aba",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-61014cb1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-8369a805",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-39754728",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-3bbb0667",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-9885ec31",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "54f36def-0ac9-4769-818f-2e8991f196a5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-3bf8a100",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-e1fad0de",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-bfe9e166",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-503b0868",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-e888961e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-3b5a154f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-9297773a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-53420e64",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "81b08d6b-065c-4e61-87b7-6428963339e2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-81b08d6b-065c-4e61-87b7-6428963339e2-f08c8d3d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "48d977ee-64df-4788-8808-70cd6c7bf5f7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-48d977ee-64df-4788-8808-70cd6c7bf5f7-345d12d9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Crypto Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Crypto Workflow. This workflow integrates 9 different services: webhook, filemaker, stickyNote, respondToWebhook, set. It contains 19 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Crypto Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "3a7041d6-e86b-414f-9d26-94c1ffe893cc": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-793bf411"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-eb1a18c8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-143cd046"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-8c35aea3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-74210218"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-e849d556"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-83051275"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3a7041d6-e86b-414f-9d26-94c1ffe893cc-003fafdf"
+            }
+          ]
+        ]
+      },
+      "48d977ee-64df-4788-8808-70cd6c7bf5f7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-48d977ee-64df-4788-8808-70cd6c7bf5f7-345d12d9"
+            }
+          ]
+        ]
+      },
+      "54f36def-0ac9-4769-818f-2e8991f196a5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-3bf8a100"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-e1fad0de"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-bfe9e166"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-503b0868"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-e888961e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-3b5a154f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-9297773a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-54f36def-0ac9-4769-818f-2e8991f196a5-53420e64"
+            }
+          ]
+        ]
+      },
+      "81b08d6b-065c-4e61-87b7-6428963339e2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-81b08d6b-065c-4e61-87b7-6428963339e2-f08c8d3d"
+            }
+          ]
+        ]
+      },
+      "8dfe4916-2fce-4d51-8a41-66cb4e31bdf5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-85489472"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-19218e5a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-64ec1aba"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-61014cb1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-8369a805"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-39754728"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-3bbb0667"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfe4916-2fce-4d51-8a41-66cb4e31bdf5-9885ec31"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Crypto Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "fileMaker": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create webhook record",
+        "parameters": {
+          "action": "create",
+          "fieldsParametersUi": {
+            "fields": [
+              {
+                "name": "json",
+                "value": "={{$node[\"Set\"].json[\"source_data\"]}}"
+              }
+            ]
+          },
+          "layout": "Webhooks"
+        },
+        "type": "n8n-nodes-base.filemaker",
+        "typeVersion": 1
+      },
+      {
+        "name": "Crypto",
+        "parameters": {
+          "action": "hmac",
+          "dataPropertyName": "target_data",
+          "encoding": "base64",
+          "secret": "YOUR_CREDENTIAL_HERE",
+          "type": "SHA256",
+          "value": "={{$json[\"source_data\"]}}"
+        },
+        "type": "n8n-nodes-base.crypto",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Crypto\"].json[\"target_data\"]}}",
+                "value2": "={{$node[\"Xero Webhook\"].json[\"headers\"][\"x-xero-signature\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Move Binary Data",
+        "parameters": {
+          "destinationKey": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "setAllData": false
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "fileMaker": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Perform processWebhook script",
+        "parameters": {
+          "action": "performscript",
+          "layout": "Webhooks",
+          "script": "processWebhook",
+          "scriptParam": "={{ $json.response.recordId }}"
+        },
+        "type": "n8n-nodes-base.filemaker",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "source_data",
+                "value": "={{$json[\"raw_data\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Script Parameter\nPasses the record id as script parameter to be used in your processWebhook script"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Input\nAdd your Xero webhook secret here",
+          "height": 121.3065326633166,
+          "width": 158.74371859296477
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Success",
+        "parameters": {
+          "options": {
+            "responseCode": 200
+          },
+          "respondWith": "noData"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Unauthorised",
+        "parameters": {
+          "options": {
+            "responseCode": 401
+          },
+          "respondWith": "noData"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Xero Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {
+            "rawBody": true
+          },
+          "path": "4cf50a61-b550-4ee6-984d-ad8c94e2b5c2",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Crypto",
+    "Movebinarydata",
+    "Webhook",
+    "Form Trigger"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 146,
+  "viewCount": 811,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Crypto Account",
+      "Movebinarydata Account",
+      "Webhook Account",
+      "Form Trigger Account"
+    ],
+    "requiredCredentials": [
+      "file Maker details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Success\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Unauthorised\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Xero Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Crypto\" node (n8n-nodes-base.crypto) and configure the action parameters, mappings, and fields.",
+      "Open the \"Move Binary Data\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create webhook record\" node (n8n-nodes-base.filemaker) and configure the action parameters, mappings, and fields.",
+      "Open the \"Perform processWebhook script\" node (n8n-nodes-base.filemaker) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-m0v7oubkc",
+      "workflowId": "crypto-workflow-lmml4",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Webhook/0615_Webhook_Filemaker_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Webhook\\0615_Webhook_Filemaker_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:20:56.160Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:56.160Z",
+  "updatedAt": "2026-07-15T11:20:56.160Z"
+}

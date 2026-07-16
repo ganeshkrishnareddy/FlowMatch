@@ -1,0 +1,2274 @@
+{
+  "id": "-workflow-n8n-d-auto-post-sur-les-r-seaux-sociaux-vide-z7yi0",
+  "name": "💥workflow n8n d'Auto-Post sur les réseaux sociaux - vide",
+  "slug": "-workflow-n8n-d-auto-post-sur-les-r-seaux-sociaux-vide-uura",
+  "description": "Automated workflow: 💥workflow n8n d'Auto-Post sur les réseaux sociaux - vide. This workflow integrates 6 different services: stickyNote, httpRequest, scheduleTrigger, set, stopAndError. It contains 37 nodes and follows best practices for error handling and security.",
+  "shortDescription": "💥workflow n8n d'Auto-Post sur les réseaux sociaux - vide workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "id": "CCcz1G4G2yPwk1me",
+    "meta": {
+      "instanceId": "workflow-2819d104",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.298790",
+      "updatedAt": "2025-09-29T07:07:46.298803",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "💥workflow n8n d'Auto-Post sur les réseaux sociaux - vide",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "72df02b7-b426-4d79-970a-936e40d1a67d",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -360,
+          -40
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 22
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d1f58a61-6a56-447b-9e34-d9abb58e50b8",
+        "name": "Assign Social Media IDs",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          80,
+          -40
+        ],
+        "parameters": {
+          "mode": "raw",
+          "options": {},
+          "jsonOutput": "{\n  \"instagram_id\": \"111\",\n  \"youtube_id\": \"222\",\n  \"tiktok_id\": \"333\",\n  \"facebook_id\": \"444\",\n  \"facebook_page_id\": \"555\",\n  \"threads_id\": \"666\",\n  \"twitter_id\": \"777\",\n  \"linkedin_id\": \"888\",\n  \"pinterest_id\": \"999\",\n  \"pinterest_board_id\": \"101010\",\n  \"bluesky_id\": \"111111\"\n}"
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6c4a3eb4-f166-4702-acb5-efeffc7e5754",
+        "name": "Get my video",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          -140,
+          -40
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "id",
+            "value": "="
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "="
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "51us92xkOlrvArhV",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4c2d215a-48d7-426f-acd4-4a02a375094e",
+        "name": "Upload Video to Blotato",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          300,
+          -40
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "url",
+                "value": "={{ $('Get my video').item.json['URL VIDEO'] }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a179cae8-128c-4ed5-b8cb-6e9fae29d742",
+        "name": "INSTAGRAM",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          580,
+          -280
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.instagram_id }}\",\n    \"target\": {\n      \"targetType\": \"instagram\"\n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"instagram\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d1c6965d-e347-471e-b400-8047a839de6d",
+        "name": "YOUTUBE",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          800,
+          -280
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.youtube_id }}\",\n    \"target\": {\n      \"targetType\": \"youtube\",\n      \"title\": \"{{ $('Get my video').item.json.Titre }}\",\n      \"privacyStatus\": \"unlisted\",\n      \"shouldNotifySubscribers\": \"false\"\n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"youtube\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "598a9da7-3b10-44d0-a1d2-dbbda8ce1a51",
+        "name": "TIKTOK",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1000,
+          -280
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.tiktok_id }}\",\n    \"target\": {\n      \"targetType\": \"tiktok\",\n      \"isYourBrand\": \"false\", \n      \"disabledDuet\": \"false\",\n      \"privacyLevel\": \"PUBLIC_TO_EVERYONE\",\n      \"isAiGenerated\": \"true\",\n      \"disabledStitch\": \"false\",\n      \"disabledComments\": \"false\",\n      \"isBrandedContent\": \"false\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"tiktok\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "796e0a52-c431-4239-bbb5-baf2d000f60e",
+        "name": "FACEBOOK",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          580,
+          -40
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.facebook_id }}\",\n    \"target\": {\n      \"targetType\": \"facebook\",\n      \"pageId\": \"{{ $('Assign Social Media IDs').item.json.facebook_page_id }}\"\n\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"facebook\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d88677f8-0a38-4aea-8825-0fef04b67af6",
+        "name": "THREADS",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          800,
+          -40
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.threads_id }}\",\n    \"target\": {\n      \"targetType\": \"threads\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"threads\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59",
+        "name": "TWETTER",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1000,
+          -40
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.twitter_id }}\",\n    \"target\": {\n      \"targetType\": \"twitter\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"twitter\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "183f17ff-b8f4-472a-a956-61201dc36741",
+        "name": "LINKEDIN",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          580,
+          200
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.linkedin_id }}\",\n    \"target\": {\n      \"targetType\": \"linkedin\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"linkedin\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "34a4d037-d035-42fe-a4ea-e4560c811dbb",
+        "name": "BLUESKY",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          800,
+          200
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "= {\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.bluesky_id }}\",\n    \"target\": {\n      \"targetType\": \"bluesky\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"bluesky\",\n      \"mediaUrls\": [\n        \"{{ $env.WEBHOOK_URL }}\"\n      ]\n    }\n  }\n}\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f331b371-c71b-4bb6-a06d-f439b568f7ea",
+        "name": "PINTEREST",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1000,
+          200
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.pinterest_id }}\",\n    \"target\": {\n      \"targetType\": \"pinterest\",\n      \"boardId\": \"{{ $('Assign Social Media IDs').item.json.pinterest_board_id }}\"      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"pinterest\",\n      \"mediaUrls\": [\n        \"{{ $env.WEBHOOK_URL }}\"\n      ]\n    }\n  }\n}\n\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "59d608a5-d5c6-4160-96cc-c42534f99c0b",
+        "name": "Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1180,
+          -40
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "STATUS": "DONE",
+              "row_number": "={{ $('Get my video').item.json.row_number }}"
+            },
+            "schema": [
+              {
+                "id": "PROMPT",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "PROMPT",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "DESCRIPTION",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "DESCRIPTION",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "URL VIDEO",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "URL VIDEO",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Titre",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Titre",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "STATUS",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "STATUS",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "row_number",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": true,
+                "required": false,
+                "displayName": "row_number",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "row_number"
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "update",
+          "sheetName": {
+            "__rl": true,
+            "mode": "id",
+            "value": "="
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "="
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "51us92xkOlrvArhV",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f15f4a2d-bf81-4fe4-91a0-2ff5c9662f46",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -420,
+          -480
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 880,
+          "height": 300,
+          "content": "# Auto-Publish to 9 Social Platforms\n## Automates distribution using Blotato’s API.\n## The video is auto-published to Instagram, YouTube, TikTok, Facebook, \n## LinkedIn, Threads, Twitter (X), Bluesky, and Pinterest \n## — all in one go, with no manual work required.\n### ** Documentation : ** [Guide]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "f2540099-8de1-4ac6-9856-7d5989d5e7e3",
+    "connections": {
+      "4c2d215a-48d7-426f-acd4-4a02a375094e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-808186f5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-415f7ce7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-ad1e4026",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-d6dbe869",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-ab96ad6d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-b6e6b88c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-2dd31821",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-9c3e9ffc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a179cae8-128c-4ed5-b8cb-6e9fae29d742": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-68359184",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-07645af2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-7b923419",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-8cdc5c41",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-533ce2f3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-0db4ed08",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-dff4daee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-ae882674",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d1c6965d-e347-471e-b400-8047a839de6d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-64ed7e93",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-b7aded07",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-ad301cd6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-4fddb155",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-46d0ef98",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-cf4f4b76",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-16b27582",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-29c49739",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "598a9da7-3b10-44d0-a1d2-dbbda8ce1a51": {
+        "main": [
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-8701bb09",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-24904dd7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-eb9ca0ee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-6a6f2193",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-4f5e3ec2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-d228b4a0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-2fec58ff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-17d9f963",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "796e0a52-c431-4239-bbb5-baf2d000f60e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-a7a5baf3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-74757ea2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-937cc74d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-7f00b179",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-ef87eb38",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-481d4f2e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-dbd53951",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-98928ef2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d88677f8-0a38-4aea-8825-0fef04b67af6": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-4dcd7079",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-584f8ccf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-f47bdeb7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-1433c352",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-4b4b1c7e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-f7e51dd1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-ce84452a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-edb0334c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59": {
+        "main": [
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-e1b160ca",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-c7dbd3c4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-616570bb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-4707616b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-33917c35",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-35d0bd8e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-32c9296a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-0ea029f9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "183f17ff-b8f4-472a-a956-61201dc36741": {
+        "main": [
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-d8cf215e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-9e04878f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-fa26848b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-d5769076",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-7a202716",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-2c8ac68b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-8bad8579",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-05d41608",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "34a4d037-d035-42fe-a4ea-e4560c811dbb": {
+        "main": [
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-f66a7cda",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-cd15480c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-fe693c28",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-92ddd83f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-c32dc626",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-7d5f8953",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-95be3072",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-3869c29d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f331b371-c71b-4bb6-a06d-f439b568f7ea": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-93dc4f0f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-03e1bdff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-3e772733",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-4721f751",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-16e7d190",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-83ba17b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-0e772082",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-a472eaee",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "6c4a3eb4-f166-4702-acb5-efeffc7e5754": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6c4a3eb4-f166-4702-acb5-efeffc7e5754-11d04e5d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "59d608a5-d5c6-4160-96cc-c42534f99c0b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-59d608a5-d5c6-4160-96cc-c42534f99c0b-b913789c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: 💥workflow n8n d'Auto-Post sur les réseaux sociaux - vide. This workflow integrates 6 different services: stickyNote, httpRequest, scheduleTrigger, set, stopAndError. It contains 37 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: 💥workflow n8n d'Auto-Post sur les réseaux sociaux - vide. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "183f17ff-b8f4-472a-a956-61201dc36741": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-d8cf215e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-9e04878f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-fa26848b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-d5769076"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-7a202716"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-2c8ac68b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-8bad8579"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-183f17ff-b8f4-472a-a956-61201dc36741-05d41608"
+            }
+          ]
+        ]
+      },
+      "2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-e1b160ca"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-c7dbd3c4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-616570bb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-4707616b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-33917c35"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-35d0bd8e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-32c9296a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2f3b9b5f-09f0-4fd0-9c65-f6b3be566f59-0ea029f9"
+            }
+          ]
+        ]
+      },
+      "34a4d037-d035-42fe-a4ea-e4560c811dbb": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-f66a7cda"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-cd15480c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-fe693c28"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-92ddd83f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-c32dc626"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-7d5f8953"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-95be3072"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-34a4d037-d035-42fe-a4ea-e4560c811dbb-3869c29d"
+            }
+          ]
+        ]
+      },
+      "4c2d215a-48d7-426f-acd4-4a02a375094e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-808186f5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-415f7ce7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-ad1e4026"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-d6dbe869"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-ab96ad6d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-b6e6b88c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-2dd31821"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4c2d215a-48d7-426f-acd4-4a02a375094e-9c3e9ffc"
+            }
+          ]
+        ]
+      },
+      "598a9da7-3b10-44d0-a1d2-dbbda8ce1a51": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-8701bb09"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-24904dd7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-eb9ca0ee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-6a6f2193"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-4f5e3ec2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-d228b4a0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-2fec58ff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-598a9da7-3b10-44d0-a1d2-dbbda8ce1a51-17d9f963"
+            }
+          ]
+        ]
+      },
+      "59d608a5-d5c6-4160-96cc-c42534f99c0b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-59d608a5-d5c6-4160-96cc-c42534f99c0b-b913789c"
+            }
+          ]
+        ]
+      },
+      "6c4a3eb4-f166-4702-acb5-efeffc7e5754": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6c4a3eb4-f166-4702-acb5-efeffc7e5754-11d04e5d"
+            }
+          ]
+        ]
+      },
+      "796e0a52-c431-4239-bbb5-baf2d000f60e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-a7a5baf3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-74757ea2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-937cc74d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-7f00b179"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-ef87eb38"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-481d4f2e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-dbd53951"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-796e0a52-c431-4239-bbb5-baf2d000f60e-98928ef2"
+            }
+          ]
+        ]
+      },
+      "a179cae8-128c-4ed5-b8cb-6e9fae29d742": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-68359184"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-07645af2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-7b923419"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-8cdc5c41"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-533ce2f3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-0db4ed08"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-dff4daee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a179cae8-128c-4ed5-b8cb-6e9fae29d742-ae882674"
+            }
+          ]
+        ]
+      },
+      "d1c6965d-e347-471e-b400-8047a839de6d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-64ed7e93"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-b7aded07"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-ad301cd6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-4fddb155"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-46d0ef98"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-cf4f4b76"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-16b27582"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d1c6965d-e347-471e-b400-8047a839de6d-29c49739"
+            }
+          ]
+        ]
+      },
+      "d88677f8-0a38-4aea-8825-0fef04b67af6": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-4dcd7079"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-584f8ccf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-f47bdeb7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-1433c352"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-4b4b1c7e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-f7e51dd1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-ce84452a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d88677f8-0a38-4aea-8825-0fef04b67af6-edb0334c"
+            }
+          ]
+        ]
+      },
+      "f331b371-c71b-4bb6-a06d-f439b568f7ea": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-93dc4f0f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-03e1bdff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-3e772733"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-4721f751"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-16e7d190"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-83ba17b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-0e772082"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f331b371-c71b-4bb6-a06d-f439b568f7ea-a472eaee"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "💥workflow n8n d'Auto-Post sur les réseaux sociaux - vide",
+    "nodes": [
+      {
+        "name": "Assign Social Media IDs",
+        "parameters": {
+          "jsonOutput": "{\n  \"instagram_id\": \"111\",\n  \"youtube_id\": \"222\",\n  \"tiktok_id\": \"333\",\n  \"facebook_id\": \"444\",\n  \"facebook_page_id\": \"555\",\n  \"threads_id\": \"666\",\n  \"twitter_id\": \"777\",\n  \"linkedin_id\": \"888\",\n  \"pinterest_id\": \"999\",\n  \"pinterest_board_id\": \"101010\",\n  \"bluesky_id\": \"111111\"\n}",
+          "mode": "raw",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "BLUESKY",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "= {\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.bluesky_id }}\",\n    \"target\": {\n      \"targetType\": \"bluesky\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"bluesky\",\n      \"mediaUrls\": [\n        \"{{ $env.WEBHOOK_URL }}\"\n      ]\n    }\n  }\n}\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "FACEBOOK",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.facebook_id }}\",\n    \"target\": {\n      \"targetType\": \"facebook\",\n      \"pageId\": \"{{ $('Assign Social Media IDs').item.json.facebook_page_id }}\"\n\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"facebook\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get my video",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "="
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "id",
+            "value": "="
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Sheets",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "row_number"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "PROMPT",
+                "id": "PROMPT",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "DESCRIPTION",
+                "id": "DESCRIPTION",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "URL VIDEO",
+                "id": "URL VIDEO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Titre",
+                "id": "Titre",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "STATUS",
+                "id": "STATUS",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "row_number",
+                "id": "row_number",
+                "readOnly": true,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "STATUS": "DONE",
+              "row_number": "={{ $('Get my video').item.json.row_number }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "="
+          },
+          "operation": "update",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "id",
+            "value": "="
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "INSTAGRAM",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.instagram_id }}\",\n    \"target\": {\n      \"targetType\": \"instagram\"\n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"instagram\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "LINKEDIN",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.linkedin_id }}\",\n    \"target\": {\n      \"targetType\": \"linkedin\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"linkedin\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "PINTEREST",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.pinterest_id }}\",\n    \"target\": {\n      \"targetType\": \"pinterest\",\n      \"boardId\": \"{{ $('Assign Social Media IDs').item.json.pinterest_board_id }}\"      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"pinterest\",\n      \"mediaUrls\": [\n        \"{{ $env.WEBHOOK_URL }}\"\n      ]\n    }\n  }\n}\n\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 22
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 6,
+          "content": "# Auto-Publish to 9 Social Platforms\n## Automates distribution using Blotato’s API.\n## The video is auto-published to Instagram, YouTube, TikTok, Facebook, \n## LinkedIn, Threads, Twitter (X), Bluesky, and Pinterest \n## — all in one go, with no manual work required.\n### ** Documentation : ** [Guide]({{ $env.WEBHOOK_URL }}",
+          "height": 300,
+          "width": 880
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "THREADS",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.threads_id }}\",\n    \"target\": {\n      \"targetType\": \"threads\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"threads\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "TIKTOK",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.tiktok_id }}\",\n    \"target\": {\n      \"targetType\": \"tiktok\",\n      \"isYourBrand\": \"false\", \n      \"disabledDuet\": \"false\",\n      \"privacyLevel\": \"PUBLIC_TO_EVERYONE\",\n      \"isAiGenerated\": \"true\",\n      \"disabledStitch\": \"false\",\n      \"disabledComments\": \"false\",\n      \"isBrandedContent\": \"false\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"tiktok\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "TWETTER",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.twitter_id }}\",\n    \"target\": {\n      \"targetType\": \"twitter\"\n      \n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"twitter\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Upload Video to Blotato",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "url",
+                "value": "={{ $('Get my video').item.json['URL VIDEO'] }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "YOUTUBE",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "blotato-api-key"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.youtube_id }}\",\n    \"target\": {\n      \"targetType\": \"youtube\",\n      \"title\": \"{{ $('Get my video').item.json.Titre }}\",\n      \"privacyStatus\": \"unlisted\",\n      \"shouldNotifySubscribers\": \"false\"\n    },\n    \"content\": {\n      \"text\": \"{{ $('Get my video').item.json.DESCRIPTION }}\",\n      \"platform\": \"youtube\",\n      \"mediaUrls\": [\n        \"{{ $json.url }}\"\n      ]\n    }\n  }\n}\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Google Sheets",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 193,
+  "viewCount": 667,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get my video\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Upload Video to Blotato\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"INSTAGRAM\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"YOUTUBE\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"TIKTOK\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"FACEBOOK\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"THREADS\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"TWETTER\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"LINKEDIN\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"BLUESKY\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"PINTEREST\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Assign Social Media IDs\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-3zyzz5l2y",
+      "workflowId": "-workflow-n8n-d-auto-post-sur-les-r-seaux-sociaux-vide-z7yi0",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1367_HTTP_Schedule_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1367_HTTP_Schedule_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:34.986Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:34.986Z",
+  "updatedAt": "2026-07-15T11:18:34.986Z"
+}

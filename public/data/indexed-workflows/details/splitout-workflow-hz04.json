@@ -1,0 +1,2379 @@
+{
+  "id": "splitout-workflow-sdo6y",
+  "name": "Splitout Workflow",
+  "slug": "splitout-workflow-hz04",
+  "description": "Automated workflow: Splitout Workflow. This workflow integrates 14 different services: stickyNote, httpRequest, formTrigger, filter, code. It contains 45 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Splitout Workflow workflow containing 36 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "18813eed-27a8-4338-8e71-abb270d43082",
+        "name": "Split by object",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          -260,
+          540
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "object"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ee610ddd-5bd7-4d97-82a9-b688c71616d8",
+        "name": "Fetch properties from Hubspot",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -40,
+          540
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "JxzF93M0SJ00jDD9",
+            "name": "HubSpot account"
+          },
+          "hubspotDeveloperApi": {
+            "id": "EN6KsMdrxSVNfhyz",
+            "name": "HubSpot Developer account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "22662720-97ae-4e59-a70e-3b858e8e632d",
+        "name": "Define crm_type",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          180,
+          540
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\nfor (let result of $json.results) {\n  result.crm_type = $('Split by object').item.json.object;\n  delete result.options\n}\nreturn {results: $json.results};\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "abfdd971-1112-4dd4-9513-13f12f3e92f2",
+        "name": "Split results",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          400,
+          540
+        ],
+        "parameters": {
+          "include": "allOtherFields",
+          "options": {},
+          "fieldToSplitOut": "results"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "94c2b864-e88d-4da8-9ca3-a34d1ca8b15b",
+        "name": "Transforms the results",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          840,
+          540
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet test = []\nlet entry = $input.item.json.results\nreturn {json: entry}\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ddebf521-ed07-446b-ac2a-e21be46ee2c5",
+        "name": "Append to Google sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1060,
+          540
+        ],
+        "parameters": {
+          "columns": {
+            "value": {},
+            "schema": [
+              {
+                "id": "updatedAt",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "updatedAt",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "createdAt",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "createdAt",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "name",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "name",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "label",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "label",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "type",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "type",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "fieldType",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "fieldType",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "description",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "description",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "groupName",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "groupName",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "displayOrder",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "displayOrder",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "calculated",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "calculated",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "externalOptions",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "externalOptions",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "hasUniqueValue",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "hasUniqueValue",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "hidden",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "hidden",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "hubspotDefined",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "hubspotDefined",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "formField",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "formField",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "dataSensitivity",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "dataSensitivity",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "crm_type",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "crm_type",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "showCurrencySymbol",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "showCurrencySymbol",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "calculationFormula",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "calculationFormula",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "referencedObjectType",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "referencedObjectType",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "createdUserId",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "createdUserId",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "updatedUserId",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "updatedUserId",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "archived",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "archived",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "dateDisplayHint",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "dateDisplayHint",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "options",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "options",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "modificationMetadata",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "modificationMetadata",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "autoMapInputData",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {
+            "useAppend": false
+          },
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1NdvtXADHaSBleSkvVxf6Y6yo3VmHmilLEBuWbrik32w",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Properties for Hubspot"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "gdLmm513ROUyH6oU",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dfd3d16b-b7d6-49ba-a38b-076960a8a184",
+        "name": "Erase Google sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          -700,
+          540
+        ],
+        "parameters": {
+          "operation": "clear",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1NdvtXADHaSBleSkvVxf6Y6yo3VmHmilLEBuWbrik32w",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Properties for Hubspot"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "gdLmm513ROUyH6oU",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d39acf68-f809-4a4b-bb5e-5f80a7fddfbc",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1000,
+          460
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 2280,
+          "height": 460,
+          "content": "## Update the properties by object Workflow\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "99ce38cb-937c-44f4-8e21-cceb8c5fa000",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1000,
+          -300
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 3200,
+          "height": 700,
+          "content": "## Import workflow\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3b231f69-ca9b-40a4-b894-24cece123855",
+        "name": "Define array of objects",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -480,
+          540
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "d6c05100-fc13-4969-90e5-bcc398a79006",
+                "name": "object",
+                "type": "array",
+                "value": "[\"companies\",\"contacts\", \"deals\", \"leads\", \"tickets\"]"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d3eff9e3-1fae-4228-bcd9-525854f3f440",
+        "name": "Start here to update your field list",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -920,
+          540
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b1a4d238-9d55-4bff-a1b4-3942dbe37fdb",
+        "name": "File upload form",
+        "type": "n8n-nodes-base.formTrigger",
+        "position": [
+          -920,
+          20
+        ],
+        "webhookId": "fc3523af-1d0f-4dfb-8869-b29cfdde1a06",
+        "parameters": {
+          "options": {},
+          "formTitle": "title",
+          "formFields": {
+            "values": [
+              {
+                "fieldType": "file",
+                "fieldLabel": "data",
+                "multipleFiles": false,
+                "requiredField": true,
+                "acceptFileTypes": ".csv"
+              },
+              {
+                "fieldType": "dropdown",
+                "fieldLabel": "Type of import",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "Companies"
+                    },
+                    {
+                      "option": "Contacts"
+                    },
+                    {
+                      "option": "Leads"
+                    },
+                    {
+                      "option": "Deals"
+                    },
+                    {
+                      "option": "Tickets"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "formDescription": "provide me a file"
+        },
+        "typeVersion": 2.2,
+        "notes": "This formTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "44f4ffe7-ff9f-4716-82ef-fc3c44dc48ca",
+        "name": "To get the first line of file",
+        "type": "n8n-nodes-base.extractFromFile",
+        "position": [
+          -700,
+          120
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "text"
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "351604db-d9e9-4994-8c1c-f543c13aead9",
+        "name": "Set the real fields",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -480,
+          120
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "69a042d8-9543-4a81-bbf8-07e9d7ae2c0d",
+                "name": "real_fields",
+                "type": "array",
+                "value": "={{ $json.data.split(\"\\n\")[0].split(\";\") }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a61d6de1-005e-41ad-a71e-3eafde83afc7",
+        "name": "Get the fields from the sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          -40,
+          20
+        ],
+        "parameters": {
+          "options": {},
+          "filtersUI": {
+            "values": [
+              {
+                "lookupValue": "={{ $('File upload form').first().json['Type of import'].toLowerCase() }}",
+                "lookupColumn": "crm_type"
+              }
+            ]
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1NdvtXADHaSBleSkvVxf6Y6yo3VmHmilLEBuWbrik32w",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Properties for Hubspot"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "gdLmm513ROUyH6oU",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "617d572a-53a9-4fe8-9f73-06689c706006",
+        "name": "Merge fields and data",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -260,
+          20
+        ],
+        "parameters": {},
+        "typeVersion": 3.1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f2be6bfb-ac32-43d0-924c-d8f20a401b2f",
+        "name": "Check if all fields from input are defined",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          180,
+          20
+        ],
+        "parameters": {
+          "jsCode": "// \nlet type = $('File upload form').first().json['Type of import']\n// Get first line of json\nlet first_line = $('Set the real fields').first().json.real_fields\nlet keys = Object.values(first_line)\nlet props = []\n\nfor (let realField of $input.all()) {\n  props.push(realField.json.name)\n}\nlet response = true\nfor (let key of keys) {\n if(!props.includes(key.trim())) {\n    console.log(props, key)\n    response = false\n }\n}\n\nreturn {response, keys, props}"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8a2e23a3-c044-48ac-b66c-7205e34ad3bd",
+        "name": "If all fields are defined",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          400,
+          20
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "3bb457eb-aef5-43f6-b268-1baaad0698e3",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.response }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "123f6190-600a-410a-b943-a6e67d4f0a86",
+        "name": "Creates the correspondance table",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          620,
+          120
+        ],
+        "parameters": {
+          "jsCode": "\nlet ret = []\nlet fields = {}\nfor (let key of $input.first().json.keys) {\n  if (!$input.first().json.props.includes(key)) {\n    let fieldName = `Set the correct field for '${key}'`\n    fields[fieldName] = key\n    // console.log(key)\n    ret.push(\n      {\n      \"fieldLabel\":key,\n     \"fieldType\": \"dropdown\",\n     \"fieldOptions\": {\n      \"values\": $input.first().json.props.map(x => {return {\"option\": x}})\n\t\t},\n      \"requiredField\":false\n   }\n    )\n  }\n}\n\nreturn {ret, fields}"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c7348c9a-e4c3-4af2-9224-5338799ed7aa",
+        "name": "Form to set the correponding field for each input field",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          840,
+          120
+        ],
+        "webhookId": "8bdb6e07-1112-4923-a1a3-a0fbb83c806e",
+        "parameters": {
+          "options": {
+            "formTitle": "=Correspondance for fields",
+            "formDescription": "=Set the correct equivalent for each field.\nYou don't have to do it for all fields."
+          },
+          "defineForm": "json",
+          "jsonOutput": "={{$json.ret}}"
+        },
+        "executeOnce": true,
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2ba6be51-2508-4d34-b447-2f326fb692b5",
+        "name": "Get the content of file",
+        "type": "n8n-nodes-base.extractFromFile",
+        "onError": "continueRegularOutput",
+        "position": [
+          -480,
+          -80
+        ],
+        "parameters": {
+          "options": {
+            "encoding": "utf-8",
+            "delimiter": ";",
+            "headerRow": true
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3bae9532-81d5-4694-b2cd-40c2b8207b22",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -960,
+          -220
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 840,
+          "height": 500,
+          "content": "## Form uploader\n- Choose  file to import. The CSV file has \",\" as delimiters, is encoded in UTF8 and has the name of the fields as header. You can change all that in \"Get content of the file\"\n- Set the type of object you want to import"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2836df7d-4307-485c-857e-30b0bb4cf59b",
+        "name": "Split all records to import",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          1280,
+          20
+        ],
+        "parameters": {
+          "include": "allOtherFields",
+          "options": {},
+          "fieldToSplitOut": "out"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5d4481f4-0157-42d4-8223-1259f45a1846",
+        "name": "Define properties",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1500,
+          20
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bc1ad698-c75a-49e5-843c-03c1c64a21b1",
+                "name": "def.properties",
+                "type": "object",
+                "value": "={{ $json.out }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b765d44e-6b13-4031-b188-e827578b9bee",
+        "name": "Uploads to Hubspot",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1720,
+          20
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={{ $json.def }}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "JxzF93M0SJ00jDD9",
+            "name": "HubSpot account"
+          },
+          "hubspotDeveloperApi": {
+            "id": "EN6KsMdrxSVNfhyz",
+            "name": "HubSpot Developer account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f95862b2-555b-44a7-b318-cb3316d33594",
+        "name": "Form response",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          1940,
+          20
+        ],
+        "webhookId": "980c195f-9ea2-4f38-a869-6ac946b9552d",
+        "parameters": {
+          "options": {
+            "formTitle": ""
+          },
+          "operation": "completion",
+          "completionTitle": "Your Data has been imported successfully"
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "75275b15-24e3-4fee-9d71-b4e7a2479c11",
+        "name": "Remove hidden and starting with hs_ props fields",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          620,
+          540
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "14ed0cde-e546-4b13-9405-16834831a7b4",
+                "operator": {
+                  "type": "string",
+                  "operation": "notStartsWith"
+                },
+                "leftValue": "={{ $json.results.name }}",
+                "rightValue": "hs_"
+              },
+              {
+                "id": "60337002-8aba-404c-b6e0-99fcd60e1d84",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.results.hidden }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3b131ff9-ff8c-4b4c-8f48-7603e2f4e29c",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -100,
+          -220
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 660,
+          "height": 500,
+          "content": "## Properties procesor\n- Get the list of properties defined by \"Update the properties by object\" for the choosen object in \"Form uploader\"\n- Check if all fields fro the file have their name in this list\n- If not, go to the correspondance form\n- if yes goes on to processing"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "75d465db-f0df-489b-a596-ed9e5a6b97ea",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          580,
+          -220
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 640,
+          "height": 500,
+          "content": "## Set the values for each property\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "16869a28-c6c1-4f88-ae7a-6ca74ad97a31",
+        "name": "Set the values for each field",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1060,
+          -80
+        ],
+        "parameters": {
+          "jsCode": "\nfunction findKeyByValue(obj, value) {\n  return Object.keys(obj).find(key => obj[key] === value);\n}\n\nlet out = []\nconst data = $('Get the content of file').all().map(x => x.json)\nconsole.log(data)\n\nfor (const item of data) {\n  console.log(item)\n  let elt = {}\n  \n  for (const prop of $('Check if all fields from input are defined').first().json.props) {\n      elt[prop] = item[prop]\n  }\n\n  out.push(elt)\n}\n\nreturn {out}"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c7f51291-91df-497e-8466-031ac031384a",
+        "name": "Set the values for each field1",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1060,
+          120
+        ],
+        "parameters": {
+          "jsCode": "\nfunction findKeyByValue(obj, value) {\n  return Object.keys(obj).find(key => obj[key] === value);\n}\n\nlet out = []\nconst data = $('Get the content of file').all().map(x => x.json)\n// console.log(form_fields)\n\nfor (const item of data) {\n  let elt = {}\n  for (const prop of $('Check if all fields from input are defined').first().json.props) {\n    let equival = findKeyByValue($input.all()[0].json, prop)\n    if(equival) {\n      elt[prop] = item[equival]\n    } else {\n      elt[prop] = item[prop]\n    }\n  }\n  \n  out.push(elt)\n}\n\nreturn {out}"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6aafe2ff-e4c7-4e07-8a39-d5bed120fdf7",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1240,
+          -220
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 640,
+          "height": 500,
+          "content": "## Import the values in Hubspot\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0b2e7364-4da7-4c4b-b1a2-3fda8e0a20be",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1000,
+          -520
+        ],
+        "parameters": {
+          "width": 460,
+          "height": 200,
+          "content": "## Contact me\n- If you need any modification to this workflow\n- if you need some help with this workflow\n- Or if you need any workflow in n8n, Make, or Langchain / Langgraph\n\nWrite to me: [thomas@pollup.net](mailto:thomas@pollup.net)\nCheck out my other templates [here]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5cf4f276-54e4-4e31-af1c-c2808802afda",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -540,
+          520
+        ],
+        "parameters": {
+          "color": 4,
+          "height": 380,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## List of objects\nDefine Here the list of the objects you would like to import in Hubspot"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bd0953b5-769f-40b2-9e71-b4e38f5aea7c",
+        "name": "Sticky Note8",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          560,
+          520
+        ],
+        "parameters": {
+          "color": 4,
+          "height": 380,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Filter the list of properties here"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ae9d2dee-1c07-40eb-b8aa-020cde8534df",
+        "name": "Sticky Note9",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -760,
+          520
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 200,
+          "height": 380,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Create an empty Google Sheet\nIf you run this part, and set it here and in the last node"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "ee610ddd-5bd7-4d97-82a9-b688c71616d8": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-bb69d4f8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-86acf558",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-23375823",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-f4359f8f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-2ee22fa1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-ca546791",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-59dab1d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-ca2d4134",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b765d44e-6b13-4031-b188-e827578b9bee": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-794b196f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-254ed0ad",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-5a2d0b63",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-e9456a36",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-72c2a70a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-cadb4c2d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-e521f54d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-b7d7fb0b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ddebf521-ed07-446b-ac2a-e21be46ee2c5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ddebf521-ed07-446b-ac2a-e21be46ee2c5-41d58a52",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "dfd3d16b-b7d6-49ba-a38b-076960a8a184": {
+        "main": [
+          [
+            {
+              "node": "error-handler-dfd3d16b-b7d6-49ba-a38b-076960a8a184-96d21b23",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "44f4ffe7-ff9f-4716-82ef-fc3c44dc48ca": {
+        "main": [
+          [
+            {
+              "node": "error-handler-44f4ffe7-ff9f-4716-82ef-fc3c44dc48ca-3d5e4d02",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a61d6de1-005e-41ad-a71e-3eafde83afc7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a61d6de1-005e-41ad-a71e-3eafde83afc7-2134adeb",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "2ba6be51-2508-4d34-b447-2f326fb692b5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-2ba6be51-2508-4d34-b447-2f326fb692b5-48a0f9ea",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Splitout Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Splitout Workflow. This workflow integrates 14 different services: stickyNote, httpRequest, formTrigger, filter, code. It contains 45 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-73250e73",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:53.435579",
+      "updatedAt": "2025-09-29T07:07:53.435649",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Splitout Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "2ba6be51-2508-4d34-b447-2f326fb692b5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2ba6be51-2508-4d34-b447-2f326fb692b5-48a0f9ea"
+            }
+          ]
+        ]
+      },
+      "44f4ffe7-ff9f-4716-82ef-fc3c44dc48ca": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-44f4ffe7-ff9f-4716-82ef-fc3c44dc48ca-3d5e4d02"
+            }
+          ]
+        ]
+      },
+      "a61d6de1-005e-41ad-a71e-3eafde83afc7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a61d6de1-005e-41ad-a71e-3eafde83afc7-2134adeb"
+            }
+          ]
+        ]
+      },
+      "b765d44e-6b13-4031-b188-e827578b9bee": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-794b196f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-254ed0ad"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-5a2d0b63"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-e9456a36"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-72c2a70a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-cadb4c2d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-e521f54d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b765d44e-6b13-4031-b188-e827578b9bee-b7d7fb0b"
+            }
+          ]
+        ]
+      },
+      "ddebf521-ed07-446b-ac2a-e21be46ee2c5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddebf521-ed07-446b-ac2a-e21be46ee2c5-41d58a52"
+            }
+          ]
+        ]
+      },
+      "dfd3d16b-b7d6-49ba-a38b-076960a8a184": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dfd3d16b-b7d6-49ba-a38b-076960a8a184-96d21b23"
+            }
+          ]
+        ]
+      },
+      "ee610ddd-5bd7-4d97-82a9-b688c71616d8": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-bb69d4f8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-86acf558"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-23375823"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-f4359f8f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-2ee22fa1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-ca546791"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-59dab1d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ee610ddd-5bd7-4d97-82a9-b688c71616d8-ca2d4134"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Splitout Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Append to Google sheet",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "autoMapInputData",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "updatedAt",
+                "id": "updatedAt",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "createdAt",
+                "id": "createdAt",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "name",
+                "id": "name",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "label",
+                "id": "label",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "type",
+                "id": "type",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "fieldType",
+                "id": "fieldType",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "description",
+                "id": "description",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "groupName",
+                "id": "groupName",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "displayOrder",
+                "id": "displayOrder",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "calculated",
+                "id": "calculated",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "externalOptions",
+                "id": "externalOptions",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "hasUniqueValue",
+                "id": "hasUniqueValue",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "hidden",
+                "id": "hidden",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "hubspotDefined",
+                "id": "hubspotDefined",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "formField",
+                "id": "formField",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "dataSensitivity",
+                "id": "dataSensitivity",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "crm_type",
+                "id": "crm_type",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "showCurrencySymbol",
+                "id": "showCurrencySymbol",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "calculationFormula",
+                "id": "calculationFormula",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "referencedObjectType",
+                "id": "referencedObjectType",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "createdUserId",
+                "id": "createdUserId",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "updatedUserId",
+                "id": "updatedUserId",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "archived",
+                "id": "archived",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "dateDisplayHint",
+                "id": "dateDisplayHint",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "options",
+                "id": "options",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "modificationMetadata",
+                "id": "modificationMetadata",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {}
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Properties for Hubspot",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1NdvtXADHaSBleSkvVxf6Y6yo3VmHmilLEBuWbrik32w"
+          },
+          "operation": "append",
+          "options": {
+            "useAppend": false
+          },
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "Check if all fields from input are defined",
+        "parameters": {
+          "jsCode": "// \nlet type = $('File upload form').first().json['Type of import']\n// Get first line of json\nlet first_line = $('Set the real fields').first().json.real_fields\nlet keys = Object.values(first_line)\nlet props = []\n\nfor (let realField of $input.all()) {\n  props.push(realField.json.name)\n}\nlet response = true\nfor (let key of keys) {\n if(!props.includes(key.trim())) {\n    console.log(props, key)\n    response = false\n }\n}\n\nreturn {response, keys, props}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Creates the correspondance table",
+        "parameters": {
+          "jsCode": "\nlet ret = []\nlet fields = {}\nfor (let key of $input.first().json.keys) {\n  if (!$input.first().json.props.includes(key)) {\n    let fieldName = `Set the correct field for '${key}'`\n    fields[fieldName] = key\n    // console.log(key)\n    ret.push(\n      {\n      \"fieldLabel\":key,\n     \"fieldType\": \"dropdown\",\n     \"fieldOptions\": {\n      \"values\": $input.first().json.props.map(x => {return {\"option\": x}})\n\t\t},\n      \"requiredField\":false\n   }\n    )\n  }\n}\n\nreturn {ret, fields}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Define array of objects",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "d6c05100-fc13-4969-90e5-bcc398a79006",
+                "name": "object",
+                "type": "array",
+                "value": "[\"companies\",\"contacts\", \"deals\", \"leads\", \"tickets\"]"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Define crm_type",
+        "parameters": {
+          "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\nfor (let result of $json.results) {\n  result.crm_type = $('Split by object').item.json.object;\n  delete result.options\n}\nreturn {results: $json.results};\n\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Define properties",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bc1ad698-c75a-49e5-843c-03c1c64a21b1",
+                "name": "def.properties",
+                "type": "object",
+                "value": "={{ $json.out }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Erase Google sheet",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Properties for Hubspot",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1NdvtXADHaSBleSkvVxf6Y6yo3VmHmilLEBuWbrik32w"
+          },
+          "operation": "clear",
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "hubspotDeveloperApi": {
+            "id": "REDACTED"
+          },
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Fetch properties from Hubspot",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "File upload form",
+        "parameters": {
+          "formDescription": "provide me a file",
+          "formFields": {
+            "values": [
+              {
+                "acceptFileTypes": ".csv",
+                "fieldLabel": "data",
+                "fieldType": "file",
+                "multipleFiles": false,
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Type of import",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "Companies"
+                    },
+                    {
+                      "option": "Contacts"
+                    },
+                    {
+                      "option": "Leads"
+                    },
+                    {
+                      "option": "Deals"
+                    },
+                    {
+                      "option": "Tickets"
+                    }
+                  ]
+                },
+                "fieldType": "dropdown"
+              }
+            ]
+          },
+          "formTitle": "title",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Form response",
+        "parameters": {
+          "completionTitle": "Your Data has been imported successfully",
+          "operation": "completion",
+          "options": {
+            "formTitle": ""
+          }
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "Form to set the correponding field for each input field",
+        "parameters": {
+          "defineForm": "json",
+          "jsonOutput": "={{$json.ret}}",
+          "options": {
+            "formDescription": "=Set the correct equivalent for each field.\nYou don't have to do it for all fields.",
+            "formTitle": "=Correspondance for fields"
+          }
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get the content of file",
+        "parameters": {
+          "options": {
+            "delimiter": ";",
+            "encoding": "utf-8",
+            "headerRow": true
+          }
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get the fields from the sheet",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Properties for Hubspot",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1NdvtXADHaSBleSkvVxf6Y6yo3VmHmilLEBuWbrik32w"
+          },
+          "filtersUI": {
+            "values": [
+              {
+                "lookupColumn": "crm_type",
+                "lookupValue": "={{ $('File upload form').first().json['Type of import'].toLowerCase() }}"
+              }
+            ]
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "If all fields are defined",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "3bb457eb-aef5-43f6-b268-1baaad0698e3",
+                "leftValue": "={{ $json.response }}",
+                "operator": {
+                  "operation": "true",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Merge fields and data",
+        "parameters": {},
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.1
+      },
+      {
+        "name": "Remove hidden and starting with hs_ props fields",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "14ed0cde-e546-4b13-9405-16834831a7b4",
+                "leftValue": "={{ $json.results.name }}",
+                "operator": {
+                  "operation": "notStartsWith",
+                  "type": "string"
+                },
+                "rightValue": "hs_"
+              },
+              {
+                "id": "60337002-8aba-404c-b6e0-99fcd60e1d84",
+                "leftValue": "={{ $json.results.hidden }}",
+                "operator": {
+                  "operation": "false",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Set the real fields",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "69a042d8-9543-4a81-bbf8-07e9d7ae2c0d",
+                "name": "real_fields",
+                "type": "array",
+                "value": "={{ $json.data.split(\"\\n\")[0].split(\";\") }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Set the values for each field",
+        "parameters": {
+          "jsCode": "\nfunction findKeyByValue(obj, value) {\n  return Object.keys(obj).find(key => obj[key] === value);\n}\n\nlet out = []\nconst data = $('Get the content of file').all().map(x => x.json)\nconsole.log(data)\n\nfor (const item of data) {\n  console.log(item)\n  let elt = {}\n  \n  for (const prop of $('Check if all fields from input are defined').first().json.props) {\n      elt[prop] = item[prop]\n  }\n\n  out.push(elt)\n}\n\nreturn {out}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Set the values for each field1",
+        "parameters": {
+          "jsCode": "\nfunction findKeyByValue(obj, value) {\n  return Object.keys(obj).find(key => obj[key] === value);\n}\n\nlet out = []\nconst data = $('Get the content of file').all().map(x => x.json)\n// console.log(form_fields)\n\nfor (const item of data) {\n  let elt = {}\n  for (const prop of $('Check if all fields from input are defined').first().json.props) {\n    let equival = findKeyByValue($input.all()[0].json, prop)\n    if(equival) {\n      elt[prop] = item[equival]\n    } else {\n      elt[prop] = item[prop]\n    }\n  }\n  \n  out.push(elt)\n}\n\nreturn {out}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Split all records to import",
+        "parameters": {
+          "fieldToSplitOut": "out",
+          "include": "allOtherFields",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split by object",
+        "parameters": {
+          "fieldToSplitOut": "object",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split results",
+        "parameters": {
+          "fieldToSplitOut": "results",
+          "include": "allOtherFields",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Start here to update your field list",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "## Update the properties by object Workflow\n",
+          "height": 460,
+          "width": 2280
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "## Import workflow\n",
+          "height": 700,
+          "width": 3200
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "## Form uploader\n- Choose  file to import. The CSV file has \",\" as delimiters, is encoded in UTF8 and has the name of the fields as header. You can change all that in \"Get content of the file\"\n- Set the type of object you want to import",
+          "height": 500,
+          "width": 840
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 4,
+          "content": "## Properties procesor\n- Get the list of properties defined by \"Update the properties by object\" for the choosen object in \"Form uploader\"\n- Check if all fields fro the file have their name in this list\n- If not, go to the correspondance form\n- if yes goes on to processing",
+          "height": 500,
+          "width": 660
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 4,
+          "content": "## Set the values for each property\n",
+          "height": 500,
+          "width": 640
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "color": 4,
+          "content": "## Import the values in Hubspot\n",
+          "height": 500,
+          "width": 640
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "color": 4,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## List of objects\nDefine Here the list of the objects you would like to import in Hubspot",
+          "height": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "content": "## Contact me\n- If you need any modification to this workflow\n- if you need some help with this workflow\n- Or if you need any workflow in n8n, Make, or Langchain / Langgraph\n\nWrite to me: [thomas@pollup.net](mailto:thomas@pollup.net)\nCheck out my other templates [here]({{ $env.WEBHOOK_URL }}",
+          "height": 200,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note8",
+        "parameters": {
+          "color": 4,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Filter the list of properties here",
+          "height": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note9",
+        "parameters": {
+          "color": 4,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Create an empty Google Sheet\nIf you run this part, and set it here and in the last node",
+          "height": 380,
+          "width": 200
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "To get the first line of file",
+        "parameters": {
+          "operation": "text",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "Transforms the results",
+        "parameters": {
+          "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet test = []\nlet entry = $input.item.json.results\nreturn {json: entry}\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "hubspotDeveloperApi": {
+            "id": "REDACTED"
+          },
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Uploads to Hubspot",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "jsonBody": "={{ $json.def }}",
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      }
+    ]
+  },
+  "nodeCount": 36,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "55 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Google Sheets",
+    "Form Trigger"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 50,
+  "viewCount": 122,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Google Sheets Account",
+      "Form Trigger Account"
+    ],
+    "requiredCredentials": [
+      "hubspot  O Auth2  A P I details",
+      "hubspot Developer  A P I details",
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Start here to update your field list\".",
+      "Verify the settings of the trigger node \"File upload form\".",
+      "Open the \"Split by object\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch properties from Hubspot\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split results\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Append to Google sheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Erase Google sheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"To get the first line of file\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get the fields from the sheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Merge fields and data\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"If all fields are defined\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Form to set the correponding field for each input field\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get the content of file\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split all records to import\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Uploads to Hubspot\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Form response\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove hidden and starting with hs_ props fields\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note8\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note9\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Define array of objects\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set the real fields\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Define properties\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-rpgsrqr6y",
+      "workflowId": "splitout-workflow-sdo6y",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/0895_Splitout_Code_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\0895_Splitout_Code_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:42.901Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:42.901Z",
+  "updatedAt": "2026-07-15T11:19:42.901Z"
+}

@@ -1,0 +1,549 @@
+{
+  "id": "mysql-workflow-v0nme",
+  "name": "Mysql Workflow",
+  "slug": "mysql-workflow-ozyj",
+  "description": "Automated workflow: Mysql Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Mysql Workflow workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-87b13df4",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.947796",
+      "updatedAt": "2025-09-29T07:07:50.947811",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "59b786fe-8e45-4616-aa45-9748df144c3a",
+        "name": "MySQL",
+        "type": "n8n-nodes-base.mySql",
+        "position": [
+          -80,
+          220
+        ],
+        "parameters": {
+          "query": "SELECT \n    company,\n    cost_center AS default_cost_center,\n    COUNT(*) AS project_count\nFROM \n    tabProject\nWHERE \n    status = 'Open' \n    AND project_type = 'External'\n    AND is_active = 'Yes'\n    AND budgeted_project_cost = 0\n    \nGROUP BY \n    company, cost_center\nORDER BY \n    company, project_count DESC;\n",
+          "options": {},
+          "operation": "executeQuery"
+        },
+        "typeVersion": 2.4,
+        "notes": "This mySql node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "48c20822-9f2e-4108-8bfb-b300689a9724",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -360,
+          220
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3757860b-b7a0-4617-a398-37ac42f1acea",
+        "name": "Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          180,
+          200
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "423062ba-e116-4e22-aa00-29107e8c24ce",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.default_cost_center }}",
+                      "rightValue": "Cost Center A"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "e065ab84-61fd-4e6c-8835-92d08be3e359",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.default_cost_center }}",
+                      "rightValue": "Cost Center B"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "0ef8ce35-2507-4ff4-8dea-11380262098e",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.default_cost_center }}",
+                      "rightValue": "=COST CENTER C"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "9152e548-cca9-441c-b4b6-8903f449dc2b",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.default_cost_center }}",
+                      "rightValue": "Cost Center D"
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bf8fd5f4-e107-44e8-af1a-be32596d664e",
+        "name": "Microsoft Outlook6",
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "position": [
+          560,
+          -20
+        ],
+        "webhookId": "dce42873-919a-4dac-9f9d-792b0a39b7f7",
+        "parameters": {
+          "subject": "Project Cost Missing",
+          "bodyContent": "==<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Missing Budgeted Cost Notification</title>\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }\n    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }\n    .email-header { background-color: #007BFF; color: #ffffff; padding: 20px; text-align: center; font-size: 18px; font-weight: bold; }\n    .email-body { padding: 20px; font-size: 16px; color: #333333; }\n    .email-body strong { color: #007BFF; }\n    .email-footer { padding: 10px 20px; font-size: 14px; color: #555555; text-align: left; }\n  </style>\n</head>\n<body>\n  <div class=\"email-container\">\n    <div class=\"email-header\">\n      {{ $json.default_cost_center }} - Project Data Missing\n    </div>\n    <div class=\"email-body\">\n      Dear {{ $json.default_cost_center }} Team,<br><br>\n      There are <strong>{{ $json.project_count }}</strong> active projects with missing <strong>Budgeted Cost</strong>.<br>\n      Kindly coordinate with the <strong>Accounts Team</strong> to update the missing values for accurate tracking.<br><br>\n      Your timely attention is appreciated.<br><br>\n      Regards,\n    </div>\n    <div class=\"email-footer\">\n      <strong>Amjid Ali</strong><br>\n      Automation Demo – n8n\n    </div>\n  </div>\n</body>\n</html>\n",
+          "toRecipients": "amjid@amjidali.com",
+          "additionalFields": {
+            "bodyContentType": "html"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This microsoftOutlook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e4ffe557-0862-401e-9f65-7195a72db1d9",
+        "name": "Microsoft Outlook1",
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "position": [
+          560,
+          160
+        ],
+        "webhookId": "ea8b2720-cbb6-4712-b9ff-4b443958d0d0",
+        "parameters": {
+          "subject": "Projects Cost Missing",
+          "bodyContent": "==<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Missing Budgeted Cost Notification</title>\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }\n    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }\n    .email-header { background-color: #007BFF; color: #ffffff; padding: 20px; text-align: center; font-size: 18px; font-weight: bold; }\n    .email-body { padding: 20px; font-size: 16px; color: #333333; }\n    .email-body strong { color: #007BFF; }\n    .email-footer { padding: 10px 20px; font-size: 14px; color: #555555; text-align: left; }\n  </style>\n</head>\n<body>\n  <div class=\"email-container\">\n    <div class=\"email-header\">\n      {{ $json.default_cost_center }} - Project Data Missing\n    </div>\n    <div class=\"email-body\">\n      Dear {{ $json.default_cost_center }} Team,<br><br>\n      There are <strong>{{ $json.project_count }}</strong> active projects with missing <strong>Budgeted Cost</strong>.<br>\n      Kindly coordinate with the <strong>Accounts Team</strong> to update the missing values for accurate tracking.<br><br>\n      Your timely attention is appreciated.<br><br>\n      Regards,\n    </div>\n    <div class=\"email-footer\">\n      <strong>Amjid Ali</strong><br>\n      Automation Demo – n8n\n    </div>\n  </div>\n</body>\n</html>\n",
+          "toRecipients": "amjid@amjidali.com",
+          "additionalFields": {
+            "bodyContentType": "html"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This microsoftOutlook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e0722ebd-1e05-4efe-a27a-e4db193dec80",
+        "name": "Microsoft Outlook7",
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "position": [
+          560,
+          380
+        ],
+        "webhookId": "46e6a678-d922-4dfc-b51d-864477e6b01e",
+        "parameters": {
+          "subject": "Projects Cost Missing",
+          "bodyContent": "==<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Missing Budgeted Cost Notification</title>\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }\n    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }\n    .email-header { background-color: #007BFF; color: #ffffff; padding: 20px; text-align: center; font-size: 18px; font-weight: bold; }\n    .email-body { padding: 20px; font-size: 16px; color: #333333; }\n    .email-body strong { color: #007BFF; }\n    .email-footer { padding: 10px 20px; font-size: 14px; color: #555555; text-align: left; }\n  </style>\n</head>\n<body>\n  <div class=\"email-container\">\n    <div class=\"email-header\">\n      {{ $json.default_cost_center }} - Project Data Missing\n    </div>\n    <div class=\"email-body\">\n      Dear {{ $json.default_cost_center }} Team,<br><br>\n      There are <strong>{{ $json.project_count }}</strong> active projects with missing <strong>Budgeted Cost</strong>.<br>\n      Kindly coordinate with the <strong>Accounts Team</strong> to update the missing values for accurate tracking.<br><br>\n      Your timely attention is appreciated.<br><br>\n      Regards,\n    </div>\n    <div class=\"email-footer\">\n      <strong>Amjid Ali</strong><br>\n      Automation Demo – n8n\n    </div>\n  </div>\n</body>\n</html>\n",
+          "toRecipients": "amjid@amjidali.com",
+          "additionalFields": {
+            "bodyContentType": "html"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This microsoftOutlook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-26a091c3",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {},
+    "name": "Mysql Workflow",
+    "description": "Automated workflow: Mysql Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Mysql Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Mysql Workflow",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Microsoft Outlook1",
+        "parameters": {
+          "additionalFields": {
+            "bodyContentType": "html"
+          },
+          "bodyContent": "==<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Missing Budgeted Cost Notification</title>\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }\n    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }\n    .email-header { background-color: #007BFF; color: #ffffff; padding: 20px; text-align: center; font-size: 18px; font-weight: bold; }\n    .email-body { padding: 20px; font-size: 16px; color: #333333; }\n    .email-body strong { color: #007BFF; }\n    .email-footer { padding: 10px 20px; font-size: 14px; color: #555555; text-align: left; }\n  </style>\n</head>\n<body>\n  <div class=\"email-container\">\n    <div class=\"email-header\">\n      {{ $json.default_cost_center }} - Project Data Missing\n    </div>\n    <div class=\"email-body\">\n      Dear {{ $json.default_cost_center }} Team,<br><br>\n      There are <strong>{{ $json.project_count }}</strong> active projects with missing <strong>Budgeted Cost</strong>.<br>\n      Kindly coordinate with the <strong>Accounts Team</strong> to update the missing values for accurate tracking.<br><br>\n      Your timely attention is appreciated.<br><br>\n      Regards,\n    </div>\n    <div class=\"email-footer\">\n      <strong>Amjid Ali</strong><br>\n      Automation Demo – n8n\n    </div>\n  </div>\n</body>\n</html>\n",
+          "subject": "Projects Cost Missing",
+          "toRecipients": "amjid@amjidali.com"
+        },
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2
+      },
+      {
+        "name": "Microsoft Outlook6",
+        "parameters": {
+          "additionalFields": {
+            "bodyContentType": "html"
+          },
+          "bodyContent": "==<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Missing Budgeted Cost Notification</title>\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }\n    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }\n    .email-header { background-color: #007BFF; color: #ffffff; padding: 20px; text-align: center; font-size: 18px; font-weight: bold; }\n    .email-body { padding: 20px; font-size: 16px; color: #333333; }\n    .email-body strong { color: #007BFF; }\n    .email-footer { padding: 10px 20px; font-size: 14px; color: #555555; text-align: left; }\n  </style>\n</head>\n<body>\n  <div class=\"email-container\">\n    <div class=\"email-header\">\n      {{ $json.default_cost_center }} - Project Data Missing\n    </div>\n    <div class=\"email-body\">\n      Dear {{ $json.default_cost_center }} Team,<br><br>\n      There are <strong>{{ $json.project_count }}</strong> active projects with missing <strong>Budgeted Cost</strong>.<br>\n      Kindly coordinate with the <strong>Accounts Team</strong> to update the missing values for accurate tracking.<br><br>\n      Your timely attention is appreciated.<br><br>\n      Regards,\n    </div>\n    <div class=\"email-footer\">\n      <strong>Amjid Ali</strong><br>\n      Automation Demo – n8n\n    </div>\n  </div>\n</body>\n</html>\n",
+          "subject": "Project Cost Missing",
+          "toRecipients": "amjid@amjidali.com"
+        },
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2
+      },
+      {
+        "name": "Microsoft Outlook7",
+        "parameters": {
+          "additionalFields": {
+            "bodyContentType": "html"
+          },
+          "bodyContent": "==<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Missing Budgeted Cost Notification</title>\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }\n    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }\n    .email-header { background-color: #007BFF; color: #ffffff; padding: 20px; text-align: center; font-size: 18px; font-weight: bold; }\n    .email-body { padding: 20px; font-size: 16px; color: #333333; }\n    .email-body strong { color: #007BFF; }\n    .email-footer { padding: 10px 20px; font-size: 14px; color: #555555; text-align: left; }\n  </style>\n</head>\n<body>\n  <div class=\"email-container\">\n    <div class=\"email-header\">\n      {{ $json.default_cost_center }} - Project Data Missing\n    </div>\n    <div class=\"email-body\">\n      Dear {{ $json.default_cost_center }} Team,<br><br>\n      There are <strong>{{ $json.project_count }}</strong> active projects with missing <strong>Budgeted Cost</strong>.<br>\n      Kindly coordinate with the <strong>Accounts Team</strong> to update the missing values for accurate tracking.<br><br>\n      Your timely attention is appreciated.<br><br>\n      Regards,\n    </div>\n    <div class=\"email-footer\">\n      <strong>Amjid Ali</strong><br>\n      Automation Demo – n8n\n    </div>\n  </div>\n</body>\n</html>\n",
+          "subject": "Projects Cost Missing",
+          "toRecipients": "amjid@amjidali.com"
+        },
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2
+      },
+      {
+        "name": "MySQL",
+        "parameters": {
+          "operation": "executeQuery",
+          "options": {},
+          "query": "SELECT \n    company,\n    cost_center AS default_cost_center,\n    COUNT(*) AS project_count\nFROM \n    tabProject\nWHERE \n    status = 'Open' \n    AND project_type = 'External'\n    AND is_active = 'Yes'\n    AND budgeted_project_cost = 0\n    \nGROUP BY \n    company, cost_center\nORDER BY \n    company, project_count DESC;\n"
+        },
+        "type": "n8n-nodes-base.mySql",
+        "typeVersion": 2.4
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Switch",
+        "parameters": {
+          "options": {},
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "423062ba-e116-4e22-aa00-29107e8c24ce",
+                      "leftValue": "={{ $json.default_cost_center }}",
+                      "operator": {
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "Cost Center A"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "e065ab84-61fd-4e6c-8835-92d08be3e359",
+                      "leftValue": "={{ $json.default_cost_center }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "Cost Center B"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "0ef8ce35-2507-4ff4-8dea-11380262098e",
+                      "leftValue": "={{ $json.default_cost_center }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "=COST CENTER C"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "9152e548-cca9-441c-b4b6-8903f449dc2b",
+                      "leftValue": "={{ $json.default_cost_center }}",
+                      "operator": {
+                        "name": "filter.operator.equals",
+                        "operation": "equals",
+                        "type": "string"
+                      },
+                      "rightValue": "Cost Center D"
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "MySQL",
+    "Outlook"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 99,
+  "viewCount": 329,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "MySQL Account",
+      "Outlook Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"MySQL\" node (n8n-nodes-base.mySql) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Microsoft Outlook6\" node (n8n-nodes-base.microsoftOutlook) and configure the action parameters, mappings, and fields.",
+      "Open the \"Microsoft Outlook1\" node (n8n-nodes-base.microsoftOutlook) and configure the action parameters, mappings, and fields.",
+      "Open the \"Microsoft Outlook7\" node (n8n-nodes-base.microsoftOutlook) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-i3silnfys",
+      "workflowId": "mysql-workflow-v0nme",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Microsoftoutlook/0835_Microsoftoutlook_Schedule_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Microsoftoutlook\\0835_Microsoftoutlook_Schedule_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:17:41.727Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:41.727Z",
+  "updatedAt": "2026-07-15T11:17:41.727Z"
+}

@@ -1,0 +1,967 @@
+{
+  "id": "if-workflow-0icmy",
+  "name": "If Workflow",
+  "slug": "if-workflow-1ch4",
+  "description": "Automated workflow: If Workflow. This workflow integrates 8 different services: webhook, stickyNote, code, respondToWebhook, set. It contains 24 nodes and follows best practices for error handling and security.",
+  "shortDescription": "If Workflow workflow containing 16 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-1266eb00",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.987176",
+      "updatedAt": "2025-09-29T07:07:42.987189",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "4f42007b-3813-410f-a608-5af89459b14f",
+        "name": "Check Authorization Header",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -20,
+          20
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $('Webhook').item.json.headers.authorization }}",
+                "value2": "=Bearer {{ $json.config.bearerToken }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "86d6157e-593d-4370-a480-1a9417300555",
+        "name": "401 Unauthorized",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          340,
+          280
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 401
+          },
+          "respondWith": "json",
+          "responseBody": "{\n  \"code\": 401,\n  \"message\": \"Unauthorized: Missing or invalid authorization token.\",\n  \"hint\": \"Ensure the request includes a valid 'Authorization' header (e.g., 'Bearer YOUR_SECRET_TOKEN').\"\n}"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0831093a-adef-41dc-8ac0-2e1998fc22ad",
+        "name": "200 OK",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1140,
+          20
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b4f42651-c7f6-43a3-a695-7d5197b45642",
+        "name": "Configuration",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -300,
+          20
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4c35898d-5a70-41bc-9fb6-9d63bbbee222",
+                "name": "config.bearerToken",
+                "type": "string",
+                "value": "123"
+              },
+              {
+                "id": "822739a6-15da-48df-8f92-c4b1adce5fef",
+                "name": "config.requiredFields.message",
+                "type": "string",
+                "value": "true"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f1539109-8585-4cf2-9b9b-f3012544ac6c",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          -580,
+          20
+        ],
+        "webhookId": "2c5b9b70-1b08-44b1-a007-dc3d9f7e70db",
+        "parameters": {
+          "path": "secure-webhook",
+          "options": {},
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bcf1183c-9a3d-41eb-89f7-1666d3a6c5fc",
+        "name": "Has required fields?",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          220,
+          20
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "if(! $json.config.requiredFields) {\n  return { json: { valid: true } };\n}\n\nconst body = $('Webhook').first().json.body;\n\nlet requiredFields = $json.config.requiredFields;\n\nfor (let [key, value] of Object.entries(requiredFields)) {\n  console.log(`${key}: ${value}`);\n  if (!(key in body)) {\n    return { json: { valid: false } };\n  }\n}\n\nreturn { json: { valid: true } };"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "81b125f1-faa0-4998-8624-431746052a84",
+        "name": "Check Valid Request",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          440,
+          20
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "8c7fe174-f284-4e41-b851-8939f0c2d19f",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.valid }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "906c671d-e2a6-4a9e-b7df-d7b9142ffeb4",
+        "name": "400 Bad Request",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          780,
+          280
+        ],
+        "parameters": {
+          "options": {
+            "responseCode": 401
+          },
+          "respondWith": "json",
+          "responseBody": "{\n  \"code\": 400,\n  \"message\": \"Bad Request: Missing required fields\",\n  \"hint\": \"Make sure all required fields are included in the request body.\"\n}"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ce657170-34e4-4b40-ba22-bb4638fa98c6",
+        "name": "Create Response",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          920,
+          20
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c6258b81-6f40-4dd5-8a60-89e2b0322490",
+                "name": "message",
+                "type": "string",
+                "value": "Success! Workflow completed."
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0a6b9f12-9b60-458e-85de-014a66063e50",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          -280
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 360,
+          "height": 460,
+          "content": "### 🛠️ Config Node Setup\n\n*This node defines the configuration for the secure webhook.*\n\n- `config.bearerToken`: The expected Bearer token for authentication.\n\n- `config.requiredFields`: Set one key for each required field in the incoming request body (e.g., `config.requiredFields.message`.\n*👉 The value doesn't matter, only the keys are checked.*"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bba24ba5-3c8d-40f7-99e0-44115b1025e0",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          200
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 1740,
+          "height": 240,
+          "content": "### 🚫 Error Handling Nodes\n\n*These nodes return standardized JSON error responses:*\n\n- 🔒 `401 Unauthorized`:\nTriggered when the request is missing a valid Bearer token.\n\n- 📭 `400 Bad Request`:\nTriggered when required fields are missing from the request body."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f451c9be-4cfb-4628-8aa7-66b66ad86bab",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          840,
+          -280
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 460,
+          "height": 460,
+          "content": "### ✅ Set & 200 Response Nodes\n\n- 🧱 `Create Response`\nBuilds the JSON response from the incoming request.\nUse this to extract, transform, or forward specific values (e.g., message, sender, etc.).\n\n- 📬 `200 OK`\nReturns a successful response using values from the `Create Response` node."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8d4e8406-c3fe-4e8a-bfa8-18407fe5e67a",
+        "name": "Add workflow nodes here",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          680,
+          20
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f3f461a6-dc48-42cd-ac75-d045795006d0",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          160,
+          -280
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 440,
+          "height": 460,
+          "content": "### 🔍 Required Fields Validator\n\n*This Code node checks if all fields defined in config.requiredFields are present in the incoming request body.*\n\n- Reads the body from the Webhook node.\n\n- Loops through each key in config.requiredFields.\n\n- Returns `{ valid: true }` if all are present, otherwise `{ valid: false }`."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2766dae8-8def-462f-a53c-0f51606eea0a",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1220,
+          -340
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 760,
+          "height": 780,
+          "content": "## 🔐 Secure Webhook – Summary\n\n*This workflow protects a public webhook with **authentication** and **payload validation**.*\n\n\n---\n\n#### 🧩 Why use it?\n- ✅ Ensure only trusted clients can call your workflow (via Bearer token).\n- ✅ Validate that all expected fields are present in the request body.\n- ✅ Return helpful and consistent JSON responses (`200`, `400`, `401`).\n\n---\n\n#### ⚙️ How it works:\n1. **`Webhook`** – Entry point for external `POST` requests.\n2. **`Configuration`** – Defines `config.bearerToken` and `config.requiredFields`.\n3. **`Check Authorization Header`** – Compares incoming Bearer token with config.\n4. **`401 Unauthorized`** – Returned if the token is missing or incorrect.\n5. **`Has required fields?`** – JS code checks for required fields in the request body.\n6. **`400 Bad Request`** – Returned if any required field is missing.\n7. **`Create Response` & `200 OK`** – Returns a custom success message.\n\n---\n\n#### 🛠 Setup Instructions:\n- Set your desired Bearer token in `config.bearerToken`.\n- For each required field, set a key in `config.requiredFields`  \n  *(e.g., `config.requiredFields.message)*.\n*👉 The value doesn't matter, only the keys are checked.*\n- Replace the **`Add workflow nodes here`** node with your own workflow logic.\n- Edit the `Create Response` node to build your response.\n\n---\n\n📌 *Great for building secure, reusable webhook endpoints for APIs, forms, or 3rd-party services.*"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "70c8f060-587a-4524-ab32-7362cc0c4cf9",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1220,
+          -600
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 760,
+          "height": 240,
+          "content": "## Support My Work! ❤️\n\n**👋 Hello! I'm Audun / xqus** \n🔗 My work: [xqus.com]({{ $env.WEBHOOK_URL }}\n💸 n8n shop: [xqus.gumroad.com]({{ $env.WEBHOOK_URL }}\n\n**If you find this workflow helpful**, consider downloading or purchasing it on [Gumroad]({{ $env.WEBHOOK_URL }}\n\nYour support helps me create more useful n8n workflows and resources for the community. \n-Thanks a lot! 🙌"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "86d6157e-593d-4370-a480-1a9417300555": {
+        "main": [
+          [
+            {
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555-c4d25078",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555-5200759a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555-24ecc711",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555-027642e8",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "0831093a-adef-41dc-8ac0-2e1998fc22ad": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad-bc49a117",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad-80da4a43",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad-47966cb8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad-ed017c18",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f1539109-8585-4cf2-9b9b-f3012544ac6c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c-68d2763b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c-ff5bc1cd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c-0589845f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c-bd8fb32d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "906c671d-e2a6-4a9e-b7df-d7b9142ffeb4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4-42456681",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4-d7f74b3f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4-49e84d4e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4-5b75ecfd",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: If Workflow. This workflow integrates 8 different services: webhook, stickyNote, code, respondToWebhook, set. It contains 24 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: If Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0831093a-adef-41dc-8ac0-2e1998fc22ad": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad-bc49a117"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad-80da4a43"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad-47966cb8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0831093a-adef-41dc-8ac0-2e1998fc22ad-ed017c18"
+            }
+          ]
+        ]
+      },
+      "86d6157e-593d-4370-a480-1a9417300555": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555-c4d25078"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555-5200759a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555-24ecc711"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86d6157e-593d-4370-a480-1a9417300555-027642e8"
+            }
+          ]
+        ]
+      },
+      "906c671d-e2a6-4a9e-b7df-d7b9142ffeb4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4-42456681"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4-d7f74b3f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4-49e84d4e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-906c671d-e2a6-4a9e-b7df-d7b9142ffeb4-5b75ecfd"
+            }
+          ]
+        ]
+      },
+      "f1539109-8585-4cf2-9b9b-f3012544ac6c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c-68d2763b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c-ff5bc1cd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c-0589845f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f1539109-8585-4cf2-9b9b-f3012544ac6c-bd8fb32d"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "nodes": [
+      {
+        "name": "200 OK",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "400 Bad Request",
+        "parameters": {
+          "options": {
+            "responseCode": 401
+          },
+          "respondWith": "json",
+          "responseBody": "{\n  \"code\": 400,\n  \"message\": \"Bad Request: Missing required fields\",\n  \"hint\": \"Make sure all required fields are included in the request body.\"\n}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "401 Unauthorized",
+        "parameters": {
+          "options": {
+            "responseCode": 401
+          },
+          "respondWith": "json",
+          "responseBody": "{\n  \"code\": 401,\n  \"message\": \"Unauthorized: Missing or invalid authorization token.\",\n  \"hint\": \"Ensure the request includes a valid 'Authorization' header (e.g., 'Bearer YOUR_SECRET_TOKEN').\"\n}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Add workflow nodes here",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Check Authorization Header",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $('Webhook').item.json.headers.authorization }}",
+                "value2": "=Bearer {{ $json.config.bearerToken }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Check Valid Request",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "8c7fe174-f284-4e41-b851-8939f0c2d19f",
+                "leftValue": "={{ $json.valid }}",
+                "operator": {
+                  "operation": "true",
+                  "singleValue": true,
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Configuration",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4c35898d-5a70-41bc-9fb6-9d63bbbee222",
+                "name": "config.bearerToken",
+                "type": "string",
+                "value": "123"
+              },
+              {
+                "id": "822739a6-15da-48df-8f92-c4b1adce5fef",
+                "name": "config.requiredFields.message",
+                "type": "string",
+                "value": "true"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Create Response",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c6258b81-6f40-4dd5-8a60-89e2b0322490",
+                "name": "message",
+                "type": "string",
+                "value": "Success! Workflow completed."
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Has required fields?",
+        "parameters": {
+          "jsCode": "if(! $json.config.requiredFields) {\n  return { json: { valid: true } };\n}\n\nconst body = $('Webhook').first().json.body;\n\nlet requiredFields = $json.config.requiredFields;\n\nfor (let [key, value] of Object.entries(requiredFields)) {\n  console.log(`${key}: ${value}`);\n  if (!(key in body)) {\n    return { json: { valid: false } };\n  }\n}\n\nreturn { json: { valid: true } };",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 6,
+          "content": "### 🛠️ Config Node Setup\n\n*This node defines the configuration for the secure webhook.*\n\n- `config.bearerToken`: The expected Bearer token for authentication.\n\n- `config.requiredFields`: Set one key for each required field in the incoming request body (e.g., `config.requiredFields.message`.\n*👉 The value doesn't matter, only the keys are checked.*",
+          "height": 460,
+          "width": 360
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 3,
+          "content": "### 🚫 Error Handling Nodes\n\n*These nodes return standardized JSON error responses:*\n\n- 🔒 `401 Unauthorized`:\nTriggered when the request is missing a valid Bearer token.\n\n- 📭 `400 Bad Request`:\nTriggered when required fields are missing from the request body.",
+          "height": 240,
+          "width": 1740
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "### ✅ Set & 200 Response Nodes\n\n- 🧱 `Create Response`\nBuilds the JSON response from the incoming request.\nUse this to extract, transform, or forward specific values (e.g., message, sender, etc.).\n\n- 📬 `200 OK`\nReturns a successful response using values from the `Create Response` node.",
+          "height": 460,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 7,
+          "content": "### 🔍 Required Fields Validator\n\n*This Code node checks if all fields defined in config.requiredFields are present in the incoming request body.*\n\n- Reads the body from the Webhook node.\n\n- Loops through each key in config.requiredFields.\n\n- Returns `{ valid: true }` if all are present, otherwise `{ valid: false }`.",
+          "height": 460,
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 5,
+          "content": "## 🔐 Secure Webhook – Summary\n\n*This workflow protects a public webhook with **authentication** and **payload validation**.*\n\n\n---\n\n#### 🧩 Why use it?\n- ✅ Ensure only trusted clients can call your workflow (via Bearer token).\n- ✅ Validate that all expected fields are present in the request body.\n- ✅ Return helpful and consistent JSON responses (`200`, `400`, `401`).\n\n---\n\n#### ⚙️ How it works:\n1. **`Webhook`** – Entry point for external `POST` requests.\n2. **`Configuration`** – Defines `config.bearerToken` and `config.requiredFields`.\n3. **`Check Authorization Header`** – Compares incoming Bearer token with config.\n4. **`401 Unauthorized`** – Returned if the token is missing or incorrect.\n5. **`Has required fields?`** – JS code checks for required fields in the request body.\n6. **`400 Bad Request`** – Returned if any required field is missing.\n7. **`Create Response` & `200 OK`** – Returns a custom success message.\n\n---\n\n#### 🛠 Setup Instructions:\n- Set your desired Bearer token in `config.bearerToken`.\n- For each required field, set a key in `config.requiredFields`  \n  *(e.g., `config.requiredFields.message)*.\n*👉 The value doesn't matter, only the keys are checked.*\n- Replace the **`Add workflow nodes here`** node with your own workflow logic.\n- Edit the `Create Response` node to build your response.\n\n---\n\n📌 *Great for building secure, reusable webhook endpoints for APIs, forms, or 3rd-party services.*",
+          "height": 780,
+          "width": 760
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "color": 6,
+          "content": "## Support My Work! ❤️\n\n**👋 Hello! I'm Audun / xqus** \n🔗 My work: [xqus.com]({{ $env.WEBHOOK_URL }}\n💸 n8n shop: [xqus.gumroad.com]({{ $env.WEBHOOK_URL }}\n\n**If you find this workflow helpful**, consider downloading or purchasing it on [Gumroad]({{ $env.WEBHOOK_URL }}\n\nYour support helps me create more useful n8n workflows and resources for the community. \n-Thanks a lot! 🙌",
+          "height": 240,
+          "width": 760
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "secure-webhook",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 16,
+  "integrationCount": 1,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Webhook"
+  ],
+  "securityStatus": "Potential Risk",
+  "verified": false,
+  "featured": true,
+  "downloadCount": 71,
+  "viewCount": 585,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"401 Unauthorized\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"200 OK\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"400 Bad Request\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Check Authorization Header\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Check Valid Request\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add workflow nodes here\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Configuration\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Create Response\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 85,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-1ks0swh2w",
+      "workflowId": "if-workflow-0icmy",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0922_Code_Webhook_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0922_Code_Webhook_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:28:54.531Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:54.531Z",
+  "updatedAt": "2026-07-15T11:28:54.531Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

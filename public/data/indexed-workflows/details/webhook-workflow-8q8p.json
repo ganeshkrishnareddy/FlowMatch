@@ -1,0 +1,676 @@
+{
+  "id": "webhook-workflow-9xwt4",
+  "name": "Webhook Workflow",
+  "slug": "webhook-workflow-8q8p",
+  "description": "Automated workflow: Webhook Workflow. This workflow integrates 8 different services: webhook, stickyNote, httpRequest, code, scheduleTrigger. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Webhook Workflow workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "517fad39-50ec-4eae-94c4-aca5b111a093",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          -120,
+          -100
+        ],
+        "webhookId": "a227afae-e16e-44c2-bb5c-e69fe553b455",
+        "parameters": {
+          "path": "a227afae-e16e-44c2-bb5c-e69fe553b455",
+          "options": {}
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cbd978df-9b95-4148-a054-7772213f5b8f",
+        "name": "continue with valid token",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1020,
+          -40
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "65167cf9-3ec5-4727-a604-a318e86bb54e",
+        "name": "get new accessToken",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          560,
+          80
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          }
+        },
+        "notesInFlow": false,
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b17e01d2-c43a-486f-ab08-d81e05f8d110",
+        "name": "2. set token in static data",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          780,
+          80
+        ],
+        "parameters": {
+          "jsCode": "const workflowStaticData = $getWorkflowStaticData('global');\n\n// get new access token\nworkflowStaticData.accessToken = $input.first().json.AccessToken;\n// set timestamp of new access token\nworkflowStaticData.timestamp = $now.toISO().toString();\n\nreturn [\n  {\n      // data: $input.all(),\n      accessToken: workflowStaticData.accessToken,\n      timestamp: workflowStaticData.timestamp,\n      // today: $today\n  }\n];"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "31fd494a-f323-47cc-8f89-0bb2f2332e0f",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -120,
+          60
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "77623419-99f9-4369-9546-375eaf6f5732",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -180,
+          240
+        ],
+        "parameters": {
+          "width": 660,
+          "height": 400,
+          "content": "# StaticData Demo\n\n\nThis workflow demonstrates how to use the [`workflowStaticData()` function]({{ $env.WEBHOOK_URL }}\n) to set any type of variable that will persist within workflow executions. \n\nThis can be useful for working with access tokens that expire after a certain time period. \n\n{{ $env.WEBHOOK_URL }}\n\n## Important\n\nStatic Data only persists across **_production_** executions, i.e. triggered by Webhooks or Schedule Triggers (not manual executions!)\nFor this the workflow will have to be activated. \n\n\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e4cbdbf7-7b3d-4c52-9d41-bc427d63df5d",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          520,
+          60
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 180,
+          "height": 420,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### HTTP Request\n\nToggle \n`Include Response Headers and Status` \noption if access token is not sent in the body"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bed68570-bf35-4fa9-984c-1b67a53b59ba",
+        "name": "if token is valid",
+        "type": "n8n-nodes-base.if",
+        "notes": "(1 minute expiration)",
+        "position": [
+          340,
+          -20
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "65f5c979-3e7d-4e50-92c3-3ae39f1bba3d",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "afterOrEquals"
+                },
+                "leftValue": "={{ $json.timestamp }}",
+                "rightValue": "={{ $now.minus(1,'minute') }}"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "notesInFlow": true,
+        "typeVersion": 2.2
+      },
+      {
+        "id": "57a4f5f9-eb77-4fd4-b6b1-55137f108374",
+        "name": "1. initiate static data",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          120,
+          -20
+        ],
+        "parameters": {
+          "jsCode": "// initialize staticData object\nconst workflowStaticData = $getWorkflowStaticData('global');\n\n// initialize accessToken on staticData if it desn't exist yet\nif (!workflowStaticData.hasOwnProperty('accessToken')) {\n  workflowStaticData.accessToken = 0\n}\n\n// initializing any other variables on the staticData object\nif (!workflowStaticData.hasOwnProperty('timestamp')) {\n  workflowStaticData.timestamp = $now.toISO()\n}\n\nreturn [\n  {\n      // data: $input.all(),\n      accessToken: workflowStaticData.accessToken,\n      timestamp: workflowStaticData.timestamp,\n      // today: $today\n  }\n];"
+        },
+        "notesInFlow": false,
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {
+      "get new accessToken": [
+        {
+          "AccessToken": "{{ $credentials.AccessToken }}"
+        }
+      ]
+    },
+    "connections": {
+      "517fad39-50ec-4eae-94c4-aca5b111a093": {
+        "main": [
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-646849aa",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-7b5de5a6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-28cf6af9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-debf19ee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-bdc4d458",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-982ed2f4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-338e6439",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-a196edef",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "65167cf9-3ec5-4727-a604-a318e86bb54e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-d3743529",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-312cf6a1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-94cdb37b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-60bf128d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-083fab2e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-3dfb249e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-2fe2c439",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-f418d5d1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Webhook Workflow. This workflow integrates 8 different services: webhook, stickyNote, httpRequest, code, scheduleTrigger. It contains 13 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-8a93542e",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.642679",
+      "updatedAt": "2025-09-29T07:07:42.642696",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Webhook Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "517fad39-50ec-4eae-94c4-aca5b111a093": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-646849aa"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-7b5de5a6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-28cf6af9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-debf19ee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-bdc4d458"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-982ed2f4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-338e6439"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-517fad39-50ec-4eae-94c4-aca5b111a093-a196edef"
+            }
+          ]
+        ]
+      },
+      "65167cf9-3ec5-4727-a604-a318e86bb54e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-d3743529"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-312cf6a1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-94cdb37b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-60bf128d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-083fab2e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-3dfb249e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-2fe2c439"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-65167cf9-3ec5-4727-a604-a318e86bb54e-f418d5d1"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "nodes": [
+      {
+        "name": "1. initiate static data",
+        "parameters": {
+          "jsCode": "// initialize staticData object\nconst workflowStaticData = $getWorkflowStaticData('global');\n\n// initialize accessToken on staticData if it desn't exist yet\nif (!workflowStaticData.hasOwnProperty('accessToken')) {\n  workflowStaticData.accessToken = 0\n}\n\n// initializing any other variables on the staticData object\nif (!workflowStaticData.hasOwnProperty('timestamp')) {\n  workflowStaticData.timestamp = $now.toISO()\n}\n\nreturn [\n  {\n      // data: $input.all(),\n      accessToken: workflowStaticData.accessToken,\n      timestamp: workflowStaticData.timestamp,\n      // today: $today\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "2. set token in static data",
+        "parameters": {
+          "jsCode": "const workflowStaticData = $getWorkflowStaticData('global');\n\n// get new access token\nworkflowStaticData.accessToken = $input.first().json.AccessToken;\n// set timestamp of new access token\nworkflowStaticData.timestamp = $now.toISO().toString();\n\nreturn [\n  {\n      // data: $input.all(),\n      accessToken: workflowStaticData.accessToken,\n      timestamp: workflowStaticData.timestamp,\n      // today: $today\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "continue with valid token",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "get new accessToken",
+        "parameters": {
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "if token is valid",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "65f5c979-3e7d-4e50-92c3-3ae39f1bba3d",
+                "leftValue": "={{ $json.timestamp }}",
+                "operator": {
+                  "operation": "afterOrEquals",
+                  "type": "dateTime"
+                },
+                "rightValue": "={{ $now.minus(1,'minute') }}"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "# StaticData Demo\n\n\nThis workflow demonstrates how to use the [`workflowStaticData()` function]({{ $env.WEBHOOK_URL }}\n) to set any type of variable that will persist within workflow executions. \n\nThis can be useful for working with access tokens that expire after a certain time period. \n\n{{ $env.WEBHOOK_URL }}\n\n## Important\n\nStatic Data only persists across **_production_** executions, i.e. triggered by Webhooks or Schedule Triggers (not manual executions!)\nFor this the workflow will have to be activated. \n\n\n\n",
+          "height": 400,
+          "width": 660
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### HTTP Request\n\nToggle \n`Include Response Headers and Status` \noption if access token is not sent in the body",
+          "height": 420,
+          "width": 180
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "options": {},
+          "path": "a227afae-e16e-44c2-bb5c-e69fe553b455"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 42,
+  "viewCount": 208,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"continue with valid token\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"get new accessToken\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"if token is valid\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-a5j7dtblm",
+      "workflowId": "webhook-workflow-9xwt4",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0630_Code_Webhook_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0630_Code_Webhook_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:28:54.079Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:54.079Z",
+  "updatedAt": "2026-07-15T11:28:54.079Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

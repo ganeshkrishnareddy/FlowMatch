@@ -1,0 +1,361 @@
+{
+  "id": "ai-summarizer-llm-ready--5vxln",
+  "name": "AI Summarizer (LLM-ready)",
+  "slug": "ai-summarizer-llm-ready--mu1p",
+  "description": "AI Summarizer (LLM-ready) built for n8n integrations.",
+  "shortDescription": "AI Summarizer (LLM-ready) workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "name": "AI Summarizer (LLM-ready)",
+    "nodes": [
+      {
+        "id": "ai-0001",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          200,
+          300
+        ],
+        "webhookId": "d3e4f5a6-b7c8-9d0e-1f2a-bc3456789004",
+        "parameters": {
+          "path": "template/ai-summarizer",
+          "httpMethod": "POST",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "typeVersion": 2
+      },
+      {
+        "id": "ai-0002",
+        "name": "Notas & Testes",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -140,
+          80
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 760,
+          "height": 380,
+          "content": "## Template: Resumidor com LLM (pronto para escalar)\n\n- Objetivo: Receber texto e gerar resumo com LLM ou fallback local.\n- Teste rápido:\n```bash\ncurl -X POST http://<SEU_N8N>/webhook/template/ai-summarizer \\\n -H 'Content-Type: application/json' \\\n -d '{\\\"text\\\":\\\"Escreva um parágrafo longo aqui...\\\"}'\n```\n- Produção: habilite o nó OpenAI e configure credenciais.\n- Fallback: 'Local Summarize' funciona sem credenciais."
+        },
+        "typeVersion": 1
+      },
+      {
+        "id": "ai-0003",
+        "name": "Prepare Text",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          460,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "txt",
+                "name": "text",
+                "type": "string",
+                "value": "={{ $json.body?.text || 'Digite seu texto aqui para resumir.' }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4
+      },
+      {
+        "id": "ai-0004",
+        "name": "OpenAI (opcional)",
+        "type": "@n8n/n8n-nodes-langchain.openAi",
+        "position": [
+          720,
+          220
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {},
+          "messages": {
+            "values": [
+              {
+                "content": "Resuma de forma objetiva o seguinte texto:\n\n{{ $json.text }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.5,
+        "disabled": true
+      },
+      {
+        "id": "ai-0005",
+        "name": "Local Summarize",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          720,
+          380
+        ],
+        "parameters": {
+          "functionCode": "// Fallback simples: truncar e manter frases principais\nconst t = ($json.text || '').trim();\nif (!t) return [{ json: { summary: '' } }];\nconst max = 240;\nconst summary = t.length <= max ? t : t.slice(0, max) + '...';\nreturn [{ json: { summary } }];"
+        },
+        "typeVersion": 2
+      },
+      {
+        "id": "ai-0006",
+        "name": "Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          980,
+          380
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "typeVersion": 1.1
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Prepare Text",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Text": {
+        "main": [
+          [
+            {
+              "node": "Local Summarize",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Local Summarize": {
+        "main": [
+          [
+            {
+              "node": "Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "Local Summarize": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Respond"
+            }
+          ]
+        ]
+      },
+      "Prepare Text": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Local Summarize"
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Prepare Text"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "AI Summarizer (LLM-ready)",
+    "nodes": [
+      {
+        "name": "Local Summarize",
+        "parameters": {
+          "functionCode": "// Fallback simples: truncar e manter frases principais\nconst t = ($json.text || '').trim();\nif (!t) return [{ json: { summary: '' } }];\nconst max = 240;\nconst summary = t.length <= max ? t : t.slice(0, max) + '...';\nreturn [{ json: { summary } }];"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 2
+      },
+      {
+        "name": "Notas & Testes",
+        "parameters": {
+          "color": 7,
+          "content": "## Template: Resumidor com LLM (pronto para escalar)\n\n- Objetivo: Receber texto e gerar resumo com LLM ou fallback local.\n- Teste rápido:\n```bash\ncurl -X POST http://<SEU_N8N>/webhook/template/ai-summarizer \\\n -H 'Content-Type: application/json' \\\n -d '{\\\"text\\\":\\\"Escreva um parágrafo longo aqui...\\\"}'\n```\n- Produção: habilite o nó OpenAI e configure credenciais.\n- Fallback: 'Local Summarize' funciona sem credenciais.",
+          "height": 380,
+          "width": 760
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "OpenAI (opcional)",
+        "parameters": {
+          "messages": {
+            "values": [
+              {
+                "content": "Resuma de forma objetiva o seguinte texto:\n\n{{ $json.text }}"
+              }
+            ]
+          },
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.openAi",
+        "typeVersion": 1.5
+      },
+      {
+        "name": "Prepare Text",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "txt",
+                "name": "text",
+                "type": "string",
+                "value": "={{ $json.body?.text || 'Digite seu texto aqui para resumir.' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Respond",
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "={{ $json }}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "template/ai-summarizer",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Webhook",
+    "OpenAI"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 182,
+  "viewCount": 732,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "OpenAI Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Respond\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Notas & Testes\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the AI node \"OpenAI (opcional)\".",
+      "Adjust the Model settings (e.g. gpt-4o, gpt-3.5-turbo) and write or refine the System Prompt parameters.",
+      "Open the \"Local Summarize\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Prepare Text\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-uat0z6agz",
+      "workflowId": "ai-summarizer-llm-ready--5vxln",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Templates/9004_AI_Summarizer_Template_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Templates\\9004_AI_Summarizer_Template_Webhook.json",
+      "discoveredAt": "2026-07-15T11:17:43.719Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:43.719Z",
+  "updatedAt": "2026-07-15T11:17:43.719Z"
+}

@@ -1,0 +1,941 @@
+{
+  "id": "informationextractor-workflow-4ju6h",
+  "name": "Informationextractor Workflow",
+  "slug": "informationextractor-workflow-lcuz",
+  "description": "Automated workflow: Informationextractor Workflow. This workflow integrates 14 different services: stickyNote, code, agent, noOp, informationExtractor. It contains 22 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Informationextractor Workflow workflow containing 20 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-8a236901",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.990338",
+      "updatedAt": "2025-09-29T07:07:42.990441",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "62b3c7cb-1993-44f1-8b86-38a34ca1d029",
+        "name": "Information Extractor",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -200,
+          500
+        ],
+        "parameters": {
+          "text": "={{ $json.query }}",
+          "options": {},
+          "schemaType": "fromJson",
+          "jsonSchemaExample": "{\n  \"name\": \"Information Extractor\",\n  \"type\": \"n8n-nodes-base.informationExtractor\",\n  \"parameters\": {\n    \"extract\": [\n      {\n        \"name\": \"items\",\n        \"pattern\": \"(latte|coffee|tea|cappuccino)\"\n      },\n      {\n        \"name\": \"quantity\",\n        \"pattern\": \"\\\\d+\"\n      },\n      {\n        \"name\": \"table\",\n        \"pattern\": \"table number (\\\\d+)\"\n      }\n    ]\n  }\n}\n"
+        },
+        "typeVersion": 1,
+        "notes": "This informationExtractor node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "75883f27-af58-4791-9e1a-a70b83e1cead",
+        "name": "OpenAI Chat Model1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -180,
+          740
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "OizdHUANhz9NIHyd",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "aeefdd4b-bf7d-4824-97d8-0afc356fb7d6",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          120,
+          540
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "8a5dda0c-a567-4305-83a3-68d6fb573dd3",
+                "operator": {
+                  "type": "array",
+                  "operation": "empty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.output.parameters.extract }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9e3f8a1b-ccd8-4f4d-91cb-b99cc46f412f",
+        "name": "Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          840,
+          420
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Item": "={{ $json.item }}",
+              "Quantity": "={{ $json.quantity }}",
+              "Table No": "={{ $json.table }}",
+              "Timestamp": "={{ $now }}"
+            },
+            "schema": [
+              {
+                "id": "Timestamp",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Timestamp",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Table No",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Table No",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Item",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Item",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Quantity",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Quantity",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Order log"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "0RSJGMBcFzxY9GkS",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4cc1818f-1585-42e1-a111-7b55557aebcb",
+        "name": "Code",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          380,
+          560
+        ],
+        "parameters": {
+          "language": "python",
+          "pythonCode": "# Input from n8n\ninput_data = items\n\n# Get the extracted list\nextract_data = input_data[0].get('json', {}).get('output', {}).get('parameters', {}).get('extract', [])\n\n# Prepare variables\norder_items = []\ntable_number = None\n\n# Separate entries by type\nitems_list = []\nquantities = []\n\n# Parse all entries\nfor entry in extract_data:\n    if entry['name'] == 'table number':\n        table_number = entry['pattern']\n    elif entry['name'] == 'item':\n        items_list.append(entry['pattern'])\n    elif entry['name'] == 'quantity':\n        quantities.append(int(entry['pattern']))\n\n# Pair items and quantities\nfor i in range(len(items_list)):\n    item_data = {\n        'item': items_list[i],\n        'quantity': quantities[i] if i < len(quantities) else None,\n        'table': table_number\n    }\n    order_items.append(item_data)\n\n# Set final output\noutput = [{'json': item} for item in order_items]\n\nreturn output"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a92d2745-148b-4e2a-b8f7-82d3993ff34f",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          620,
+          500
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "aea89e6c-37a9-4859-adc8-b7e449701503",
+        "name": "Replace Me",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          800,
+          660
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b31dba52-b27e-4267-be32-a7730b4d08a8",
+        "name": "No Operation, do nothing",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          440,
+          400
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d7f9a381-6bc2-44d0-81ac-6e0fbe77d70a",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -260,
+          220
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 340,
+          "height": 680,
+          "content": "## JSON PARSER\n\n1.converts the textual data final order like\nitem name \nquantity \nand table name in a json.\n\n2.if the data doesn't include the above it returns null."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "acc7a528-f767-4576-b08d-6fc386f57648",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          100,
+          220
+        ],
+        "parameters": {
+          "color": 2,
+          "width": 460,
+          "height": 680,
+          "content": "## Refine/Split the jsons into multiple items\n\nIf the data from previous item is not null the custom code block splits the data into multiple json items in a list."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "857a3102-f5e1-4db5-afb4-154544414701",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          580,
+          220
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 440,
+          "height": 680,
+          "content": "## Send each item as a record in Google sheet\n\n\n**Each item is looped over and produce a batch of 1 item and appended as row in sheet with timestamp.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a1ff2b0f-0b48-4ea2-8121-4e2d72197ef7",
+        "name": "Triggered on Restaurant Chat workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -440,
+          500
+        ],
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "typeVersion": 1.1,
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8689b773-a1c4-4de4-a66e-fab8c9eb6244",
+        "name": "When chat message received",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -140,
+          -280
+        ],
+        "webhookId": "d931c4a7-02f5-4359-918f-7ad3fae7b144",
+        "parameters": {
+          "public": true,
+          "options": {}
+        },
+        "typeVersion": 1.1,
+        "notes": "This chatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "de310ce2-3868-4a0f-aa9b-38253e75dbda",
+        "name": "AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          100,
+          -260
+        ],
+        "parameters": {
+          "options": {
+            "systemMessage": "\n\nYou are a polite and efficient restaurant assistant.\n\nYour job is to take customer orders, verify the order details, correct any mistakes, and confirm the order.\n\nFollow these steps:\n\nGreeting and Asking for the Order\n\nIf the customer greets you (e.g., \"Hello\", \"Hi\", \"Good evening\"), respond with:\n\n\"Hello! How can I assist you today? What would you like to order?\"\n\nOrder Parsing and Understanding\n\nAccept orders in flexible formats, such as:\n\n\"1 latte, 2 coffee, table number 5\"\n\n\"latte 2, pepsi 1, table 3\"\n\n\"1 cappucino\"\n\n\"1 tea table no 4\"\n\nYour goal is to extract the following:\n\nItem names (e.g., latte, coffee, chocolate, tea, pepsi)\n\nQuantities (must be numeric)\n\nTable number (must be numeric)\n\nVerify and Handle Missing or Incorrect Information\n\nFor each item in the order:\n\nIf the item name is missing, respond:\n\"Sorry, the item name is missing. What would you like to order?\"\n\nIf the quantity is missing, respond:\n\"How many [item] would you like?\"\n\nIf the table number is missing, respond:\n\"Could you please provide a table number?\"\n\nIf there are spelling mistakes in the item name, suggest corrections. Example:\n\"Did you mean chocolate instead of chocolat? Please confirm.\"\n\nUse fuzzy matching to detect common variations and typos.\n\nFinal Confirmation\n\nOnce all necessary details are collected, present an order summary like this:\n\nHere’s your order summary:\n\n1 latte\n\n2 coffee\n\nTable number: 5\nShall I confirm this order?\n\nOn Confirmation: Use the Tool\n\nWhen the user confirms, use the tool ConfirmOrder to send the final confirmation message as plain text in this format:\n\nThank you for confirming! Your order will be prepared shortly. Enjoy your time with us!\n\nOrder details are following:\nitem quantity\nlatte 1\ncoffee 2\n\nAdded to table number 5\n\nEnsure numeric values (quantities and table numbers) are correctly extracted, even if they appear at the start or end. Always confirm with the user if there is any uncertainty.\n\n\n\n\n\n\n\n\n"
+          }
+        },
+        "typeVersion": 1.9,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9dda45ee-0a92-448c-8a7e-8daa99282cda",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -20,
+          20
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {
+            "responseFormat": "text"
+          }
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "OizdHUANhz9NIHyd",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0c0189d5-8fb4-4679-b2e2-221a3e2a4c88",
+        "name": "Call n8n Workflow Tool",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          360,
+          20
+        ],
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "wgaJ0eJQtYA8oKSC",
+            "cachedResultName": "Restaurant POS workflow"
+          },
+          "description": "This tool sends the text output generated by the AI Agent node to another n8n workflow for additional handling or automation.",
+          "workflowInputs": {
+            "value": {},
+            "schema": [],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          }
+        },
+        "notesInFlow": false,
+        "typeVersion": 2.2,
+        "notes": "This toolWorkflow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9292db7f-6ffc-486e-b31a-bcbd6ef7ab98",
+        "name": "Last 5 conversations Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          140,
+          40
+        ],
+        "parameters": {},
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2782d5b6-d33b-4c89-ac79-90bf380f0828",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          60,
+          -380
+        ],
+        "parameters": {
+          "width": 340,
+          "height": 300,
+          "content": "## Restaurant Order Chat bot\n** It chats with the user and refines the order for the pos system in another workflow."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7c298718-e9e3-40d3-a612-94c578bd3100",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          500,
+          -20
+        ],
+        "parameters": {
+          "color": 5,
+          "content": "## Call the subworkflow\nit passes the data to the subworkflow for further process\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-bfe086b4",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "75883f27-af58-4791-9e1a-a70b83e1cead": {
+        "main": [
+          [
+            {
+              "node": "error-handler-75883f27-af58-4791-9e1a-a70b83e1cead-eee492d3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9e3f8a1b-ccd8-4f4d-91cb-b99cc46f412f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9e3f8a1b-ccd8-4f4d-91cb-b99cc46f412f-2dcaf4f3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9dda45ee-0a92-448c-8a7e-8daa99282cda": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9dda45ee-0a92-448c-8a7e-8daa99282cda-22f7ba19",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Informationextractor Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Informationextractor Workflow. This workflow integrates 14 different services: stickyNote, code, agent, noOp, informationExtractor. It contains 22 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Informationextractor Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "75883f27-af58-4791-9e1a-a70b83e1cead": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-75883f27-af58-4791-9e1a-a70b83e1cead-eee492d3"
+            }
+          ]
+        ]
+      },
+      "9dda45ee-0a92-448c-8a7e-8daa99282cda": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9dda45ee-0a92-448c-8a7e-8daa99282cda-22f7ba19"
+            }
+          ]
+        ]
+      },
+      "9e3f8a1b-ccd8-4f4d-91cb-b99cc46f412f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9e3f8a1b-ccd8-4f4d-91cb-b99cc46f412f-2dcaf4f3"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Informationextractor Workflow",
+    "nodes": [
+      {
+        "name": "AI Agent",
+        "parameters": {
+          "options": {
+            "systemMessage": "\n\nYou are a polite and efficient restaurant assistant.\n\nYour job is to take customer orders, verify the order details, correct any mistakes, and confirm the order.\n\nFollow these steps:\n\nGreeting and Asking for the Order\n\nIf the customer greets you (e.g., \"Hello\", \"Hi\", \"Good evening\"), respond with:\n\n\"Hello! How can I assist you today? What would you like to order?\"\n\nOrder Parsing and Understanding\n\nAccept orders in flexible formats, such as:\n\n\"1 latte, 2 coffee, table number 5\"\n\n\"latte 2, pepsi 1, table 3\"\n\n\"1 cappucino\"\n\n\"1 tea table no 4\"\n\nYour goal is to extract the following:\n\nItem names (e.g., latte, coffee, chocolate, tea, pepsi)\n\nQuantities (must be numeric)\n\nTable number (must be numeric)\n\nVerify and Handle Missing or Incorrect Information\n\nFor each item in the order:\n\nIf the item name is missing, respond:\n\"Sorry, the item name is missing. What would you like to order?\"\n\nIf the quantity is missing, respond:\n\"How many [item] would you like?\"\n\nIf the table number is missing, respond:\n\"Could you please provide a table number?\"\n\nIf there are spelling mistakes in the item name, suggest corrections. Example:\n\"Did you mean chocolate instead of chocolat? Please confirm.\"\n\nUse fuzzy matching to detect common variations and typos.\n\nFinal Confirmation\n\nOnce all necessary details are collected, present an order summary like this:\n\nHere’s your order summary:\n\n1 latte\n\n2 coffee\n\nTable number: 5\nShall I confirm this order?\n\nOn Confirmation: Use the Tool\n\nWhen the user confirms, use the tool ConfirmOrder to send the final confirmation message as plain text in this format:\n\nThank you for confirming! Your order will be prepared shortly. Enjoy your time with us!\n\nOrder details are following:\nitem quantity\nlatte 1\ncoffee 2\n\nAdded to table number 5\n\nEnsure numeric values (quantities and table numbers) are correctly extracted, even if they appear at the start or end. Always confirm with the user if there is any uncertainty.\n\n\n\n\n\n\n\n\n"
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.9
+      },
+      {
+        "name": "Call n8n Workflow Tool",
+        "parameters": {
+          "description": "This tool sends the text output generated by the AI Agent node to another n8n workflow for additional handling or automation.",
+          "workflowId": {
+            "__rl": true,
+            "cachedResultName": "Restaurant POS workflow",
+            "mode": "list",
+            "value": "wgaJ0eJQtYA8oKSC"
+          },
+          "workflowInputs": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [],
+            "value": {}
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Code",
+        "parameters": {
+          "language": "python",
+          "pythonCode": "# Input from n8n\ninput_data = items\n\n# Get the extracted list\nextract_data = input_data[0].get('json', {}).get('output', {}).get('parameters', {}).get('extract', [])\n\n# Prepare variables\norder_items = []\ntable_number = None\n\n# Separate entries by type\nitems_list = []\nquantities = []\n\n# Parse all entries\nfor entry in extract_data:\n    if entry['name'] == 'table number':\n        table_number = entry['pattern']\n    elif entry['name'] == 'item':\n        items_list.append(entry['pattern'])\n    elif entry['name'] == 'quantity':\n        quantities.append(int(entry['pattern']))\n\n# Pair items and quantities\nfor i in range(len(items_list)):\n    item_data = {\n        'item': items_list[i],\n        'quantity': quantities[i] if i < len(quantities) else None,\n        'table': table_number\n    }\n    order_items.append(item_data)\n\n# Set final output\noutput = [{'json': item} for item in order_items]\n\nreturn output"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Sheets",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Timestamp",
+                "id": "Timestamp",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Table No",
+                "id": "Table No",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Item",
+                "id": "Item",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Quantity",
+                "id": "Quantity",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Item": "={{ $json.item }}",
+              "Quantity": "={{ $json.quantity }}",
+              "Table No": "={{ $json.table }}",
+              "Timestamp": "={{ $now }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Order log",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "8a5dda0c-a567-4305-83a3-68d6fb573dd3",
+                "leftValue": "={{ $json.output.parameters.extract }}",
+                "operator": {
+                  "operation": "empty",
+                  "singleValue": true,
+                  "type": "array"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Information Extractor",
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"name\": \"Information Extractor\",\n  \"type\": \"n8n-nodes-base.informationExtractor\",\n  \"parameters\": {\n    \"extract\": [\n      {\n        \"name\": \"items\",\n        \"pattern\": \"(latte|coffee|tea|cappuccino)\"\n      },\n      {\n        \"name\": \"quantity\",\n        \"pattern\": \"\\\\d+\"\n      },\n      {\n        \"name\": \"table\",\n        \"pattern\": \"table number (\\\\d+)\"\n      }\n    ]\n  }\n}\n",
+          "options": {},
+          "schemaType": "fromJson",
+          "text": "={{ $json.query }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Last 5 conversations Memory",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "No Operation, do nothing",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {
+            "responseFormat": "text"
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model1",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Replace Me",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 3,
+          "content": "## JSON PARSER\n\n1.converts the textual data final order like\nitem name \nquantity \nand table name in a json.\n\n2.if the data doesn't include the above it returns null.",
+          "height": 680,
+          "width": 340
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 2,
+          "content": "## Refine/Split the jsons into multiple items\n\nIf the data from previous item is not null the custom code block splits the data into multiple json items in a list.",
+          "height": 680,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "## Send each item as a record in Google sheet\n\n\n**Each item is looped over and produce a batch of 1 item and appended as row in sheet with timestamp.\n",
+          "height": 680,
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Restaurant Order Chat bot\n** It chats with the user and refines the order for the pos system in another workflow.",
+          "height": 300,
+          "width": 340
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 5,
+          "content": "## Call the subworkflow\nit passes the data to the subworkflow for further process\n"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Triggered on Restaurant Chat workflow",
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When chat message received",
+        "parameters": {
+          "options": {},
+          "public": true
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 20,
+  "integrationCount": 1,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Google Sheets"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 181,
+  "viewCount": 158,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Triggered on Restaurant Chat workflow\".",
+      "Open the \"Information Extractor\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Replace Me\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"No Operation, do nothing\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"When chat message received\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Call n8n Workflow Tool\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Last 5 conversations Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 96,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-funjetycb",
+      "workflowId": "informationextractor-workflow-4ju6h",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0918_Code_Noop_Send_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0918_Code_Noop_Send_Triggered.json",
+      "discoveredAt": "2026-07-15T11:28:54.517Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:54.517Z",
+  "updatedAt": "2026-07-15T11:28:54.517Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

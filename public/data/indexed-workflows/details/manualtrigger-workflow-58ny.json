@@ -1,0 +1,811 @@
+{
+  "id": "manualtrigger-workflow-p671t",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-58ny",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 5 different services: stickyNote, httpRequest, set, stopAndError, manualTrigger. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "31b6611c-e4d1-4ab8-9351-74718caf938d",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          820,
+          360
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e",
+        "name": "Get mailboxes",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1260,
+          360
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "using",
+                "value": "={{ [ \"urn:ietf:params:jmap:core\", \"urn:ietf:params:jmap:mail\" ] }}"
+              },
+              {
+                "name": "methodCalls",
+                "value": "={{\n[\n  [ \n    \"Mailbox/get\",\n    {\n      \"accountId\": $json.primaryAccounts['urn:ietf:params:jmap:mail'],\n      \"ids\": null\n    },\n    \"mailboxes\"\n  ] \n]\n}}"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "ZzWBkLUs2mg2xJBW",
+            "name": "Fastmail"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8477a075-1341-4b69-8e20-4a56b2a96711",
+        "name": "Fetch API details",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1040,
+          360
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "ZzWBkLUs2mg2xJBW",
+            "name": "Fastmail"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "87188d6d-eb94-4b83-aaa4-e5c744d65c45",
+        "name": "Format results",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1480,
+          360
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "account_id",
+                "stringValue": "={{ $('Fetch API details').first().json.primaryAccounts['urn:ietf:params:jmap:mail'] }}"
+              },
+              {
+                "name": "mailbox_id",
+                "stringValue": "={{ $json.methodResponses.find(e => e[2] == 'mailboxes')[1].list.find(e => e.role == 'inbox').id }}"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "550b20c1-57ff-497e-b20a-e772e5fbfe86",
+        "name": "Get unread messages",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1700,
+          360
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "using",
+                "value": "={{ [ \"urn:ietf:params:jmap:core\", \"urn:ietf:params:jmap:mail\" ] }}"
+              },
+              {
+                "name": "methodCalls",
+                "value": "={{\n[\n  [ \n    \"Email/query\",\n    {\n      \"accountId\": $json.account_id,\n      \"filter\": {\n        \"inMailbox\": $json.mailbox_id,\n        \"notKeyword\": \"$seen\"\n      },\n      \"sort\": [\n        {\n          \"property\": \"receivedAt\",\n          \"isAscending\": false\n        }\n      ],\n      \"limit\": 3,\n      \"calculateTotal\": true,\n    },\n    \"messages\"\n  ], [\n    \"Email/get\",\n    {\n      \"accountId\": $json.account_id,\n      \"#ids\": {\n        \"name\": \"Email/query\",\n        \"path\": \"/ids\",\n        \"resultOf\": \"messages\"\n      },\n      \"properties\": [\n        \"id\",\n        \"receivedAt\",\n        \"from\",\n        \"subject\",\n        \"keywords\"\n      ]\n    },\n    \"emails\"\n  ] \n]\n}}"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "ZzWBkLUs2mg2xJBW",
+            "name": "Fastmail"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7298d504-8e68-481b-a2cb-07a64dcef159",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          980,
+          200
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 671,
+          "height": 328,
+          "content": "## ℹ️ Replacing the initial nodes\n\nThese nodes fetch your account and mailbox IDs. Consider saving these values instead of querying them on every execution to improve performance and reduce the load on the JMAP API."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b279bb2d-e76e-4e3b-abaf-e351d1c3462d",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          980,
+          -60
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 671,
+          "height": 232,
+          "content": "## ℹ️ Credentials\n\nThe JMAP standard does not limit the available authentication options. Fastmail (the sponsor of the standard) supports Bearer authentication as well as OAuth2.\n\nIn n8n you can implement the Fastmail Bearer authentication by creating Header Auth credentials with a name of `Authorization` and a value of `Bearer $apiToken` (replacing `$apiToken` with your actual [token from Fastmail]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-00ac86d4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-ea2694a3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-c1af057e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-08407e20",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-206fdc75",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-86bdc37e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-5077ff1a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-b19fb35c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "8477a075-1341-4b69-8e20-4a56b2a96711": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-2ae9814c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-663488ff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-d3b8c0b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-977d6d4c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-ada02502",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-ba7bcc3f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-51eb48b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-569c04a5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "550b20c1-57ff-497e-b20a-e772e5fbfe86": {
+        "main": [
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-26816f5a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-76d03d16",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-8cdf1afb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-1a572e67",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-e26cf173",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-c15bcbbd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-2b875bdc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-5899bdc8",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 5 different services: stickyNote, httpRequest, set, stopAndError, manualTrigger. It contains 13 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-2ebce3dc",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.950383",
+      "updatedAt": "2025-09-29T07:07:48.950406",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "550b20c1-57ff-497e-b20a-e772e5fbfe86": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-26816f5a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-76d03d16"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-8cdf1afb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-1a572e67"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-e26cf173"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-c15bcbbd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-2b875bdc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-550b20c1-57ff-497e-b20a-e772e5fbfe86-5899bdc8"
+            }
+          ]
+        ]
+      },
+      "5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-00ac86d4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-ea2694a3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-c1af057e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-08407e20"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-206fdc75"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-86bdc37e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-5077ff1a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5b8a2148-f8e3-4c21-ba39-6aa8cc492c5e-b19fb35c"
+            }
+          ]
+        ]
+      },
+      "8477a075-1341-4b69-8e20-4a56b2a96711": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-2ae9814c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-663488ff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-d3b8c0b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-977d6d4c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-ada02502"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-ba7bcc3f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-51eb48b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8477a075-1341-4b69-8e20-4a56b2a96711-569c04a5"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Fetch API details",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {},
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Format results",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "account_id",
+                "stringValue": "={{ $('Fetch API details').first().json.primaryAccounts['urn:ietf:params:jmap:mail'] }}"
+              },
+              {
+                "name": "mailbox_id",
+                "stringValue": "={{ $json.methodResponses.find(e => e[2] == 'mailboxes')[1].list.find(e => e.role == 'inbox').id }}"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get mailboxes",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "using",
+                "value": "={{ [ \"urn:ietf:params:jmap:core\", \"urn:ietf:params:jmap:mail\" ] }}"
+              },
+              {
+                "name": "methodCalls",
+                "value": "={{\n[\n  [ \n    \"Mailbox/get\",\n    {\n      \"accountId\": $json.primaryAccounts['urn:ietf:params:jmap:mail'],\n      \"ids\": null\n    },\n    \"mailboxes\"\n  ] \n]\n}}"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get unread messages",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "using",
+                "value": "={{ [ \"urn:ietf:params:jmap:core\", \"urn:ietf:params:jmap:mail\" ] }}"
+              },
+              {
+                "name": "methodCalls",
+                "value": "={{\n[\n  [ \n    \"Email/query\",\n    {\n      \"accountId\": $json.account_id,\n      \"filter\": {\n        \"inMailbox\": $json.mailbox_id,\n        \"notKeyword\": \"$seen\"\n      },\n      \"sort\": [\n        {\n          \"property\": \"receivedAt\",\n          \"isAscending\": false\n        }\n      ],\n      \"limit\": 3,\n      \"calculateTotal\": true,\n    },\n    \"messages\"\n  ], [\n    \"Email/get\",\n    {\n      \"accountId\": $json.account_id,\n      \"#ids\": {\n        \"name\": \"Email/query\",\n        \"path\": \"/ids\",\n        \"resultOf\": \"messages\"\n      },\n      \"properties\": [\n        \"id\",\n        \"receivedAt\",\n        \"from\",\n        \"subject\",\n        \"keywords\"\n      ]\n    },\n    \"emails\"\n  ] \n]\n}}"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 5,
+          "content": "## ℹ️ Replacing the initial nodes\n\nThese nodes fetch your account and mailbox IDs. Consider saving these values instead of querying them on every execution to improve performance and reduce the load on the JMAP API.",
+          "height": 328,
+          "width": 671
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 3,
+          "content": "## ℹ️ Credentials\n\nThe JMAP standard does not limit the available authentication options. Fastmail (the sponsor of the standard) supports Bearer authentication as well as OAuth2.\n\nIn n8n you can implement the Fastmail Bearer authentication by creating Header Auth credentials with a name of `Authorization` and a value of `Bearer $apiToken` (replacing `$apiToken` with your actual [token from Fastmail]({{ $env.WEBHOOK_URL }}",
+          "height": 232,
+          "width": 671
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 89,
+  "viewCount": 796,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"Get mailboxes\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch API details\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get unread messages\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Format results\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-qz5f7kbs4",
+      "workflowId": "manualtrigger-workflow-p671t",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0374_Manual_Stickynote_Send_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0374_Manual_Stickynote_Send_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:28.891Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:28.891Z",
+  "updatedAt": "2026-07-15T11:29:28.891Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

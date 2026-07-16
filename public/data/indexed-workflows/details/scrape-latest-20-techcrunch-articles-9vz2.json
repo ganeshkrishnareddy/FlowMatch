@@ -1,0 +1,833 @@
+{
+  "id": "scrape-latest-20-techcrunch-articles-hsxdo",
+  "name": "Scrape Latest 20 TechCrunch Articles",
+  "slug": "scrape-latest-20-techcrunch-articles-9vz2",
+  "description": "Automated workflow: Scrape Latest 20 TechCrunch Articles. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Scrape Latest 20 TechCrunch Articles workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "MKGrRFnUuMZMAxNf",
+    "meta": {
+      "instanceId": "workflow-ab646b1d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.010785",
+      "updatedAt": "2025-09-29T07:07:50.010797",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Scrape Latest 20 TechCrunch Articles",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "f757df19-a2b0-42c5-b75e-e4af51696059",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -400,
+          160
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1311d3be-cf2e-42ca-ae69-8ebfeb71eefb",
+        "name": "Request Techcrunsh Latest Page",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -220,
+          160
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c7807fdf-3b0b-40f8-b912-214475501861",
+        "name": "Parse a posts box",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          -40,
+          160
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "extractHtmlContent",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "ul.wp-block-post-template",
+                "returnValue": "html"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4f6720e2-32ee-41dd-a369-a05bb06b4441",
+        "name": "Parse all posts",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          120,
+          160
+        ],
+        "parameters": {
+          "options": {
+            "trimValues": true
+          },
+          "operation": "extractHtmlContent",
+          "dataPropertyName": "box",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "li.wp-block-post",
+                "returnArray": true,
+                "returnValue": "html"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2d4f5589-1c27-4fa0-9c64-34d02fb091cf",
+        "name": "split out the posts",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          300,
+          160
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "posts"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bf35ac63-554a-4039-9636-78016110f615",
+        "name": "Parse each post in detail",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          520,
+          160
+        ],
+        "parameters": {
+          "options": {
+            "trimValues": true
+          },
+          "operation": "extractHtmlContent",
+          "dataPropertyName": "posts",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "attribute": "src",
+                "cssSelector": "img",
+                "returnValue": "attribute"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "h3.loop-card__title"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "attribute": "data-destinationlink",
+                "cssSelector": "h3>a",
+                "returnValue": "attribute"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "attribute": "datetime",
+                "cssSelector": "time",
+                "returnValue": "attribute"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2aedd43b-5c04-410e-be37-7e84b798e551",
+        "name": "Request a post detail page",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          720,
+          160
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e0d9eb9c-096c-47de-b39a-d72083d403de",
+        "name": "Parse a post's content and metadata",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          940,
+          160
+        ],
+        "parameters": {
+          "options": {
+            "trimValues": true,
+            "cleanUpText": true
+          },
+          "operation": "extractHtmlContent",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "div.entry-content"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "h1.wp-block-post-title"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "attribute": "src",
+                "cssSelector": "img.attachment-post-thumbnail",
+                "returnValue": "attribute"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "attribute": "datetime",
+                "cssSelector": "time",
+                "returnValue": "attribute"
+              }
+            ]
+          }
+        },
+        "executeOnce": false,
+        "typeVersion": 1.2,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "513c616e-9362-4246-a420-70c93863ad6e",
+        "name": "Save the values",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1120,
+          160
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "411666fc-c934-4cfe-93c8-dd2ba426fa46",
+                "name": "url",
+                "type": "string",
+                "value": "={{ $('Parse each post in detail').item.json.url }}"
+              },
+              {
+                "id": "251700fe-bfee-46a6-b157-c0d029edb594",
+                "name": "created_at",
+                "type": "string",
+                "value": "={{ $('Parse each post in detail').item.json.created_at }}"
+              },
+              {
+                "id": "296f4201-06a3-4d81-b85f-5d0b045e09bd",
+                "name": "image",
+                "type": "string",
+                "value": "={{ $('Parse each post in detail').item.json.image }}"
+              },
+              {
+                "id": "1af47c5f-1b6e-4894-b7c5-9a037a328a0d",
+                "name": "content",
+                "type": "string",
+                "value": "={{ $json.content }}"
+              },
+              {
+                "id": "5595be9f-7d2a-43c5-8b40-839f787e9ace",
+                "name": "title",
+                "type": "string",
+                "value": "={{ $json.title }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "6f14b55f-11a9-46f6-ba96-4abdfd3fe2f8",
+    "connections": {
+      "1311d3be-cf2e-42ca-ae69-8ebfeb71eefb": {
+        "main": [
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-618ceb6f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-048c3e67",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-2d054180",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-9c2f7a6d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-b07b9d7f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-a5297724",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-48608b13",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-21065906",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "2aedd43b-5c04-410e-be37-7e84b798e551": {
+        "main": [
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-b9137841",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-673b5210",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-a4970ff7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-9b202e6c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-35b4c7e2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-c0b4439f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-26413a95",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-f5115f3a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Scrape Latest 20 TechCrunch Articles. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Scrape Latest 20 TechCrunch Articles. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "1311d3be-cf2e-42ca-ae69-8ebfeb71eefb": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-618ceb6f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-048c3e67"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-2d054180"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-9c2f7a6d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-b07b9d7f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-a5297724"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-48608b13"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1311d3be-cf2e-42ca-ae69-8ebfeb71eefb-21065906"
+            }
+          ]
+        ]
+      },
+      "2aedd43b-5c04-410e-be37-7e84b798e551": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-b9137841"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-673b5210"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-a4970ff7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-9b202e6c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-35b4c7e2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-c0b4439f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-26413a95"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2aedd43b-5c04-410e-be37-7e84b798e551-f5115f3a"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scrape Latest 20 TechCrunch Articles",
+    "nodes": [
+      {
+        "name": "Parse a post's content and metadata",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "div.entry-content",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "cssSelector": "h1.wp-block-post-title",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "attribute": "src",
+                "cssSelector": "img.attachment-post-thumbnail",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "attribute"
+              },
+              {
+                "attribute": "datetime",
+                "cssSelector": "time",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "attribute"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {
+            "cleanUpText": true,
+            "trimValues": true
+          }
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Parse a posts box",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "ul.wp-block-post-template",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "html"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Parse all posts",
+        "parameters": {
+          "dataPropertyName": "box",
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "li.wp-block-post",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnArray": true,
+                "returnValue": "html"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {
+            "trimValues": true
+          }
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Parse each post in detail",
+        "parameters": {
+          "dataPropertyName": "posts",
+          "extractionValues": {
+            "values": [
+              {
+                "attribute": "src",
+                "cssSelector": "img",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "attribute"
+              },
+              {
+                "cssSelector": "h3.loop-card__title",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "attribute": "data-destinationlink",
+                "cssSelector": "h3>a",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "attribute"
+              },
+              {
+                "attribute": "datetime",
+                "cssSelector": "time",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnValue": "attribute"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {
+            "trimValues": true
+          }
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Request a post detail page",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Request Techcrunsh Latest Page",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Save the values",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "411666fc-c934-4cfe-93c8-dd2ba426fa46",
+                "name": "url",
+                "type": "string",
+                "value": "={{ $('Parse each post in detail').item.json.url }}"
+              },
+              {
+                "id": "251700fe-bfee-46a6-b157-c0d029edb594",
+                "name": "created_at",
+                "type": "string",
+                "value": "={{ $('Parse each post in detail').item.json.created_at }}"
+              },
+              {
+                "id": "296f4201-06a3-4d81-b85f-5d0b045e09bd",
+                "name": "image",
+                "type": "string",
+                "value": "={{ $('Parse each post in detail').item.json.image }}"
+              },
+              {
+                "id": "1af47c5f-1b6e-4894-b7c5-9a037a328a0d",
+                "name": "content",
+                "type": "string",
+                "value": "={{ $json.content }}"
+              },
+              {
+                "id": "5595be9f-7d2a-43c5-8b40-839f787e9ace",
+                "name": "title",
+                "type": "string",
+                "value": "={{ $json.title }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "split out the posts",
+        "parameters": {
+          "fieldToSplitOut": "posts",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Box",
+    "Html"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 44,
+  "viewCount": 158,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Box Account",
+      "Html Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Request Techcrunsh Latest Page\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Parse a posts box\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"Parse all posts\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"split out the posts\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Parse each post in detail\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"Request a post detail page\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Parse a post's content and metadata\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Save the values\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-2crfkjawc",
+      "workflowId": "scrape-latest-20-techcrunch-articles-hsxdo",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/1546_Manual_Splitout_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\1546_Manual_Splitout_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:43.090Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:43.090Z",
+  "updatedAt": "2026-07-15T11:29:43.090Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

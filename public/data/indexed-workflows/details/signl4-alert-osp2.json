@@ -1,0 +1,426 @@
+{
+  "id": "signl4-alert-pog9j",
+  "name": "SIGNL4 Alert",
+  "slug": "signl4-alert-osp2",
+  "description": "Automated workflow: SIGNL4 Alert. This workflow processes data and performs automated tasks.",
+  "shortDescription": "SIGNL4 Alert workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "2",
+    "name": "SIGNL4 Alert",
+    "nodes": [
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          350,
+          500
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyHour"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "6d16121a-270e-497b-b8eb-ebd84aa0b880",
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Write Binary File",
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "position": [
+          880,
+          500
+        ],
+        "parameters": {
+          "fileName": "alert-data.json"
+        },
+        "typeVersion": 1,
+        "id": "312ac354-8e65-4119-9c90-c740278a92ec",
+        "notes": "This writeBinaryFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Read Binary File",
+        "type": "n8n-nodes-base.readBinaryFile",
+        "position": [
+          450,
+          270
+        ],
+        "parameters": {
+          "filePath": "alert-data.json"
+        },
+        "typeVersion": 1,
+        "id": "73a7e7f3-d488-4abd-ada9-64531e19f3ea",
+        "notes": "This readBinaryFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Binary to JSON",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          630,
+          270
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "35166d43-5347-4fc7-86c0-d3f3cbf0bbce",
+        "notes": "This moveBinaryData node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "JSON to Binary",
+        "type": "n8n-nodes-base.moveBinaryData",
+        "position": [
+          720,
+          500
+        ],
+        "parameters": {
+          "mode": "jsonToBinary",
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "93a5ef4c-94c5-4675-9f1f-4b9300a30b79",
+        "notes": "This moveBinaryData node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Mark as Done",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          560,
+          500
+        ],
+        "parameters": {
+          "functionCode": "items[0].json.Body = $node[\"Binary to JSON\"].json.Body;\nitems[0].json.Done = true;\nitems[0].json.eventId = $node[\"SIGNL4 Alert\"].json.eventId;\nitems[0].json.lastId = $node[\"Binary to JSON\"].json.eventId;\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "18477285-16f9-4464-9b62-519441e56a11",
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          810,
+          270
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Binary to JSON\"].json[\"Done\"]}}"
+              }
+            ]
+          },
+          "combineOperation": "=all"
+        },
+        "typeVersion": 1,
+        "id": "bb2e9b65-9c54-4306-b25a-4a8e7cb05c72",
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "SIGNL4 Resolve",
+        "type": "n8n-nodes-base.signl4",
+        "position": [
+          1040,
+          500
+        ],
+        "parameters": {
+          "operation": "resolve",
+          "externalId": "={{$node[\"Binary to JSON\"].json[\"lastId\"]}}"
+        },
+        "credentials": {
+          "signl4Api": "Team"
+        },
+        "typeVersion": 1,
+        "id": "993f52a7-f43f-4b1e-89fe-aa9b501c6763",
+        "notes": "This signl4 node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "SIGNL4 Alert",
+        "type": "n8n-nodes-base.signl4",
+        "position": [
+          990,
+          270
+        ],
+        "parameters": {
+          "message": "={{$node[\"Binary to JSON\"].json[\"Body\"]}}",
+          "additionalFields": {
+            "externalId": "={{$node[\"Binary to JSON\"].json[\"eventId\"]}}",
+            "locationFieldsUi": {
+              "locationFieldsValues": {
+                "latitude": "52.3984235",
+                "longitude": "13.0544149"
+              }
+            }
+          }
+        },
+        "credentials": {
+          "signl4Api": "Team"
+        },
+        "typeVersion": 1,
+        "id": "78359c79-15f5-4fc2-8b71-ed1f15c6658c",
+        "notes": "This signl4 node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-7ebe8484",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "settings": {
+      "timezone": "UTC",
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: SIGNL4 Alert. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-791ddef0",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.539112",
+      "updatedAt": "2025-09-29T07:07:51.539163",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: SIGNL4 Alert. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "SIGNL4 Alert",
+    "nodes": [
+      {
+        "name": "Binary to JSON",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyHour"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "combineOperation": "=all",
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Binary to JSON\"].json[\"Done\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "JSON to Binary",
+        "parameters": {
+          "mode": "jsonToBinary",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.moveBinaryData",
+        "typeVersion": 1
+      },
+      {
+        "name": "Mark as Done",
+        "parameters": {
+          "functionCode": "items[0].json.Body = $node[\"Binary to JSON\"].json.Body;\nitems[0].json.Done = true;\nitems[0].json.eventId = $node[\"SIGNL4 Alert\"].json.eventId;\nitems[0].json.lastId = $node[\"Binary to JSON\"].json.eventId;\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Read Binary File",
+        "parameters": {
+          "filePath": "alert-data.json"
+        },
+        "type": "n8n-nodes-base.readBinaryFile",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "signl4Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "SIGNL4 Alert",
+        "parameters": {
+          "additionalFields": {
+            "externalId": "={{$node[\"Binary to JSON\"].json[\"eventId\"]}}",
+            "locationFieldsUi": {
+              "locationFieldsValues": {
+                "latitude": "52.3984235",
+                "longitude": "13.0544149"
+              }
+            }
+          },
+          "message": "={{$node[\"Binary to JSON\"].json[\"Body\"]}}"
+        },
+        "type": "n8n-nodes-base.signl4",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "signl4Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "SIGNL4 Resolve",
+        "parameters": {
+          "externalId": "={{$node[\"Binary to JSON\"].json[\"lastId\"]}}",
+          "operation": "resolve"
+        },
+        "type": "n8n-nodes-base.signl4",
+        "typeVersion": 1
+      },
+      {
+        "name": "Write Binary File",
+        "parameters": {
+          "fileName": "alert-data.json"
+        },
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Movebinarydata",
+    "Signl4"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 209,
+  "viewCount": 546,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Movebinarydata Account",
+      "Signl4 Account"
+    ],
+    "requiredCredentials": [
+      "signl4  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Write Binary File\" node (n8n-nodes-base.writeBinaryFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Read Binary File\" node (n8n-nodes-base.readBinaryFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Binary to JSON\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"JSON to Binary\" node (n8n-nodes-base.moveBinaryData) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mark as Done\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"SIGNL4 Resolve\" node (n8n-nodes-base.signl4) and configure the action parameters, mappings, and fields.",
+      "Open the \"SIGNL4 Alert\" node (n8n-nodes-base.signl4) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-hh0yaae0k",
+      "workflowId": "signl4-alert-pog9j",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Readbinaryfile/0749_Readbinaryfile_Movebinarydata_Send_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Readbinaryfile\\0749_Readbinaryfile_Movebinarydata_Send_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:19:20.990Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:20.990Z",
+  "updatedAt": "2026-07-15T11:19:20.990Z"
+}

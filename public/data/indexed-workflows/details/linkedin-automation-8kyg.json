@@ -1,0 +1,1416 @@
+{
+  "id": "linkedin-automation-uholr",
+  "name": "Linkedin Automation",
+  "slug": "linkedin-automation-8kyg",
+  "description": "Automated workflow: Linkedin Automation. This workflow integrates 10 different services: filter, stickyNote, httpRequest, telegram, airtable. It contains 24 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Linkedin Automation workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "id": "yF1HNe2ucaE81fNl",
+    "meta": {
+      "instanceId": "workflow-46d6adaf",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.262743",
+      "updatedAt": "2025-09-29T07:07:48.262757",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Linkedin Automation",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "fa012332-1c95-4460-b1d1-9d54441c9179",
+        "name": "Get List of records used",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          -40,
+          -80
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appt6kHkRkLlUh033",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Linkdin"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tbliloartO26TD5TG",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Used Articles"
+          },
+          "options": {},
+          "operation": "search"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "9bPeAvakB1tkDxsW",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 2.1,
+        "alwaysOutputData": true,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2d99b3b7-2fcd-46bf-8859-f41e94cb5ae1",
+        "name": "Update the used node",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          200,
+          600
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appt6kHkRkLlUh033",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Linkdin"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tbliloartO26TD5TG",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Used Articles"
+          },
+          "columns": {
+            "value": {
+              "id": "={{ $('download image for post').item.json.id }}",
+              "value": "={{ $('download image for post').item.json.id }}"
+            },
+            "schema": [
+              {
+                "id": "id",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "id",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "value",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "value",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "create"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "9bPeAvakB1tkDxsW",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "72abb016-8f58-4c4c-b492-9ba7a576441a",
+        "name": "map used articls ids",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          200,
+          -80
+        ],
+        "parameters": {
+          "jsCode": "let values = $input.all().map(item => item.json.value);\n\nreturn [\n    {\n      json: {\n        values: values\n      }\n    }\n  ];"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c49d5db2-d1c9-4444-8fa8-f39197e2a472",
+        "name": "filter only unused Ids",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          640,
+          -80
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "934a4ab8-bc6b-4d1b-b050-c1f19a03cc9f",
+                "operator": {
+                  "type": "array",
+                  "operation": "notContains",
+                  "rightType": "any"
+                },
+                "leftValue": "={{ $('map used articls ids').item.json.values }}",
+                "rightValue": "={{ $json.articles }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0b390b7d-8729-48e5-aadc-5aa9da8c7139",
+        "name": "get random tags",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -280,
+          -80
+        ],
+        "parameters": {
+          "jsCode": "const devToTags = [\n  \"android\",\n        \"androiddev\",\n        \"kotlin\",\n        \"jetpack-compose\",\n        \"android-appdevelopment\",\n        \"app-development\"\n];\n\n\nfunction getRandomValuesAsObjects(list, count) {\n  const randomValues = [];\n  for (let i = 0; i < count; i++) {\n    const randomIndex = Math.floor(Math.random() * list.length);\n    randomValues.push({ json: { value: list[randomIndex] } });\n  }\n  return randomValues;\n}\n\nreturn getRandomValuesAsObjects(devToTags, 1);\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6b16bc15-8d82-4aa0-9ee2-5a10f070d106",
+        "name": "sent the status",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          520,
+          600
+        ],
+        "webhookId": "9373d46a-d5ad-40f4-93c0-7a44ff5fea37",
+        "parameters": {
+          "text": "=Linkdin Post Sent Successfully  \n\n{{ $('If').item.json.title }}\n\nDb Status Id {{ $json.id }}",
+          "chatId": "1199262493",
+          "replyMarkup": "inlineKeyboard",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "R8nJZScHqw02haLU",
+            "name": "Mr.4rogrammer bot"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "99c5ed96-4220-46b0-9a2a-628963393894",
+        "name": "Morning  9 Clock",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -560,
+          -80
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9,19 * * *"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c81c749a-e21b-4ba6-beae-2b8a21523c06",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -560,
+          -600
+        ],
+        "parameters": {
+          "width": 920,
+          "height": 400,
+          "content": "# 📢 Auto-Post Medium Articles to LinkedIn with Telegram Alerts\n\nThis n8n workflow automates your LinkedIn posting by fetching articles from [medium.com](medium.com) twice a day (9:00 AM and 7:00 PM), ensuring consistent content sharing without manual effort.\n\nTo prevent duplicates, it stores posted article IDs in Airtable. It also sends a Telegram message after every successful post, so you stay updated.\n\n---\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "61171a34-53a3-448a-886c-b0cc83b75b33",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          400,
+          -520
+        ],
+        "parameters": {
+          "width": 580,
+          "height": 240,
+          "content": "\n## ✅ Features\n\n- 🕒 Runs twice daily at 9:00 AM and 7:00 PM (customizable)\n- 📰 Fetches latest medium.com articles by tag\n- 📂 Uses Airtable to avoid reposting the same article\n- 📢 Posts to your LinkedIn profile or company page\n- 📬 Sends a Telegram notification after successful posting\n- ⚙️ Fully customizable schedule, tags, and post format"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c6712f11-2852-49af-8fb9-235da0e4685c",
+        "name": "fetch article ids from tag",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          420,
+          -80
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-rapidapi-host",
+                "value": "medium2.p.rapidapi.com"
+              },
+              {
+                "name": "x-rapidapi-key",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6382e23e-e214-48b4-8d93-06fc2c74e7cc",
+        "name": "Fetch Medium post using Article Id",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          880,
+          -80
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-rapidapi-host",
+                "value": "medium2.p.rapidapi.com"
+              },
+              {
+                "name": "x-rapidapi-key",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eb92a4b3-d468-4d0f-8488-e6edb122b1db",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -200,
+          260
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "69a60b53-f719-44e8-9ca4-97b99205a253",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.image_url }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "792507fc-f956-4bc7-9c56-80f1078643a1",
+        "name": "make Linkedin post",
+        "type": "n8n-nodes-base.linkedIn",
+        "position": [
+          740,
+          240
+        ],
+        "parameters": {
+          "text": "={{ $('Fetch Medium post content').item.json.content.substring(0, 600) }} ...\n\nArticle link : {{ $env.WEBHOOK_URL }}{{ $('If').item.json.url }}\n\n#AndroidDevelopment #MobileAppDevelopment #AppDevelopment #Programming #SoftwareEngineering #TechCommunity #DeveloperLife #Kotlin #LinkedInDevelopers \n#Mr4rogrammer #isharewhatilearn",
+          "person": "BQYGc4bH9N",
+          "additionalFields": {
+            "title": "=💫 {{ $('If').item.json.title }} ⭐",
+            "visibility": "PUBLIC"
+          },
+          "shareMediaCategory": "IMAGE"
+        },
+        "credentials": {
+          "linkedInOAuth2Api": {
+            "id": "TODMZHWKWUyYl0qb",
+            "name": "LinkedIn account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This linkedIn node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b5026d10-0bcf-4ef4-a42e-0d8162a7eccc",
+        "name": "Fetch Medium post content",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          100,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-rapidapi-host",
+                "value": "medium2.p.rapidapi.com"
+              },
+              {
+                "name": "x-rapidapi-key",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d25bf5d7-0258-4f07-b0b7-54ace75ef697",
+        "name": "download image for post",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          420,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "allowUnauthorizedCerts": false
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "alwaysOutputData": false,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "timezone": "UTC",
+      "callerPolicy": "workflowsFromSameOwner",
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "errorWorkflow": null,
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "cc2275e5-a8d2-468c-be91-5e14ad568e3a",
+    "connections": {
+      "c6712f11-2852-49af-8fb9-235da0e4685c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-c9edf6f6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-b1507478",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-25949fa6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-a0154846",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-7a831d0d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-e78720cb",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-b9852b5c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-07b3edf9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "6382e23e-e214-48b4-8d93-06fc2c74e7cc": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-56131c3d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-8cdd96be",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-3acef32b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-69d276b0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-b333a586",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-72e7be1a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-3412d35d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-0ea53bce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b5026d10-0bcf-4ef4-a42e-0d8162a7eccc": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-841da890",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-4d3f1e82",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-3ef7c9da",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-89468515",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-8a07bd16",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-ad51c834",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-ec640826",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-da7435d9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d25bf5d7-0258-4f07-b0b7-54ace75ef697": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-e273c43d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-e9a0e5b0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-441fd32c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-dbfc56c0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-fce88071",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-f0c46735",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-54e619b0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-d2a64f07",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "6b16bc15-8d82-4aa0-9ee2-5a10f070d106": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6b16bc15-8d82-4aa0-9ee2-5a10f070d106-08f8b2a6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Linkedin Automation. This workflow integrates 10 different services: filter, stickyNote, httpRequest, telegram, airtable. It contains 24 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Linkedin Automation. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "6382e23e-e214-48b4-8d93-06fc2c74e7cc": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-56131c3d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-8cdd96be"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-3acef32b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-69d276b0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-b333a586"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-72e7be1a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-3412d35d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6382e23e-e214-48b4-8d93-06fc2c74e7cc-0ea53bce"
+            }
+          ]
+        ]
+      },
+      "6b16bc15-8d82-4aa0-9ee2-5a10f070d106": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6b16bc15-8d82-4aa0-9ee2-5a10f070d106-08f8b2a6"
+            }
+          ]
+        ]
+      },
+      "b5026d10-0bcf-4ef4-a42e-0d8162a7eccc": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-841da890"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-4d3f1e82"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-3ef7c9da"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-89468515"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-8a07bd16"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-ad51c834"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-ec640826"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b5026d10-0bcf-4ef4-a42e-0d8162a7eccc-da7435d9"
+            }
+          ]
+        ]
+      },
+      "c6712f11-2852-49af-8fb9-235da0e4685c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-c9edf6f6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-b1507478"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-25949fa6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-a0154846"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-7a831d0d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-e78720cb"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-b9852b5c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c6712f11-2852-49af-8fb9-235da0e4685c-07b3edf9"
+            }
+          ]
+        ]
+      },
+      "d25bf5d7-0258-4f07-b0b7-54ace75ef697": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-e273c43d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-e9a0e5b0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-441fd32c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-dbfc56c0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-fce88071"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-f0c46735"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-54e619b0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d25bf5d7-0258-4f07-b0b7-54ace75ef697-d2a64f07"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Linkedin Automation",
+    "nodes": [
+      {
+        "name": "download image for post",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0"
+              }
+            ]
+          },
+          "options": {
+            "allowUnauthorizedCerts": false
+          },
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "fetch article ids from tag",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-rapidapi-host",
+                "value": "medium2.p.rapidapi.com"
+              },
+              {
+                "name": "x-rapidapi-key",
+                "value": ""
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Fetch Medium post content",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-rapidapi-host",
+                "value": "medium2.p.rapidapi.com"
+              },
+              {
+                "name": "x-rapidapi-key",
+                "value": ""
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Fetch Medium post using Article Id",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-rapidapi-host",
+                "value": "medium2.p.rapidapi.com"
+              },
+              {
+                "name": "x-rapidapi-key",
+                "value": ""
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "filter only unused Ids",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "934a4ab8-bc6b-4d1b-b050-c1f19a03cc9f",
+                "leftValue": "={{ $('map used articls ids').item.json.values }}",
+                "operator": {
+                  "operation": "notContains",
+                  "rightType": "any",
+                  "type": "array"
+                },
+                "rightValue": "={{ $json.articles }}"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get List of records used",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "Linkdin",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "appt6kHkRkLlUh033"
+          },
+          "operation": "search",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "Used Articles",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tbliloartO26TD5TG"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "get random tags",
+        "parameters": {
+          "jsCode": "const devToTags = [\n  \"android\",\n        \"androiddev\",\n        \"kotlin\",\n        \"jetpack-compose\",\n        \"android-appdevelopment\",\n        \"app-development\"\n];\n\n\nfunction getRandomValuesAsObjects(list, count) {\n  const randomValues = [];\n  for (let i = 0; i < count; i++) {\n    const randomIndex = Math.floor(Math.random() * list.length);\n    randomValues.push({ json: { value: list[randomIndex] } });\n  }\n  return randomValues;\n}\n\nreturn getRandomValuesAsObjects(devToTags, 1);\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "69a60b53-f719-44e8-9ca4-97b99205a253",
+                "leftValue": "={{ $json.image_url }}",
+                "operator": {
+                  "operation": "notEmpty",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "linkedInOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "make Linkedin post",
+        "parameters": {
+          "additionalFields": {
+            "title": "=💫 {{ $('If').item.json.title }} ⭐",
+            "visibility": "PUBLIC"
+          },
+          "person": "BQYGc4bH9N",
+          "shareMediaCategory": "IMAGE",
+          "text": "={{ $('Fetch Medium post content').item.json.content.substring(0, 600) }} ...\n\nArticle link : {{ $env.WEBHOOK_URL }}{{ $('If').item.json.url }}\n\n#AndroidDevelopment #MobileAppDevelopment #AppDevelopment #Programming #SoftwareEngineering #TechCommunity #DeveloperLife #Kotlin #LinkedInDevelopers \n#Mr4rogrammer #isharewhatilearn"
+        },
+        "type": "n8n-nodes-base.linkedIn",
+        "typeVersion": 1
+      },
+      {
+        "name": "map used articls ids",
+        "parameters": {
+          "jsCode": "let values = $input.all().map(item => item.json.value);\n\nreturn [\n    {\n      json: {\n        values: values\n      }\n    }\n  ];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Morning  9 Clock",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "expression": "0 9,19 * * *",
+                "field": "cronExpression"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "sent the status",
+        "parameters": {
+          "additionalFields": {
+            "appendAttribution": false
+          },
+          "chatId": "1199262493",
+          "replyMarkup": "inlineKeyboard",
+          "text": "=Linkdin Post Sent Successfully  \n\n{{ $('If').item.json.title }}\n\nDb Status Id {{ $json.id }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "# 📢 Auto-Post Medium Articles to LinkedIn with Telegram Alerts\n\nThis n8n workflow automates your LinkedIn posting by fetching articles from [medium.com](medium.com) twice a day (9:00 AM and 7:00 PM), ensuring consistent content sharing without manual effort.\n\nTo prevent duplicates, it stores posted article IDs in Airtable. It also sends a Telegram message after every successful post, so you stay updated.\n\n---\n",
+          "height": 400,
+          "width": 920
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "\n## ✅ Features\n\n- 🕒 Runs twice daily at 9:00 AM and 7:00 PM (customizable)\n- 📰 Fetches latest medium.com articles by tag\n- 📂 Uses Airtable to avoid reposting the same article\n- 📢 Posts to your LinkedIn profile or company page\n- 📬 Sends a Telegram notification after successful posting\n- ⚙️ Fully customizable schedule, tags, and post format",
+          "height": 240,
+          "width": 580
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update the used node",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "Linkdin",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "appt6kHkRkLlUh033"
+          },
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "id",
+                "id": "id",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "value",
+                "id": "value",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "id": "={{ $('download image for post').item.json.id }}",
+              "value": "={{ $('download image for post').item.json.id }}"
+            }
+          },
+          "operation": "create",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "Used Articles",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "tbliloartO26TD5TG"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Airtable",
+    "Telegram",
+    "HTTP Request",
+    "LinkedIn"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 134,
+  "viewCount": 63,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Airtable Account",
+      "Telegram Account",
+      "HTTP Request Account",
+      "LinkedIn Account"
+    ],
+    "requiredCredentials": [
+      "airtable Token  A P I details",
+      "telegram  A P I details",
+      "linked In  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Morning  9 Clock\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get List of records used\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update the used node\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"filter only unused Ids\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"sent the status\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"fetch article ids from tag\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch Medium post using Article Id\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"make Linkedin post\" node (n8n-nodes-base.linkedIn) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch Medium post content\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"download image for post\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-vqys2iieg",
+      "workflowId": "linkedin-automation-uholr",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Linkedin/2024_Linkedin_Telegram_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Linkedin\\2024_Linkedin_Telegram_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:43.007Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:43.007Z",
+  "updatedAt": "2026-07-15T11:18:43.007Z"
+}

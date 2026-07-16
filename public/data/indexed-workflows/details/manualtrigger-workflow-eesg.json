@@ -1,0 +1,508 @@
+{
+  "id": "manualtrigger-workflow-1r1rn",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-eesg",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 5 different services: stickyNote, httpRequest, set, stopAndError, manualTrigger. It contains 8 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "293b70f0-06e8-4db5-befd-bfaed1f3575a",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -460,
+          80
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1c473546-6280-412d-9f8e-b43962365d78",
+        "name": "Set Params",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -160,
+          -60
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "8b5c6ca0-5ca8-4f67-abc1-44341cf419bc",
+                "name": "system_prompt",
+                "type": "string",
+                "value": "You are an n8n fanboy."
+              },
+              {
+                "id": "7c36c362-6269-4564-b6fe-f82126bc8f5e",
+                "name": "user_prompt",
+                "type": "string",
+                "value": "What are the differences between n8n and Make?"
+              },
+              {
+                "id": "4366d2b5-ad22-445a-8589-fddab1caa1ab",
+                "name": "domains",
+                "type": "string",
+                "value": "n8n.io, make.com"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "894bd6a4-5db7-45fb-a8e0-1a81af068bbf",
+        "name": "Clean Output",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          580,
+          -100
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "5859093c-6b22-41db-ac6c-9a9f6f18b7e3",
+                "name": "output",
+                "type": "string",
+                "value": "={{ $json.choices[0].message.content }}"
+              },
+              {
+                "id": "13208fff-5153-45a7-a1cb-fe49e32d9a03",
+                "name": "citations",
+                "type": "array",
+                "value": "={{ $json.citations }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "52d3a832-8c9b-4356-ad2a-377340678a58",
+        "name": "Perplexity Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          240,
+          40
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n \"model\": \"sonar\",\n \"messages\": [\n {\n \"role\": \"system\",\n \"content\": \"{{ $json.system_prompt }}\"\n },\n {\n \"role\": \"user\",\n \"content\": \"{{ $json.user_prompt }}\"\n }\n ],\n \"temperature\": 0.2,\n \"top_p\": 0.9,\n \"search_domain_filter\": {{ (JSON.stringify($json.domains.split(','))) }},\n \"return_images\": false,\n \"return_related_questions\": false,\n \"search_recency_filter\": \"month\",\n \"top_k\": 0,\n \"stream\": false,\n \"presence_penalty\": 0,\n \"frequency_penalty\": 1,\n \"response_format\": null\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "yEocL0NSpUWzMsHG",
+            "name": "Perplexity"
+          },
+          "httpHeaderAuth": {
+            "id": "TngzgS09J1YvLIXl",
+            "name": "Perplexity"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "48657f2c-d1dd-4d7e-8014-c27748e63e58",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -140,
+          -440
+        ],
+        "parameters": {
+          "width": 480,
+          "height": 300,
+          "content": "## Credentials Setup\n\n1/ Go to the perplexity dashboard, purchase some credits and create an API Key\n\n{{ $env.API_BASE_URL }}\n\n2/ In the perplexity Request node, use Generic Credentials, Header Auth. \n\nFor the name, use the value \"Authorization\"\nAnd for the value \"Bearer pplx-e4...59ea\" (Your Perplexity Api Key)\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e0daabee-c145-469e-93c2-c759c303dc2a",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          100,
+          260
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 480,
+          "height": 120,
+          "content": "**Sonar Pro** is the current top model used by perplexity. \nIf you want to use a different one, check this page: \n\n{{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "52d3a832-8c9b-4356-ad2a-377340678a58": {
+        "main": [
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-b71cfc5f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-d5f59dd0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-c082698d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-60a65d91",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-6413f2f5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-7422d732",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-2fe99d8a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-9841db1d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 5 different services: stickyNote, httpRequest, set, stopAndError, manualTrigger. It contains 8 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-7c590252",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.051269",
+      "updatedAt": "2025-09-29T07:07:50.051341",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "52d3a832-8c9b-4356-ad2a-377340678a58": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-b71cfc5f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-d5f59dd0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-c082698d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-60a65d91"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-6413f2f5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-7422d732"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-2fe99d8a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-52d3a832-8c9b-4356-ad2a-377340678a58-9841db1d"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Clean Output",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "5859093c-6b22-41db-ac6c-9a9f6f18b7e3",
+                "name": "output",
+                "type": "string",
+                "value": "={{ $json.choices[0].message.content }}"
+              },
+              {
+                "id": "13208fff-5153-45a7-a1cb-fe49e32d9a03",
+                "name": "citations",
+                "type": "array",
+                "value": "={{ $json.citations }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          },
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Perplexity Request",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "jsonBody": "={\n \"model\": \"sonar\",\n \"messages\": [\n {\n \"role\": \"system\",\n \"content\": \"{{ $json.system_prompt }}\"\n },\n {\n \"role\": \"user\",\n \"content\": \"{{ $json.user_prompt }}\"\n }\n ],\n \"temperature\": 0.2,\n \"top_p\": 0.9,\n \"search_domain_filter\": {{ (JSON.stringify($json.domains.split(','))) }},\n \"return_images\": false,\n \"return_related_questions\": false,\n \"search_recency_filter\": \"month\",\n \"top_k\": 0,\n \"stream\": false,\n \"presence_penalty\": 0,\n \"frequency_penalty\": 1,\n \"response_format\": null\n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Set Params",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "8b5c6ca0-5ca8-4f67-abc1-44341cf419bc",
+                "name": "system_prompt",
+                "type": "string",
+                "value": "You are an n8n fanboy."
+              },
+              {
+                "id": "7c36c362-6269-4564-b6fe-f82126bc8f5e",
+                "name": "user_prompt",
+                "type": "string",
+                "value": "What are the differences between n8n and Make?"
+              },
+              {
+                "id": "4366d2b5-ad22-445a-8589-fddab1caa1ab",
+                "name": "domains",
+                "type": "string",
+                "value": "n8n.io, make.com"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Credentials Setup\n\n1/ Go to the perplexity dashboard, purchase some credits and create an API Key\n\n{{ $env.API_BASE_URL }}\n\n2/ In the perplexity Request node, use Generic Credentials, Header Auth. \n\nFor the name, use the value \"Authorization\"\nAnd for the value \"Bearer pplx-e4...59ea\" (Your Perplexity Api Key)\n\n",
+          "height": 300,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "**Sonar Pro** is the current top model used by perplexity. \nIf you want to use a different one, check this page: \n\n{{ $env.WEBHOOK_URL }}",
+          "height": 120,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 41,
+  "viewCount": 110,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Basic Auth details",
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Perplexity Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Params\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Clean Output\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ig1dmk7rz",
+      "workflowId": "manualtrigger-workflow-1r1rn",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/1621_Manual_Stickynote_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\1621_Manual_Stickynote_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:06.307Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:06.307Z",
+  "updatedAt": "2026-07-15T11:19:06.307Z"
+}

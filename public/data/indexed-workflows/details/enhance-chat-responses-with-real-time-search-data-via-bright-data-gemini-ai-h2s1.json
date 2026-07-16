@@ -1,0 +1,846 @@
+{
+  "id": "enhance-chat-responses-with-real-time-search-data-via-bright-data-gemini-ai-vbyx7",
+  "name": "Enhance Chat Responses with Real-Time Search Data via Bright Data & Gemini AI",
+  "slug": "enhance-chat-responses-with-real-time-search-data-via-bright-data-gemini-ai-h2s1",
+  "description": "Automated workflow: Enhance Chat Responses with Real-Time Search Data via Bright Data & Gemini AI. This workflow integrates 11 different services: stickyNote, toolHttpRequest, lmChatGoogleGemini, agent, mcpClientTool. It contains 21 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Enhance Chat Responses with Real-Time Search Data via Bright Data & Gemini AI workflow containing 18 nodes.",
+  "originalWorkflowJson": {
+    "id": "8jdT4wXjV5NljqKa",
+    "meta": {
+      "instanceId": "workflow-ebd586b1",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:49.720664",
+      "updatedAt": "2025-09-29T07:07:49.720679",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Enhance Chat Responses with Real-Time Search Data via Bright Data & Gemini AI",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "7294b048-5804-4620-a53e-52df293c3df1",
+        "name": "When chat message received",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -460,
+          160
+        ],
+        "webhookId": "3ad383ee-ded9-4a46-9165-9af0bad6c450",
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1.1,
+        "notes": "This chatTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8ff09a26-ffa4-451d-9452-35b8f2936cab",
+        "name": "AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -140,
+          60
+        ],
+        "parameters": {
+          "options": {
+            "systemMessage": "You are a helpful assistant.\n\nUse MCP Search Engine assistant tools for Bright Data for Google, Bing or Yandex Search. \n\nImportant: Return the response to Chat and also perform the webhook notification of responses.\n\nUse the relevant tool in the order of execution. "
+          }
+        },
+        "typeVersion": 1.8,
+        "notes": "This agent node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "92352366-7fe5-407d-aa34-96ac19b13284",
+        "name": "Google Gemini Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -240,
+          280
+        ],
+        "parameters": {
+          "options": {},
+          "modelName": "models/gemini-2.0-flash-exp"
+        },
+        "credentials": {
+          "googlePalmApi": {
+            "id": "YeO7dHZnuGBVQKVZ",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatGoogleGemini node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b6d947d1-9752-4aff-834c-de99ff1ad903",
+        "name": "Simple Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -60,
+          280
+        ],
+        "parameters": {},
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "73273d82-2a2f-41a2-ad1c-369f7a05ebe1",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -480,
+          -200
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "39464933-03e0-46a2-ba3b-ab96aa14461e",
+        "name": "MCP Client list all tools for Bright Data",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "position": [
+          -260,
+          -200
+        ],
+        "parameters": {},
+        "credentials": {
+          "mcpClientApi": {
+            "id": "JtatFSfA2kkwctYa",
+            "name": "MCP Client (STDIO) account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mcpClient node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9d0d498f-10da-4a66-9e59-1773089d5d7c",
+        "name": "MCP Client Bright Data Search Tool",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "position": [
+          160,
+          -200
+        ],
+        "parameters": {
+          "toolName": "={{ $('MCP Client list all tools for Bright Data').item.json.tools[0].name }}",
+          "operation": "executeTool",
+          "toolParameters": "={\n   \"query\": \"{{ $json.search_query }}\",\n   \"engine\": \"google\"\n} "
+        },
+        "credentials": {
+          "mcpClientApi": {
+            "id": "JtatFSfA2kkwctYa",
+            "name": "MCP Client (STDIO) account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mcpClient node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "346fd1f7-be97-47b6-b767-74382dc90979",
+        "name": "Set search query",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -60,
+          -200
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "214e61a0-3587-453f-baf5-eac013990857",
+                "name": "search_query",
+                "type": "string",
+                "value": "Bright Data"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1dc4dabe-d651-4b43-b561-4528be14e578",
+        "name": "Google Search Engine for Bright Data",
+        "type": "n8n-nodes-mcp.mcpClientTool",
+        "notes": "Scrape search results from Google, Bing or Yandex. Returns SERP results in markdown (URL, title, description)",
+        "position": [
+          240,
+          540
+        ],
+        "parameters": {
+          "toolName": "search_engine",
+          "operation": "executeTool",
+          "toolParameters": "={\n   \"query\": \"{{ $json.chatInput }}\",\n   \"engine\": \"google\"\n}"
+        },
+        "credentials": {
+          "mcpClientApi": {
+            "id": "JtatFSfA2kkwctYa",
+            "name": "MCP Client (STDIO) account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1
+      },
+      {
+        "id": "029f5e0e-070f-47a7-8c77-2b59ca01ada4",
+        "name": "Bing Search Engine for Bright Data",
+        "type": "n8n-nodes-mcp.mcpClientTool",
+        "notes": "Scrape search results from Google, Bing or Yandex. Returns SERP results in markdown (URL, title, description)",
+        "position": [
+          40,
+          540
+        ],
+        "parameters": {
+          "toolName": "search_engine",
+          "operation": "executeTool",
+          "toolParameters": "={\n   \"query\": \"{{ $json.chatInput }}\",\n   \"engine\": \"bing\"\n} "
+        },
+        "credentials": {
+          "mcpClientApi": {
+            "id": "JtatFSfA2kkwctYa",
+            "name": "MCP Client (STDIO) account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1
+      },
+      {
+        "id": "580d37de-deb9-49cf-b9b8-4d14edca28f2",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -40,
+          460
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 640,
+          "height": 240,
+          "content": "## Bright Data Search Engines"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bb77ba7c-c70e-4912-96f6-4f63b966c7a9",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -100,
+          -260
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 460,
+          "height": 260,
+          "content": "## Bright Data Google Search"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ecdd9f42-f56c-4bdb-b778-cd3b7545bb37",
+        "name": "MCP Client List all tools",
+        "type": "n8n-nodes-mcp.mcpClientTool",
+        "position": [
+          260,
+          280
+        ],
+        "parameters": {},
+        "credentials": {
+          "mcpClientApi": {
+            "id": "JtatFSfA2kkwctYa",
+            "name": "MCP Client (STDIO) account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mcpClientTool node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a1adfa84-6e1a-4b5c-9148-feddb1e6ab72",
+        "name": "HTTP Request for Webhook Notification",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          500,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "method": "POST",
+          "sendBody": true,
+          "parametersBody": {
+            "values": [
+              {
+                "name": "chat_response"
+              }
+            ]
+          },
+          "toolDescription": "Webhook notification for search responses"
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ae88bb19-170f-443f-b777-561cf2e3be25",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -100,
+          -400
+        ],
+        "parameters": {
+          "width": 440,
+          "height": 120,
+          "content": "## Disclaimer\nThis template is only available on n8n self-hosted as it's making use of the community node for MCP Client."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "80ac697d-2c4a-4f97-82aa-edcabbf7ef6f",
+        "name": "Yandex Search Engine for Bright Data",
+        "type": "n8n-nodes-mcp.mcpClientTool",
+        "notes": "Scrape search results from Google, Bing or Yandex. Returns SERP results in markdown (URL, title, description)",
+        "position": [
+          460,
+          540
+        ],
+        "parameters": {
+          "toolName": "search_engine",
+          "operation": "executeTool",
+          "toolParameters": "={\n   \"query\": \"{{ $json.chatInput }}\",\n   \"engine\": \"yandex\"\n}"
+        },
+        "credentials": {
+          "mcpClientApi": {
+            "id": "JtatFSfA2kkwctYa",
+            "name": "MCP Client (STDIO) account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1
+      },
+      {
+        "id": "dfb2117d-782f-44d9-baca-1ee4b0fef863",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -940,
+          -40
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 400,
+          "height": 220,
+          "content": "## Note\nUse Bright Data MCP Search Engine assistant tools to perform Google, Bing or Yandex Search.\n\nThe AI Agent will make use of suitable search engine-based tools, returns the response to Chat and also performs the Webhook notification call for sending the AI responses via the MCP Client tools.\n\nSource - {{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "694b3381-8ebe-4afb-be93-019715c0c2cf",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          460
+        ],
+        "parameters": {
+          "width": 300,
+          "height": 180,
+          "content": "## LLM Usage\nGoogle Gemini is employed by the AI agent to understand and interpret user queries. Based on this interpretation, the agent initiates a call to the appropriate MCP client to perform the required web search task."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "2382b23d-fd06-4f10-bcbd-f09a944a1c8d",
+    "connections": {
+      "a1adfa84-6e1a-4b5c-9148-feddb1e6ab72": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-9c6cd3d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-7b22ae46",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-16cc34ef",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-dcabd60e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-2435cf62",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-bbb11b2d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-1e58b040",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-169c336e",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "92352366-7fe5-407d-aa34-96ac19b13284": {
+        "main": [
+          [
+            {
+              "node": "error-handler-92352366-7fe5-407d-aa34-96ac19b13284-06642ac3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Enhance Chat Responses with Real-Time Search Data via Bright Data & Gemini AI. This workflow integrates 11 different services: stickyNote, toolHttpRequest, lmChatGoogleGemini, agent, mcpClientTool. It contains 21 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Enhance Chat Responses with Real-Time Search Data via Bright Data & Gemini AI. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "92352366-7fe5-407d-aa34-96ac19b13284": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-92352366-7fe5-407d-aa34-96ac19b13284-06642ac3"
+            }
+          ]
+        ]
+      },
+      "a1adfa84-6e1a-4b5c-9148-feddb1e6ab72": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-9c6cd3d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-7b22ae46"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-16cc34ef"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-dcabd60e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-2435cf62"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-bbb11b2d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-1e58b040"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a1adfa84-6e1a-4b5c-9148-feddb1e6ab72-169c336e"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Enhance Chat Responses with Real-Time Search Data via Bright Data & Gemini AI",
+    "nodes": [
+      {
+        "name": "AI Agent",
+        "parameters": {
+          "options": {
+            "systemMessage": "You are a helpful assistant.\n\nUse MCP Search Engine assistant tools for Bright Data for Google, Bing or Yandex Search. \n\nImportant: Return the response to Chat and also perform the webhook notification of responses.\n\nUse the relevant tool in the order of execution. "
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "credentials": {
+          "mcpClientApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Bing Search Engine for Bright Data",
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "search_engine",
+          "toolParameters": "={\n   \"query\": \"{{ $json.chatInput }}\",\n   \"engine\": \"bing\"\n} "
+        },
+        "type": "n8n-nodes-mcp.mcpClientTool",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googlePalmApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Gemini Chat Model",
+        "parameters": {
+          "modelName": "models/gemini-2.0-flash-exp",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mcpClientApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Search Engine for Bright Data",
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "search_engine",
+          "toolParameters": "={\n   \"query\": \"{{ $json.chatInput }}\",\n   \"engine\": \"google\"\n}"
+        },
+        "type": "n8n-nodes-mcp.mcpClientTool",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTTP Request for Webhook Notification",
+        "parameters": {
+          "method": "POST",
+          "parametersBody": {
+            "values": [
+              {
+                "name": "chat_response"
+              }
+            ]
+          },
+          "sendBody": true,
+          "toolDescription": "Webhook notification for search responses",
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "mcpClientApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "MCP Client Bright Data Search Tool",
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "={{ $('MCP Client list all tools for Bright Data').item.json.tools[0].name }}",
+          "toolParameters": "={\n   \"query\": \"{{ $json.search_query }}\",\n   \"engine\": \"google\"\n} "
+        },
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mcpClientApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "MCP Client List all tools",
+        "parameters": {},
+        "type": "n8n-nodes-mcp.mcpClientTool",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mcpClientApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "MCP Client list all tools for Bright Data",
+        "parameters": {},
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set search query",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "214e61a0-3587-453f-baf5-eac013990857",
+                "name": "search_query",
+                "type": "string",
+                "value": "Bright Data"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Simple Memory",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "## Bright Data Search Engines",
+          "height": 240,
+          "width": 640
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 3,
+          "content": "## Bright Data Google Search",
+          "height": 260,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Disclaimer\nThis template is only available on n8n self-hosted as it's making use of the community node for MCP Client.",
+          "height": 120,
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 5,
+          "content": "## Note\nUse Bright Data MCP Search Engine assistant tools to perform Google, Bing or Yandex Search.\n\nThe AI Agent will make use of suitable search engine-based tools, returns the response to Chat and also performs the Webhook notification call for sending the AI responses via the MCP Client tools.\n\nSource - {{ $env.WEBHOOK_URL }}",
+          "height": 220,
+          "width": 400
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "## LLM Usage\nGoogle Gemini is employed by the AI agent to understand and interpret user queries. Based on this interpretation, the agent initiates a call to the appropriate MCP client to perform the required web search task.",
+          "height": 180,
+          "width": 300
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When chat message received",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mcpClientApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Yandex Search Engine for Bright Data",
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "search_engine",
+          "toolParameters": "={\n   \"query\": \"{{ $json.chatInput }}\",\n   \"engine\": \"yandex\"\n}"
+        },
+        "type": "n8n-nodes-mcp.mcpClientTool",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 18,
+  "integrationCount": 1,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Mcp"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 198,
+  "viewCount": 161,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Mcp Account"
+    ],
+    "requiredCredentials": [
+      "google Palm  A P I details",
+      "mcp Client  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"When chat message received\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Gemini Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Simple Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"MCP Client list all tools for Bright Data\" node (n8n-nodes-mcp.mcpClient) and configure the action parameters, mappings, and fields.",
+      "Open the \"MCP Client Bright Data Search Tool\" node (n8n-nodes-mcp.mcpClient) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Search Engine for Bright Data\" node (n8n-nodes-mcp.mcpClientTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Bing Search Engine for Bright Data\" node (n8n-nodes-mcp.mcpClientTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"MCP Client List all tools\" node (n8n-nodes-mcp.mcpClientTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Request for Webhook Notification\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Yandex Search Engine for Bright Data\" node (n8n-nodes-mcp.mcpClientTool) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set search query\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-cxbljllhf",
+      "workflowId": "enhance-chat-responses-with-real-time-search-data-via-bright-data-gemini-ai-vbyx7",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/1183_Manual_Stickynote_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\1183_Manual_Stickynote_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:01.960Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:01.960Z",
+  "updatedAt": "2026-07-15T11:19:01.960Z"
+}

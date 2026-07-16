@@ -1,0 +1,633 @@
+{
+  "id": "google-page-entity-extraction-template-ve7a9",
+  "name": "Google Page Entity Extraction Template",
+  "slug": "google-page-entity-extraction-template-2un7",
+  "description": "Automated workflow: Google Page Entity Extraction Template. This workflow integrates 6 different services: webhook, stickyNote, httpRequest, code, respondToWebhook. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Google Page Entity Extraction Template workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "4wPgPbxtojrUO7Dx",
+    "meta": {
+      "instanceId": "workflow-3e7ebf81",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:43.045416",
+      "updatedAt": "2025-09-29T07:07:43.045430",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Google Page Entity Extraction Template",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "8719f1de-2a3e-4c34-9edc-e4b8f993b525",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1240,
+          -420
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1.1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "01420fd5-3483-4e74-b9fc-971199898449",
+        "name": "Google Entities",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1020,
+          -420
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={{ $json.apiRequest }}",
+          "sendBody": true,
+          "sendQuery": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "key",
+                "value": "YOUR-GOOGLE-API-KEY"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5c1c258a-44ed-4d5a-a22d-cddb4df09018",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -300,
+          -700
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 620,
+          "height": 880,
+          "content": "# Google Page Entity Extraction Template\n\n## What this workflow does\nThis workflow allows you to extract named entities (people, organizations, locations, etc.) from any web page using Google's Natural Language API. Simply send a URL to the webhook endpoint, and the workflow will fetch the page content, process it through Google's entity recognition service, and return the structured entity data.\n\n### How to use\n1. Replace \"YOUR-GOOGLE-API-KEY\" with your actual Google Cloud API key (Natural Language API must be enabled)\n2. Activate the workflow and use the webhook URL as your endpoint\n3. Send a POST request to the webhook with a JSON body containing the URL you want to analyze: {\"url\": \"{{ $env.WEBHOOK_URL }}\"}\n4. Review the returned entity analysis with categories, salience scores, and metadata\n\n## Webhook Input Format\nThe webhook expects a POST request with a JSON body in this format:\n```json\n{\n  \"url\": \"{{ $env.WEBHOOK_URL }}\"\n}\n```\n### Response Format\nThe webhook returns a JSON response containing the full entity analysis from Google's Natural Language API, including:\n\nEntity names and types (PERSON, LOCATION, ORGANIZATION, etc.)\nSalience scores indicating entity importance\nMetadata and mentions within the text\nEntity sentiment (if available)"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "79add9a7-adca-4ce5-8a6a-5fcb75288846",
+        "name": "Get Url",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          360,
+          -420
+        ],
+        "webhookId": "2944c8f6-03cd-4ab8-8b8e-cb033edf877a",
+        "parameters": {
+          "path": "2944c8f6-03cd-4ab8-8b8e-cb033edf877a",
+          "options": {},
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3",
+        "name": "Get URL Page Contents",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          580,
+          -420
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dda5ef3d-f031-4dd6-b117-c1f69aa66b63",
+        "name": "Respond with detected entities",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          800,
+          -420
+        ],
+        "parameters": {
+          "jsCode": "// Clean and prepare HTML for API request\nconst html = $input.item.json.data;\n// Trim if too large (optional)\nconst trimmedHtml = html.length > 100000 ? html.substring(0, 100000) : html;\n\nreturn {\n  json: {\n    apiRequest: {\n      document: {\n        type: \"HTML\",\n        content: trimmedHtml\n      },\n      encodingType: \"UTF8\"\n    }\n  }\n}"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "432203af-190a-4a89-81d8-f86682a0b63f",
+    "connections": {
+      "8719f1de-2a3e-4c34-9edc-e4b8f993b525": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525-d8de2532",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525-632d715e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525-04bb8ea8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525-3fa17240",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "01420fd5-3483-4e74-b9fc-971199898449": {
+        "main": [
+          [
+            {
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449-f08e8235",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449-9b4db028",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449-1087297c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449-368fe6de",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "79add9a7-adca-4ce5-8a6a-5fcb75288846": {
+        "main": [
+          [
+            {
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846-75c722db",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846-146da3d3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846-d69abf91",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846-cd780c0b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3": {
+        "main": [
+          [
+            {
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3-35ea7ab7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3-4d3c87f1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3-efa1ea3d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3-20ec2921",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Google Page Entity Extraction Template. This workflow integrates 6 different services: webhook, stickyNote, httpRequest, code, respondToWebhook. It contains 14 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Google Page Entity Extraction Template. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "01420fd5-3483-4e74-b9fc-971199898449": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449-f08e8235"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449-9b4db028"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449-1087297c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-01420fd5-3483-4e74-b9fc-971199898449-368fe6de"
+            }
+          ]
+        ]
+      },
+      "081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3-35ea7ab7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3-4d3c87f1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3-efa1ea3d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-081a52bc-2da7-44fb-bdc3-4cb73cbf8dd3-20ec2921"
+            }
+          ]
+        ]
+      },
+      "79add9a7-adca-4ce5-8a6a-5fcb75288846": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846-75c722db"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846-146da3d3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846-d69abf91"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-79add9a7-adca-4ce5-8a6a-5fcb75288846-cd780c0b"
+            }
+          ]
+        ]
+      },
+      "8719f1de-2a3e-4c34-9edc-e4b8f993b525": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525-d8de2532"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525-632d715e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525-04bb8ea8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8719f1de-2a3e-4c34-9edc-e4b8f993b525-3fa17240"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Google Page Entity Extraction Template",
+    "nodes": [
+      {
+        "name": "Get Url",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "2944c8f6-03cd-4ab8-8b8e-cb033edf877a",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get URL Page Contents",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Google Entities",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={{ $json.apiRequest }}",
+          "method": "POST",
+          "options": {},
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "key",
+                "value": "YOUR-GOOGLE-API-KEY"
+              }
+            ]
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "sendQuery": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Respond to Webhook",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Respond with detected entities",
+        "parameters": {
+          "jsCode": "// Clean and prepare HTML for API request\nconst html = $input.item.json.data;\n// Trim if too large (optional)\nconst trimmedHtml = html.length > 100000 ? html.substring(0, 100000) : html;\n\nreturn {\n  json: {\n    apiRequest: {\n      document: {\n        type: \"HTML\",\n        content: trimmedHtml\n      },\n      encodingType: \"UTF8\"\n    }\n  }\n}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "# Google Page Entity Extraction Template\n\n## What this workflow does\nThis workflow allows you to extract named entities (people, organizations, locations, etc.) from any web page using Google's Natural Language API. Simply send a URL to the webhook endpoint, and the workflow will fetch the page content, process it through Google's entity recognition service, and return the structured entity data.\n\n### How to use\n1. Replace \"YOUR-GOOGLE-API-KEY\" with your actual Google Cloud API key (Natural Language API must be enabled)\n2. Activate the workflow and use the webhook URL as your endpoint\n3. Send a POST request to the webhook with a JSON body containing the URL you want to analyze: {\"url\": \"{{ $env.WEBHOOK_URL }}\"}\n4. Review the returned entity analysis with categories, salience scores, and metadata\n\n## Webhook Input Format\nThe webhook expects a POST request with a JSON body in this format:\n```json\n{\n  \"url\": \"{{ $env.WEBHOOK_URL }}\"\n}\n```\n### Response Format\nThe webhook returns a JSON response containing the full entity analysis from Google's Natural Language API, including:\n\nEntity names and types (PERSON, LOCATION, ORGANIZATION, etc.)\nSalience scores indicating entity importance\nMetadata and mentions within the text\nEntity sentiment (if available)",
+          "height": 880,
+          "width": 620
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 156,
+  "viewCount": 749,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Respond to Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Get Url\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Google Entities\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get URL Page Contents\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-6qwl4p0e3",
+      "workflowId": "google-page-entity-extraction-template-ve7a9",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0980_Code_Webhook_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0980_Code_Webhook_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:28:54.601Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:54.601Z",
+  "updatedAt": "2026-07-15T11:28:54.601Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

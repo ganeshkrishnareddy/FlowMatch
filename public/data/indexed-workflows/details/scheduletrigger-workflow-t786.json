@@ -1,0 +1,648 @@
+{
+  "id": "scheduletrigger-workflow-r9j9m",
+  "name": "Scheduletrigger Workflow",
+  "slug": "scheduletrigger-workflow-t786",
+  "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 10 different services: microsoftOutlook, stickyNote, markdown, scheduleTrigger, chainLlm. It contains 13 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Scheduletrigger Workflow workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-7ded1ad7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.026122",
+      "updatedAt": "2025-09-29T07:07:52.026130",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "154458b0-dde3-4224-9fa8-d38a025aa0d3",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -640,
+          -140
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0fc88546-50ef-4183-8fb2-dcea939f3bcf",
+        "name": "Get Recent Messages",
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "position": [
+          -440,
+          -140
+        ],
+        "webhookId": "48619a9a-d7a5-47af-983d-146e377d8767",
+        "parameters": {
+          "fields": [
+            "body",
+            "categories",
+            "conversationId",
+            "from",
+            "hasAttachments",
+            "internetMessageId",
+            "sender",
+            "subject",
+            "toRecipients",
+            "receivedDateTime",
+            "webLink"
+          ],
+          "output": "fields",
+          "options": {},
+          "filtersUI": {
+            "values": {
+              "filters": {
+                "receivedAfter": "={{ $now.minus({ \"hour\": 1 }).toISO() }}"
+              }
+            }
+          },
+          "operation": "getAll"
+        },
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "EWg6sbhPKcM5y3Mr",
+            "name": "Microsoft Outlook account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This microsoftOutlook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d056be7e-43ed-4fea-8aef-36579c656633",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          280,
+          40
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e4b6fd9d-2506-45bf-bd80-a81a2c04306b",
+        "name": "Structured Output Parser",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          480,
+          40
+        ],
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"labels\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" }\n    },\n    \"priority\": { \"type\": \"number\" },\n    \"summary\": { \"type\": \"string\" },\n    \"description\": { \"type\": \"string\" }\n  }\n}"
+        },
+        "typeVersion": 1.2,
+        "notes": "This outputParserStructured node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3cef25fc-2581-4556-bf54-7704815d98b3",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          0,
+          -340
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 700,
+          "height": 540,
+          "content": "## 2. Automate Generation and Triaging of Ticket\n[Read more about the Basic LLM node]({{ $env.WEBHOOK_URL }}\n\nNew tickets always need to be properly labelled and prioritised but it's not always possible to get to update all incoming tickets if you're light on hands. Using an AI is a great use-case for triaging of tickets as its contextual understanding helps automates this step."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d6ba8c9b-3e39-442f-8b79-cafe11c15a18",
+        "name": "Markdown",
+        "type": "n8n-nodes-base.markdown",
+        "position": [
+          100,
+          -140
+        ],
+        "parameters": {
+          "html": "={{ $json.body.content }}",
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This markdown node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fb7c6d7c-df30-43de-8f37-9e394a8ad7aa",
+        "name": "Create Issue",
+        "type": "n8n-nodes-base.jira",
+        "position": [
+          900,
+          -140
+        ],
+        "parameters": {
+          "project": {
+            "__rl": true,
+            "mode": "id",
+            "value": "10000"
+          },
+          "summary": "={{ $json.output.summary }}",
+          "issueType": {
+            "__rl": true,
+            "mode": "id",
+            "value": "10000"
+          },
+          "additionalFields": {
+            "labels": "={{ $json.output.labels }}",
+            "priority": {
+              "__rl": true,
+              "mode": "id",
+              "value": "={{ $json.output.priority }}"
+            },
+            "description": "={{ $json.output.description }}"
+          }
+        },
+        "credentials": {
+          "jiraSoftwareCloudApi": {
+            "id": "IH5V74q6PusewNjD",
+            "name": "Jira SW Cloud account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This jira node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9e26f402-36da-40e1-a736-db4fe16de54a",
+        "name": "Mark as Seen",
+        "type": "n8n-nodes-base.removeDuplicates",
+        "position": [
+          -240,
+          -140
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "removeItemsSeenInPreviousExecutions",
+          "dedupeValue": "={{ $json.id }}"
+        },
+        "typeVersion": 2,
+        "notes": "This removeDuplicates node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b5f49877-e494-4712-a937-1f348198700e",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -740,
+          -340
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 720,
+          "height": 540,
+          "content": "## 1. Watch Outlook Inbox for Support Emails\n[Learn more about the Outlook node]({{ $env.WEBHOOK_URL }}\n\n**This template assumes a shared inbox specifically for support tickets!** If you have a general inbox, you may need to classify and filter each message which might become costly. The \"remove duplicates\" node (ie. \"Mark as seen\") ensures we only process each email exactly once."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b9d08834-14ad-4cdf-bc20-411033eee5b7",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          720,
+          -340
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 460,
+          "height": 440,
+          "content": "## 3. Create Issue in JIRA\n[Read more about the JIRA node]({{ $env.WEBHOOK_URL }}\n\nThis is only a simple example to create an issue in JIRA but easily extendable to add much more!"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e6942a39-1893-44cf-a846-c6b4d9c37e92",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1160,
+          -720
+        ],
+        "parameters": {
+          "width": 380,
+          "height": 940,
+          "content": "## Try It Out!\n### This n8n template watches an outlook shared inbox for support messages and creates an equivalent issue item in JIRA.\n\n### How it works\n* A scheduled trigger fetches recent Outlook messages from an shared inbox which collects support requests.\n* These support requests are filtered to ensure they are only processed once and their HTML body is converted to markdown for easier parsing.\n* Each support request is then triaged via an AI Agent which adds appropriate labels, assesses priority and summarises a title and description of the original request.\n* Finally, the AI generated values are used to create an issue in JIRA to be actioned.\n\n### How to use\n* Ensure the messages fetched are solely support requests otherwise you'll need to classify messages before processing them.\n* Specify the labels and priorities to use in the system prompt of the AI agent.\n\n### Requirements\n* Outlook for incoming support\n* OpenAI for LLM\n* JIRA for issue management\n\n### Customising this workflow\n* Consider automating more steps after the issue is created such as attempting issue resolution or capacity planning.\n\n\n### Need Help?\nJoin the [Discord]({{ $env.WEBHOOK_URL }} or ask in the [Forum]({{ $env.WEBHOOK_URL }}\n\nHappy Hacking!"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "71a906b2-7b01-43a8-aa82-7d9810d95e23",
+        "name": "Generate Issue From Support Request",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          300,
+          -140
+        ],
+        "parameters": {
+          "text": "=Reported by {{ $json.from.emailAddress.name }} <{{ $json.from.emailAddress.address }}>\nReported at: {{ $now.toISO() }}\nSummary: {{ $json.subject }}\nDescription:\n{{ $json.data.replaceAll('\\n', ' ') }}",
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=Your are JIRA triage assistant who's task is to\n1) classify and label the given issue.\n2) Prioritise the given issue.\n3) Rewrite the issue summary and description.\n\n## Labels\nUse one or more. Use words wrapped in \"[]\" (square brackets):\n* Technical\n* Account\n* Access\n* Billing\n* Product\n* Training\n* Feedback\n* Complaints\n* Security\n* Privacy\n\n## Priority\n* 1 - highest\n* 2 - high\n* 3 - medium\n* 4 - low\n* 5 - lowest\n\n## Write Summary and Description\n* Remove emotional and anedotal phrases or information\n* Keep to the facts of the matter\n* Highlight what was attempted and is/was failing"
+              }
+            ]
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.6,
+        "notes": "This chainLlm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-c6a2c244",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "d056be7e-43ed-4fea-8aef-36579c656633": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d056be7e-43ed-4fea-8aef-36579c656633-6d4b7211",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 10 different services: microsoftOutlook, stickyNote, markdown, scheduleTrigger, chainLlm. It contains 13 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Scheduletrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "d056be7e-43ed-4fea-8aef-36579c656633": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d056be7e-43ed-4fea-8aef-36579c656633-6d4b7211"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "jiraSoftwareCloudApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Issue",
+        "parameters": {
+          "additionalFields": {
+            "description": "={{ $json.output.description }}",
+            "labels": "={{ $json.output.labels }}",
+            "priority": {
+              "__rl": true,
+              "mode": "id",
+              "value": "={{ $json.output.priority }}"
+            }
+          },
+          "issueType": {
+            "__rl": true,
+            "mode": "id",
+            "value": "10000"
+          },
+          "project": {
+            "__rl": true,
+            "mode": "id",
+            "value": "10000"
+          },
+          "summary": "={{ $json.output.summary }}"
+        },
+        "type": "n8n-nodes-base.jira",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Generate Issue From Support Request",
+        "parameters": {
+          "hasOutputParser": true,
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=Your are JIRA triage assistant who's task is to\n1) classify and label the given issue.\n2) Prioritise the given issue.\n3) Rewrite the issue summary and description.\n\n## Labels\nUse one or more. Use words wrapped in \"[]\" (square brackets):\n* Technical\n* Account\n* Access\n* Billing\n* Product\n* Training\n* Feedback\n* Complaints\n* Security\n* Privacy\n\n## Priority\n* 1 - highest\n* 2 - high\n* 3 - medium\n* 4 - low\n* 5 - lowest\n\n## Write Summary and Description\n* Remove emotional and anedotal phrases or information\n* Keep to the facts of the matter\n* Highlight what was attempted and is/was failing"
+              }
+            ]
+          },
+          "promptType": "define",
+          "text": "=Reported by {{ $json.from.emailAddress.name }} <{{ $json.from.emailAddress.address }}>\nReported at: {{ $now.toISO() }}\nSummary: {{ $json.subject }}\nDescription:\n{{ $json.data.replaceAll('\\n', ' ') }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Recent Messages",
+        "parameters": {
+          "fields": [
+            "body",
+            "categories",
+            "conversationId",
+            "from",
+            "hasAttachments",
+            "internetMessageId",
+            "sender",
+            "subject",
+            "toRecipients",
+            "receivedDateTime",
+            "webLink"
+          ],
+          "filtersUI": {
+            "values": {
+              "filters": {
+                "receivedAfter": "={{ $now.minus({ \"hour\": 1 }).toISO() }}"
+              }
+            }
+          },
+          "operation": "getAll",
+          "options": {},
+          "output": "fields"
+        },
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2
+      },
+      {
+        "name": "Mark as Seen",
+        "parameters": {
+          "dedupeValue": "={{ $json.id }}",
+          "operation": "removeItemsSeenInPreviousExecutions",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.removeDuplicates",
+        "typeVersion": 2
+      },
+      {
+        "name": "Markdown",
+        "parameters": {
+          "html": "={{ $json.body.content }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.markdown",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "## 1. Watch Outlook Inbox for Support Emails\n[Learn more about the Outlook node]({{ $env.WEBHOOK_URL }}\n\n**This template assumes a shared inbox specifically for support tickets!** If you have a general inbox, you may need to classify and filter each message which might become costly. The \"remove duplicates\" node (ie. \"Mark as seen\") ensures we only process each email exactly once.",
+          "height": 540,
+          "width": 720
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "## 2. Automate Generation and Triaging of Ticket\n[Read more about the Basic LLM node]({{ $env.WEBHOOK_URL }}\n\nNew tickets always need to be properly labelled and prioritised but it's not always possible to get to update all incoming tickets if you're light on hands. Using an AI is a great use-case for triaging of tickets as its contextual understanding helps automates this step.",
+          "height": 540,
+          "width": 700
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 7,
+          "content": "## 3. Create Issue in JIRA\n[Read more about the JIRA node]({{ $env.WEBHOOK_URL }}\n\nThis is only a simple example to create an issue in JIRA but easily extendable to add much more!",
+          "height": 440,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Try It Out!\n### This n8n template watches an outlook shared inbox for support messages and creates an equivalent issue item in JIRA.\n\n### How it works\n* A scheduled trigger fetches recent Outlook messages from an shared inbox which collects support requests.\n* These support requests are filtered to ensure they are only processed once and their HTML body is converted to markdown for easier parsing.\n* Each support request is then triaged via an AI Agent which adds appropriate labels, assesses priority and summarises a title and description of the original request.\n* Finally, the AI generated values are used to create an issue in JIRA to be actioned.\n\n### How to use\n* Ensure the messages fetched are solely support requests otherwise you'll need to classify messages before processing them.\n* Specify the labels and priorities to use in the system prompt of the AI agent.\n\n### Requirements\n* Outlook for incoming support\n* OpenAI for LLM\n* JIRA for issue management\n\n### Customising this workflow\n* Consider automating more steps after the issue is created such as attempting issue resolution or capacity planning.\n\n\n### Need Help?\nJoin the [Discord]({{ $env.WEBHOOK_URL }} or ask in the [Forum]({{ $env.WEBHOOK_URL }}\n\nHappy Hacking!",
+          "height": 940,
+          "width": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Structured Output Parser",
+        "parameters": {
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"labels\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" }\n    },\n    \"priority\": { \"type\": \"number\" },\n    \"summary\": { \"type\": \"string\" },\n    \"description\": { \"type\": \"string\" }\n  }\n}",
+          "schemaType": "manual"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Microsoftoutlook",
+    "Markdown",
+    "Jira"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 124,
+  "viewCount": 557,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Microsoftoutlook Account",
+      "Markdown Account",
+      "Jira Account"
+    ],
+    "requiredCredentials": [
+      "microsoft Outlook  O Auth2  A P I details",
+      "open Ai  A P I details",
+      "jira Software Cloud  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get Recent Messages\" node (n8n-nodes-base.microsoftOutlook) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Structured Output Parser\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Markdown\" node (n8n-nodes-base.markdown) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Issue\" node (n8n-nodes-base.jira) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mark as Seen\" node (n8n-nodes-base.removeDuplicates) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Generate Issue From Support Request\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-atjc2etsb",
+      "workflowId": "scheduletrigger-workflow-r9j9m",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/0911_Schedule_Removeduplicates_Create_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\0911_Schedule_Removeduplicates_Create_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:30:03.905Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:03.905Z",
+  "updatedAt": "2026-07-15T11:30:03.905Z",
+  "category": {
+    "slug": "ai-automation",
+    "name": "AI Automation"
+  },
+  "categoryId": "ai-automation"
+}

@@ -1,0 +1,745 @@
+{
+  "id": "webhook-workflow-dtyfi",
+  "name": "Webhook Workflow",
+  "slug": "webhook-workflow-iwji",
+  "description": "Automated workflow: Webhook Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Webhook Workflow workflow containing 12 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "9320d08a-4868-4103-abdf-3f8f54a7a0a0",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "9024e29e-9080-4cf5-9a6b-0d918468f195",
+        "parameters": {
+          "path": "ytube",
+          "options": {},
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a5cc8922-8124-4269-9cfd-e891b29cc2b7",
+        "name": "YouTube Transcript",
+        "type": "n8n-nodes-youtube-transcription.youtubeTranscripter",
+        "position": [
+          800,
+          0
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This youtubeTranscripter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ff3c0fd1-36d8-4d64-b405-0600efd4d93b",
+        "name": "Split Out",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          200,
+          260
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "transcript"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "423276e0-81bf-487a-bbdd-26e9b84fa755",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1200,
+          140
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1.1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "27344649-8029-48ae-867b-7363d904fc59",
+        "name": "Telegram",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          1200,
+          380
+        ],
+        "parameters": {
+          "text": "={{ $json.title }}\n{{ $json.youtubeUrl }}",
+          "additionalFields": {
+            "parse_mode": "HTML",
+            "appendAttribution": false
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "230c0325-d22a-4070-9460-748a6fef48d5",
+        "name": "Get YouTube URL",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          200,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "3ee42e4c-3cee-4934-97e7-64c96b5691ed",
+                "name": "youtubeUrl",
+                "type": "string",
+                "value": "={{ $json.body.youtubeUrl }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "420e90c3-9dfa-4f41-825a-9874b5ebe43a",
+        "name": "YouTube Video ID",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          400,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const extractYoutubeId = (url) => {\n // Regex pattern that matches both youtu.be and youtube.com URLs\n const pattern = /(?:youtube\\.com\\/(?:[^\\/]+\\/.+\\/|(?:v|e(?:mbed)?)\\/|.*[?&]v=)|youtu\\.be\\/)([^\"&?\\/\\s]{11})/;\n const match = url.match(pattern);\n return match ? match[1] : null;\n};\n\n// Input URL from previous node\nconst youtubeUrl = items[0].json.youtubeUrl; // Adjust this based on your workflow\n\n// Process the URL and return the video ID\nreturn [{\n json: {\n videoId: extractYoutubeId(youtubeUrl)\n }\n}];\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a4171c3e-1ff2-40de-af7f-b3971a1ebe79",
+        "name": "Get YouTube Video",
+        "type": "n8n-nodes-base.youTube",
+        "position": [
+          600,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "videoId": "={{ $json.videoId }}",
+          "resource": "video",
+          "operation": "get"
+        },
+        "typeVersion": 1,
+        "notes": "This youTube node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "73e6bfc5-8b62-4880-acd4-292f2f692540",
+        "name": "gpt-4o-mini",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          620,
+          440
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ea14e296-b30c-46f7-b283-746822ae1af4",
+        "name": "Summarize & Analyze Transcript",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          600,
+          260
+        ],
+        "parameters": {
+          "text": "=Please analyze the given text and create a structured summary following these guidelines:\n\n1. Break down the content into main topics using Level 2 headers (##)\n2. Under each header:\n - List only the most essential concepts and key points\n - Use bullet points for clarity\n - Keep explanations concise\n - Preserve technical accuracy\n - Highlight key terms in bold\n3. Organize the information in this sequence:\n - Definition/Background\n - Main characteristics\n - Implementation details\n - Advantages/Disadvantages\n4. Format requirements:\n - Use markdown formatting\n - Keep bullet points simple (no nesting)\n - Bold important terms using **term**\n - Use tables for comparisons\n - Include relevant technical details\n\nPlease provide a clear, structured summary that captures the core concepts while maintaining technical accuracy.\n\nHere is the text: {{ $json.concatenated_text\n }}",
+          "promptType": "define"
+        },
+        "typeVersion": 1.4,
+        "notes": "This chainLlm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "90e3488f-f854-483e-9106-a5760d0c0457",
+        "name": "Concatenate",
+        "type": "n8n-nodes-base.summarize",
+        "position": [
+          400,
+          260
+        ],
+        "parameters": {
+          "options": {},
+          "fieldsToSummarize": {
+            "values": [
+              {
+                "field": "text",
+                "separateBy": " ",
+                "aggregation": "concatenate"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This summarize node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9c5c249c-5eeb-4433-ba93-ace4611f4858",
+        "name": "Response Object",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          960,
+          260
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bf132004-6636-411f-9d85-0c696fda84c4",
+                "name": "summary",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              },
+              {
+                "id": "63c8d0e3-685c-488a-9b45-363cf52479ea",
+                "name": "topics",
+                "type": "array",
+                "value": "=[]"
+              },
+              {
+                "id": "171f30cf-34e9-42f3-8735-814024bfde0b",
+                "name": "title",
+                "type": "string",
+                "value": "={{ $('Get YouTube Video').item.json.snippet.title }}"
+              },
+              {
+                "id": "7f26f5a3-e695-49d1-b1e8-9260c31f1b3d",
+                "name": "description",
+                "type": "string",
+                "value": "={{ $('Get YouTube Video').item.json.snippet.description }}"
+              },
+              {
+                "id": "d0594232-cb39-453c-b015-3b039c098e1f",
+                "name": "id",
+                "type": "string",
+                "value": "={{ $('Get YouTube Video').item.json.id }}"
+              },
+              {
+                "id": "17b6ca08-ce89-4467-bd25-0d2d182f7a8b",
+                "name": "youtubeUrl",
+                "type": "string",
+                "value": "={{ $('Webhook').item.json.body.youtubeUrl }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "9320d08a-4868-4103-abdf-3f8f54a7a0a0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0-f37b5762",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0-e0a47525",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0-2458fd67",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0-10b28d6b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "423276e0-81bf-487a-bbdd-26e9b84fa755": {
+        "main": [
+          [
+            {
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755-6ec830a7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755-43498fb4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755-ad64b247",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755-f42f3dda",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "27344649-8029-48ae-867b-7363d904fc59": {
+        "main": [
+          [
+            {
+              "node": "error-handler-27344649-8029-48ae-867b-7363d904fc59-b18f960d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "73e6bfc5-8b62-4880-acd4-292f2f692540": {
+        "main": [
+          [
+            {
+              "node": "error-handler-73e6bfc5-8b62-4880-acd4-292f2f692540-961b1df9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "description": "Automated workflow: Webhook Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "meta": {
+      "instanceId": "workflow-7622e22d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:57.994359",
+      "updatedAt": "2025-09-29T07:07:57.994378",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Webhook Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "27344649-8029-48ae-867b-7363d904fc59": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-27344649-8029-48ae-867b-7363d904fc59-b18f960d"
+            }
+          ]
+        ]
+      },
+      "423276e0-81bf-487a-bbdd-26e9b84fa755": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755-6ec830a7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755-43498fb4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755-ad64b247"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-423276e0-81bf-487a-bbdd-26e9b84fa755-f42f3dda"
+            }
+          ]
+        ]
+      },
+      "73e6bfc5-8b62-4880-acd4-292f2f692540": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-73e6bfc5-8b62-4880-acd4-292f2f692540-961b1df9"
+            }
+          ]
+        ]
+      },
+      "9320d08a-4868-4103-abdf-3f8f54a7a0a0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0-f37b5762"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0-e0a47525"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0-2458fd67"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9320d08a-4868-4103-abdf-3f8f54a7a0a0-10b28d6b"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Webhook Workflow",
+    "nodes": [
+      {
+        "name": "Concatenate",
+        "parameters": {
+          "fieldsToSummarize": {
+            "values": [
+              {
+                "aggregation": "concatenate",
+                "field": "text",
+                "separateBy": " "
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.summarize",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get YouTube URL",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "3ee42e4c-3cee-4934-97e7-64c96b5691ed",
+                "name": "youtubeUrl",
+                "type": "string",
+                "value": "={{ $json.body.youtubeUrl }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Get YouTube Video",
+        "parameters": {
+          "operation": "get",
+          "options": {},
+          "resource": "video",
+          "videoId": "={{ $json.videoId }}"
+        },
+        "type": "n8n-nodes-base.youTube",
+        "typeVersion": 1
+      },
+      {
+        "name": "gpt-4o-mini",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Respond to Webhook",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Response Object",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bf132004-6636-411f-9d85-0c696fda84c4",
+                "name": "summary",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              },
+              {
+                "id": "63c8d0e3-685c-488a-9b45-363cf52479ea",
+                "name": "topics",
+                "type": "array",
+                "value": "=[]"
+              },
+              {
+                "id": "171f30cf-34e9-42f3-8735-814024bfde0b",
+                "name": "title",
+                "type": "string",
+                "value": "={{ $('Get YouTube Video').item.json.snippet.title }}"
+              },
+              {
+                "id": "7f26f5a3-e695-49d1-b1e8-9260c31f1b3d",
+                "name": "description",
+                "type": "string",
+                "value": "={{ $('Get YouTube Video').item.json.snippet.description }}"
+              },
+              {
+                "id": "d0594232-cb39-453c-b015-3b039c098e1f",
+                "name": "id",
+                "type": "string",
+                "value": "={{ $('Get YouTube Video').item.json.id }}"
+              },
+              {
+                "id": "17b6ca08-ce89-4467-bd25-0d2d182f7a8b",
+                "name": "youtubeUrl",
+                "type": "string",
+                "value": "={{ $('Webhook').item.json.body.youtubeUrl }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Split Out",
+        "parameters": {
+          "fieldToSplitOut": "transcript",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Summarize & Analyze Transcript",
+        "parameters": {
+          "promptType": "define",
+          "text": "=Please analyze the given text and create a structured summary following these guidelines:\n\n1. Break down the content into main topics using Level 2 headers (##)\n2. Under each header:\n - List only the most essential concepts and key points\n - Use bullet points for clarity\n - Keep explanations concise\n - Preserve technical accuracy\n - Highlight key terms in bold\n3. Organize the information in this sequence:\n - Definition/Background\n - Main characteristics\n - Implementation details\n - Advantages/Disadvantages\n4. Format requirements:\n - Use markdown formatting\n - Keep bullet points simple (no nesting)\n - Bold important terms using **term**\n - Use tables for comparisons\n - Include relevant technical details\n\nPlease provide a clear, structured summary that captures the core concepts while maintaining technical accuracy.\n\nHere is the text: {{ $json.concatenated_text\n }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.4
+      },
+      {
+        "name": "Telegram",
+        "parameters": {
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          },
+          "text": "={{ $json.title }}\n{{ $json.youtubeUrl }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "ytube",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      },
+      {
+        "name": "YouTube Transcript",
+        "parameters": {},
+        "type": "n8n-nodes-youtube-transcription.youtubeTranscripter",
+        "typeVersion": 1
+      },
+      {
+        "name": "YouTube Video ID",
+        "parameters": {
+          "jsCode": "const extractYoutubeId = (url) => {\n // Regex pattern that matches both youtu.be and youtube.com URLs\n const pattern = /(?:youtube\\.com\\/(?:[^\\/]+\\/.+\\/|(?:v|e(?:mbed)?)\\/|.*[?&]v=)|youtu\\.be\\/)([^\"&?\\/\\s]{11})/;\n const match = url.match(pattern);\n return match ? match[1] : null;\n};\n\n// Input URL from previous node\nconst youtubeUrl = items[0].json.youtubeUrl; // Adjust this based on your workflow\n\n// Process the URL and return the video ID\nreturn [{\n json: {\n videoId: extractYoutubeId(youtubeUrl)\n }\n}];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 12,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Webhook",
+    "YouTube",
+    "Telegram"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 44,
+  "viewCount": 774,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "YouTube Account",
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Respond to Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"YouTube Transcript\" node (n8n-nodes-youtube-transcription.youtubeTranscripter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Telegram\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get YouTube Video\" node (n8n-nodes-base.youTube) and configure the action parameters, mappings, and fields.",
+      "Open the \"gpt-4o-mini\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Summarize & Analyze Transcript\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Concatenate\" node (n8n-nodes-base.summarize) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Get YouTube URL\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Response Object\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-r2ez2bjaf",
+      "workflowId": "webhook-workflow-dtyfi",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/2040_Telegram_Splitout_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\2040_Telegram_Splitout_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:59.103Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:59.103Z",
+  "updatedAt": "2026-07-15T11:30:59.103Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

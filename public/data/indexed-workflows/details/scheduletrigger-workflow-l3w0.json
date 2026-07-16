@@ -1,0 +1,1286 @@
+{
+  "id": "scheduletrigger-workflow-dvabu",
+  "name": "Scheduletrigger Workflow",
+  "slug": "scheduletrigger-workflow-l3w0",
+  "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 15 different services: stickyNote, executionData, code, scheduleTrigger, n8n. It contains 33 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Scheduletrigger Workflow workflow containing 30 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-e17d9324",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:47.488787",
+      "updatedAt": "2025-09-29T07:07:47.488872",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "d74c545f-17ab-47f7-bb2a-93c9e9673bab",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          460,
+          -20
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 1,
+                "triggerAtMinute": 30
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fc54b674-dc64-49ad-819d-66a4e416efc2",
+        "name": "Get all n8n Workflows",
+        "type": "n8n-nodes-base.n8n",
+        "position": [
+          680,
+          -20
+        ],
+        "parameters": {
+          "filters": {},
+          "requestOptions": {}
+        },
+        "credentials": {
+          "n8nApi": {
+            "id": "WR8oA7tQqdurDv3Y",
+            "name": "n8n account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This n8n node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b23cd260-8e68-42e7-935c-a658ae35cccd",
+        "name": "Backup to Google Drive2",
+        "type": "n8n-nodes-base.googleDrive",
+        "onError": "continueErrorOutput",
+        "position": [
+          1260,
+          400
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "options": {},
+          "operation": "update",
+          "changeFileContent": true,
+          "newUpdatedFileName": "={{  $('Workflow Data').item.json.name + \"_\" + $('Workflow Data').item.json.id+ \".json\"}}"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "FsjSbb8sdqbZm9dM",
+            "name": "Out"
+          }
+        },
+        "retryOnFail": true,
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "29a69d92-f416-489d-9a96-3a22844556e0",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          920,
+          -20
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ddee56fd-8610-4cae-9ae0-76e58e7fd111",
+        "name": "Backup to Google Drive4",
+        "type": "n8n-nodes-base.googleDrive",
+        "onError": "continueErrorOutput",
+        "position": [
+          1380,
+          720
+        ],
+        "parameters": {
+          "name": "={{  $('Workflow Data').item.json.name + \"_\" + $('Workflow Data').item.json.id+ \".json\"}}",
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "options": {},
+          "folderId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "13clPf8pnv_-GLeeNXLhuVzQiqnKo_7Ev",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8nWorkflows"
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "FsjSbb8sdqbZm9dM",
+            "name": "Out"
+          }
+        },
+        "retryOnFail": true,
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8fdf83b1-5884-45a2-8710-e9012c07ccca",
+        "name": "ifDriveEmpty",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          680,
+          420
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "5ec1b850-e0ce-4bd6-a8be-504e01825c00",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{$('getDriveFileData').item.json.name}}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "01437168-bb55-4308-a83c-a26c0f9c1843",
+        "name": "firstWorkflowJson",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1000,
+          720
+        ],
+        "parameters": {
+          "mode": "raw",
+          "options": {},
+          "jsonOutput": "={{ $('Workflow Data').item.json.toJsonString() }}\n"
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7bcb95db-b13b-4bef-9a34-acd1194f6d96",
+        "name": "JsonToFile",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1180,
+          720
+        ],
+        "parameters": {
+          "jsCode": "return items.map(item => {\n  const jsonData = JSON.stringify(item.json);\n  const binaryData = Buffer.from(jsonData).toString('base64');\n  item.binary = {\n    data: {\n      data: binaryData,\n      mimeType: 'application/json',\n      fileName: 'data.json'\n    }\n  };\n  return item;\n});"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "efdb7ea6-f4bf-4553-993c-448cd7bb2039",
+        "name": "CodeJsonToFile1",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1080,
+          400
+        ],
+        "parameters": {
+          "jsCode": "return items.map(item => {\n  const jsonData = JSON.stringify( $('Workflow Data').item.json);\n  const binaryData = Buffer.from(jsonData).toString('base64');\n  item.binary = {\n    data: {\n      data: binaryData,\n      mimeType: 'application/json',\n      fileName: 'data.json'\n    }\n  };\n  return item;\n});"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "411b1585-4be1-4a92-a54b-64965f0d529d",
+        "name": "Limit",
+        "type": "n8n-nodes-base.limit",
+        "position": [
+          1100,
+          -40
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This limit node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dcd2e2ee-fc18-47bc-9210-b1b42c270961",
+        "name": "Workflow Data",
+        "type": "n8n-nodes-base.executionData",
+        "position": [
+          -140,
+          420
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This executionData node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d243a474-9139-4af4-8134-df815a4af806",
+        "name": "successEmail",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          1360,
+          -40
+        ],
+        "webhookId": "b6cdbf4b-3abf-4eda-aa49-c19012e3133b",
+        "parameters": {
+          "sendTo": "your email address",
+          "message": "={{ $now.format('yyyy-MM-dd HH:mm') }} workflow backup success.",
+          "options": {},
+          "subject": "google drive workflow backup success",
+          "emailType": "text"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "3QEYg96F002cbPmf",
+            "name": "out account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "306a1d38-27ef-4249-956a-cfec30d898b1",
+        "name": "failureEmail",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          1620,
+          420
+        ],
+        "webhookId": "f38fba13-3970-43a5-8afd-ea873289015b",
+        "parameters": {
+          "sendTo": "your email address",
+          "message": "={{ $now }} {{ $('Workflow Data').item.json.name }} workflow backup .",
+          "options": {},
+          "subject": "google drive workflow backup error",
+          "emailType": "text"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "3QEYg96F002cbPmf",
+            "name": "out account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "544cb91c-4f96-4a84-8db2-9c88e758a1e3",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          600,
+          -80
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 260,
+          "height": 220,
+          "content": "## Set n8n API"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "84d6b3e9-9f01-40b8-980d-acd2f95d30fe",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          600,
+          -180
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 150,
+          "height": 80,
+          "content": "## Edit this node 👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a3f1669b-41da-4256-af2c-e556738eabf1",
+        "name": "getDriveFileData",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          300,
+          420
+        ],
+        "parameters": {
+          "filter": {
+            "folderId": {
+              "__rl": true,
+              "mode": "url",
+              "value": "={{ $('Parameters').item.json.directory }}"
+            },
+            "whatToSearch": "files"
+          },
+          "options": {},
+          "resource": "fileFolder",
+          "returnAll": true,
+          "queryString": "={{  $('Workflow Data').item.json.name + \"_\" + $('Workflow Data').item.json.id+ \".json\"}}"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "FsjSbb8sdqbZm9dM",
+            "name": "Out"
+          }
+        },
+        "retryOnFail": true,
+        "typeVersion": 3,
+        "alwaysOutputData": true,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f1771f9e-4153-4595-bbd9-22abfef23c54",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -300,
+          420
+        ],
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "typeVersion": 1.1,
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7110911a-c6c6-4ef6-888f-f640784d077b",
+        "name": "Execute Workflow",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "position": [
+          1100,
+          100
+        ],
+        "parameters": {
+          "options": {},
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "DfMF9CmVw6FU4hYm"
+          },
+          "workflowInputs": {
+            "value": {},
+            "schema": [],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This executeWorkflow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cb5cc7fb-f24f-48be-a175-c24bf830dce2",
+        "name": "Parameters",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          20,
+          420
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "1b65def6-4984-497d-a4bc-232af22927ad",
+                "name": "directory",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              },
+              {
+                "id": "c8c98f88-9f22-4574-88b8-1db99f6e4ec4",
+                "name": "parentdrive",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0ab79967-aa4e-4914-abbd-8a60057b083d",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -20,
+          300
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 150,
+          "height": 80,
+          "content": "## Edit this node 👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "948c9276-88a7-4d02-85dc-525c4e8b0c01",
+        "name": "Sticky Note10",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1240,
+          -100
+        ],
+        "parameters": {
+          "width": 340,
+          "height": 220,
+          "content": "## Send complete message"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cabf9b91-5a2f-4c8f-ae07-318fca57b54f",
+        "name": "Discord",
+        "type": "n8n-nodes-base.discord",
+        "position": [
+          1360,
+          80
+        ],
+        "webhookId": "65ce702c-8f03-4016-b192-a2503a7fbca7",
+        "parameters": {
+          "content": "={{ $now.format('yyyy-MM-dd HH:mm') }} Google Drive workflow backup success.",
+          "guildId": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "options": {
+            "tts": false
+          },
+          "resource": "message",
+          "channelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1365663078880116756",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "backup-status"
+          }
+        },
+        "credentials": {
+          "discordBotApi": {
+            "id": "hm4HwPUEF07pmkj0",
+            "name": "Discord Bot account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This discord node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ea46a8fb-5a43-400e-85d6-602ef1c68c5e",
+        "name": "Sticky Note8",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          20,
+          -280
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 370,
+          "height": 480,
+          "content": "## 重要！ 👇\n\n**啟動前： **\n\n### 作者資訊與資源\n作者：Hochien Chang\nYouTube 頻道：[HC AI說人話]({{ $env.WEBHOOK_URL }}\n說明影片連結： {{ $env.WEBHOOK_URL }}\n\n1.  **更新認證：** 確認已設定「Google Drive OAuth2 API」認證。\n2.  **設定參數：** 編輯「參數」節點，設定所需的 Google Drive 資料夾 URL。\n3.  **設定電子郵件：** 使用您的收件者電子郵件地址更新「Gmail」節點。\n\n\n參考工作流：{{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "af7f9d0e-6ce4-4277-801d-92bf05a424d6",
+        "name": "Sticky Note9",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -380,
+          -280
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 390,
+          "height": 480,
+          "content": "### IMPORTANT! 👇\n\n**Before activating:**\n### Author Information and Resources\nCreator：Hochien Chang\nYouTube 頻道：[HC HumanizeAI](www.youtube.com/@HC-HumanizeAI)\nExplanation Video Link: {{ $env.WEBHOOK_URL }}\n\n1.  **Update Credentials:** Ensure 'Google Drive OAuth2 API' credentials are set up.\n2.  **Configure Parameters:** Edit the 'Parameters' node to set your desired Google Drive folder URL.\n3.  **Set Email:** Update the 'Gmail' nodes with your recipient email address.\n\n\nBase on: {{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f24c9b0c-1bf4-40dc-9492-8c452e5d9905",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          920,
+          600
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 620,
+          "height": 300,
+          "content": "## 新工作流上傳\n## New Workflow upload👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dac5bca9-9d7f-4131-a563-9115bf0528cc",
+        "name": "Sticky Note11",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          920,
+          300
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 620,
+          "height": 280,
+          "content": "## 現有工作流更新\n## existing Workflow update👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6d126534-8b9b-4935-bce7-471ecc931e83",
+        "name": "Sticky Note12",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          140,
+          300
+        ],
+        "parameters": {
+          "width": 440,
+          "height": 280,
+          "content": "## 取得 Google Drive 現有的檔案資訊\n## Get Google Drive existing file info👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2ed623f4-faca-40ea-9ace-ab6d0933f6ba",
+        "name": "Sticky Note13",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          580,
+          300
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 320,
+          "height": 280,
+          "content": "## 確認是否為第一次備份\n## Only for initialing👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "46f0dbdc-4023-426c-b87b-3431817981c0",
+        "name": "Sticky Note14",
+        "type": "n8n-nodes-base.stickyNote",
+        "disabled": true,
+        "position": [
+          -380,
+          -380
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 760,
+          "height": 80,
+          "content": "# HC AI 說人話"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-9886af4b",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "b23cd260-8e68-42e7-935c-a658ae35cccd": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b23cd260-8e68-42e7-935c-a658ae35cccd-3075b152",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ddee56fd-8610-4cae-9ae0-76e58e7fd111": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ddee56fd-8610-4cae-9ae0-76e58e7fd111-961cffdd",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a3f1669b-41da-4256-af2c-e556738eabf1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a3f1669b-41da-4256-af2c-e556738eabf1-b26c2b86",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cabf9b91-5a2f-4c8f-ae07-318fca57b54f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-cabf9b91-5a2f-4c8f-ae07-318fca57b54f-70478c44",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 15 different services: stickyNote, executionData, code, scheduleTrigger, n8n. It contains 33 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Scheduletrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "a3f1669b-41da-4256-af2c-e556738eabf1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a3f1669b-41da-4256-af2c-e556738eabf1-b26c2b86"
+            }
+          ]
+        ]
+      },
+      "b23cd260-8e68-42e7-935c-a658ae35cccd": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b23cd260-8e68-42e7-935c-a658ae35cccd-3075b152"
+            }
+          ]
+        ]
+      },
+      "cabf9b91-5a2f-4c8f-ae07-318fca57b54f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cabf9b91-5a2f-4c8f-ae07-318fca57b54f-70478c44"
+            }
+          ]
+        ]
+      },
+      "ddee56fd-8610-4cae-9ae0-76e58e7fd111": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddee56fd-8610-4cae-9ae0-76e58e7fd111-961cffdd"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Backup to Google Drive2",
+        "parameters": {
+          "changeFileContent": true,
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "newUpdatedFileName": "={{  $('Workflow Data').item.json.name + \"_\" + $('Workflow Data').item.json.id+ \".json\"}}",
+          "operation": "update",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Backup to Google Drive4",
+        "parameters": {
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "cachedResultName": "n8nWorkflows",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "13clPf8pnv_-GLeeNXLhuVzQiqnKo_7Ev"
+          },
+          "name": "={{  $('Workflow Data').item.json.name + \"_\" + $('Workflow Data').item.json.id+ \".json\"}}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "CodeJsonToFile1",
+        "parameters": {
+          "jsCode": "return items.map(item => {\n  const jsonData = JSON.stringify( $('Workflow Data').item.json);\n  const binaryData = Buffer.from(jsonData).toString('base64');\n  item.binary = {\n    data: {\n      data: binaryData,\n      mimeType: 'application/json',\n      fileName: 'data.json'\n    }\n  };\n  return item;\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "discordBotApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Discord",
+        "parameters": {
+          "channelId": {
+            "__rl": true,
+            "cachedResultName": "backup-status",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1365663078880116756"
+          },
+          "content": "={{ $now.format('yyyy-MM-dd HH:mm') }} Google Drive workflow backup success.",
+          "guildId": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "options": {
+            "tts": false
+          },
+          "resource": "message"
+        },
+        "type": "n8n-nodes-base.discord",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Execute Workflow",
+        "parameters": {
+          "options": {},
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "DfMF9CmVw6FU4hYm"
+          },
+          "workflowInputs": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [],
+            "value": {}
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "failureEmail",
+        "parameters": {
+          "emailType": "text",
+          "message": "={{ $now }} {{ $('Workflow Data').item.json.name }} workflow backup .",
+          "options": {},
+          "sendTo": "your email address",
+          "subject": "google drive workflow backup error"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "firstWorkflowJson",
+        "parameters": {
+          "jsonOutput": "={{ $('Workflow Data').item.json.toJsonString() }}\n",
+          "mode": "raw",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "n8nApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get all n8n Workflows",
+        "parameters": {
+          "filters": {},
+          "requestOptions": {}
+        },
+        "type": "n8n-nodes-base.n8n",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "getDriveFileData",
+        "parameters": {
+          "filter": {
+            "folderId": {
+              "__rl": true,
+              "mode": "url",
+              "value": "={{ $('Parameters').item.json.directory }}"
+            },
+            "whatToSearch": "files"
+          },
+          "options": {},
+          "queryString": "={{  $('Workflow Data').item.json.name + \"_\" + $('Workflow Data').item.json.id+ \".json\"}}",
+          "resource": "fileFolder",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "ifDriveEmpty",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "5ec1b850-e0ce-4bd6-a8be-504e01825c00",
+                "leftValue": "={{$('getDriveFileData').item.json.name}}",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "JsonToFile",
+        "parameters": {
+          "jsCode": "return items.map(item => {\n  const jsonData = JSON.stringify(item.json);\n  const binaryData = Buffer.from(jsonData).toString('base64');\n  item.binary = {\n    data: {\n      data: binaryData,\n      mimeType: 'application/json',\n      fileName: 'data.json'\n    }\n  };\n  return item;\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Limit",
+        "parameters": {},
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "Parameters",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "1b65def6-4984-497d-a4bc-232af22927ad",
+                "name": "directory",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              },
+              {
+                "id": "c8c98f88-9f22-4574-88b8-1db99f6e4ec4",
+                "name": "parentdrive",
+                "type": "string",
+                "value": "{{ $env.WEBHOOK_URL }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 1,
+                "triggerAtMinute": 30
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 3,
+          "content": "## 新工作流上傳\n## New Workflow upload👇",
+          "height": 300,
+          "width": 620
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note10",
+        "parameters": {
+          "content": "## Send complete message",
+          "height": 220,
+          "width": 340
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note11",
+        "parameters": {
+          "color": 6,
+          "content": "## 現有工作流更新\n## existing Workflow update👇",
+          "height": 280,
+          "width": 620
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note12",
+        "parameters": {
+          "content": "## 取得 Google Drive 現有的檔案資訊\n## Get Google Drive existing file info👇",
+          "height": 280,
+          "width": 440
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note13",
+        "parameters": {
+          "color": 4,
+          "content": "## 確認是否為第一次備份\n## Only for initialing👇",
+          "height": 280,
+          "width": 320
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note14",
+        "parameters": {
+          "color": 6,
+          "content": "# HC AI 說人話",
+          "height": 80,
+          "width": 760
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 4,
+          "content": "## Edit this node 👇",
+          "height": 80,
+          "width": 150
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "color": 5,
+          "content": "## Set n8n API",
+          "height": 220,
+          "width": 260
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "color": 4,
+          "content": "## Edit this node 👇",
+          "height": 80,
+          "width": 150
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note8",
+        "parameters": {
+          "color": 7,
+          "content": "## 重要！ 👇\n\n**啟動前： **\n\n### 作者資訊與資源\n作者：Hochien Chang\nYouTube 頻道：[HC AI說人話]({{ $env.WEBHOOK_URL }}\n說明影片連結： {{ $env.WEBHOOK_URL }}\n\n1.  **更新認證：** 確認已設定「Google Drive OAuth2 API」認證。\n2.  **設定參數：** 編輯「參數」節點，設定所需的 Google Drive 資料夾 URL。\n3.  **設定電子郵件：** 使用您的收件者電子郵件地址更新「Gmail」節點。\n\n\n參考工作流：{{ $env.WEBHOOK_URL }}",
+          "height": 480,
+          "width": 370
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note9",
+        "parameters": {
+          "color": 7,
+          "content": "### IMPORTANT! 👇\n\n**Before activating:**\n### Author Information and Resources\nCreator：Hochien Chang\nYouTube 頻道：[HC HumanizeAI](www.youtube.com/@HC-HumanizeAI)\nExplanation Video Link: {{ $env.WEBHOOK_URL }}\n\n1.  **Update Credentials:** Ensure 'Google Drive OAuth2 API' credentials are set up.\n2.  **Configure Parameters:** Edit the 'Parameters' node to set your desired Google Drive folder URL.\n3.  **Set Email:** Update the 'Gmail' nodes with your recipient email address.\n\n\nBase on: {{ $env.WEBHOOK_URL }}",
+          "height": 480,
+          "width": 390
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "successEmail",
+        "parameters": {
+          "emailType": "text",
+          "message": "={{ $now.format('yyyy-MM-dd HH:mm') }} workflow backup success.",
+          "options": {},
+          "sendTo": "your email address",
+          "subject": "google drive workflow backup success"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "When Executed by Another Workflow",
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Workflow Data",
+        "parameters": {},
+        "type": "n8n-nodes-base.executionData",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 30,
+  "integrationCount": 4,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "45 Mins",
+  "integrations": [
+    "N8n",
+    "Google Drive",
+    "Gmail",
+    "Discord"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 117,
+  "viewCount": 501,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "N8n Account",
+      "Google Drive Account",
+      "Gmail Account",
+      "Discord Account"
+    ],
+    "requiredCredentials": [
+      "n8n  A P I details",
+      "google Drive  O Auth2  A P I details",
+      "gmail  O Auth2 details",
+      "discord Bot  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Verify the settings of the trigger node \"When Executed by Another Workflow\".",
+      "Open the \"Get all n8n Workflows\" node (n8n-nodes-base.n8n) and configure the action parameters, mappings, and fields.",
+      "Open the \"Backup to Google Drive2\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Backup to Google Drive4\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"ifDriveEmpty\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Limit\" node (n8n-nodes-base.limit) and configure the action parameters, mappings, and fields.",
+      "Open the \"Workflow Data\" node (n8n-nodes-base.executionData) and configure the action parameters, mappings, and fields.",
+      "Open the \"successEmail\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"failureEmail\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"getDriveFileData\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Execute Workflow\" node (n8n-nodes-base.executeWorkflow) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note10\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Discord\" node (n8n-nodes-base.discord) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note8\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note9\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note11\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note12\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note13\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note14\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"firstWorkflowJson\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Parameters\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-kxvdc1n9k",
+      "workflowId": "scheduletrigger-workflow-dvabu",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Limit/0897_Limit_Code_Send_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Limit\\0897_Limit_Code_Send_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:18:40.652Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:40.652Z",
+  "updatedAt": "2026-07-15T11:18:40.652Z"
+}

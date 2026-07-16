@@ -1,0 +1,506 @@
+{
+  "id": "etl-pipeline-7v8l2",
+  "name": "ETL pipeline",
+  "slug": "etl-pipeline-un56",
+  "description": "Automated workflow: ETL pipeline. This workflow processes data and performs automated tasks.",
+  "shortDescription": "ETL pipeline workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "6",
+    "name": "ETL pipeline",
+    "nodes": [
+      {
+        "name": "Twitter",
+        "type": "n8n-nodes-base.twitter",
+        "position": [
+          300,
+          300
+        ],
+        "parameters": {
+          "limit": 3,
+          "operation": "search",
+          "searchText": "=#OnThisDay",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "twitterOAuth1Api": "twitter_api"
+        },
+        "typeVersion": 1,
+        "id": "4ce873dc-9e37-4884-9c63-f68374f2bcd3",
+        "notes": "This twitter node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Postgres",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          1100,
+          300
+        ],
+        "parameters": {
+          "table": "tweets",
+          "columns": "text, score, magnitude",
+          "returnFields": "=*"
+        },
+        "credentials": {
+          "postgres": "postgres"
+        },
+        "typeVersion": 1,
+        "id": "ce4ec74d-9718-4a25-9152-bb37937001c4",
+        "notes": "This postgres node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "MongoDB",
+        "type": "n8n-nodes-base.mongoDb",
+        "position": [
+          500,
+          300
+        ],
+        "parameters": {
+          "fields": "text",
+          "options": {},
+          "operation": "insert",
+          "collection": "tweets"
+        },
+        "credentials": {
+          "mongoDb": "mongodb"
+        },
+        "typeVersion": 1,
+        "id": "93fd546a-4325-4fe0-8a54-22dac85504bb",
+        "notes": "This mongoDb node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Slack",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          1500,
+          200
+        ],
+        "parameters": {
+          "text": "=🐦 NEW TWEET with sentiment score {{$json[\"score\"]}} and magnitude {{$json[\"magnitude\"]}} ⬇️\n{{$json[\"text\"]}}",
+          "channel": "tweets",
+          "attachments": [],
+          "otherOptions": {}
+        },
+        "credentials": {
+          "slackApi": "slack"
+        },
+        "typeVersion": 1,
+        "id": "36097c0d-2311-49b6-92c0-b20c6906a2b0",
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1300,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$json[\"score\"]}}",
+                "operation": "larger"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "d37e9fcd-38fc-45b4-b2e8-b926497f8593",
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "NoOp",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1500,
+          400
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "6967e38a-9d16-490a-87db-cd4e20483f6a",
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Google Cloud Natural Language",
+        "type": "n8n-nodes-base.googleCloudNaturalLanguage",
+        "position": [
+          700,
+          300
+        ],
+        "parameters": {
+          "content": "={{$node[\"MongoDB\"].json[\"text\"]}}",
+          "options": {}
+        },
+        "credentials": {
+          "googleCloudNaturalLanguageOAuth2Api": "google_nlp"
+        },
+        "typeVersion": 1,
+        "id": "a544286c-1ef5-41c1-a9d0-3ba1873e65bf",
+        "notes": "This googleCloudNaturalLanguage node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          900,
+          300
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "score",
+                "value": "={{$json[\"documentSentiment\"][\"score\"]}}"
+              },
+              {
+                "name": "magnitude",
+                "value": "={{$json[\"documentSentiment\"][\"magnitude\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "text",
+                "value": "={{$node[\"Twitter\"].json[\"text\"]}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "3ae0ba4c-9d77-46fc-9636-b05736527f8f",
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          100,
+          300
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 6
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "4689324a-18ad-4327-a409-ac451db0e735",
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-0fa178af",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: ETL pipeline. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-72ad3dbb",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.342926",
+      "updatedAt": "2025-09-29T07:07:51.342937",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: ETL pipeline. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "ETL pipeline",
+    "nodes": [
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 6
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleCloudNaturalLanguageOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Cloud Natural Language",
+        "parameters": {
+          "content": "={{$node[\"MongoDB\"].json[\"text\"]}}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCloudNaturalLanguage",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "larger",
+                "value1": "={{$json[\"score\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mongoDb": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "MongoDB",
+        "parameters": {
+          "collection": "tweets",
+          "fields": "text",
+          "operation": "insert",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.mongoDb",
+        "typeVersion": 1
+      },
+      {
+        "name": "NoOp",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "postgres": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Postgres",
+        "parameters": {
+          "columns": "text, score, magnitude",
+          "returnFields": "=*",
+          "table": "tweets"
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "score",
+                "value": "={{$json[\"documentSentiment\"][\"score\"]}}"
+              },
+              {
+                "name": "magnitude",
+                "value": "={{$json[\"documentSentiment\"][\"magnitude\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "text",
+                "value": "={{$node[\"Twitter\"].json[\"text\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "slackApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Slack",
+        "parameters": {
+          "attachments": [],
+          "channel": "tweets",
+          "otherOptions": {},
+          "text": "=🐦 NEW TWEET with sentiment score {{$json[\"score\"]}} and magnitude {{$json[\"magnitude\"]}} ⬇️\n{{$json[\"text\"]}}"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "twitterOAuth1Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Twitter",
+        "parameters": {
+          "additionalFields": {},
+          "limit": 3,
+          "operation": "search",
+          "searchText": "=#OnThisDay"
+        },
+        "type": "n8n-nodes-base.twitter",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 5,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Twitter/X",
+    "PostgreSQL",
+    "MongoDB",
+    "Slack",
+    "Googlecloudnaturallanguage"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 166,
+  "viewCount": 79,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Twitter/X Account",
+      "PostgreSQL Account",
+      "MongoDB Account",
+      "Slack Account",
+      "Googlecloudnaturallanguage Account"
+    ],
+    "requiredCredentials": [
+      "twitter O Auth1  A P I details",
+      "postgres details",
+      "mongo Db details",
+      "slack  A P I details",
+      "google Cloud Natural Language  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Twitter\" node (n8n-nodes-base.twitter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Postgres\" node (n8n-nodes-base.postgres) and configure the action parameters, mappings, and fields.",
+      "Open the \"MongoDB\" node (n8n-nodes-base.mongoDb) and configure the action parameters, mappings, and fields.",
+      "Open the \"Slack\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"NoOp\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Cloud Natural Language\" node (n8n-nodes-base.googleCloudNaturalLanguage) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-63lwr0f8w",
+      "workflowId": "etl-pipeline-7v8l2",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Postgres/1108_Postgres_Googlecloudnaturallanguage_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Postgres\\1108_Postgres_Googlecloudnaturallanguage_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:19:18.855Z"
+    },
+    {
+      "id": "src-ph2rbwyhx",
+      "workflowId": "etl-pipeline-ziqem",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Postgres/1421_Postgres_Googlecloudnaturallanguage_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Postgres\\1421_Postgres_Googlecloudnaturallanguage_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:19:19.219Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:18.855Z",
+  "updatedAt": "2026-07-15T11:19:18.855Z"
+}

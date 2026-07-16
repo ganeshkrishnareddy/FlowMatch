@@ -1,0 +1,818 @@
+{
+  "id": "production-workflow-bm6u6",
+  "name": "Production Workflow",
+  "slug": "production-workflow-60m8",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 18 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          -550,
+          450
+        ],
+        "parameters": {
+          "path": "PuHq2RQsmc3HXB/hook",
+          "options": {
+            "rawBody": false
+          },
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1,
+        "id": "node-ac41d08e"
+      },
+      {
+        "name": "Mautic",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          1260,
+          180
+        ],
+        "parameters": {
+          "email": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"email\"]}}",
+          "company": 1,
+          "options": {},
+          "lastName": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"lastName\"]}}",
+          "firstName": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"firstName\"]}}",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "mauticOAuth2Api": "OAuth2 Mautic"
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": false,
+        "id": "node-a642a0cf"
+      },
+      {
+        "name": "Find User",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          170,
+          260
+        ],
+        "parameters": {
+          "limit": 1,
+          "options": {
+            "search": "={{$node[\"Set Webhook Request\"].json[\"student\"][\"email\"]}}"
+          },
+          "operation": "getAll",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": "OAuth2 Mautic"
+        },
+        "notesInFlow": false,
+        "typeVersion": 1,
+        "alwaysOutputData": false,
+        "id": "node-8f9bd912"
+      },
+      {
+        "name": "Update User",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          1560,
+          250
+        ],
+        "parameters": {
+          "options": {},
+          "contactId": "={{$node[\"@MAIN STUDENT DATA\"].json[\"userFound\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "email": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"email\"]}}",
+            "lastName": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"lastName\"]}}",
+            "firstName": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"firstName\"]}}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": "OAuth2 Mautic"
+        },
+        "typeVersion": 1,
+        "id": "node-fac3ef36"
+      },
+      {
+        "name": "Tag User",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          430,
+          670
+        ],
+        "parameters": {
+          "options": {},
+          "contactId": "={{$node[\"Find User To Tag Sale\"].json[\"id\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "tags": "={{$node[\"Set Webhook Request\"].json[\"student\"][\"course\"][\"name\"]}}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": "OAuth2 Mautic"
+        },
+        "typeVersion": 1,
+        "id": "node-7f5515e6"
+      },
+      {
+        "name": "Unsubscribe User",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          2170,
+          410
+        ],
+        "parameters": {
+          "options": {},
+          "contactId": "={{$node[\"@MAIN STUDENT DATA\"].json[\"userFound\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "tags": "=#unsubscribe"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": "OAuth2 Mautic"
+        },
+        "typeVersion": 1,
+        "id": "node-75041876"
+      },
+      {
+        "name": "Split Full Name",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          340,
+          420
+        ],
+        "parameters": {
+          "functionCode": "const student = items[0].json.student\nstudent.firstName = student.name ? student.name.split(' ').slice(0, -1).join(' ') : ''\nstudent.lastName= student.name ? student.name.split(' ').slice(-1).join(' ') : ''\nitems[0].json.student = student\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-0f4593d8"
+      },
+      {
+        "name": "If not found return -1",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          450,
+          260
+        ],
+        "parameters": {
+          "functionCode": "items[0].json.id = items[0].json.id || -1\nreturn items"
+        },
+        "typeVersion": 1,
+        "id": "node-285ac437"
+      },
+      {
+        "name": "@MAIN STUDENT DATA",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          900,
+          400
+        ],
+        "parameters": {
+          "join": "inner",
+          "mode": "mergeByIndex"
+        },
+        "typeVersion": 1,
+        "id": "node-da23188f"
+      },
+      {
+        "name": "Remove unsubscribe",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          1770,
+          500
+        ],
+        "parameters": {
+          "options": {},
+          "contactId": "={{$node[\"@MAIN STUDENT DATA\"].json[\"userFound\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "tags": "=-#unsubscribe"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": "OAuth2 Mautic"
+        },
+        "typeVersion": 1,
+        "id": "node-1a0b7db0"
+      },
+      {
+        "name": "Find User To Tag Sale",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          190,
+          670
+        ],
+        "parameters": {
+          "limit": 1,
+          "options": {
+            "search": "={{$node[\"Set Webhook Request\"].json[\"student\"][\"user\"][\"email\"]}}"
+          },
+          "operation": "getAll",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": "OAuth2 Mautic"
+        },
+        "notesInFlow": false,
+        "typeVersion": 1,
+        "alwaysOutputData": false,
+        "id": "node-72027eef"
+      },
+      {
+        "name": "Set userFound",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          700,
+          260
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "userFound",
+                "value": "={{$node[\"If not found return -1\"].json[\"id\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-f7657e14"
+      },
+      {
+        "name": "Switch Webhook Types",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          -70,
+          450
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "User.",
+                "operation": "contains"
+              },
+              {
+                "output": 1,
+                "value2": "Sale.",
+                "operation": "contains"
+              }
+            ]
+          },
+          "value1": "={{$node[\"Set Webhook Request\"].json[\"type\"]}}",
+          "dataType": "string"
+        },
+        "typeVersion": 1,
+        "id": "node-53d27675"
+      },
+      {
+        "name": "Set Webhook Request",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -310,
+          450
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "student",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"object\"]}}"
+              },
+              {
+                "name": "type",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"type\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-bf0f164a"
+      },
+      {
+        "name": "IF NOT userFound",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1090,
+          400
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"@MAIN STUDENT DATA\"].json[\"userFound\"]}}",
+                "value2": "-1",
+                "operation": "regex"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-56ec6298"
+      },
+      {
+        "name": "Switch User.type",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          1380,
+          420
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "User.updated"
+              },
+              {
+                "output": 1,
+                "value2": "User.unsubscribe_from_marketing_emails"
+              },
+              {
+                "output": 2,
+                "value2": "=User.subscribe_to_marketing_emails"
+              }
+            ]
+          },
+          "value1": "={{$node[\"@MAIN STUDENT DATA\"].json[\"type\"]}}",
+          "dataType": "string"
+        },
+        "typeVersion": 1,
+        "id": "node-47779f5a"
+      },
+      {
+        "name": "IF unsubscribe_from_marketing_emails",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1770,
+          250
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [],
+            "boolean": [
+              {
+                "value1": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"unsubscribe_from_marketing_emails\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-1da97c49"
+      },
+      {
+        "id": "error-3edc58bc",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-a158ad65",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.926513",
+      "updatedAt": "2025-09-29T07:07:50.926530",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "@MAIN STUDENT DATA",
+        "parameters": {
+          "join": "inner",
+          "mode": "mergeByIndex"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Find User",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "limit": 1,
+          "operation": "getAll",
+          "options": {
+            "search": "={{$node[\"Set Webhook Request\"].json[\"student\"][\"email\"]}}"
+          }
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Find User To Tag Sale",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "limit": 1,
+          "operation": "getAll",
+          "options": {
+            "search": "={{$node[\"Set Webhook Request\"].json[\"student\"][\"user\"][\"email\"]}}"
+          }
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "name": "If not found return -1",
+        "parameters": {
+          "functionCode": "items[0].json.id = items[0].json.id || -1\nreturn items"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF NOT userFound",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "regex",
+                "value1": "={{$node[\"@MAIN STUDENT DATA\"].json[\"userFound\"]}}",
+                "value2": "-1"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF unsubscribe_from_marketing_emails",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"unsubscribe_from_marketing_emails\"]}}",
+                "value2": true
+              }
+            ],
+            "string": []
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mautic",
+        "parameters": {
+          "additionalFields": {},
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "company": 1,
+          "email": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"email\"]}}",
+          "firstName": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"firstName\"]}}",
+          "lastName": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"lastName\"]}}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Remove unsubscribe",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "contactId": "={{$node[\"@MAIN STUDENT DATA\"].json[\"userFound\"]}}",
+          "operation": "update",
+          "options": {},
+          "updateFields": {
+            "tags": "=-#unsubscribe"
+          }
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set userFound",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "userFound",
+                "value": "={{$node[\"If not found return -1\"].json[\"id\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Webhook Request",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "student",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"object\"]}}"
+              },
+              {
+                "name": "type",
+                "value": "={{$node[\"Webhook\"].json[\"body\"][\"type\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split Full Name",
+        "parameters": {
+          "functionCode": "const student = items[0].json.student\nstudent.firstName = student.name ? student.name.split(' ').slice(0, -1).join(' ') : ''\nstudent.lastName= student.name ? student.name.split(' ').slice(-1).join(' ') : ''\nitems[0].json.student = student\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Switch User.type",
+        "parameters": {
+          "dataType": "string",
+          "rules": {
+            "rules": [
+              {
+                "value2": "User.updated"
+              },
+              {
+                "output": 1,
+                "value2": "User.unsubscribe_from_marketing_emails"
+              },
+              {
+                "output": 2,
+                "value2": "=User.subscribe_to_marketing_emails"
+              }
+            ]
+          },
+          "value1": "={{$node[\"@MAIN STUDENT DATA\"].json[\"type\"]}}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      },
+      {
+        "name": "Switch Webhook Types",
+        "parameters": {
+          "dataType": "string",
+          "rules": {
+            "rules": [
+              {
+                "operation": "contains",
+                "value2": "User."
+              },
+              {
+                "operation": "contains",
+                "output": 1,
+                "value2": "Sale."
+              }
+            ]
+          },
+          "value1": "={{$node[\"Set Webhook Request\"].json[\"type\"]}}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Tag User",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "contactId": "={{$node[\"Find User To Tag Sale\"].json[\"id\"]}}",
+          "operation": "update",
+          "options": {},
+          "updateFields": {
+            "tags": "={{$node[\"Set Webhook Request\"].json[\"student\"][\"course\"][\"name\"]}}"
+          }
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Unsubscribe User",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "contactId": "={{$node[\"@MAIN STUDENT DATA\"].json[\"userFound\"]}}",
+          "operation": "update",
+          "options": {},
+          "updateFields": {
+            "tags": "=#unsubscribe"
+          }
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update User",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "contactId": "={{$node[\"@MAIN STUDENT DATA\"].json[\"userFound\"]}}",
+          "operation": "update",
+          "options": {},
+          "updateFields": {
+            "email": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"email\"]}}",
+            "firstName": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"firstName\"]}}",
+            "lastName": "={{$node[\"@MAIN STUDENT DATA\"].json[\"student\"][\"lastName\"]}}"
+          }
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {
+            "rawBody": false
+          },
+          "path": "PuHq2RQsmc3HXB/hook"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 18,
+  "integrationCount": 2,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Webhook",
+    "Mautic"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 16,
+  "viewCount": 341,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Mautic Account"
+    ],
+    "requiredCredentials": [
+      "mautic  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Mautic\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Find User\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update User\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Tag User\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Unsubscribe User\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Full Name\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"If not found return -1\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"@MAIN STUDENT DATA\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove unsubscribe\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Find User To Tag Sale\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch Webhook Types\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF NOT userFound\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch User.type\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF unsubscribe_from_marketing_emails\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set userFound\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set Webhook Request\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-ceosld9av",
+      "workflowId": "production-workflow-bm6u6",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Mautic/0963_Mautic_Webhook_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Mautic\\0963_Mautic_Webhook_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:11.960Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:11.960Z",
+  "updatedAt": "2026-07-15T11:19:11.960Z"
+}

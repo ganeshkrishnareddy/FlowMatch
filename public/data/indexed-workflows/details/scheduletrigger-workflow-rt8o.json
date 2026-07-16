@@ -1,0 +1,1424 @@
+{
+  "id": "scheduletrigger-workflow-y5ess",
+  "name": "Scheduletrigger Workflow",
+  "slug": "scheduletrigger-workflow-rt8o",
+  "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 10 different services: stickyNote, httpRequest, scheduleTrigger, switch, set. It contains 21 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Scheduletrigger Workflow workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-8b6fc807",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.942077",
+      "updatedAt": "2025-09-29T07:07:51.942145",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "acb0acd0-9bb6-4491-a1ca-4aa9a7820bbc",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          1440,
+          420
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 6
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c6bb51c4-aec4-4a6d-ade2-1080bbbb6fb3",
+        "name": "Calculate Status",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2367,
+          460
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b0cbcff5-bfcf-46a5-a386-65c4dd56c42f",
+                "name": "date",
+                "type": "string",
+                "value": "={{ $json.headers.date }}"
+              },
+              {
+                "id": "8c4155e4-bcc6-41dd-9582-346a57a7b997",
+                "name": "Property",
+                "type": "string",
+                "value": "={{ $json.Property }}"
+              },
+              {
+                "id": "f0320678-d352-486f-a633-9980c4fc73b2",
+                "name": "UP_FROM_UP",
+                "type": "boolean",
+                "value": "={{ $json.statusCode < 400 && $json.Status === 'UP' }}"
+              },
+              {
+                "id": "61783eb6-a683-44c9-aa0c-5fc5247da9fa",
+                "name": "DOWN_FROM_DOWN",
+                "type": "boolean",
+                "value": "={{ $json.statusCode >= 400 && $json.Status === 'DOWN' }}"
+              },
+              {
+                "id": "1052a69e-4456-445d-bdd9-2765b334cf64",
+                "name": "UP_FROM_DOWN",
+                "type": "boolean",
+                "value": "={{ $json.statusCode < 400 && $json.Status === 'DOWN' }}"
+              },
+              {
+                "id": "9af72278-5b29-406a-b4c5-f47f3d805063",
+                "name": "DOWN_FROM_UP",
+                "type": "boolean",
+                "value": "={{ $json.statusCode >= 400 && $json.Status === 'UP' }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "50307dca-fa88-4a19-91a4-456866e529d4",
+        "name": "Get Sites",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1700,
+          420
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "dashboard"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1t2RT3lxyxXj3X1y6klWvyhEJEazpkT3Hpi2ttEJRVT4",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8n uptime"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "XHvC7jIRR8A2TlUl",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.3,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4b0cb0cc-282b-4be9-a4ca-0c4eb10d896e",
+        "name": "Send Chat Alert",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          3100,
+          340
+        ],
+        "parameters": {
+          "text": "=From: n8n uptime\nDate: {{ $('Calculate Status').item.json[\"date\"] }}\n\n{{ $('Calculate Status').item.json.Property }} is {{ $('Calculate Status').item.json[\"DOWN_FROM_UP\"] ? 'DOWN' : 'UP' }}",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "C06RS1WPUQ6",
+            "cachedResultName": "general"
+          },
+          "otherOptions": {}
+        },
+        "credentials": {
+          "slackApi": {
+            "id": "VfK3js0YdqBdQLGP",
+            "name": "Slack account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ab303995-bd82-4aef-8fe1-ce808c4dbd33",
+        "name": "Send Email Alert",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          2940,
+          340
+        ],
+        "parameters": {
+          "sendTo": "no-reply@example.com",
+          "message": "=From: n8n uptime\nDate: {{ $('Calculate Status').item.json[\"date\"] }}\n\n{{ $('Calculate Status').item.json.Property }} is {{ $('Calculate Status').item.json[\"DOWN_FROM_UP\"] ? 'DOWN' : 'UP' }}",
+          "options": {
+            "senderName": "n8n uptime",
+            "appendAttribution": false
+          },
+          "subject": "=n8n uptime: {{ $('Calculate Status').item.json.Property }} is {{ $('Calculate Status').item.json[\"DOWN_FROM_UP\"] ? 'DOWN' : 'UP' }}",
+          "emailType": "text"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "Sf5Gfl9NiFTNXFWb",
+            "name": "Gmail account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "63343e68-be07-4d89-8363-140299dcf0b6",
+        "name": "Log Uptime Event",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          2940,
+          520
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "date": "={{ $json.date }}",
+              "period": "={{ new Date($json.date).format(\"yyyy-MM\") }}"
+            },
+            "schema": [
+              {
+                "id": "period",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "period",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "date",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "date",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Property",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Property",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "UP_FROM_UP",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "UP_FROM_UP",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "DOWN_FROM_DOWN",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "DOWN_FROM_DOWN",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "UP_FROM_DOWN",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "UP_FROM_DOWN",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "DOWN_FROM_UP",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "DOWN_FROM_UP",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": []
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "={{ $('Calculate Status').item.json.Property }}"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1t2RT3lxyxXj3X1y6klWvyhEJEazpkT3Hpi2ttEJRVT4",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8n uptime"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "XHvC7jIRR8A2TlUl",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.3,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fe97a18b-902c-4fab-bf73-69b5b9e41a11",
+        "name": "Update Site Status",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          3100,
+          520
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Status": "={{ $json[\"DOWN_FROM_UP\"] || $json[\"DOWN_FROM_DOWN\"] ? 'DOWN' : 'UP' }}",
+              "Property": "={{ $json.Property }}"
+            },
+            "schema": [
+              {
+                "id": "Property",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "Property",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Status",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Status",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "Property"
+            ]
+          },
+          "options": {},
+          "operation": "appendOrUpdate",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "dashboard"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1t2RT3lxyxXj3X1y6klWvyhEJEazpkT3Hpi2ttEJRVT4",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8n uptime"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "XHvC7jIRR8A2TlUl",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.3,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b37537d1-eedf-446e-a5ed-2ef7388fd7bc",
+        "name": "Perform Site Test",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2207,
+          460
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": true
+              }
+            }
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "22efcca8-81a8-4128-a03f-efd394e41977",
+        "name": "For Each Site...",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          2007,
+          460
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b74d0b2c-8b08-42fe-a78f-103d4ea3b60f",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1375.3365733151754,
+          160
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 533.3167991131336,
+          "height": 451.46281790887826,
+          "content": "## 1. Setting a Schedule\n[Read more about Scheduling Workflows]({{ $env.WEBHOOK_URL }}\n\nSince we expect downtime to be a rare occurance, our monitor should only check infrequently during the day. We'll use a schedule trigger for this purpose.\n\nOnce the schdule activates, we'll pull a list of sites to check from our google sheet."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6c570ff2-aa08-4458-b2da-7632d516c4e3",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1940,
+          247.83581204342858
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 596.6620781418152,
+          "height": 464.2968162619932,
+          "content": "## 2. Perform Site Checks\n[Read more about using HTTP requests]({{ $env.WEBHOOK_URL }}\n\nn8n makes it easy to communicate with external websites by offering a powerful HTTP request node which can handle GET and POST requests as well as pagination.\n\nHere, we're only interested in the status code of our requests."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d1f67650-1409-43b1-b197-0e5a821d8b6f",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2580,
+          117.20168629145996
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 720.3351531809235,
+          "height": 600.2604061412927,
+          "content": "## 3. Sending Alerts and Logging Results\n[Read more about using Switch for powerful control flow]({{ $env.WEBHOOK_URL }}\n\nThe switch node is powerful control flow tool that makes your workflows smart. Here, we're able to use Switch to trigger alert notifications whenever we have DOWN status or whenever we get a status change.\n\nWe store the event in our Sites Google Sheet and update the site's status which will be used to calculate our state on the next scheduled run."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "244291de-7ce1-48c9-9d7a-c04fc7d069ab",
+        "name": "Status Router",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          2640,
+          520
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "true",
+                        "singleValue": true
+                      },
+                      "leftValue": "={{ $json.UP_FROM_UP }}",
+                      "rightValue": 200
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "f50ae8d6-4359-4163-aedb-fddf100ad676",
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "true",
+                        "singleValue": true
+                      },
+                      "leftValue": "={{ $json.UP_FROM_DOWN }}",
+                      "rightValue": 200
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "417e93d8-08b7-468d-a3bb-f0d395b3026a",
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "true",
+                        "singleValue": true
+                      },
+                      "leftValue": "={{ $json.DOWN_FROM_DOWN }}",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "7191e7cb-f2e1-4288-aa68-21f6efefafc5",
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "true",
+                        "singleValue": true
+                      },
+                      "leftValue": "={{ $json.DOWN_FROM_UP }}",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a2a683fa-1fa5-4595-856a-de4f717eadf0",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1063.07390978683,
+          160
+        ],
+        "parameters": {
+          "width": 276.590892958905,
+          "height": 299.942498076894,
+          "content": "## Try It Out!\n### Thie workflow showcases how you can build a simple website monitoring service using Scheduled Triggers and the HTTP Requests node. \n\n### Need Help?\nJoin the [Discord]({{ $env.WEBHOOK_URL }} or ask in the [Forum]({{ $env.WEBHOOK_URL }}\n\nHappy Hacking!"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "704ce21f-6b96-4dc5-a27f-fca4b326efd1",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1620,
+          380
+        ],
+        "parameters": {
+          "width": 262.6069985025353,
+          "height": 379.4991553144906,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### 🚨Google Sheet Required!\nYou'll need the following columns:\n* **Property** - the website address to monitor\n* **Status** - either one of \"UP\" or \"DOWN\""
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "b37537d1-eedf-446e-a5ed-2ef7388fd7bc": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-e30f4b63",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-16c2e93d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-4d56e3ee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-d4f3500b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-207b96be",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-8055444c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-d0cfce96",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-e1113328",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "50307dca-fa88-4a19-91a4-456866e529d4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-50307dca-fa88-4a19-91a4-456866e529d4-9d55e324",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4b0cb0cc-282b-4be9-a4ca-0c4eb10d896e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4b0cb0cc-282b-4be9-a4ca-0c4eb10d896e-18bdec8a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "63343e68-be07-4d89-8363-140299dcf0b6": {
+        "main": [
+          [
+            {
+              "node": "error-handler-63343e68-be07-4d89-8363-140299dcf0b6-19b3a248",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "fe97a18b-902c-4fab-bf73-69b5b9e41a11": {
+        "main": [
+          [
+            {
+              "node": "error-handler-fe97a18b-902c-4fab-bf73-69b5b9e41a11-4d13f51b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Scheduletrigger Workflow. This workflow integrates 10 different services: stickyNote, httpRequest, scheduleTrigger, switch, set. It contains 21 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Scheduletrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4b0cb0cc-282b-4be9-a4ca-0c4eb10d896e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4b0cb0cc-282b-4be9-a4ca-0c4eb10d896e-18bdec8a"
+            }
+          ]
+        ]
+      },
+      "50307dca-fa88-4a19-91a4-456866e529d4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-50307dca-fa88-4a19-91a4-456866e529d4-9d55e324"
+            }
+          ]
+        ]
+      },
+      "63343e68-be07-4d89-8363-140299dcf0b6": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-63343e68-be07-4d89-8363-140299dcf0b6-19b3a248"
+            }
+          ]
+        ]
+      },
+      "b37537d1-eedf-446e-a5ed-2ef7388fd7bc": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-e30f4b63"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-16c2e93d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-4d56e3ee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-d4f3500b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-207b96be"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-8055444c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-d0cfce96"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b37537d1-eedf-446e-a5ed-2ef7388fd7bc-e1113328"
+            }
+          ]
+        ]
+      },
+      "fe97a18b-902c-4fab-bf73-69b5b9e41a11": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fe97a18b-902c-4fab-bf73-69b5b9e41a11-4d13f51b"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Scheduletrigger Workflow",
+    "nodes": [
+      {
+        "name": "Calculate Status",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b0cbcff5-bfcf-46a5-a386-65c4dd56c42f",
+                "name": "date",
+                "type": "string",
+                "value": "={{ $json.headers.date }}"
+              },
+              {
+                "id": "8c4155e4-bcc6-41dd-9582-346a57a7b997",
+                "name": "Property",
+                "type": "string",
+                "value": "={{ $json.Property }}"
+              },
+              {
+                "id": "f0320678-d352-486f-a633-9980c4fc73b2",
+                "name": "UP_FROM_UP",
+                "type": "boolean",
+                "value": "={{ $json.statusCode < 400 && $json.Status === 'UP' }}"
+              },
+              {
+                "id": "61783eb6-a683-44c9-aa0c-5fc5247da9fa",
+                "name": "DOWN_FROM_DOWN",
+                "type": "boolean",
+                "value": "={{ $json.statusCode >= 400 && $json.Status === 'DOWN' }}"
+              },
+              {
+                "id": "1052a69e-4456-445d-bdd9-2765b334cf64",
+                "name": "UP_FROM_DOWN",
+                "type": "boolean",
+                "value": "={{ $json.statusCode < 400 && $json.Status === 'DOWN' }}"
+              },
+              {
+                "id": "9af72278-5b29-406a-b4c5-f47f3d805063",
+                "name": "DOWN_FROM_UP",
+                "type": "boolean",
+                "value": "={{ $json.statusCode >= 400 && $json.Status === 'UP' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.3
+      },
+      {
+        "name": "For Each Site...",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Sites",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "n8n uptime",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1t2RT3lxyxXj3X1y6klWvyhEJEazpkT3Hpi2ttEJRVT4"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "dashboard",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.3
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Log Uptime Event",
+        "parameters": {
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "period",
+                "id": "period",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "date",
+                "id": "date",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Property",
+                "id": "Property",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "UP_FROM_UP",
+                "id": "UP_FROM_UP",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "DOWN_FROM_DOWN",
+                "id": "DOWN_FROM_DOWN",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "UP_FROM_DOWN",
+                "id": "UP_FROM_DOWN",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "DOWN_FROM_UP",
+                "id": "DOWN_FROM_UP",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "date": "={{ $json.date }}",
+              "period": "={{ new Date($json.date).format(\"yyyy-MM\") }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "n8n uptime",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1t2RT3lxyxXj3X1y6klWvyhEJEazpkT3Hpi2ttEJRVT4"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "={{ $('Calculate Status').item.json.Property }}"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.3
+      },
+      {
+        "name": "Perform Site Test",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true
+              }
+            }
+          },
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 6
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "slackApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Chat Alert",
+        "parameters": {
+          "channelId": {
+            "__rl": true,
+            "cachedResultName": "general",
+            "mode": "list",
+            "value": "C06RS1WPUQ6"
+          },
+          "otherOptions": {},
+          "select": "channel",
+          "text": "=From: n8n uptime\nDate: {{ $('Calculate Status').item.json[\"date\"] }}\n\n{{ $('Calculate Status').item.json.Property }} is {{ $('Calculate Status').item.json[\"DOWN_FROM_UP\"] ? 'DOWN' : 'UP' }}"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Email Alert",
+        "parameters": {
+          "emailType": "text",
+          "message": "=From: n8n uptime\nDate: {{ $('Calculate Status').item.json[\"date\"] }}\n\n{{ $('Calculate Status').item.json.Property }} is {{ $('Calculate Status').item.json[\"DOWN_FROM_UP\"] ? 'DOWN' : 'UP' }}",
+          "options": {
+            "appendAttribution": false,
+            "senderName": "n8n uptime"
+          },
+          "sendTo": "no-reply@example.com",
+          "subject": "=n8n uptime: {{ $('Calculate Status').item.json.Property }} is {{ $('Calculate Status').item.json[\"DOWN_FROM_UP\"] ? 'DOWN' : 'UP' }}"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Status Router",
+        "parameters": {
+          "options": {},
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.UP_FROM_UP }}",
+                      "operator": {
+                        "operation": "true",
+                        "singleValue": true,
+                        "type": "boolean"
+                      },
+                      "rightValue": 200
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "f50ae8d6-4359-4163-aedb-fddf100ad676",
+                      "leftValue": "={{ $json.UP_FROM_DOWN }}",
+                      "operator": {
+                        "operation": "true",
+                        "singleValue": true,
+                        "type": "boolean"
+                      },
+                      "rightValue": 200
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "417e93d8-08b7-468d-a3bb-f0d395b3026a",
+                      "leftValue": "={{ $json.DOWN_FROM_DOWN }}",
+                      "operator": {
+                        "operation": "true",
+                        "singleValue": true,
+                        "type": "boolean"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "7191e7cb-f2e1-4288-aa68-21f6efefafc5",
+                      "leftValue": "={{ $json.DOWN_FROM_UP }}",
+                      "operator": {
+                        "operation": "true",
+                        "singleValue": true,
+                        "type": "boolean"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### 🚨Google Sheet Required!\nYou'll need the following columns:\n* **Property** - the website address to monitor\n* **Status** - either one of \"UP\" or \"DOWN\"",
+          "height": 379.4991553144906,
+          "width": 262.6069985025353
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 7,
+          "content": "## 1. Setting a Schedule\n[Read more about Scheduling Workflows]({{ $env.WEBHOOK_URL }}\n\nSince we expect downtime to be a rare occurance, our monitor should only check infrequently during the day. We'll use a schedule trigger for this purpose.\n\nOnce the schdule activates, we'll pull a list of sites to check from our google sheet.",
+          "height": 451.46281790887826,
+          "width": 533.3167991131336
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 7,
+          "content": "## 2. Perform Site Checks\n[Read more about using HTTP requests]({{ $env.WEBHOOK_URL }}\n\nn8n makes it easy to communicate with external websites by offering a powerful HTTP request node which can handle GET and POST requests as well as pagination.\n\nHere, we're only interested in the status code of our requests.",
+          "height": 464.2968162619932,
+          "width": 596.6620781418152
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "color": 7,
+          "content": "## 3. Sending Alerts and Logging Results\n[Read more about using Switch for powerful control flow]({{ $env.WEBHOOK_URL }}\n\nThe switch node is powerful control flow tool that makes your workflows smart. Here, we're able to use Switch to trigger alert notifications whenever we have DOWN status or whenever we get a status change.\n\nWe store the event in our Sites Google Sheet and update the site's status which will be used to calculate our state on the next scheduled run.",
+          "height": 600.2604061412927,
+          "width": 720.3351531809235
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "content": "## Try It Out!\n### Thie workflow showcases how you can build a simple website monitoring service using Scheduled Triggers and the HTTP Requests node. \n\n### Need Help?\nJoin the [Discord]({{ $env.WEBHOOK_URL }} or ask in the [Forum]({{ $env.WEBHOOK_URL }}\n\nHappy Hacking!",
+          "height": 299.942498076894,
+          "width": 276.590892958905
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Site Status",
+        "parameters": {
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "Property"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Property",
+                "id": "Property",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Status",
+                "id": "Status",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Property": "={{ $json.Property }}",
+              "Status": "={{ $json[\"DOWN_FROM_UP\"] || $json[\"DOWN_FROM_DOWN\"] ? 'DOWN' : 'UP' }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "n8n uptime",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1t2RT3lxyxXj3X1y6klWvyhEJEazpkT3Hpi2ttEJRVT4"
+          },
+          "operation": "appendOrUpdate",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "dashboard",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.3
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Google Sheets",
+    "Slack",
+    "Gmail",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 46,
+  "viewCount": 785,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "Slack Account",
+      "Gmail Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details",
+      "slack  A P I details",
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get Sites\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Send Chat Alert\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Send Email Alert\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Log Uptime Event\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Update Site Status\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Perform Site Test\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"For Each Site...\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Status Router\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Calculate Status\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Incoming triggers will qualified/formatted, new rows will be written to Google Sheets, and email replies or alerts will be sent automatically.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-jb9q6xlcr",
+      "workflowId": "scheduletrigger-workflow-y5ess",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/0529_Schedule_Slack_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\0529_Schedule_Slack_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:26.802Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:26.802Z",
+  "updatedAt": "2026-07-15T11:19:26.802Z"
+}

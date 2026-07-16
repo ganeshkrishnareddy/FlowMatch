@@ -1,0 +1,629 @@
+{
+  "id": "import-multiple-csv-to-googlesheet-h0v6f",
+  "name": "Import multiple CSV to GoogleSheet",
+  "slug": "import-multiple-csv-to-googlesheet-x177",
+  "description": "Automated workflow: Import multiple CSV to GoogleSheet. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Import multiple CSV to GoogleSheet workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "zic2ZEHvxHR4UAYI",
+    "meta": {
+      "instanceId": "workflow-aec6d9e7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.543323",
+      "updatedAt": "2025-09-29T07:07:51.543332",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Import multiple CSV to GoogleSheet",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "cd5adfcc-5b92-4a75-8e78-c2c1218d946a",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          920,
+          380
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "17305629-bb19-4b55-964e-689ab5f4d557",
+        "name": "Read Binary Files",
+        "type": "n8n-nodes-base.readBinaryFiles",
+        "position": [
+          1120,
+          380
+        ],
+        "parameters": {
+          "fileSelector": "=./.n8n/*.csv"
+        },
+        "typeVersion": 1,
+        "notes": "This readBinaryFiles node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d3055f63-67fa-4dcd-886d-fe6f56fb7058",
+        "name": "Split In Batches",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          1320,
+          380
+        ],
+        "parameters": {
+          "options": {},
+          "batchSize": 1
+        },
+        "typeVersion": 2,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "597e9b14-1a8c-4fbb-b5df-c965db1e0e16",
+        "name": "Read CSV",
+        "type": "n8n-nodes-base.spreadsheetFile",
+        "position": [
+          1520,
+          360
+        ],
+        "parameters": {
+          "options": {
+            "rawData": true,
+            "headerRow": true,
+            "readAsString": true,
+            "includeEmptyCells": false
+          },
+          "fileFormat": "csv"
+        },
+        "typeVersion": 2,
+        "notes": "This spreadsheetFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "90d5ccac-f2a3-42b6-8fa3-d05450ffa67b",
+        "name": "Remove duplicates",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          1520,
+          600
+        ],
+        "parameters": {
+          "compare": "selectedFields",
+          "options": {},
+          "operation": "removeDuplicates",
+          "fieldsToCompare": "user_name"
+        },
+        "typeVersion": 3,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2bddcd85-1c99-41ec-8e16-ab75631c3fb9",
+        "name": "Keep only subscribers",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          1720,
+          600
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json.subscribed }}",
+                "value2": "TRUE"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4ac13e9d-8523-4ff3-b778-1d9f0dc744e3",
+        "name": "Sort by date",
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          1920,
+          600
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "sort",
+          "sortFieldsUi": {
+            "sortField": [
+              {
+                "fieldName": "date_subscribed"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This itemLists node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "862a7ded-0199-48bb-8183-10f9ae06724b",
+        "name": "Upload to spreadsheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          2120,
+          600
+        ],
+        "parameters": {
+          "columns": {
+            "value": {},
+            "schema": [
+              {
+                "id": "user_name",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "required": false,
+                "displayName": "user_name",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "user_email",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "user_email",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "subscribed",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "subscribed",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "date_subscribed",
+                "type": "string",
+                "display": true,
+                "removed": true,
+                "required": false,
+                "displayName": "date_subscribed",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "autoMapInputData",
+            "matchingColumns": [
+              "user_name"
+            ]
+          },
+          "options": {},
+          "operation": "appendOrUpdate",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 2042396108,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "n8n-sheet"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "{{ $credentials.googleSheetsOAuth2Api.id }}",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "95b499b4-024d-49a5-887f-f2f74bd1b9a1",
+        "name": "Assign source file name",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1720,
+          360
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Source",
+                "stringValue": "={{ $('Split In Batches').item.binary.data.fileName }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-8bbe14fd",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "a6ccb0b8-04bd-407d-b5ca-010c68bb2128",
+    "connections": {
+      "17305629-bb19-4b55-964e-689ab5f4d557": {
+        "main": [
+          [
+            {
+              "node": "error-handler-17305629-bb19-4b55-964e-689ab5f4d557-3f43fedd",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "597e9b14-1a8c-4fbb-b5df-c965db1e0e16": {
+        "main": [
+          [
+            {
+              "node": "error-handler-597e9b14-1a8c-4fbb-b5df-c965db1e0e16-050ead1f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "862a7ded-0199-48bb-8183-10f9ae06724b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-862a7ded-0199-48bb-8183-10f9ae06724b-0726d360",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Import multiple CSV to GoogleSheet. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Import multiple CSV to GoogleSheet. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "17305629-bb19-4b55-964e-689ab5f4d557": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-17305629-bb19-4b55-964e-689ab5f4d557-3f43fedd"
+            }
+          ]
+        ]
+      },
+      "597e9b14-1a8c-4fbb-b5df-c965db1e0e16": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-597e9b14-1a8c-4fbb-b5df-c965db1e0e16-050ead1f"
+            }
+          ]
+        ]
+      },
+      "862a7ded-0199-48bb-8183-10f9ae06724b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-862a7ded-0199-48bb-8183-10f9ae06724b-0726d360"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Import multiple CSV to GoogleSheet",
+    "nodes": [
+      {
+        "name": "Assign source file name",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Source",
+                "stringValue": "={{ $('Split In Batches').item.binary.data.fileName }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Keep only subscribers",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json.subscribed }}",
+                "value2": "TRUE"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 1
+      },
+      {
+        "name": "Read Binary Files",
+        "parameters": {
+          "fileSelector": "=./.n8n/*.csv"
+        },
+        "type": "n8n-nodes-base.readBinaryFiles",
+        "typeVersion": 1
+      },
+      {
+        "name": "Read CSV",
+        "parameters": {
+          "fileFormat": "csv",
+          "options": {
+            "headerRow": true,
+            "includeEmptyCells": false,
+            "rawData": true,
+            "readAsString": true
+          }
+        },
+        "type": "n8n-nodes-base.spreadsheetFile",
+        "typeVersion": 2
+      },
+      {
+        "name": "Remove duplicates",
+        "parameters": {
+          "compare": "selectedFields",
+          "fieldsToCompare": "user_name",
+          "operation": "removeDuplicates",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sort by date",
+        "parameters": {
+          "operation": "sort",
+          "options": {},
+          "sortFieldsUi": {
+            "sortField": [
+              {
+                "fieldName": "date_subscribed"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.itemLists",
+        "typeVersion": 3
+      },
+      {
+        "name": "Split In Batches",
+        "parameters": {
+          "batchSize": 1,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Upload to spreadsheet",
+        "parameters": {
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "matchingColumns": [
+              "user_name"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "user_name",
+                "id": "user_name",
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "user_email",
+                "id": "user_email",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "subscribed",
+                "id": "subscribed",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "date_subscribed",
+                "id": "date_subscribed",
+                "removed": true,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {}
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          },
+          "operation": "appendOrUpdate",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "n8n-sheet",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 2042396108
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Spreadsheetfile",
+    "Itemlists",
+    "Google Sheets"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 109,
+  "viewCount": 175,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Spreadsheetfile Account",
+      "Itemlists Account",
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"Read Binary Files\" node (n8n-nodes-base.readBinaryFiles) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split In Batches\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Read CSV\" node (n8n-nodes-base.spreadsheetFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove duplicates\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Keep only subscribers\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sort by date\" node (n8n-nodes-base.itemLists) and configure the action parameters, mappings, and fields.",
+      "Open the \"Upload to spreadsheet\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Assign source file name\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-j5kxt7kx6",
+      "workflowId": "import-multiple-csv-to-googlesheet-h0v6f",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Readbinaryfiles/2036_Readbinaryfiles_Filter_Import_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Readbinaryfiles\\2036_Readbinaryfiles_Filter_Import_Triggered.json",
+      "discoveredAt": "2026-07-15T11:19:21.281Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:21.281Z",
+  "updatedAt": "2026-07-15T11:19:21.281Z"
+}

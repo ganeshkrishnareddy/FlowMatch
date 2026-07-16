@@ -1,0 +1,672 @@
+{
+  "id": "mcp-client-with-brave-and-telegram-s71lm",
+  "name": "MCP Client with Brave and Telegram",
+  "slug": "mcp-client-with-brave-and-telegram-tv7d",
+  "description": "Automated workflow: MCP Client with Brave and Telegram. This workflow integrates 8 different services: telegramTrigger, stickyNote, telegram, code, set. It contains 16 nodes and follows best practices for error handling and security.",
+  "shortDescription": "MCP Client with Brave and Telegram workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "id": "52pBJt8swWgtdY54",
+    "meta": {
+      "instanceId": "workflow-1225a941",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:56.621802",
+      "updatedAt": "2025-09-29T07:07:56.621837",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "MCP Client with Brave and Telegram",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "af9b297d-0f8f-408f-a4d6-7545a94e8a38",
+        "name": "List Brave Tools",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "position": [
+          560,
+          -40
+        ],
+        "parameters": {},
+        "credentials": {
+          "mcpClientApi": {
+            "id": "YEgJcPwvAlBOCEDA",
+            "name": "MCP Client (STDIO) Brave"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mcpClient node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c3265586-a376-4d02-8f33-828bbba6d221",
+        "name": "Exec Brave tool",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "position": [
+          800,
+          -40
+        ],
+        "parameters": {
+          "toolName": "={{ $json.tools[0].name }}",
+          "operation": "executeTool",
+          "toolParameters": "={\n  \"query\":\"{{ $('Clean query').item.json.query }}\"\n}"
+        },
+        "credentials": {
+          "mcpClientApi": {
+            "id": "YEgJcPwvAlBOCEDA",
+            "name": "MCP Client (STDIO) Brave"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mcpClient node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "adbfe84e-ab4a-4640-bb52-fcb06f9d1450",
+        "name": "Clean query",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          300,
+          -40
+        ],
+        "parameters": {
+          "jsCode": "for (const item of $input.all()) {\n  const originalText = item.json.text;\n\n  const query = originalText.replace(\"/brave \", \"\");\n\n  item.json.query = query;\n}\n\nreturn $input.all();\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9905cad4-e847-44be-8cc4-69fd427ce8a1",
+        "name": "Send message",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          1040,
+          -40
+        ],
+        "webhookId": "b48bb09b-e019-46a2-994b-8058f65e6442",
+        "parameters": {
+          "text": "={{ $json.result.content[0].text }}",
+          "chatId": "={{ $('Get Message').item.json.message.from.id }}",
+          "additionalFields": {
+            "parse_mode": "HTML"
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "rQ5q95W7uKesMDx4",
+            "name": "Telegram account Fastewb"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bf0e7c48-bbc8-4efd-9083-2fa965902453",
+        "name": "Get Message",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "position": [
+          -440,
+          -20
+        ],
+        "webhookId": "07c09a64-758b-40ea-8c24-d999048781c3",
+        "parameters": {
+          "updates": [
+            "message"
+          ],
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "rQ5q95W7uKesMDx4",
+            "name": "Telegram account Fastewb"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This telegramTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b37c6f84-bceb-476c-9a7c-5682a4e69f8d",
+        "name": "Search with Brave?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -180,
+          -20
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "9c5ea127-cbbb-4304-8a93-b47b5c09b837",
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                },
+                "leftValue": "={{ $json.message.text }}",
+                "rightValue": "/brave "
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e879ea50-83f9-4a87-856c-a06a628ae31c",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          -860
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 480,
+          "content": "## PRELIMINARY STEPS\n- Access to an n8n self-hosted instance and install the Community node \"n8n-nodes-mcp\". Please see this [easy guide]({{ $env.WEBHOOK_URL }}\n- Get your Brave Search API Key: {{ $env.API_BASE_URL }}\n- Telegram Bot Access Token\n\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "754e62d1-efdb-460d-bdb1-2369d633a804",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          -660
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 480,
+          "height": 420,
+          "content": "## SET MCP BRAVE TOOL\nIn \"List Brave Tools\" create new credential as shown in  this image\n![image]({{ $env.WEBHOOK_URL }}\n\nIn Environment field set this value:\nBRAVE_API_KEY=your-api-key"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "073eb8d2-9026-4031-af01-850342a5c5ca",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -240,
+          -120
+        ],
+        "parameters": {
+          "height": 260,
+          "content": "the search only occurs when the command \"/brave\" is present in the message"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eb76fbed-0ba0-4a56-a1fe-65e4bfb38ea8",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          240,
+          -120
+        ],
+        "parameters": {
+          "width": 220,
+          "height": 260,
+          "content": "I clean the message by removing the \"/brave\" command"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "980bf4e1-15cf-4276-b746-343850ec4b6f",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          520,
+          -120
+        ],
+        "parameters": {
+          "width": 180,
+          "height": 260,
+          "content": "Get all available Brave search tools"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2c712ec4-2184-4136-bd21-f17e19fb029e",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          760,
+          -120
+        ],
+        "parameters": {
+          "width": 180,
+          "height": 260,
+          "content": "I get the search results"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "226a396a-e152-422d-b4e2-670a39117f57",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          -1180
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 480,
+          "height": 280,
+          "content": "## MCP-based Brave Search Engine on Telegram \n\nThis workflow is a powerful tool for automating interactions with Brave tools through Telegram, providing users with quick and easy access to information directly in their chat.\n\nThis n8n workflow enables users to perform web searches directly from Telegram using the Brave search engine. By simply sending the command /brave followed by a query, the workflow retrieves search results from Brave and returns them as a Telegram message."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7c526a9e-f3a2-433c-aeb1-ced2e5af6a12",
+        "name": "Get Text",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          80,
+          -40
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "029f4e7e-b367-4aa9-863e-e372694940fb",
+                "name": "text",
+                "type": "string",
+                "value": "={{ $json.message.text }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-97aca575",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "4566dd53-d373-43da-91c5-213ca5f335c6",
+    "connections": {
+      "9905cad4-e847-44be-8cc4-69fd427ce8a1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9905cad4-e847-44be-8cc4-69fd427ce8a1-eb2fd0cd",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "bf0e7c48-bbc8-4efd-9083-2fa965902453": {
+        "main": [
+          [
+            {
+              "node": "error-handler-bf0e7c48-bbc8-4efd-9083-2fa965902453-1bd6fa06",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: MCP Client with Brave and Telegram. This workflow integrates 8 different services: telegramTrigger, stickyNote, telegram, code, set. It contains 16 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: MCP Client with Brave and Telegram. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "9905cad4-e847-44be-8cc4-69fd427ce8a1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9905cad4-e847-44be-8cc4-69fd427ce8a1-eb2fd0cd"
+            }
+          ]
+        ]
+      },
+      "bf0e7c48-bbc8-4efd-9083-2fa965902453": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-bf0e7c48-bbc8-4efd-9083-2fa965902453-1bd6fa06"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "MCP Client with Brave and Telegram",
+    "nodes": [
+      {
+        "name": "Clean query",
+        "parameters": {
+          "jsCode": "for (const item of $input.all()) {\n  const originalText = item.json.text;\n\n  const query = originalText.replace(\"/brave \", \"\");\n\n  item.json.query = query;\n}\n\nreturn $input.all();\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mcpClientApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Exec Brave tool",
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "={{ $json.tools[0].name }}",
+          "toolParameters": "={\n  \"query\":\"{{ $('Clean query').item.json.query }}\"\n}"
+        },
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Message",
+        "parameters": {
+          "additionalFields": {},
+          "updates": [
+            "message"
+          ]
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Get Text",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "029f4e7e-b367-4aa9-863e-e372694940fb",
+                "name": "text",
+                "type": "string",
+                "value": "={{ $json.message.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "mcpClientApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "List Brave Tools",
+        "parameters": {},
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1
+      },
+      {
+        "name": "Search with Brave?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "9c5ea127-cbbb-4304-8a93-b47b5c09b837",
+                "leftValue": "={{ $json.message.text }}",
+                "operator": {
+                  "operation": "startsWith",
+                  "type": "string"
+                },
+                "rightValue": "/brave "
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send message",
+        "parameters": {
+          "additionalFields": {
+            "parse_mode": "HTML"
+          },
+          "chatId": "={{ $('Get Message').item.json.message.from.id }}",
+          "text": "={{ $json.result.content[0].text }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 6,
+          "content": "## PRELIMINARY STEPS\n- Access to an n8n self-hosted instance and install the Community node \"n8n-nodes-mcp\". Please see this [easy guide]({{ $env.WEBHOOK_URL }}\n- Get your Brave Search API Key: {{ $env.API_BASE_URL }}\n- Telegram Bot Access Token\n\n\n",
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 6,
+          "content": "## SET MCP BRAVE TOOL\nIn \"List Brave Tools\" create new credential as shown in  this image\n![image]({{ $env.WEBHOOK_URL }}\n\nIn Environment field set this value:\nBRAVE_API_KEY=your-api-key",
+          "height": 420,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "the search only occurs when the command \"/brave\" is present in the message",
+          "height": 260
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "I clean the message by removing the \"/brave\" command",
+          "height": 260,
+          "width": 220
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "Get all available Brave search tools",
+          "height": 260,
+          "width": 180
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "content": "I get the search results",
+          "height": 260,
+          "width": 180
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "color": 3,
+          "content": "## MCP-based Brave Search Engine on Telegram \n\nThis workflow is a powerful tool for automating interactions with Brave tools through Telegram, providing users with quick and easy access to information directly in their chat.\n\nThis n8n workflow enables users to perform web searches directly from Telegram using the Brave search engine. By simply sending the command /brave followed by a query, the workflow retrieves search results from Brave and returns them as a Telegram message.",
+          "height": 280,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Mcp",
+    "Telegram"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 40,
+  "viewCount": 169,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Mcp Account",
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "mcp Client  A P I details",
+      "telegram  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Get Message\".",
+      "Open the \"List Brave Tools\" node (n8n-nodes-mcp.mcpClient) and configure the action parameters, mappings, and fields.",
+      "Open the \"Exec Brave tool\" node (n8n-nodes-mcp.mcpClient) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send message\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search with Brave?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Get Text\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-eeirg9hwu",
+      "workflowId": "mcp-client-with-brave-and-telegram-s71lm",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/1001_Telegram_Stickynote_Automation_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\1001_Telegram_Stickynote_Automation_Triggered.json",
+      "discoveredAt": "2026-07-15T11:20:16.235Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:16.235Z",
+  "updatedAt": "2026-07-15T11:20:16.235Z"
+}

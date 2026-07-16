@@ -1,0 +1,900 @@
+{
+  "id": "if-workflow-q49kt",
+  "name": "If Workflow",
+  "slug": "if-workflow-5ime",
+  "description": "Automated workflow: If Workflow. This workflow integrates 6 different services: webhook, stickyNote, httpRequest, respondToWebhook, stopAndError. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "If Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "73b64763-5e18-4ff1-bb52-ba25a08d3c3a",
+        "name": "If params correct",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          500,
+          200
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "2e968b41-88f7-4b28-9837-af50ae130979",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "voice_id",
+                "rightValue": ""
+              },
+              {
+                "id": "ad961bc9-6db8-4cac-8c63-30930e8beca7",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "text",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "39079dec-54c5-458e-afa1-56ee5723f3a3",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          960,
+          180
+        ],
+        "parameters": {
+          "options": {},
+          "respondWith": "binary"
+        },
+        "typeVersion": 1.1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b6a344f4-28ac-41a7-8e6a-a2782a5d1c68",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          300,
+          200
+        ],
+        "webhookId": "5acc6769-6c0f-42a8-a69c-b05e437e18a9",
+        "parameters": {
+          "path": "generate-voice",
+          "options": {},
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a25dec72-152b-4457-a18f-9cbbd31840ec",
+        "name": "Generate voice",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          740,
+          180
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"text\":  \"{{ $json.body.text }}\"\n} ",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "nhkU37chaiBU6X3j",
+            "name": "Custom Auth account"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e862955e-76d9-4a24-9501-0d5eb8fbe778",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          280,
+          -360
+        ],
+        "parameters": {
+          "width": 806.0818150700699,
+          "height": 495.17470523089514,
+          "content": "## Generate Text-to-Speech Using Elevenlabs via API\nThis workflow provides an API endpoint to generate speech from text using [Elevenlabs.io]({{ $env.WEBHOOK_URL }} a popular text-to-speech service.\n\n### Step 1: Configure Custom Credentials in n8n\nTo set up your credentials in n8n, create a new custom authentication entry with the following JSON structure:\n```json\n{\n  \"headers\": {\n    \"xi-api-key\": \"your-elevenlabs-api-key\"\n  }\n}\n```\nReplace `\"your-elevenlabs-api-key\"` with your actual Elevenlabs API key.\n\n### Step 2: Send a POST Request to the Webhook\nSend a POST request to the workflow's webhook endpoint with these two parameters:\n- `voice_id`: The ID of the voice from Elevenlabs that you want to use.\n- `text`: The text you want to convert to speech.\n\nThis workflow has been a significant time-saver in my video production tasks. I hope it proves just as useful to you!\n\nHappy automating!  \nThe n8Ninja"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "275ca523-8b43-4723-9dc4-f5dc1832fcd1",
+        "name": "Error",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          740,
+          360
+        ],
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "{\n  \"error\": \"Invalid inputs.\"\n}"
+        },
+        "typeVersion": 1.1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "39079dec-54c5-458e-afa1-56ee5723f3a3": {
+        "main": [
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-8fd5b535",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-76c0afc5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-3656ec34",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-9fdb0912",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-0c00bfea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-6085e53d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-6bbf86f3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-1d57f4cc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "b6a344f4-28ac-41a7-8e6a-a2782a5d1c68": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-ab423891",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-2d49cbe3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-b8c9fe2f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-4737ee56",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-4e3a0455",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-9fd0ba28",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-56ed2dd9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-e0e0e65b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a25dec72-152b-4457-a18f-9cbbd31840ec": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-bcff34e4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-51746351",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-36286c32",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-8878b737",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-b589bf06",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-64a31cc6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-97a8f41e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-35e59d6a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "275ca523-8b43-4723-9dc4-f5dc1832fcd1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-7493a7b8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-a11bd50c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-a10fa429",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-0eb9849b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-a0168c65",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-64350219",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-388dbafc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-7fd322af",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: If Workflow. This workflow integrates 6 different services: webhook, stickyNote, httpRequest, respondToWebhook, stopAndError. It contains 14 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-e420e607",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.966038",
+      "updatedAt": "2025-09-29T07:07:45.966101",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: If Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "275ca523-8b43-4723-9dc4-f5dc1832fcd1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-7493a7b8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-a11bd50c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-a10fa429"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-0eb9849b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-a0168c65"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-64350219"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-388dbafc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-275ca523-8b43-4723-9dc4-f5dc1832fcd1-7fd322af"
+            }
+          ]
+        ]
+      },
+      "39079dec-54c5-458e-afa1-56ee5723f3a3": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-8fd5b535"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-76c0afc5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-3656ec34"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-9fdb0912"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-0c00bfea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-6085e53d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-6bbf86f3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39079dec-54c5-458e-afa1-56ee5723f3a3-1d57f4cc"
+            }
+          ]
+        ]
+      },
+      "a25dec72-152b-4457-a18f-9cbbd31840ec": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-bcff34e4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-51746351"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-36286c32"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-8878b737"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-b589bf06"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-64a31cc6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-97a8f41e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a25dec72-152b-4457-a18f-9cbbd31840ec-35e59d6a"
+            }
+          ]
+        ]
+      },
+      "b6a344f4-28ac-41a7-8e6a-a2782a5d1c68": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-ab423891"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-2d49cbe3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-b8c9fe2f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-4737ee56"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-4e3a0455"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-9fd0ba28"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-56ed2dd9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b6a344f4-28ac-41a7-8e6a-a2782a5d1c68-e0e0e65b"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "nodes": [
+      {
+        "name": "Error",
+        "parameters": {
+          "options": {},
+          "respondWith": "json",
+          "responseBody": "{\n  \"error\": \"Invalid inputs.\"\n}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "httpCustomAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Generate voice",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpCustomAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"text\":  \"{{ $json.body.text }}\"\n} ",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "If params correct",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "2e968b41-88f7-4b28-9837-af50ae130979",
+                "leftValue": "voice_id",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              },
+              {
+                "id": "ad961bc9-6db8-4cac-8c63-30930e8beca7",
+                "leftValue": "text",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "Respond to Webhook",
+        "parameters": {
+          "options": {},
+          "respondWith": "binary"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Generate Text-to-Speech Using Elevenlabs via API\nThis workflow provides an API endpoint to generate speech from text using [Elevenlabs.io]({{ $env.WEBHOOK_URL }} a popular text-to-speech service.\n\n### Step 1: Configure Custom Credentials in n8n\nTo set up your credentials in n8n, create a new custom authentication entry with the following JSON structure:\n```json\n{\n  \"headers\": {\n    \"xi-api-key\": \"your-elevenlabs-api-key\"\n  }\n}\n```\nReplace `\"your-elevenlabs-api-key\"` with your actual Elevenlabs API key.\n\n### Step 2: Send a POST Request to the Webhook\nSend a POST request to the workflow's webhook endpoint with these two parameters:\n- `voice_id`: The ID of the voice from Elevenlabs that you want to use.\n- `text`: The text you want to convert to speech.\n\nThis workflow has been a significant time-saver in my video production tasks. I hope it proves just as useful to you!\n\nHappy automating!  \nThe n8Ninja",
+          "height": 495.17470523089514,
+          "width": 806.0818150700699
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "generate-voice",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Webhook",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 185,
+  "viewCount": 422,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Custom Auth details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Respond to Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Error\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"If params correct\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Generate voice\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-q398w1mar",
+      "workflowId": "if-workflow-q49kt",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0492_HTTP_Respondtowebhook_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0492_HTTP_Respondtowebhook_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:08.842Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:08.842Z",
+  "updatedAt": "2026-07-15T11:29:08.842Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

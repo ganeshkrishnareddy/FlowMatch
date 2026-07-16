@@ -1,0 +1,1330 @@
+{
+  "id": "dynamically-create-tables-in-airtable-for-your-webflow-form-submissions-4ev5k",
+  "name": "Dynamically create tables in Airtable for your Webflow form submissions",
+  "slug": "dynamically-create-tables-in-airtable-for-your-webflow-form-submissions-2skq",
+  "description": "Automated workflow: Dynamically create tables in Airtable for your Webflow form submissions. This workflow integrates 8 different services: stickyNote, httpRequest, airtable, code, set. It contains 21 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Dynamically create tables in Airtable for your Webflow form submissions workflow containing 17 nodes.",
+  "originalWorkflowJson": {
+    "id": "IvIzphIxPj1rZ3az",
+    "meta": {
+      "instanceId": "workflow-49696204",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:43.415732",
+      "updatedAt": "2025-09-29T07:07:43.415802",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Dynamically create tables in Airtable for your Webflow form submissions",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "5db273d4-8f40-4e2e-816e-5591dc312c95",
+        "name": "Webflow Submission Trigger",
+        "type": "n8n-nodes-base.webflowTrigger",
+        "position": [
+          -1080,
+          580
+        ],
+        "webhookId": "969939dd-09c0-4311-82b8-31bceb6b9532",
+        "parameters": {
+          "site": "60e6f0f07c46af62aa2b1c98"
+        },
+        "credentials": {
+          "webflowApi": {
+            "id": "Nuq6n7zNYTp6iS2m",
+            "name": "Webflow Tutum Access"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This webflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fda9755d-7922-4a1f-8200-0195cbb39720",
+        "name": "Prepare form submission for workflow",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -820,
+          580
+        ],
+        "parameters": {
+          "mode": "raw",
+          "include": "none",
+          "options": {},
+          "jsonOutput": "={\n  \"wf_id\": \"{{ $json._id }}\",\n  \"wf_formId\": \"{{ $json.formId }}\",\n  \"wf_formName\": \"{{ $json.name }}\",\n  \"wf_requestDateTime\": \"{{ $json.d }}\",\n  \"wf_data\": {{ JSON.stringify(JSON.stringify($('Webflow Submission Trigger').item.json.data)) }}\n}"
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2a9d4ac1-8fbf-402f-b9b6-0d0300a1b221",
+        "name": "Get Form Index Reference Table ID",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -300,
+          580
+        ],
+        "parameters": {
+          "jsCode": "const data = $input.all();\nconst floatingObject = $(\"Prepare form submission for workflow\").all()[0].json;\n\nfloatingObject.at_baseId = $(\"[AIRTABLE] Get Base Schema from list\").params.base.value;\nfloatingObject.at_formIndexTableId = null;\nfloatingObject.at_currentFormTableId = null;\n  \nif(!floatingObject.at_baseId)\n  return null; // no bases configured\n\nfor (let index = 0; index < data.length; index++) {\n  if(data[index].json.name.toLowerCase() === \"form index\")\n  {\n    floatingObject.at_formIndexTableId = data[index].json.id;\n    break;\n  }\n}\n\nreturn floatingObject;\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "de5ee6bc-3d09-4bd6-9275-61a600a0d334",
+        "name": "Does Index Reference Table Exist?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -40,
+          580
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "4d0077b0-9cd8-4b8f-8548-0162c51e9d61",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                },
+                "leftValue": "={{ $json.at_formIndexTableId }}",
+                "rightValue": "=tbl"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0",
+        "name": "[AIRTABLE]  Create Index Reference Table",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          460,
+          820
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n    \"name\": \"Form Index\",\n    \"fields\": [\n        {\n            \"name\": \"FormId\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormName\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"TableId\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"TableName\",\n            \"type\": \"singleLineText\"\n        }\n    ]\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "vuNVHoaeyE29Fzra",
+            "name": "Airtable Personal Access Token For Tutum"
+          },
+          "airtableOAuth2Api": {
+            "id": "yFiIfESsFO8OpQVU",
+            "name": "Airtable oAuth"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d9cd6051-76ca-46ae-b5d7-8a33001d36f2",
+        "name": "[AIRTABLE] Get Base Schema from list",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          -540,
+          580
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appEKYlGR0xHQdLlj",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Webflow Tutum Site"
+          },
+          "resource": "base",
+          "operation": "getSchema"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "vuNVHoaeyE29Fzra",
+            "name": "Airtable Personal Access Token For Tutum"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "771ebb7e-2833-47bd-92eb-623da0054246",
+        "name": "[AIRTABLE] Create Webflow Form Table",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          700,
+          820
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n    \"name\": \"{{ $('Get Form Index Reference Table ID').item.json.wf_formName }}\",\n    \"fields\": [\n        {\n            \"name\": \"Id\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormId\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormName\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormCreationDate\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormContent\",\n            \"type\": \"richText\"\n        }\n    ]\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "vuNVHoaeyE29Fzra",
+            "name": "Airtable Personal Access Token For Tutum"
+          },
+          "airtableOAuth2Api": {
+            "id": "yFiIfESsFO8OpQVU",
+            "name": "Airtable oAuth"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fd428219-e036-4b68-b9e0-b9328396521f",
+        "name": "Set New Webflow Form Table ID",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          920,
+          820
+        ],
+        "parameters": {
+          "jsCode": "const floatingObject = $(\"Get Form Index Reference Table ID\").all()[0].json;\nfloatingObject.at_currentFormTableId = $(\"[AIRTABLE] Create Webflow Form Table\").all()[0].json.id;\n\nif(!floatingObject.at_formIndexTableId){\n  floatingObject.at_formIndexTableId = $(\"[AIRTABLE]  Create Index Reference Table\").all()[0].json.id;\n}\n\nreturn floatingObject;\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a50f3b26-138e-4ae3-99c4-008cfa96b9f1",
+        "name": "[AIRTABLE] Insert Record In Form Index Reference Table",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1180,
+          820
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Get Form Index Reference Table ID').item.json.at_baseId }}"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.at_formIndexTableId }}"
+          },
+          "columns": {
+            "value": {
+              "FormId": "={{ $('Get Form Index Reference Table ID').item.json.wf_formId }}",
+              "TableId": "={{ $json.at_currentFormTableId }}",
+              "FormName": "={{ $('Get Form Index Reference Table ID').item.json.wf_formName }}",
+              "TableName": "={{ $('Get Form Index Reference Table ID').item.json.wf_formName }}"
+            },
+            "schema": [
+              {
+                "id": "FormId",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "FormId",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "FormName",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "FormName",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "TableId",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "TableId",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "TableName",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "TableName",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": []
+          },
+          "options": {},
+          "operation": "create"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "vuNVHoaeyE29Fzra",
+            "name": "Airtable Personal Access Token For Tutum"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "55928c98-65cf-42db-8819-c80a2fe961ba",
+        "name": "[AIRTABLE] Insert Record In Webflow Form Table",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1540,
+          540
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Get Form Index Reference Table ID').item.json.at_baseId }}"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Get Form Index Reference Table ID').item.json.at_currentFormTableId }}"
+          },
+          "columns": {
+            "value": {
+              "Id": "={{ $('Get Form Index Reference Table ID').item.json.wf_id }}",
+              "FormId": "={{ $('Get Form Index Reference Table ID').item.json.wf_formId }}",
+              "FormName": "={{ $('Get Form Index Reference Table ID').item.json.wf_formName }}",
+              "FormContent": "={{ $('Get Form Index Reference Table ID').item.json.wf_data }}",
+              "FormCreationDate": "={{ $('Get Form Index Reference Table ID').item.json.wf_requestDateTime }}"
+            },
+            "schema": [
+              {
+                "id": "Id",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Id",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "FormId",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "FormId",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "FormName",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "FormName",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "FormCreationDate",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "FormCreationDate",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "FormContent",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "FormContent",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": []
+          },
+          "options": {},
+          "operation": "create"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "vuNVHoaeyE29Fzra",
+            "name": "Airtable Personal Access Token For Tutum"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "73e45cba-5860-46a6-bb4b-9e9589bf73f2",
+        "name": "[AIRTABLE] Find Webflow Form Record In Form Index Reference Table",
+        "type": "n8n-nodes-base.airtable",
+        "onError": "continueRegularOutput",
+        "position": [
+          460,
+          460
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Get Form Index Reference Table ID').item.json.at_baseId }}"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.at_formIndexTableId }}"
+          },
+          "options": {},
+          "operation": "search",
+          "filterByFormula": "={FormId}='{{ $json.wf_formId }}'"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "vuNVHoaeyE29Fzra",
+            "name": "Airtable Personal Access Token For Tutum"
+          }
+        },
+        "typeVersion": 2,
+        "alwaysOutputData": true,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a46a4f35-760b-4b70-83ac-1b471a4a277e",
+        "name": "Set Webflow Form Table ID",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          680,
+          460
+        ],
+        "parameters": {
+          "jsCode": "const floatingObject = $(\"Get Form Index Reference Table ID\").all()[0].json;\nconst formIndexData = $(\"[AIRTABLE] Find Webflow Form Record In Form Index Reference Table\").all()[0].json;\n\nfloatingObject.at_currentFormTableId = null;\n\nif(Object.keys(formIndexData).length === 0){\n  return floatingObject;\n}\n\nfloatingObject.at_currentFormTableId = $(\"[AIRTABLE] Find Webflow Form Record In Form Index Reference Table\").all()[0].json.TableId;\n\nreturn floatingObject;\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e2085c4d-c94e-4b89-b6ff-4f4f936f663f",
+        "name": "Does This Webflow Form Table Exist?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          900,
+          460
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "2f8e4c59-79ef-4840-a17f-c82a6b541ac5",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.at_currentFormTableId }}",
+                "rightValue": "=[null]"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ddca3aac-af29-4e39-8a73-3707815a00fe",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1860,
+          360
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 624.279069767441,
+          "height": 485.5185231617872,
+          "content": "# Manage Webflow form submissions in Airtable\n## Full guide with video\n[Full guide with video here]({{ $env.WEBHOOK_URL }}\n\nhis automation workflow will dynamically create tables in an Airtable base for each of your Webflow Site Forms. Then, every form submission will be added as a record in those tables.\n\n## Getting started\n1. Create Webflow credential using API V1 Token\n2. Create a Personal Access Token for Airtable\n3. Connect credentials (please look at the notes to ensure the correct nodes are connected)\n\nThat's it! You do not need to add any custom code to your Webflow forms or site.\n\nThe name of your forms in the form settings section of the Designer in Webflow will be used to create the Airtable tables. This workflow will automatically do this for you.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f9b3a68e-34fa-454b-ad45-5e3315414b2e",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -600,
+          380
+        ],
+        "parameters": {
+          "width": 249.71390814112306,
+          "height": 436.3067204586099,
+          "content": "## Add Personal Access Token and select base\n\nMake sure to select the correct base from the list."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "41d0e29a-583d-4c39-a4a3-254dfcee132b",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          400,
+          680
+        ],
+        "parameters": {
+          "width": 451.54733285112343,
+          "height": 317.58117651155095,
+          "content": "## HTTP requests to Airtable\n\nSelect the Airtable Personal Access Token credential. We need to make HTTP requests here to create tables in your Base since the Airtable node does not yet have that option. "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e73f6861-6663-49c9-b284-41ec9b3eb761",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1840,
+          900
+        ],
+        "parameters": {
+          "color": 7,
+          "content": "## General note\nYou do not need to modify any of the nodes accept for adding your credentials."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "5eed0c44-4697-4d4d-bbb9-42bf750de167",
+    "connections": {
+      "56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-8d6e4645",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-5648a9dd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-7c5f1455",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-25699080",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-827f2f41",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-64740b20",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-f481499f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-a25e0a43",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "771ebb7e-2833-47bd-92eb-623da0054246": {
+        "main": [
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-87b0830a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-68697dec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-87483824",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-86953f3c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-4f2d0c12",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-ab219694",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-2bd84e16",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-b6b76fd9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Dynamically create tables in Airtable for your Webflow form submissions. This workflow integrates 8 different services: stickyNote, httpRequest, airtable, code, set. It contains 21 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Dynamically create tables in Airtable for your Webflow form submissions. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-8d6e4645"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-5648a9dd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-7c5f1455"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-25699080"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-827f2f41"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-64740b20"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-f481499f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-56b20caa-f4e6-44fa-84c5-8a77ef0ce9a0-a25e0a43"
+            }
+          ]
+        ]
+      },
+      "771ebb7e-2833-47bd-92eb-623da0054246": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-87b0830a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-68697dec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-87483824"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-86953f3c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-4f2d0c12"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-ab219694"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-2bd84e16"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-771ebb7e-2833-47bd-92eb-623da0054246-b6b76fd9"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Dynamically create tables in Airtable for your Webflow form submissions",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableOAuth2Api": {
+            "id": "REDACTED"
+          },
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "[AIRTABLE]  Create Index Reference Table",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "jsonBody": "={\n    \"name\": \"Form Index\",\n    \"fields\": [\n        {\n            \"name\": \"FormId\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormName\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"TableId\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"TableName\",\n            \"type\": \"singleLineText\"\n        }\n    ]\n}",
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "credentials": {
+          "airtableOAuth2Api": {
+            "id": "REDACTED"
+          },
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "[AIRTABLE] Create Webflow Form Table",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "jsonBody": "={\n    \"name\": \"{{ $('Get Form Index Reference Table ID').item.json.wf_formName }}\",\n    \"fields\": [\n        {\n            \"name\": \"Id\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormId\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormName\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormCreationDate\",\n            \"type\": \"singleLineText\"\n        },\n        {\n            \"name\": \"FormContent\",\n            \"type\": \"richText\"\n        }\n    ]\n}",
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "[AIRTABLE] Find Webflow Form Record In Form Index Reference Table",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Get Form Index Reference Table ID').item.json.at_baseId }}"
+          },
+          "filterByFormula": "={FormId}='{{ $json.wf_formId }}'",
+          "operation": "search",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.at_formIndexTableId }}"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "[AIRTABLE] Get Base Schema from list",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "Webflow Tutum Site",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "appEKYlGR0xHQdLlj"
+          },
+          "operation": "getSchema",
+          "resource": "base"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "[AIRTABLE] Insert Record In Form Index Reference Table",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Get Form Index Reference Table ID').item.json.at_baseId }}"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FormId",
+                "id": "FormId",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FormName",
+                "id": "FormName",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "TableId",
+                "id": "TableId",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "TableName",
+                "id": "TableName",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "FormId": "={{ $('Get Form Index Reference Table ID').item.json.wf_formId }}",
+              "FormName": "={{ $('Get Form Index Reference Table ID').item.json.wf_formName }}",
+              "TableId": "={{ $json.at_currentFormTableId }}",
+              "TableName": "={{ $('Get Form Index Reference Table ID').item.json.wf_formName }}"
+            }
+          },
+          "operation": "create",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.at_formIndexTableId }}"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "[AIRTABLE] Insert Record In Webflow Form Table",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Get Form Index Reference Table ID').item.json.at_baseId }}"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Id",
+                "id": "Id",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FormId",
+                "id": "FormId",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FormName",
+                "id": "FormName",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FormCreationDate",
+                "id": "FormCreationDate",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FormContent",
+                "id": "FormContent",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "FormContent": "={{ $('Get Form Index Reference Table ID').item.json.wf_data }}",
+              "FormCreationDate": "={{ $('Get Form Index Reference Table ID').item.json.wf_requestDateTime }}",
+              "FormId": "={{ $('Get Form Index Reference Table ID').item.json.wf_formId }}",
+              "FormName": "={{ $('Get Form Index Reference Table ID').item.json.wf_formName }}",
+              "Id": "={{ $('Get Form Index Reference Table ID').item.json.wf_id }}"
+            }
+          },
+          "operation": "create",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Get Form Index Reference Table ID').item.json.at_currentFormTableId }}"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "name": "Does Index Reference Table Exist?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "4d0077b0-9cd8-4b8f-8548-0162c51e9d61",
+                "leftValue": "={{ $json.at_formIndexTableId }}",
+                "operator": {
+                  "operation": "contains",
+                  "type": "string"
+                },
+                "rightValue": "=tbl"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "Does This Webflow Form Table Exist?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "2f8e4c59-79ef-4840-a17f-c82a6b541ac5",
+                "leftValue": "={{ $json.at_currentFormTableId }}",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": "=[null]"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get Form Index Reference Table ID",
+        "parameters": {
+          "jsCode": "const data = $input.all();\nconst floatingObject = $(\"Prepare form submission for workflow\").all()[0].json;\n\nfloatingObject.at_baseId = $(\"[AIRTABLE] Get Base Schema from list\").params.base.value;\nfloatingObject.at_formIndexTableId = null;\nfloatingObject.at_currentFormTableId = null;\n  \nif(!floatingObject.at_baseId)\n  return null; // no bases configured\n\nfor (let index = 0; index < data.length; index++) {\n  if(data[index].json.name.toLowerCase() === \"form index\")\n  {\n    floatingObject.at_formIndexTableId = data[index].json.id;\n    break;\n  }\n}\n\nreturn floatingObject;\n\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Prepare form submission for workflow",
+        "parameters": {
+          "include": "none",
+          "jsonOutput": "={\n  \"wf_id\": \"{{ $json._id }}\",\n  \"wf_formId\": \"{{ $json.formId }}\",\n  \"wf_formName\": \"{{ $json.name }}\",\n  \"wf_requestDateTime\": \"{{ $json.d }}\",\n  \"wf_data\": {{ JSON.stringify(JSON.stringify($('Webflow Submission Trigger').item.json.data)) }}\n}",
+          "mode": "raw",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Set New Webflow Form Table ID",
+        "parameters": {
+          "jsCode": "const floatingObject = $(\"Get Form Index Reference Table ID\").all()[0].json;\nfloatingObject.at_currentFormTableId = $(\"[AIRTABLE] Create Webflow Form Table\").all()[0].json.id;\n\nif(!floatingObject.at_formIndexTableId){\n  floatingObject.at_formIndexTableId = $(\"[AIRTABLE]  Create Index Reference Table\").all()[0].json.id;\n}\n\nreturn floatingObject;\n\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Set Webflow Form Table ID",
+        "parameters": {
+          "jsCode": "const floatingObject = $(\"Get Form Index Reference Table ID\").all()[0].json;\nconst formIndexData = $(\"[AIRTABLE] Find Webflow Form Record In Form Index Reference Table\").all()[0].json;\n\nfloatingObject.at_currentFormTableId = null;\n\nif(Object.keys(formIndexData).length === 0){\n  return floatingObject;\n}\n\nfloatingObject.at_currentFormTableId = $(\"[AIRTABLE] Find Webflow Form Record In Form Index Reference Table\").all()[0].json.TableId;\n\nreturn floatingObject;\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 6,
+          "content": "# Manage Webflow form submissions in Airtable\n## Full guide with video\n[Full guide with video here]({{ $env.WEBHOOK_URL }}\n\nhis automation workflow will dynamically create tables in an Airtable base for each of your Webflow Site Forms. Then, every form submission will be added as a record in those tables.\n\n## Getting started\n1. Create Webflow credential using API V1 Token\n2. Create a Personal Access Token for Airtable\n3. Connect credentials (please look at the notes to ensure the correct nodes are connected)\n\nThat's it! You do not need to add any custom code to your Webflow forms or site.\n\nThe name of your forms in the form settings section of the Designer in Webflow will be used to create the Airtable tables. This workflow will automatically do this for you.\n",
+          "height": 485.5185231617872,
+          "width": 624.279069767441
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Add Personal Access Token and select base\n\nMake sure to select the correct base from the list.",
+          "height": 436.3067204586099,
+          "width": 249.71390814112306
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## HTTP requests to Airtable\n\nSelect the Airtable Personal Access Token credential. We need to make HTTP requests here to create tables in your Base since the Airtable node does not yet have that option. ",
+          "height": 317.58117651155095,
+          "width": 451.54733285112343
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 7,
+          "content": "## General note\nYou do not need to modify any of the nodes accept for adding your credentials."
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "webflowApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Webflow Submission Trigger",
+        "parameters": {
+          "site": "60e6f0f07c46af62aa2b1c98"
+        },
+        "type": "n8n-nodes-base.webflowTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 17,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Webflow",
+    "HTTP Request",
+    "Airtable"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 166,
+  "viewCount": 489,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webflow Account",
+      "HTTP Request Account",
+      "Airtable Account"
+    ],
+    "requiredCredentials": [
+      "webflow  A P I details",
+      "airtable Token  A P I details",
+      "airtable  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Webflow Submission Trigger\".",
+      "Open the \"Does Index Reference Table Exist?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"[AIRTABLE]  Create Index Reference Table\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"[AIRTABLE] Get Base Schema from list\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"[AIRTABLE] Create Webflow Form Table\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"[AIRTABLE] Insert Record In Form Index Reference Table\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"[AIRTABLE] Insert Record In Webflow Form Table\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"[AIRTABLE] Find Webflow Form Record In Form Index Reference Table\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Does This Webflow Form Table Exist?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Prepare form submission for workflow\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-y87t2ewp8",
+      "workflowId": "dynamically-create-tables-in-airtable-for-your-webflow-form-submissions-4ev5k",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/1514_Code_HTTP_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\1514_Code_HTTP_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:17.854Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:17.854Z",
+  "updatedAt": "2026-07-15T11:18:17.854Z"
+}

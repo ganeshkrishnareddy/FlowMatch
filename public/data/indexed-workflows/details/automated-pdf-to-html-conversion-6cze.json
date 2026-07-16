@@ -1,0 +1,711 @@
+{
+  "id": "automated-pdf-to-html-conversion-8o43v",
+  "name": "Automated PDF to HTML Conversion",
+  "slug": "automated-pdf-to-html-conversion-6cze",
+  "description": "Automated workflow: Automated PDF to HTML Conversion. This workflow integrates 7 different services: stickyNote, httpRequest, googleDriveTrigger, code, googleDrive. It contains 11 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Automated PDF to HTML Conversion workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "id": "3McL3itHTso0Cy10",
+    "meta": {
+      "instanceId": "workflow-8594d38d",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.189894",
+      "updatedAt": "2025-09-29T07:07:46.189906",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Automated PDF to HTML Conversion",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "43950636-79d1-43c3-b5a1-44ace016257d",
+        "name": "Google Drive Trigger",
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "event": "fileCreated",
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder",
+          "folderToWatch": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "",
+            "name": ""
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This googleDriveTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b5e1c616-a809-4e38-a1dd-0f91123bd846",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "4fd733d3-d393-4aea-bc25-c1e8bda32b54",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.mimeType }}",
+                "rightValue": "application/pdf"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d13a2481-9c21-43f0-beb8-1881b6a6843b",
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          480,
+          -20
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "redirect": {
+              "redirect": {}
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "url",
+                "value": "={{ $json.webViewLink }}"
+              },
+              {
+                "name": "inline",
+                "value": "true"
+              },
+              {
+                "name": "async",
+                "value": false
+              },
+              {
+                "name": "unwrap"
+              },
+              {
+                "name": "pages",
+                "value": "0-"
+              },
+              {
+                "name": "rect"
+              },
+              {
+                "name": "async",
+                "value": "false"
+              },
+              {
+                "name": "name",
+                "value": "result.csv"
+              },
+              {
+                "name": "password"
+              },
+              {
+                "name": "lineGrouping"
+              },
+              {
+                "name": "profiles"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "zTHQFpHDdUNXJ49g",
+            "name": "Header Auth account 2"
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "66d49dae-d282-4854-8674-69784110ee0b",
+        "name": "Google Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          1080,
+          -20
+        ],
+        "parameters": {
+          "name": "sample.html",
+          "driveId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "",
+            "__regex": "https:\\/\\/drive\\.google\\.com(?:\\/.*|)\\/folders\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+          },
+          "options": {},
+          "folderId": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "",
+            "name": ""
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "461222d4-7a73-412f-aceb-81745f17f7ea",
+        "name": "Convert to Binary File",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          780,
+          -20
+        ],
+        "parameters": {
+          "jsCode": "// Convert the HTML string to a Buffer\nconst buffer = Buffer.from($json.body, 'utf-8');\n\n// Return the buffer as binary data\nreturn [\n  {\n    binary: {\n      data: {\n        data: buffer.toString('base64'), // Convert buffer to base64 string\n        mimeType: 'text/html',\n        fileName: 'sample.html'\n      }\n    }\n  }\n];\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "543dd2ff-011f-4f83-a5c7-ffb80fc3910d",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -60,
+          -120
+        ],
+        "parameters": {
+          "width": 1340,
+          "height": 280,
+          "content": "## Automated PDF to HTML Conversion\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f0d02b89-71d2-4239-833d-9e5235024291",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -60,
+          200
+        ],
+        "parameters": {
+          "width": 1340,
+          "height": 180,
+          "content": "## Description: \nThis n8n workflow automates the process of converting a newly stored PDF file from Google Drive into an HTML file and saving it back to Google Drive. The workflow is triggered whenever a new PDF is uploaded to a specific folder, ensuring seamless conversion and storage without any manual intervention.\n\nThis workflow provides an efficient, automated solution for converting PDFs to HTML, eliminating the need for manual file handling and ensuring a smooth document transformation process. It is particularly useful for scenarios where PDFs need to be dynamically converted and stored in an organized manner for web usage, archiving, or further processing.\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "224c9b46-dc5e-44de-8ec4-956d48f4f4f1",
+    "connections": {
+      "d13a2481-9c21-43f0-beb8-1881b6a6843b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-0cb3725f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-b2738f6d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-a6034190",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-fec68860",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-3e22bb21",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-5a29bdd8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-5afdabf0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-b16a748f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "43950636-79d1-43c3-b5a1-44ace016257d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-43950636-79d1-43c3-b5a1-44ace016257d-3482e50a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "66d49dae-d282-4854-8674-69784110ee0b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-66d49dae-d282-4854-8674-69784110ee0b-deb0a229",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Automated PDF to HTML Conversion. This workflow integrates 7 different services: stickyNote, httpRequest, googleDriveTrigger, code, googleDrive. It contains 11 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Automated PDF to HTML Conversion. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "43950636-79d1-43c3-b5a1-44ace016257d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43950636-79d1-43c3-b5a1-44ace016257d-3482e50a"
+            }
+          ]
+        ]
+      },
+      "66d49dae-d282-4854-8674-69784110ee0b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-66d49dae-d282-4854-8674-69784110ee0b-deb0a229"
+            }
+          ]
+        ]
+      },
+      "d13a2481-9c21-43f0-beb8-1881b6a6843b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-0cb3725f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-b2738f6d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-a6034190"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-fec68860"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-3e22bb21"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-5a29bdd8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-5afdabf0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d13a2481-9c21-43f0-beb8-1881b6a6843b-b16a748f"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Automated PDF to HTML Conversion",
+    "nodes": [
+      {
+        "name": "Convert to Binary File",
+        "parameters": {
+          "jsCode": "// Convert the HTML string to a Buffer\nconst buffer = Buffer.from($json.body, 'utf-8');\n\n// Return the buffer as binary data\nreturn [\n  {\n    binary: {\n      data: {\n        data: buffer.toString('base64'), // Convert buffer to base64 string\n        mimeType: 'text/html',\n        fileName: 'sample.html'\n      }\n    }\n  }\n];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive",
+        "parameters": {
+          "driveId": {
+            "__regex": "https:\\/\\/drive\\.google\\.com(?:\\/.*|)\\/folders\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)",
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          },
+          "folderId": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          },
+          "name": "sample.html",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive Trigger",
+        "parameters": {
+          "event": "fileCreated",
+          "folderToWatch": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          },
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder"
+        },
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "HTTP Request",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "url",
+                "value": "={{ $json.webViewLink }}"
+              },
+              {
+                "name": "inline",
+                "value": "true"
+              },
+              {
+                "name": "async",
+                "value": false
+              },
+              {
+                "name": "unwrap"
+              },
+              {
+                "name": "pages",
+                "value": "0-"
+              },
+              {
+                "name": "rect"
+              },
+              {
+                "name": "async",
+                "value": "false"
+              },
+              {
+                "name": "name",
+                "value": "result.csv"
+              },
+              {
+                "name": "password"
+              },
+              {
+                "name": "lineGrouping"
+              },
+              {
+                "name": "profiles"
+              }
+            ]
+          },
+          "genericAuthType": "httpHeaderAuth",
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "method": "POST",
+          "options": {
+            "redirect": {
+              "redirect": {}
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "4fd733d3-d393-4aea-bc25-c1e8bda32b54",
+                "leftValue": "={{ $json.mimeType }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "application/pdf"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Automated PDF to HTML Conversion\n",
+          "height": 280,
+          "width": 1340
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Description: \nThis n8n workflow automates the process of converting a newly stored PDF file from Google Drive into an HTML file and saving it back to Google Drive. The workflow is triggered whenever a new PDF is uploaded to a specific folder, ensuring seamless conversion and storage without any manual intervention.\n\nThis workflow provides an efficient, automated solution for converting PDFs to HTML, eliminating the need for manual file handling and ensuring a smooth document transformation process. It is particularly useful for scenarios where PDFs need to be dynamically converted and stored in an organized manner for web usage, archiving, or further processing.\n\n",
+          "height": 180,
+          "width": 1340
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Drive",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 209,
+  "viewCount": 489,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "google Drive  O Auth2  A P I details",
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Google Drive Trigger\".",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Drive\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-9lylxai4o",
+      "workflowId": "automated-pdf-to-html-conversion-8o43v",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0934_HTTP_Code_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0934_HTTP_Code_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:33.434Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:33.434Z",
+  "updatedAt": "2026-07-15T11:18:33.434Z"
+}

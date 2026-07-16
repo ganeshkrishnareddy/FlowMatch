@@ -1,0 +1,585 @@
+{
+  "id": "stickynote-workflow-oyryu",
+  "name": "Stickynote Workflow",
+  "slug": "stickynote-workflow-u3ue",
+  "description": "Automated workflow: Stickynote Workflow. This workflow integrates 9 different services: stickyNote, telegramTrigger, telegram, agent, stopAndError. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Stickynote Workflow workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-c64cefde",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:41.993979",
+      "updatedAt": "2025-09-29T07:07:41.993995",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "bc49829b-45f2-4910-9c37-907271982f14",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1500,
+          -520
+        ],
+        "parameters": {
+          "width": 780,
+          "height": 540,
+          "content": "### 3. Do you need more details?\nFind a step-by-step guide in this tutorial\n![Guide]({{ $env.WEBHOOK_URL }}\n[🎥 Watch My Tutorial]({{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "80af5237-9046-4b40-ac7c-167d8e0a490f",
+        "name": "AI Agent",
+        "type": "n8n-nodes-base.noOp",
+        "notes": "Pinyin + Example",
+        "position": [
+          -2140,
+          -140
+        ],
+        "parameters": {
+          "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+          "options": {
+            "systemMessage": "=# Context\nYou are an AI-powered language tutor designed to help {{ $('Telegram Trigger').item.json.message.chat.first_name }} practice Chinese vocabulary efficiently. \n\n# Role\nYour primary role is to generate interactive Multiple-Choice Questions (MCQs) and evaluate the user's responses.\n\n# Types of Exercises\n- MCQ: Provide an English word and four Chinese answer choices, one correct and three incorrect.\n\n# Rules for MCQ Generation\n1. Select a random **Chinese word** from this list {{ $json.targetLanguage }}\n2. Randomly select **three incorrect Chinese options** from the list or outside the list.\n3. **Do NOT mark the correct answer with ✅** in the question.\n4. Present the question in the following format:\nExample Question Format:\nWhat is the correct translation for \"Warehouse\"?\nA) 运输\nB) 仓库 \nC) 合同\nD) 投标\n5. Ask the user to respond with **A, B, C, or D**.\n\n# Evaluating User Responses:\n1. **Wait for the user's answer. Do NOT assume correctness before checking.**\n2. If the user selects the correct answer:\n- Respond positively: \"Great job! ✅ [Correct Answer] [Correct Answer's Pinyin] means [English Meaning].\"\n3. If the user selects the wrong answer:\n- Provide corrective feedback: \"Oops! ❌ The correct answer was [Correct Answer] ([English Meaning]).\"\n4. If the user provides an **invalid response** (e.g., \"Hello\"), ask them to respond with **A, B, C, or D**.\n\n# Post-Evaluation:\n- After giving feedback, always generate another question. Do not ask the user if he wants another question\n\n# Behavior & Tone\n- Be engaging and encouraging.\n- Ensure clarity in feedback.\n- Guide the user patiently if they provide invalid inputs."
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "notesInFlow": true,
+        "typeVersion": 1.7
+      },
+      {
+        "id": "8b35027e-ec5b-4c3e-9a5b-2780b6c40223",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -2180,
+          100
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "688d6882-4930-407d-bf58-5f6add8eb159",
+        "name": "Simple Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -2000,
+          140
+        ],
+        "parameters": {
+          "sessionKey": "YOUR_CREDENTIAL_HERE",
+          "sessionIdType": "customKey"
+        },
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "33f4a062-73f9-4a99-abca-1184ef2c2a41",
+        "name": "Telegram Trigger",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "position": [
+          -2960,
+          -140
+        ],
+        "webhookId": "88179da7-9927-4bdc-8bd7-78022810b48e",
+        "parameters": {
+          "updates": [
+            "message"
+          ],
+          "additionalFields": {}
+        },
+        "notesInFlow": true,
+        "typeVersion": 1.1,
+        "notes": "This telegramTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "af385807-d024-477e-9a42-c195043e95da",
+        "name": "Retrive Vocabulary",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          -2700,
+          -140
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 0,
+            "cachedResultUrl": "{{ $env.BASE_URL }}",
+            "cachedResultName": "="
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "=",
+            "cachedResultUrl": "{{ $env.BASE_URL }}",
+            "cachedResultName": "="
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3ab67ca5-9839-4fa6-bfc1-4dbbaf5593fc",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -3000,
+          -520
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 680,
+          "height": 540,
+          "content": "### 1. Workflow Trigger with Telegram Message\n1. The workflow is triggered by a user message. \n2. The second node retrieves the vocabulary list from a Google Sheet.\n3. The third node combines all the words in Chinese and English in two distinctive lists.\n\n#### How to setup?\n- **Telegram Node:** set up your telegram bot credentials\n[Learn more about the Telegram Trigger Node]({{ $env.WEBHOOK_URL }}\n- **Retrieve Vocabulary from a Google Sheet Node**:\n   1. Add your Google Sheet API credentials to access the Google Sheet file\n   2. Select the file using the list, an URL or an ID\n   3. Select the sheet in which you have stored your vocabulary list\n  [Learn more about the Google Sheet Node]({{ $env.WEBHOOK_URL }}\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "740a2d04-46fe-41f1-b887-f88f3e23c50d",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -2300,
+          -520
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 760,
+          "height": 780,
+          "content": "### 2. Conversational AI Agent\nThe AI agent will take as inputs the two vocabulary lists and user's message to asks questions and process answers. Conversations are recorded by chat id; each user has its own conversation with the bot.\n\n#### How to setup?\n- **Telegram Nodes:** set up your telegram bot credentials\n[Learn more about the Telegram Trigger Node]({{ $env.WEBHOOK_URL }}\n- **AI Agent with the Chat Model**:\n   1. Add a chat model with the required credentials *(Example: Open AI 4o-mini)*\n   2. Adapt the system prompt with the **target learning language** and the format of the question you want to have.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e92a55dc-6d9d-4008-bb40-72a7f2dd470c",
+        "name": "Aggregate Vocabulary Lists",
+        "type": "n8n-nodes-base.aggregate",
+        "position": [
+          -2460,
+          -140
+        ],
+        "parameters": {
+          "options": {},
+          "fieldsToAggregate": {
+            "fieldToAggregate": [
+              {
+                "renameField": true,
+                "outputFieldName": "initialLanguage",
+                "fieldToAggregate": "initialText"
+              },
+              {
+                "renameField": true,
+                "outputFieldName": "targetLanguage",
+                "fieldToAggregate": "translatedText"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This aggregate node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "18b29677-cfc0-4817-9321-35090a3fda2e",
+        "name": "Answer to the User",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          -1740,
+          -140
+        ],
+        "webhookId": "=",
+        "parameters": {
+          "text": "={{ $json.output }}",
+          "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-358d360d",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "8b35027e-ec5b-4c3e-9a5b-2780b6c40223": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8b35027e-ec5b-4c3e-9a5b-2780b6c40223-98a15ae2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "33f4a062-73f9-4a99-abca-1184ef2c2a41": {
+        "main": [
+          [
+            {
+              "node": "error-handler-33f4a062-73f9-4a99-abca-1184ef2c2a41-792e10ce",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "af385807-d024-477e-9a42-c195043e95da": {
+        "main": [
+          [
+            {
+              "node": "error-handler-af385807-d024-477e-9a42-c195043e95da-878bc231",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "18b29677-cfc0-4817-9321-35090a3fda2e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-18b29677-cfc0-4817-9321-35090a3fda2e-f8043720",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Stickynote Workflow. This workflow integrates 9 different services: stickyNote, telegramTrigger, telegram, agent, stopAndError. It contains 14 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stickynote Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "18b29677-cfc0-4817-9321-35090a3fda2e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-18b29677-cfc0-4817-9321-35090a3fda2e-f8043720"
+            }
+          ]
+        ]
+      },
+      "33f4a062-73f9-4a99-abca-1184ef2c2a41": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-33f4a062-73f9-4a99-abca-1184ef2c2a41-792e10ce"
+            }
+          ]
+        ]
+      },
+      "8b35027e-ec5b-4c3e-9a5b-2780b6c40223": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b35027e-ec5b-4c3e-9a5b-2780b6c40223-98a15ae2"
+            }
+          ]
+        ]
+      },
+      "af385807-d024-477e-9a42-c195043e95da": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af385807-d024-477e-9a42-c195043e95da-878bc231"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Stickynote Workflow",
+    "nodes": [
+      {
+        "name": "Aggregate Vocabulary Lists",
+        "parameters": {
+          "fieldsToAggregate": {
+            "fieldToAggregate": [
+              {
+                "fieldToAggregate": "initialText",
+                "outputFieldName": "initialLanguage",
+                "renameField": true
+              },
+              {
+                "fieldToAggregate": "translatedText",
+                "outputFieldName": "targetLanguage",
+                "renameField": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1
+      },
+      {
+        "name": "AI Agent",
+        "parameters": {
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "=# Context\nYou are an AI-powered language tutor designed to help {{ $('Telegram Trigger').item.json.message.chat.first_name }} practice Chinese vocabulary efficiently. \n\n# Role\nYour primary role is to generate interactive Multiple-Choice Questions (MCQs) and evaluate the user's responses.\n\n# Types of Exercises\n- MCQ: Provide an English word and four Chinese answer choices, one correct and three incorrect.\n\n# Rules for MCQ Generation\n1. Select a random **Chinese word** from this list {{ $json.targetLanguage }}\n2. Randomly select **three incorrect Chinese options** from the list or outside the list.\n3. **Do NOT mark the correct answer with ✅** in the question.\n4. Present the question in the following format:\nExample Question Format:\nWhat is the correct translation for \"Warehouse\"?\nA) 运输\nB) 仓库 \nC) 合同\nD) 投标\n5. Ask the user to respond with **A, B, C, or D**.\n\n# Evaluating User Responses:\n1. **Wait for the user's answer. Do NOT assume correctness before checking.**\n2. If the user selects the correct answer:\n- Respond positively: \"Great job! ✅ [Correct Answer] [Correct Answer's Pinyin] means [English Meaning].\"\n3. If the user selects the wrong answer:\n- Provide corrective feedback: \"Oops! ❌ The correct answer was [Correct Answer] ([English Meaning]).\"\n4. If the user provides an **invalid response** (e.g., \"Hello\"), ask them to respond with **A, B, C, or D**.\n\n# Post-Evaluation:\n- After giving feedback, always generate another question. Do not ask the user if he wants another question\n\n# Behavior & Tone\n- Be engaging and encouraging.\n- Ensure clarity in feedback.\n- Guide the user patiently if they provide invalid inputs."
+          },
+          "promptType": "define",
+          "text": "={{ $('Telegram Trigger').item.json.message.text }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "name": "Answer to the User",
+        "parameters": {
+          "additionalFields": {
+            "appendAttribution": false
+          },
+          "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+          "text": "={{ $json.output }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Retrive Vocabulary",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "=",
+            "cachedResultUrl": "{{ $env.BASE_URL }}",
+            "mode": "list",
+            "value": "="
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "=",
+            "cachedResultUrl": "{{ $env.BASE_URL }}",
+            "mode": "list",
+            "value": 0
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "Simple Memory",
+        "parameters": {
+          "sessionIdType": "customKey",
+          "sessionKey": "YOUR_CREDENTIAL_HERE"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 7,
+          "content": "### 2. Conversational AI Agent\nThe AI agent will take as inputs the two vocabulary lists and user's message to asks questions and process answers. Conversations are recorded by chat id; each user has its own conversation with the bot.\n\n#### How to setup?\n- **Telegram Nodes:** set up your telegram bot credentials\n[Learn more about the Telegram Trigger Node]({{ $env.WEBHOOK_URL }}\n- **AI Agent with the Chat Model**:\n   1. Add a chat model with the required credentials *(Example: Open AI 4o-mini)*\n   2. Adapt the system prompt with the **target learning language** and the format of the question you want to have.\n",
+          "height": 780,
+          "width": 760
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "### 1. Workflow Trigger with Telegram Message\n1. The workflow is triggered by a user message. \n2. The second node retrieves the vocabulary list from a Google Sheet.\n3. The third node combines all the words in Chinese and English in two distinctive lists.\n\n#### How to setup?\n- **Telegram Node:** set up your telegram bot credentials\n[Learn more about the Telegram Trigger Node]({{ $env.WEBHOOK_URL }}\n- **Retrieve Vocabulary from a Google Sheet Node**:\n   1. Add your Google Sheet API credentials to access the Google Sheet file\n   2. Select the file using the list, an URL or an ID\n   3. Select the sheet in which you have stored your vocabulary list\n  [Learn more about the Google Sheet Node]({{ $env.WEBHOOK_URL }}\n",
+          "height": 540,
+          "width": 680
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "### 3. Do you need more details?\nFind a step-by-step guide in this tutorial\n![Guide]({{ $env.WEBHOOK_URL }}\n[🎥 Watch My Tutorial]({{ $env.WEBHOOK_URL }}",
+          "height": 540,
+          "width": 780
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Telegram Trigger",
+        "parameters": {
+          "additionalFields": {},
+          "updates": [
+            "message"
+          ]
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Telegram",
+    "Google Sheets"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 17,
+  "viewCount": 746,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Telegram Account",
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Telegram Trigger\".",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"AI Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Simple Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Retrive Vocabulary\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Aggregate Vocabulary Lists\" node (n8n-nodes-base.aggregate) and configure the action parameters, mappings, and fields.",
+      "Open the \"Answer to the User\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-5u8431l36",
+      "workflowId": "stickynote-workflow-oyryu",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Aggregate/0800_Aggregate_Telegram_Automate_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Aggregate\\0800_Aggregate_Telegram_Automate_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:16.164Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.164Z",
+  "updatedAt": "2026-07-15T11:18:16.164Z"
+}

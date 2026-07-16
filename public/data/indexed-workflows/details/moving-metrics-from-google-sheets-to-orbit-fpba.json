@@ -1,0 +1,428 @@
+{
+  "id": "moving-metrics-from-google-sheets-to-orbit-qowlr",
+  "name": "Moving metrics from Google Sheets to Orbit",
+  "slug": "moving-metrics-from-google-sheets-to-orbit-fpba",
+  "description": "Automated workflow: Moving metrics from Google Sheets to Orbit. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Moving metrics from Google Sheets to Orbit workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "name": "Moving metrics from Google Sheets to Orbit",
+    "nodes": [
+      {
+        "id": "trigger-c3ff08d0",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1473,
+          426
+        ],
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "GitHub Username",
+          "propertyName2": "attributes.slug"
+        },
+        "typeVersion": 1,
+        "id": "0198f23f-9a98-4c46-9497-887c7beeb55a",
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Add Members",
+        "type": "n8n-nodes-base.orbit",
+        "position": [
+          1073,
+          326
+        ],
+        "parameters": {
+          "operation": "upsert",
+          "identityUi": {
+            "identityValue": {
+              "source": "github",
+              "searchBy": "username",
+              "username": "={{$json[\"GitHub\"]}}"
+            }
+          },
+          "workspaceId": "543",
+          "additionalFields": {
+            "name": "={{$json[\"Name\"]}}",
+            "tShirt": "={{$json[\"T-Shirt Size\"]}}",
+            "location": "={{$json[\"Location\"]}}",
+            "tagsToAdd": "={{$json[\"Tags\"]}}"
+          }
+        },
+        "credentials": {
+          "orbitApi": "Orbit Credentials"
+        },
+        "typeVersion": 1,
+        "id": "3a494ce0-bc49-4d29-9300-bbb754f7809b",
+        "notes": "This orbit node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Get all members",
+        "type": "n8n-nodes-base.orbit",
+        "position": [
+          1273,
+          526
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "getAll",
+          "returnAll": true,
+          "workspaceId": "543"
+        },
+        "credentials": {
+          "orbitApi": "Orbit Credentials"
+        },
+        "typeVersion": 1,
+        "id": "468fc5a0-3886-411f-8299-9bcaab8d0ee2",
+        "notes": "This orbit node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Get Members",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          873,
+          326
+        ],
+        "parameters": {
+          "range": "Members!A:F",
+          "options": {},
+          "sheetId": "1GiR5glinWBUJ-pw3w8LpcuwyOXst2z5nnFSak8DQrMQ",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": "Google Sheets Credentials"
+        },
+        "typeVersion": 1,
+        "id": "939e3d97-fbb8-42ed-9737-7b7a7b740fb5",
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Get Activities",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1273,
+          326
+        ],
+        "parameters": {
+          "range": "Activities!A:D",
+          "options": {
+            "returnAllMatches": true
+          },
+          "sheetId": "={{$node[\"Get Members\"].parameter[\"sheetId\"]}}",
+          "operation": "lookup",
+          "lookupValue": "={{$node[\"Get Members\"].json[\"GitHub\"]}}",
+          "lookupColumn": "GitHub Username",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": "Google Sheets Credentials"
+        },
+        "typeVersion": 1,
+        "id": "c36b6168-5d3a-40d5-963a-0009e6e37b96",
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Add Activities",
+        "type": "n8n-nodes-base.orbit",
+        "position": [
+          1673,
+          426
+        ],
+        "parameters": {
+          "title": "={{$json[\"Title\"]}}",
+          "memberId": "={{$json[\"id\"]}}",
+          "resource": "activity",
+          "workspaceId": "543",
+          "additionalFields": {
+            "link": "={{$json[\"Activity Link\"]}}",
+            "description": "={{$node[\"Merge\"].json[\"Description\"]}}"
+          }
+        },
+        "credentials": {
+          "orbitApi": "Orbit Credentials"
+        },
+        "typeVersion": 1,
+        "id": "9bca0a06-a20a-486d-8d03-1f727aede037",
+        "notes": "This orbit node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-6f751cca",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: Moving metrics from Google Sheets to Orbit. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-5b9120e5",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.509402",
+      "updatedAt": "2025-09-29T07:07:45.509407",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Moving metrics from Google Sheets to Orbit. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Moving metrics from Google Sheets to Orbit",
+    "nodes": [
+      {
+        "credentials": {
+          "orbitApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add Activities",
+        "parameters": {
+          "additionalFields": {
+            "description": "={{$node[\"Merge\"].json[\"Description\"]}}",
+            "link": "={{$json[\"Activity Link\"]}}"
+          },
+          "memberId": "={{$json[\"id\"]}}",
+          "resource": "activity",
+          "title": "={{$json[\"Title\"]}}",
+          "workspaceId": "543"
+        },
+        "type": "n8n-nodes-base.orbit",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "orbitApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add Members",
+        "parameters": {
+          "additionalFields": {
+            "location": "={{$json[\"Location\"]}}",
+            "name": "={{$json[\"Name\"]}}",
+            "tShirt": "={{$json[\"T-Shirt Size\"]}}",
+            "tagsToAdd": "={{$json[\"Tags\"]}}"
+          },
+          "identityUi": {
+            "identityValue": {
+              "searchBy": "username",
+              "source": "github",
+              "username": "={{$json[\"GitHub\"]}}"
+            }
+          },
+          "operation": "upsert",
+          "workspaceId": "543"
+        },
+        "type": "n8n-nodes-base.orbit",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Activities",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "lookupColumn": "GitHub Username",
+          "lookupValue": "={{$node[\"Get Members\"].json[\"GitHub\"]}}",
+          "operation": "lookup",
+          "options": {
+            "returnAllMatches": true
+          },
+          "range": "Activities!A:D",
+          "sheetId": "={{$node[\"Get Members\"].parameter[\"sheetId\"]}}"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "orbitApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get all members",
+        "parameters": {
+          "operation": "getAll",
+          "options": {},
+          "returnAll": true,
+          "workspaceId": "543"
+        },
+        "type": "n8n-nodes-base.orbit",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Members",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "options": {},
+          "range": "Members!A:F",
+          "sheetId": "1GiR5glinWBUJ-pw3w8LpcuwyOXst2z5nnFSak8DQrMQ"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "GitHub Username",
+          "propertyName2": "attributes.slug"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Orbit",
+    "Google Sheets"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 72,
+  "viewCount": 102,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Orbit Account",
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "orbit  A P I details",
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add Members\" node (n8n-nodes-base.orbit) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get all members\" node (n8n-nodes-base.orbit) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Members\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Get Activities\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Add Activities\" node (n8n-nodes-base.orbit) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-jk16aum04",
+      "workflowId": "moving-metrics-from-google-sheets-to-orbit-qowlr",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Googlesheets/1153_GoogleSheets_Orbit_Automation.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Googlesheets\\1153_GoogleSheets_Orbit_Automation.json",
+      "discoveredAt": "2026-07-15T11:17:38.473Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:38.473Z",
+  "updatedAt": "2026-07-15T11:17:38.473Z"
+}

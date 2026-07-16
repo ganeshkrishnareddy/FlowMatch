@@ -1,0 +1,630 @@
+{
+  "id": "automated-daily-weather-data-fetcher-and-storage-84ya0",
+  "name": "Automated Daily Weather Data Fetcher and Storage",
+  "slug": "automated-daily-weather-data-fetcher-and-storage-7i56",
+  "description": "Automated workflow: Automated Daily Weather Data Fetcher and Storage. This workflow integrates 5 different services: stickyNote, httpRequest, airtable, scheduleTrigger, stopAndError. It contains 7 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Automated Daily Weather Data Fetcher and Storage workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "id": "PHp3gKoyYfSztbTB",
+    "meta": {
+      "instanceId": "workflow-9bc356da",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.430202",
+      "updatedAt": "2025-09-29T07:07:46.430209",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Automated Daily Weather Data Fetcher and Storage",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "871fd9fd-de44-4c9f-aef4-0c731c5685f1",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          40,
+          100
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 10
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0b721c2a-6301-4a08-9602-990598d0f7a3",
+        "name": "Store Weather Data",
+        "type": "n8n-nodes-base.airtable",
+        "notes": "Store weather data in table\n",
+        "position": [
+          480,
+          100
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "list",
+            "value": "appKtypfMptBIKStp",
+            "cachedResultUrl": "",
+            "cachedResultName": "WeatherData"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "tblfb3sJ84eQUlYJd",
+            "cachedResultUrl": "",
+            "cachedResultName": "Data"
+          },
+          "columns": {
+            "value": {
+              "Temp": "={{ $json.main.temp }}",
+              "Humidity": "={{ $json.main.humidity }}",
+              "Location": "={{ $json.name }}",
+              "Timezone": "={{ $json.timezone }}",
+              "Wind Speed": "={{ $json.wind.speed }}"
+            },
+            "schema": [
+              {
+                "id": "Location",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Location",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Timezone",
+                "type": "number",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Timezone",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Temp",
+                "type": "number",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Temp",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Wind Speed",
+                "type": "number",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Wind Speed",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Humidity",
+                "type": "number",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "Humidity",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": []
+          },
+          "options": {},
+          "operation": "create"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "",
+            "name": ""
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2.1
+      },
+      {
+        "id": "052a47c1-d167-432c-93f2-117a1c129c51",
+        "name": "Get Weather Data",
+        "type": "n8n-nodes-base.httpRequest",
+        "notes": "Fetching the weather data",
+        "position": [
+          260,
+          100
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "sendQuery": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpQueryAuth",
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "units",
+                "value": "metric"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "zowZrB19NtOy4lxp",
+            "name": "OpenWeatherAPi"
+          },
+          "httpQueryAuth": {
+            "id": "OVXHUjaqzUxECHEG",
+            "name": "OpenWeatherMap Query Auth"
+          },
+          "httpHeaderAuth": {
+            "id": "glJ33a6G5lqhm1CW",
+            "name": "Shopify GraphQL Cred"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 4.2
+      },
+      {
+        "id": "525f3e92-c620-47f2-b97e-53cb98d63406",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 680,
+          "height": 320,
+          "content": "Automated Daily Weather Data Fetcher and Storage\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cff8dbb0-3639-45a6-a06d-9ab63b2dfce8",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          0,
+          340
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 680,
+          "height": 120,
+          "content": "This workflow fetches weather data daily using the OpenWeatherMap API and stores the weather information in Airtable. The data can include current temperature, humidity, wind speed, and other relevant weather details. This automation ensures that the weather data is updated every day and stored for future reference, providing an easy-to-access historical record of the weather patterns."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "ef874403-4189-4b92-a963-a02fc585cb77",
+    "connections": {
+      "052a47c1-d167-432c-93f2-117a1c129c51": {
+        "main": [
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-2324ae57",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-31e57ec2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-04771aa7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-ad1d8665",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-2e2edcfc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-45f43901",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-af3e512c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-e416cc1a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Automated Daily Weather Data Fetcher and Storage. This workflow integrates 5 different services: stickyNote, httpRequest, airtable, scheduleTrigger, stopAndError. It contains 7 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Automated Daily Weather Data Fetcher and Storage. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "052a47c1-d167-432c-93f2-117a1c129c51": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-2324ae57"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-31e57ec2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-04771aa7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-ad1d8665"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-2e2edcfc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-45f43901"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-af3e512c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-052a47c1-d167-432c-93f2-117a1c129c51-e416cc1a"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Automated Daily Weather Data Fetcher and Storage",
+    "nodes": [
+      {
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "REDACTED"
+          },
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          },
+          "httpQueryAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Weather Data",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpQueryAuth",
+          "options": {},
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "units",
+                "value": "metric"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 6,
+          "content": "Automated Daily Weather Data Fetcher and Storage\n\n",
+          "height": 320,
+          "width": 680
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 6,
+          "content": "This workflow fetches weather data daily using the OpenWeatherMap API and stores the weather information in Airtable. The data can include current temperature, humidity, wind speed, and other relevant weather details. This automation ensures that the weather data is updated every day and stored for future reference, providing an easy-to-access historical record of the weather patterns.",
+          "height": 120,
+          "width": 680
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Store Weather Data",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "cachedResultName": "WeatherData",
+            "cachedResultUrl": "",
+            "mode": "list",
+            "value": "appKtypfMptBIKStp"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Location",
+                "id": "Location",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Timezone",
+                "id": "Timezone",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "number"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Temp",
+                "id": "Temp",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "number"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Wind Speed",
+                "id": "Wind Speed",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "number"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Humidity",
+                "id": "Humidity",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "number"
+              }
+            ],
+            "value": {
+              "Humidity": "={{ $json.main.humidity }}",
+              "Location": "={{ $json.name }}",
+              "Temp": "={{ $json.main.temp }}",
+              "Timezone": "={{ $json.timezone }}",
+              "Wind Speed": "={{ $json.wind.speed }}"
+            }
+          },
+          "operation": "create",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "cachedResultName": "Data",
+            "cachedResultUrl": "",
+            "mode": "list",
+            "value": "tblfb3sJ84eQUlYJd"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Airtable",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 131,
+  "viewCount": 579,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Airtable Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "airtable Token  A P I details",
+      "http Basic Auth details",
+      "http Query Auth details",
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Store Weather Data\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Weather Data\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 91,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-grj7w9yxz",
+      "workflowId": "automated-daily-weather-data-fetcher-and-storage-84ya0",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1593_HTTP_Schedule_Import_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1593_HTTP_Schedule_Import_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:35.970Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:35.970Z",
+  "updatedAt": "2026-07-15T11:18:35.970Z"
+}

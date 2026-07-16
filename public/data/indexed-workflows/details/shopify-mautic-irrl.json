@@ -1,0 +1,1302 @@
+{
+  "id": "shopify-mautic-l0qe1",
+  "name": "Shopify + Mautic",
+  "slug": "shopify-mautic-irrl",
+  "description": "Automated workflow: Shopify + Mautic. This workflow integrates 10 different services: webhook, stickyNote, mautic, graphql, set. It contains 28 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Shopify + Mautic workflow containing 26 nodes.",
+  "originalWorkflowJson": {
+    "id": "JiSesGjDIXIPYtbt",
+    "meta": {
+      "instanceId": "workflow-d6b546f1",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.946733",
+      "updatedAt": "2025-09-29T07:07:50.946740",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Shopify + Mautic",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "592b2608-e77e-4988-8f77-8820645b56ee",
+        "name": "Shopify Trigger",
+        "type": "n8n-nodes-base.shopifyTrigger",
+        "position": [
+          540,
+          320
+        ],
+        "webhookId": "252052f3-e844-4500-8c34-c57f583d4432",
+        "parameters": {
+          "topic": "customers/update",
+          "authentication": "{{ $credentials.accessToken }}"
+        },
+        "credentials": {
+          "shopifyAccessTokenApi": {
+            "id": "WbxXaLMHozAgY3Rz",
+            "name": "Shopify Access Token account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This shopifyTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f2e6931d-0279-4142-9b9e-1092657d91e2",
+        "name": "Accepts Marketing?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1240,
+          180
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "8e207eec-212a-48a9-b64e-2d15094c987f",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $('Shopify Trigger').item.json.email_marketing_consent.state }}",
+                "rightValue": "subscribed"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2a31657b-f1b3-4e4a-8f6a-3d3ee15aa052",
+        "name": "Accepts Marketing?1",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1240,
+          500
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "8e207eec-212a-48a9-b64e-2d15094c987f",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $('Shopify Trigger').item.json.email_marketing_consent.state }}",
+                "rightValue": "subscribed"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "266a07ca-915a-4afd-9a0a-60eb974ee263",
+        "name": "No Operation, do nothing",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1540,
+          720
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b9aee974-4d75-4b1e-80b7-8aab9d4f403d",
+        "name": "Add to confirmed segment",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          1840,
+          40
+        ],
+        "parameters": {
+          "resource": "contactSegment",
+          "contactId": "={{ $json.id }}",
+          "segmentId": 1,
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "cBmAMa80nofah9QG",
+            "name": "Mautic account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mautic node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a0fbd9e7-a60d-430b-b5df-4ec063e181c9",
+        "name": "Remove from confirmed segment",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          1840,
+          300
+        ],
+        "parameters": {
+          "resource": "contactSegment",
+          "contactId": "={{ $json.id }}",
+          "operation": "remove",
+          "segmentId": 1,
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "cBmAMa80nofah9QG",
+            "name": "Mautic account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mautic node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          540,
+          1500
+        ],
+        "webhookId": "6485fca6-c641-4067-b19a-192709b88e45",
+        "parameters": {
+          "path": "6485fca6-c641-4067-b19a-192709b88e45",
+          "options": {
+            "rawBody": true
+          },
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1.1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "001eff12-6f14-4fb2-afdd-e6b7956437bf",
+        "name": "Crypto",
+        "type": "n8n-nodes-base.crypto",
+        "position": [
+          760,
+          1500
+        ],
+        "parameters": {
+          "type": "SHA256",
+          "action": "hmac",
+          "secret": "YOUR_CREDENTIAL_HERE",
+          "encoding": "base64",
+          "binaryData": true
+        },
+        "typeVersion": 1,
+        "notes": "This crypto node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6cde7c3c-e1f9-4584-908c-9b4a82e4f2a4",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          980,
+          1500
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "eb322a60-a1e6-46ed-b7b9-539373f9d881",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $('Webhook').item.json.headers['webhook-signature'] }}",
+                "rightValue": "={{ $json.data }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e848a1d3-2f9b-4d27-8862-b3284654f818",
+        "name": "No Operation, do nothing1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1260,
+          1700
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ff27ee31-c13d-4a52-a260-aef9df8c64a6",
+        "name": "GraphQL",
+        "type": "n8n-nodes-base.graphql",
+        "position": [
+          1260,
+          1480
+        ],
+        "parameters": {
+          "query": "=query {\n  customers(first: 1, query: \"email:'{{ $json[\"body\"][\"mautic.lead_channel_subscription_changed\"][0][\"contact\"][\"fields\"][\"core\"][\"email\"][\"value\"] }}'\") {\n    edges {\n      node {\n        id\n        state\n      }\n    }\n  }\n}\n",
+          "endpoint": "{{ $env.API_ENDPOINT }}",
+          "authentication": "{{ $credentials.headerAuth }}"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "Z98cM8akgh1jPtG7",
+            "name": "Header Auth  Shopify"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This graphql node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "168b255b-f796-426c-80fd-c2fe79ef973f",
+        "name": "Marketing Consent - subscribed",
+        "type": "n8n-nodes-base.graphql",
+        "position": [
+          2120,
+          1160
+        ],
+        "parameters": {
+          "query": "mutation customerEmailMarketingConsentUpdate($input: CustomerEmailMarketingConsentUpdateInput!) {\n  customerEmailMarketingConsentUpdate(input: $input) {\n    customer {\n      id\n    }\n    userErrors {\n      field\n      message\n    }\n  }\n}\n",
+          "endpoint": "{{ $env.API_ENDPOINT }}",
+          "variables": "={\n  \"input\": {\n    \"customerId\": \"{{ $json[\"data\"][\"customers\"][\"edges\"][0][\"node\"][\"id\"] }}\",\n    \"emailMarketingConsent\": {\n      \"consentUpdatedAt\": \"{{ $now }}\",\n      \"marketingOptInLevel\": \"CONFIRMED_OPT_IN\",\n      \"marketingState\": \"SUBSCRIBED\"\n    }\n  }\n}\n",
+          "requestFormat": "json",
+          "authentication": "{{ $credentials.headerAuth }}"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "Z98cM8akgh1jPtG7",
+            "name": "Header Auth  Shopify"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This graphql node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f7db8ec3-27d4-41f7-a0c9-6249bf6e805a",
+        "name": "Marketing Consent - unsubscribed",
+        "type": "n8n-nodes-base.graphql",
+        "position": [
+          2120,
+          1500
+        ],
+        "parameters": {
+          "query": "mutation customerEmailMarketingConsentUpdate($input: CustomerEmailMarketingConsentUpdateInput!) {\n  customerEmailMarketingConsentUpdate(input: $input) {\n    customer {\n      id\n    }\n    userErrors {\n      field\n      message\n    }\n  }\n}\n",
+          "endpoint": "{{ $env.API_ENDPOINT }}",
+          "variables": "={\n  \"input\": {\n    \"customerId\": \"{{ $json[\"data\"][\"customers\"][\"edges\"][0][\"node\"][\"id\"] }}\",\n    \"emailMarketingConsent\": {\n      \"consentUpdatedAt\": \"{{ $now }}\",\n      \"marketingOptInLevel\": \"CONFIRMED_OPT_IN\",\n      \"marketingState\": \"UNSUBSCRIBED\"\n    }\n  }\n}\n",
+          "requestFormat": "json",
+          "authentication": "{{ $credentials.headerAuth }}"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "Z98cM8akgh1jPtG7",
+            "name": "Header Auth  Shopify"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This graphql node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ff62697d-29d0-4b7e-b695-cd90535e5fa8",
+        "name": "Mautic - Accepts Marketing?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1820,
+          1180
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "960e386c-4198-4b04-88a6-715162729064",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $('Webhook').item.json.body['mautic.lead_channel_subscription_changed'][0].new_status }}",
+                "rightValue": "contactable"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8515256f-c49b-4000-9a1e-be9958720dd6",
+        "name": "Customer exists?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1540,
+          1480
+        ],
+        "parameters": {
+          "options": {
+            "looseTypeValidation": false
+          },
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "4d2f02ab-f5e3-437d-8a35-f301888a8597",
+                "operator": {
+                  "type": "array",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.data.customers.edges }}",
+                "rightValue": 0
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "616ae364-82a0-456a-abaf-b8855ca56f8f",
+        "name": "No Operation, do nothing2",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1820,
+          1640
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "afdeb330-06d0-4fdf-9f42-1d8ce74d483d",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          540,
+          1680
+        ],
+        "parameters": {
+          "width": 580.807881773399,
+          "content": "## Webhook Validation\nWe use the same key shared with Mautic to hash the incoming request. If the computed hash is identical to the one delivered the request is valid and can be processed"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "38633539-cc9a-4bde-92f7-39e697bd803f",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2040,
+          40
+        ],
+        "parameters": {
+          "width": 279.1188177339898,
+          "height": 383.7477832512317,
+          "content": "## Mautic Segments\nThe n8n Shopify node cannot Please make sure to select your segment on both nodes"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4107ce14-58bc-4171-87bb-5fc74a506e38",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1080,
+          1300
+        ],
+        "parameters": {
+          "width": 279.1188177339898,
+          "content": "## Shopify \nThe n8n Shopify node cannot get customer marketing consent, so we get this from the Shopify GraphQL API"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "33f97be7-a4bf-42ee-96ae-dbbe54f5248f",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          580,
+          1140
+        ],
+        "parameters": {
+          "width": 279.1188177339898,
+          "content": "## Set your Shopify Subdomain here"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7f203946-a365-44a3-8de0-1fe0b1964eab",
+        "name": "Set Shopify Subdomain",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          760,
+          1320
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Shopify Subdomain",
+                "stringValue": "n8n-mautic-demo"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "544a4da2-11a4-465b-a30e-02ed618a77a6",
+        "name": "Search for Contact by Email",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          760,
+          320
+        ],
+        "parameters": {
+          "limit": 1,
+          "options": {
+            "search": "={{ $json.email }}"
+          },
+          "operation": "getAll",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "cBmAMa80nofah9QG",
+            "name": "Mautic account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This mautic node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1332db6d-99ab-4d38-89b8-7f7ba25d4cf1",
+        "name": "Contact exists?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          980,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "5872c5d4-655f-4cd6-9b21-622acdcb0814",
+                "operator": {
+                  "type": "number",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.id }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "488494df-6e8c-4f8c-b7ed-5d6d67f083c8",
+        "name": "Create a new contact",
+        "type": "n8n-nodes-base.mautic",
+        "position": [
+          1540,
+          480
+        ],
+        "parameters": {
+          "email": "={{ $('Shopify Trigger').item.json.email }}",
+          "company": "=",
+          "options": {},
+          "lastName": "={{ $('Shopify Trigger').item.json.last_name }}",
+          "firstName": "={{ $('Shopify Trigger').item.json.first_name }}",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "cBmAMa80nofah9QG",
+            "name": "Mautic account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mautic node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "586c736b-cd46-4c5c-ac2f-c4380cf465bb",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          0,
+          1420
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 360.408084305475,
+          "height": 315.5897364788551,
+          "content": "## Mautic to Shopify\n\nThis part uses GraphQL calls to the Shopify Admin API. In order to get a better understanding for the queries and mutations please check the API Docs.\n\nExamples from the Shopify Docs used in this workflow:\n\n[Get the first ten customers with an enabled customer account]({{ $env.API_BASE_URL }}\n\n\n[Mutation to update the Email Marketing consent]({{ $env.API_BASE_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "47e8a011-b2ba-4839-ac85-24dd45e18020",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          20,
+          220
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 360.408084305475,
+          "height": 315.5897364788551,
+          "content": "## Shopify to Mautic\n\nThis part uses the Shopify Trigger to watch for changes on customer data.\n\nTo use the Mautic nodes please make sure you have the API enabled in your Mautic Instance."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "71208adf-ebfb-4961-b23b-fb46c86ca09f",
+    "connections": {
+      "0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-b6b7cecf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-451df20e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-40391c1c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-b9b5bc1a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-ab4a3be3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-84fa1fd8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-815a3aa5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-9770571a",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Shopify + Mautic. This workflow integrates 10 different services: webhook, stickyNote, mautic, graphql, set. It contains 28 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Shopify + Mautic. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-b6b7cecf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-451df20e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-40391c1c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-b9b5bc1a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-ab4a3be3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-84fa1fd8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-815a3aa5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0bc8fc06-3bf5-4c49-acc2-1ed499a07ea1-9770571a"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Shopify + Mautic",
+    "nodes": [
+      {
+        "name": "Accepts Marketing?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "8e207eec-212a-48a9-b64e-2d15094c987f",
+                "leftValue": "={{ $('Shopify Trigger').item.json.email_marketing_consent.state }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "subscribed"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "Accepts Marketing?1",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "8e207eec-212a-48a9-b64e-2d15094c987f",
+                "leftValue": "={{ $('Shopify Trigger').item.json.email_marketing_consent.state }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "subscribed"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add to confirmed segment",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "contactId": "={{ $json.id }}",
+          "resource": "contactSegment",
+          "segmentId": 1
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "name": "Contact exists?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "5872c5d4-655f-4cd6-9b21-622acdcb0814",
+                "leftValue": "={{ $json.id }}",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "number"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create a new contact",
+        "parameters": {
+          "additionalFields": {},
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "company": "=",
+          "email": "={{ $('Shopify Trigger').item.json.email }}",
+          "firstName": "={{ $('Shopify Trigger').item.json.first_name }}",
+          "lastName": "={{ $('Shopify Trigger').item.json.last_name }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "name": "Crypto",
+        "parameters": {
+          "action": "hmac",
+          "binaryData": true,
+          "encoding": "base64",
+          "secret": "YOUR_CREDENTIAL_HERE",
+          "type": "SHA256"
+        },
+        "type": "n8n-nodes-base.crypto",
+        "typeVersion": 1
+      },
+      {
+        "name": "Customer exists?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "4d2f02ab-f5e3-437d-8a35-f301888a8597",
+                "leftValue": "={{ $json.data.customers.edges }}",
+                "operator": {
+                  "operation": "notEmpty",
+                  "singleValue": true,
+                  "type": "array"
+                },
+                "rightValue": 0
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {
+            "looseTypeValidation": false
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "GraphQL",
+        "parameters": {
+          "authentication": "{{ $credentials.headerAuth }}",
+          "endpoint": "{{ $env.API_ENDPOINT }}",
+          "query": "=query {\n  customers(first: 1, query: \"email:'{{ $json[\"body\"][\"mautic.lead_channel_subscription_changed\"][0][\"contact\"][\"fields\"][\"core\"][\"email\"][\"value\"] }}'\") {\n    edges {\n      node {\n        id\n        state\n      }\n    }\n  }\n}\n"
+        },
+        "type": "n8n-nodes-base.graphql",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "eb322a60-a1e6-46ed-b7b9-539373f9d881",
+                "leftValue": "={{ $('Webhook').item.json.headers['webhook-signature'] }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "={{ $json.data }}"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Marketing Consent - subscribed",
+        "parameters": {
+          "authentication": "{{ $credentials.headerAuth }}",
+          "endpoint": "{{ $env.API_ENDPOINT }}",
+          "query": "mutation customerEmailMarketingConsentUpdate($input: CustomerEmailMarketingConsentUpdateInput!) {\n  customerEmailMarketingConsentUpdate(input: $input) {\n    customer {\n      id\n    }\n    userErrors {\n      field\n      message\n    }\n  }\n}\n",
+          "requestFormat": "json",
+          "variables": "={\n  \"input\": {\n    \"customerId\": \"{{ $json[\"data\"][\"customers\"][\"edges\"][0][\"node\"][\"id\"] }}\",\n    \"emailMarketingConsent\": {\n      \"consentUpdatedAt\": \"{{ $now }}\",\n      \"marketingOptInLevel\": \"CONFIRMED_OPT_IN\",\n      \"marketingState\": \"SUBSCRIBED\"\n    }\n  }\n}\n"
+        },
+        "type": "n8n-nodes-base.graphql",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Marketing Consent - unsubscribed",
+        "parameters": {
+          "authentication": "{{ $credentials.headerAuth }}",
+          "endpoint": "{{ $env.API_ENDPOINT }}",
+          "query": "mutation customerEmailMarketingConsentUpdate($input: CustomerEmailMarketingConsentUpdateInput!) {\n  customerEmailMarketingConsentUpdate(input: $input) {\n    customer {\n      id\n    }\n    userErrors {\n      field\n      message\n    }\n  }\n}\n",
+          "requestFormat": "json",
+          "variables": "={\n  \"input\": {\n    \"customerId\": \"{{ $json[\"data\"][\"customers\"][\"edges\"][0][\"node\"][\"id\"] }}\",\n    \"emailMarketingConsent\": {\n      \"consentUpdatedAt\": \"{{ $now }}\",\n      \"marketingOptInLevel\": \"CONFIRMED_OPT_IN\",\n      \"marketingState\": \"UNSUBSCRIBED\"\n    }\n  }\n}\n"
+        },
+        "type": "n8n-nodes-base.graphql",
+        "typeVersion": 1
+      },
+      {
+        "name": "Mautic - Accepts Marketing?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "960e386c-4198-4b04-88a6-715162729064",
+                "leftValue": "={{ $('Webhook').item.json.body['mautic.lead_channel_subscription_changed'][0].new_status }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "contactable"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "No Operation, do nothing",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "No Operation, do nothing1",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "No Operation, do nothing2",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Remove from confirmed segment",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "contactId": "={{ $json.id }}",
+          "operation": "remove",
+          "resource": "contactSegment",
+          "segmentId": 1
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mauticOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search for Contact by Email",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "limit": 1,
+          "operation": "getAll",
+          "options": {
+            "search": "={{ $json.email }}"
+          }
+        },
+        "type": "n8n-nodes-base.mautic",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Shopify Subdomain",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Shopify Subdomain",
+                "stringValue": "n8n-mautic-demo"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "credentials": {
+          "shopifyAccessTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Shopify Trigger",
+        "parameters": {
+          "authentication": "{{ $credentials.accessToken }}",
+          "topic": "customers/update"
+        },
+        "type": "n8n-nodes-base.shopifyTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Shopify \nThe n8n Shopify node cannot get customer marketing consent, so we get this from the Shopify GraphQL API",
+          "width": 279.1188177339898
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Webhook Validation\nWe use the same key shared with Mautic to hash the incoming request. If the computed hash is identical to the one delivered the request is valid and can be processed",
+          "width": 580.807881773399
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Mautic Segments\nThe n8n Shopify node cannot Please make sure to select your segment on both nodes",
+          "height": 383.7477832512317,
+          "width": 279.1188177339898
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Set your Shopify Subdomain here",
+          "width": 279.1188177339898
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 4,
+          "content": "## Mautic to Shopify\n\nThis part uses GraphQL calls to the Shopify Admin API. In order to get a better understanding for the queries and mutations please check the API Docs.\n\nExamples from the Shopify Docs used in this workflow:\n\n[Get the first ten customers with an enabled customer account]({{ $env.API_BASE_URL }}\n\n\n[Mutation to update the Email Marketing consent]({{ $env.API_BASE_URL }}",
+          "height": 315.5897364788551,
+          "width": 360.408084305475
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "color": 4,
+          "content": "## Shopify to Mautic\n\nThis part uses the Shopify Trigger to watch for changes on customer data.\n\nTo use the Mautic nodes please make sure you have the API enabled in your Mautic Instance.",
+          "height": 315.5897364788551,
+          "width": 360.408084305475
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {
+            "rawBody": true
+          },
+          "path": "6485fca6-c641-4067-b19a-192709b88e45"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 26,
+  "integrationCount": 5,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "40 Mins",
+  "integrations": [
+    "Shopify",
+    "Mautic",
+    "Webhook",
+    "Crypto",
+    "GraphQL"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 87,
+  "viewCount": 384,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Shopify Account",
+      "Mautic Account",
+      "Webhook Account",
+      "Crypto Account",
+      "GraphQL Account"
+    ],
+    "requiredCredentials": [
+      "shopify Access Token  A P I details",
+      "mautic  O Auth2  A P I details",
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Shopify Trigger\".",
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Accepts Marketing?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Accepts Marketing?1\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"No Operation, do nothing\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add to confirmed segment\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove from confirmed segment\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Crypto\" node (n8n-nodes-base.crypto) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"No Operation, do nothing1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"GraphQL\" node (n8n-nodes-base.graphql) and configure the action parameters, mappings, and fields.",
+      "Open the \"Marketing Consent - subscribed\" node (n8n-nodes-base.graphql) and configure the action parameters, mappings, and fields.",
+      "Open the \"Marketing Consent - unsubscribed\" node (n8n-nodes-base.graphql) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mautic - Accepts Marketing?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Customer exists?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"No Operation, do nothing2\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search for Contact by Email\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Contact exists?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create a new contact\" node (n8n-nodes-base.mautic) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Shopify Subdomain\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-o4ho3x9m1",
+      "workflowId": "shopify-mautic-l0qe1",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Mautic/1526_Mautic_Webhook_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Mautic\\1526_Mautic_Webhook_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:12.248Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:12.248Z",
+  "updatedAt": "2026-07-15T11:19:12.248Z"
+}

@@ -1,0 +1,439 @@
+{
+  "id": "billbot-lieey",
+  "name": "BillBot",
+  "slug": "billbot-ya21",
+  "description": "Production-ready workflow: BillBot. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "BillBot workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "id": "200",
+    "name": "BillBot",
+    "nodes": [
+      {
+        "name": "Set relevant data",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          780,
+          460
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "Category",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"category\"][\"value\"]}}"
+              },
+              {
+                "name": "Date",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"date\"][\"iso\"]}}"
+              },
+              {
+                "name": "Merchant",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"merchant\"][\"name\"]}}"
+              },
+              {
+                "name": "Time",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"time\"][\"iso\"]}}"
+              },
+              {
+                "name": "Amount",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"total\"][\"amount\"]}}"
+              },
+              {
+                "name": "Currency",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"locale\"][\"currency\"]}}"
+              },
+              {
+                "name": "Added by",
+                "value": "={{$node[\"Get receipts from bot\"].json[\"message\"][\"chat\"][\"first_name\"]}} {{$node[\"Get receipts from bot\"].json[\"message\"][\"chat\"][\"last_name\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-c1e4ed19"
+      },
+      {
+        "name": "Send confirmation",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          1180,
+          460
+        ],
+        "parameters": {
+          "text": "=✅ Bill of {{$node[\"Set relevant data\"].json[\"Amount\"]}} {{$node[\"Set relevant data\"].json[\"Currency\"]}} from {{$node[\"Set relevant data\"].json[\"Merchant\"]}}, dated {{$node[\"Set relevant data\"].json[\"Date\"]}} at {{$node[\"Set relevant data\"].json[\"Time\"]}}. Category was {{$node[\"Set relevant data\"].json[\"Category\"]}}.",
+          "chatId": "={{$node[\"Get receipts from bot\"].json[\"message\"][\"chat\"][\"id\"]}}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": ""
+        },
+        "typeVersion": 1,
+        "id": "node-dbac86d7"
+      },
+      {
+        "name": "Get receipts from bot",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "position": [
+          380,
+          460
+        ],
+        "webhookId": "ef81fe75-10c8-40c3-8bea-d65648556705",
+        "parameters": {
+          "updates": [
+            "*"
+          ],
+          "additionalFields": {
+            "download": true
+          }
+        },
+        "credentials": {
+          "telegramApi": ""
+        },
+        "typeVersion": 1,
+        "id": "node-76f0acb0"
+      },
+      {
+        "name": "Parse details from receipt",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          580,
+          460
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "bodyContentType": "multipart-form-data"
+          },
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.headerAuth }}",
+          "jsonParameters": true,
+          "sendBinaryData": true
+        },
+        "credentials": {
+          "httpHeaderAuth": ""
+        },
+        "typeVersion": 1,
+        "id": "node-b5ab29bd"
+      },
+      {
+        "name": "Add to expense record",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          980,
+          460
+        ],
+        "parameters": {
+          "range": "A:G",
+          "options": {},
+          "sheetId": "",
+          "operation": "append",
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": ""
+        },
+        "typeVersion": 1,
+        "id": "node-b2c82f60"
+      },
+      {
+        "name": "Send SMS notification",
+        "type": "n8n-nodes-base.twilio",
+        "position": [
+          1380,
+          460
+        ],
+        "parameters": {
+          "to": "",
+          "from": "",
+          "message": "=A receipt worth {{$node[\"Set relevant data\"].json[\"Amount\"]}} {{$node[\"Set relevant data\"].json[\"Currency\"]}} was submitted by {{$node[\"Set relevant data\"].json[\"Added by\"]}} and has been added to the following spreadsheet:\nhttps://docs.google.com/spreadsheets/d/{{$node[\"Add to expense record\"].parameter[\"sheetId\"]}}/"
+        },
+        "credentials": {
+          "twilioApi": "Twilio Programmable SMS"
+        },
+        "typeVersion": 1,
+        "id": "node-559fa1e0"
+      },
+      {
+        "id": "error-68ecdf1d",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-930620a2",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.801986",
+      "updatedAt": "2025-09-29T07:07:45.802019",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: BillBot. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "BillBot",
+    "nodes": [
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Add to expense record",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "operation": "append",
+          "options": {},
+          "range": "A:G",
+          "sheetId": ""
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get receipts from bot",
+        "parameters": {
+          "additionalFields": {
+            "download": true
+          },
+          "updates": [
+            "*"
+          ]
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Parse details from receipt",
+        "parameters": {
+          "authentication": "{{ $credentials.headerAuth }}",
+          "jsonParameters": true,
+          "options": {
+            "bodyContentType": "multipart-form-data"
+          },
+          "requestMethod": "POST",
+          "sendBinaryData": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send confirmation",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "={{$node[\"Get receipts from bot\"].json[\"message\"][\"chat\"][\"id\"]}}",
+          "text": "=✅ Bill of {{$node[\"Set relevant data\"].json[\"Amount\"]}} {{$node[\"Set relevant data\"].json[\"Currency\"]}} from {{$node[\"Set relevant data\"].json[\"Merchant\"]}}, dated {{$node[\"Set relevant data\"].json[\"Date\"]}} at {{$node[\"Set relevant data\"].json[\"Time\"]}}. Category was {{$node[\"Set relevant data\"].json[\"Category\"]}}."
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "twilioApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send SMS notification",
+        "parameters": {
+          "from": "",
+          "message": "=A receipt worth {{$node[\"Set relevant data\"].json[\"Amount\"]}} {{$node[\"Set relevant data\"].json[\"Currency\"]}} was submitted by {{$node[\"Set relevant data\"].json[\"Added by\"]}} and has been added to the following spreadsheet:\nhttps://docs.google.com/spreadsheets/d/{{$node[\"Add to expense record\"].parameter[\"sheetId\"]}}/",
+          "to": ""
+        },
+        "type": "n8n-nodes-base.twilio",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set relevant data",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "Category",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"category\"][\"value\"]}}"
+              },
+              {
+                "name": "Date",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"date\"][\"iso\"]}}"
+              },
+              {
+                "name": "Merchant",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"merchant\"][\"name\"]}}"
+              },
+              {
+                "name": "Time",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"time\"][\"iso\"]}}"
+              },
+              {
+                "name": "Amount",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"total\"][\"amount\"]}}"
+              },
+              {
+                "name": "Currency",
+                "value": "={{$node[\"Parse details from receipt\"].json[\"predictions\"][0][\"locale\"][\"currency\"]}}"
+              },
+              {
+                "name": "Added by",
+                "value": "={{$node[\"Get receipts from bot\"].json[\"message\"][\"chat\"][\"first_name\"]}} {{$node[\"Get receipts from bot\"].json[\"message\"][\"chat\"][\"last_name\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Telegram",
+    "HTTP Request",
+    "Google Sheets",
+    "Twilio"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 87,
+  "viewCount": 379,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Telegram Account",
+      "HTTP Request Account",
+      "Google Sheets Account",
+      "Twilio Account"
+    ],
+    "requiredCredentials": [
+      "telegram  A P I details",
+      "http Header Auth details",
+      "google Sheets  O Auth2  A P I details",
+      "twilio  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Get receipts from bot\".",
+      "Open the \"Send confirmation\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Parse details from receipt\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Add to expense record\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Send SMS notification\" node (n8n-nodes-base.twilio) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set relevant data\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-b1bfsgp4d",
+      "workflowId": "billbot-lieey",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0364_HTTP_Twilio_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0364_HTTP_Twilio_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:30.745Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:30.745Z",
+  "updatedAt": "2026-07-15T11:18:30.745Z"
+}

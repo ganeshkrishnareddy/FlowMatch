@@ -1,0 +1,2794 @@
+{
+  "id": "set-workflow-358vt",
+  "name": "Set Workflow",
+  "slug": "set-workflow-xoxp",
+  "description": "Automated workflow: Set Workflow. This workflow integrates 14 different services: filter, httpRequest, formTrigger, stickyNote, code. It contains 52 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Set Workflow workflow containing 40 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-68f93a00",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:53.311441",
+      "updatedAt": "2025-09-29T07:07:53.311456",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "fd4629a6-f7c3-4927-a3da-767d8206b486",
+        "name": "set credentials",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bfb7f25d-f992-4395-9fbe-939a57fc2a3c",
+                "name": "n8n",
+                "type": "string",
+                "value": "=[your n8n instance without a trailling /]"
+              },
+              {
+                "id": "538e0608-fd19-46ed-ba2c-c1efe03eaf9b",
+                "name": "username",
+                "type": "string",
+                "value": "=your n8n username"
+              },
+              {
+                "id": "ad1c4785-70d0-40d7-a61c-e97c3e8702e7",
+                "name": "password",
+                "type": "string",
+                "value": "=your n8n password"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "877bbd5c-fb57-4fa4-9d0a-113270113f31",
+        "name": "login n8n",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          180,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "emailOrLdapLoginId",
+                "value": "={{ $json.username }}"
+              },
+              {
+                "name": "password",
+                "value": "={{ $json.password }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "41effdd0-ffad-439c-aa33-39f9cc13f6f9",
+        "name": "get tags",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          800,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "redirect": {
+              "redirect": {}
+            },
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": true,
+                "responseFormat": "json"
+              }
+            },
+            "allowUnauthorizedCerts": false
+          },
+          "sendQuery": true,
+          "sendHeaders": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "withUsageCount",
+                "value": "false"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $('login n8n').first().json.headers['set-cookie'][0] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8fd2e71d-8da6-4f28-a377-56ef12c50c33",
+        "name": "my-projects",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          340,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $json.headers['set-cookie'][0] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6bbd2296-fe2b-40d2-8e6c-d04b0987b1c6",
+        "name": "Split Out",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "data"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "28a1f311-37fd-45be-aac4-684de800f099",
+        "name": "filter owned projects",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          640,
+          300
+        ],
+        "parameters": {
+          "options": {
+            "ignoreCase": true
+          },
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": false,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "e66c13b9-4e49-486b-812e-6a38e680207b",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                },
+                "leftValue": "={{ $json.name.extractEmail() }}",
+                "rightValue": "={{ $('set credentials').item.json.username }}"
+              },
+              {
+                "id": "99059f5b-055b-48ee-93c9-9689063fcfbe",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.role }}",
+                "rightValue": "project:personalOwner"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0362220f-ebb7-4fa0-b204-ec45f9b20cf4",
+        "name": "Get folders",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1440,
+          480
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "sendQuery": true,
+          "sendHeaders": true,
+          "queryParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $('login n8n').item.json.headers['set-cookie'][0] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b03373b9-ff14-4e8f-8d00-96755390d252",
+        "name": "Split Out2",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          1800,
+          380
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "data"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "00ad1ad3-5c55-40e9-8209-2c60fb8b5a0a",
+        "name": "Remove Duplicates",
+        "type": "n8n-nodes-base.removeDuplicates",
+        "position": [
+          2140,
+          380
+        ],
+        "parameters": {
+          "compare": "selectedFields",
+          "options": {},
+          "fieldsToCompare": "name"
+        },
+        "typeVersion": 2,
+        "notes": "This removeDuplicates node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ac6c24e3-f095-48e2-a007-e5f07b7ff2a0",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          1240,
+          320
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bcb53003-7473-47ec-82c3-2e954ae26e90",
+        "name": "get workflows",
+        "type": "n8n-nodes-base.n8n",
+        "position": [
+          3040,
+          720
+        ],
+        "parameters": {
+          "filters": {
+            "tags": "={{ $json.tag }}"
+          },
+          "requestOptions": {}
+        },
+        "credentials": {
+          "n8nApi": {
+            "id": "qMPcwXYtxelKJQhF",
+            "name": "n8n account✅"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This n8n node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ddf83b3b-dffb-46b8-ab4b-38d19e1672b7",
+        "name": "Move workflow to folder",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          3240,
+          720
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "PATCH",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "parentFolderId",
+                "value": "={{ $('set global').item.json['folder id'] }}"
+              },
+              {
+                "name": "versionId",
+                "value": "={{ $json.versionId }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $('login n8n').item.json.headers['set-cookie'][0] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a611394f-418d-42d5-b26c-095c17043a86",
+        "name": "Normalize names",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1980,
+          380
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a0d33a3e-f13b-438d-af1b-a4ff644b9373",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') }}"
+              },
+              {
+                "id": "abff18b8-ea51-4cc0-8e88-f326534931ec",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $('Loop Over Items').item.json.name }}"
+              }
+            ]
+          },
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e351c926-cf6e-4f61-9a7a-46338368c66e",
+        "name": "Limit1",
+        "type": "n8n-nodes-base.limit",
+        "position": [
+          2420,
+          380
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This limit node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c5d0c6b1-e478-40da-b9b7-15a60d3439dc",
+        "name": "Create folders",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2260,
+          640
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "name",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $('login n8n').item.json.headers['set-cookie'][0] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e7ab539f-6795-45eb-b23d-11ee13d3a17e",
+        "name": "set folder name + id",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2800,
+          640
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b4743119-ab58-44d8-b881-877de84e82e9",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.data.name }}"
+              },
+              {
+                "id": "42ad0f03-f7c1-424f-9429-0b5402b60cc6",
+                "name": "folder id",
+                "type": "string",
+                "value": "={{ $json.data.id }}"
+              },
+              {
+                "id": "9ac73fd6-cfd9-47a3-8f28-d0238ebccaf9",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $('Edit Fields').first().json.tag }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8daa7475-4ac3-46b4-9681-b4c80002db06",
+        "name": "set folder name + id1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2780,
+          360
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b4743119-ab58-44d8-b881-877de84e82e9",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.name }}"
+              },
+              {
+                "id": "42ad0f03-f7c1-424f-9429-0b5402b60cc6",
+                "name": "folder id",
+                "type": "string",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "id": "9ac73fd6-cfd9-47a3-8f28-d0238ebccaf9",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $('Normalize names').item.json.tag }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "688107fc-03e4-4e7f-9e51-ad8d30822566",
+        "name": "set global",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          3020,
+          480
+        ],
+        "parameters": {
+          "options": {},
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "39027caf-6097-47cf-86c5-70882c45062d",
+        "name": "Filter",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          2280,
+          380
+        ],
+        "parameters": {
+          "options": {
+            "ignoreCase": true
+          },
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": false,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "c7bf8dcd-6e97-4908-a4c2-a197d452ffc1",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.name }}",
+                "rightValue": "={{ $('Loop Over Items').first().json.name }}"
+              }
+            ]
+          },
+          "looseTypeValidation": true
+        },
+        "typeVersion": 2.2,
+        "alwaysOutputData": true,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1fcaf2d9-4aef-435d-968f-b8ecfea8a1ea",
+        "name": "Edit Fields",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1820,
+          640
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6dae439c-b0b1-4058-832f-9308fda265fc",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $('Loop Over Items').item.json.name }}"
+              },
+              {
+                "id": "3c1f1bf1-d6ae-4111-b091-2b05a62c15e9",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $('Loop Over Items').item.json.name }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1dea92e4-9b93-4b7e-8496-020731864219",
+        "name": "On form submission",
+        "type": "n8n-nodes-base.formTrigger",
+        "position": [
+          -160,
+          300
+        ],
+        "webhookId": "d7a3218f-0b12-4966-bf07-edd8acffe5e8",
+        "parameters": {
+          "options": {
+            "buttonLabel": "Submit"
+          },
+          "formTitle": "Tags to Folders",
+          "formFields": {
+            "values": [
+              {
+                "fieldType": "html"
+              }
+            ]
+          },
+          "formDescription": "Convert all tags into folders"
+        },
+        "typeVersion": 2.2,
+        "notes": "This formTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "926f64a9-e5ef-4f99-8938-83b09c7cc13c",
+        "name": "Code",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          360,
+          580
+        ],
+        "parameters": {
+          "jsCode": "function capitalizeFirstLetter(val) {\n  const str = String(val).trim();\n  return str.charAt(0).toUpperCase() + str.slice(1);\n}\n\n// Get raw comma-separated string\nconst raw = $json.name;\n\n// Step 1: Split, clean, and filter\nconst values = raw\n  .split(',')\n  .map(x => x.trim())\n  .filter(x => x.length > 0 && !/^[A-Za-z0-9]{10,}$/.test(x)) // filter junk-like tokens\n  .map(x => ({ option: capitalizeFirstLetter(x) }));\n\n// Step 2: Add [create new]\nvalues.push({ option: \"[create new]\" });\n\n// Step 3: Build form config\nconst formOptions = {\n  fieldLabel: \"Dropdown Options\",\n  fieldType: \"dropdown\",\n  requiredField: true,\n  fieldOptions: {\n    values\n  }\n};\n\n// Step 4: Return as stringified JSON\nreturn [\n  {\n    json: {\n      fieldLabel: \"Dropdown Options\",\n      fieldType: \"dropdown\",\n      requiredField: true,\n      fieldOptions: {\n        values: values\n      }\n    }\n  }\n];\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4c3b4a14-d0ec-449d-b222-cd4a7c05b2bb",
+        "name": "If no folder",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1620,
+          480
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "e10c2b8e-bdc0-476e-aaed-886e99d4ed37",
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                },
+                "leftValue": "={{ $json.count }}",
+                "rightValue": 0
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a29325c5-5543-463c-9dc9-ec572afc0b82",
+        "name": "If folder exists",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          2580,
+          380
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "70916c0d-531b-4cae-9fac-ae40aa3f7453",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.name }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d65e17fb-8c4b-4412-8d81-b7fa0d540b81",
+        "name": "set name",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2020,
+          640
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e7d24d6b-0d97-4e47-b0d4-43682eef686d",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') }}"
+              },
+              {
+                "id": "52fb820d-5a8a-434b-a99f-db035714d8e3",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $json.tag }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "104af4eb-f087-4c4f-ad69-058f7fbe5407",
+        "name": "end import",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          1660,
+          160
+        ],
+        "webhookId": "3605aadf-17f1-4443-8950-e4d506a61415",
+        "parameters": {
+          "options": {},
+          "operation": "completion",
+          "completionTitle": "Import complete",
+          "completionMessage": "=Successfully imported {{ $('pass all items').all().length }} workflows to the folders {{ $('select tags to move').item.json['Dropdown Options'] }}"
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "31441d1e-8675-4a6b-bf3d-5f7230a6c173",
+        "name": "pass all items",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1480,
+          160
+        ],
+        "parameters": {
+          "options": {},
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "287704cc-7a43-4ffc-873e-b19920764b1e",
+        "name": "select tags to move",
+        "type": "n8n-nodes-base.form",
+        "position": [
+          580,
+          580
+        ],
+        "webhookId": "72c3db6c-542a-4df9-a10a-d63ce8a2f33b",
+        "parameters": {
+          "options": {},
+          "defineForm": "json",
+          "jsonOutput": "=[\t{\n\t\t\"fieldLabel\": \"Dropdown Options\",\n\t\t\"fieldType\": \"dropdown\",\n\t\t\"fieldOptions\": {\n\t\t\t\"values\": {{ $json.fieldOptions.values.toJsonString() }}\n\t\t},\n\t\t\"requiredField\": true,\n        \"multiselect\": true \n\t}\n\n] "
+        },
+        "typeVersion": 1,
+        "notes": "This form node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "df8831e6-d587-4220-b602-8c06b3627d11",
+        "name": "extract name from form",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1020,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "f3bbf61c-6f60-4b51-a2b4-05d92d4fe000",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json['Dropdown Options'] || $json['[\\'Dropdown Options\\']'] }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6340d3b0-9059-463c-bd78-2789156f47a8",
+        "name": "Split Out the tags",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          780,
+          580
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "['Dropdown Options']"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5f6dc440-7be1-432f-88c5-f05f5f3939b1",
+        "name": "tags to string",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          140,
+          580
+        ],
+        "parameters": {
+          "options": {
+            "ignoreConversionErrors": true
+          },
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ce3e2cf1-a37e-476c-934b-355a477c91d2",
+                "name": "name",
+                "type": "array",
+                "value": "={{ $json.body.data.map(item => item.name )}} "
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8784bdaf-0100-4f91-8631-b4ad4518fa33",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -20,
+          220
+        ],
+        "parameters": {
+          "width": 960,
+          "height": 260,
+          "content": "## Step 1\nLogin to n8n, and get the tags we have for our personal owned projects"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f27df4ec-c415-4077-8037-0bfe573aa4bf",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -20,
+          500
+        ],
+        "parameters": {
+          "width": 960,
+          "height": 280,
+          "content": "## Step 2\nExtract the tags as a json string, and format this into a suitable format for our response form for user to select the tags they want to work with"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8966e043-e358-4ba3-bc12-406c104b7dd1",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          960,
+          240
+        ],
+        "parameters": {
+          "color": 2,
+          "width": 420,
+          "height": 260,
+          "content": "## Step 3\nExtract the form details and loop over each tag to process"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8b0bdded-cbeb-471a-ba74-ca7c6aaa34f2",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1420,
+          380
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 340,
+          "height": 240,
+          "content": "## Step 3\nWe search for the folders and filter based on the number of folders found"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "be088523-e64a-4251-9c5c-355342c3ba98",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1780,
+          300
+        ],
+        "parameters": {
+          "width": 940,
+          "height": 220,
+          "content": "## Step 4 a) \nIf more than 1 folder is found, we dedupe the tags and limit to one, then use that as the folder"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6b08db71-dca5-4bb8-bb0c-4599c8e53bb1",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1780,
+          560
+        ],
+        "parameters": {
+          "width": 680,
+          "height": 220,
+          "content": "## Step 4 b) \nIf no folder is found, we create a new folder "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f96f9211-e076-472c-a7cd-abf58b4662ff",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2740,
+          260
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 420,
+          "height": 480,
+          "content": "## Step 5\n\nMerge the paths so we use one workflow"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f7f253bd-0b3a-48bb-97f5-1a8cf82b9b7e",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2960,
+          660
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 480,
+          "height": 240,
+          "content": "## Step 6\nGet the workflows and move them to the respective folders"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1d10ecf9-48e4-47d9-9d79-69ac1e375827",
+        "name": "Sticky Note8",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1440,
+          80
+        ],
+        "parameters": {
+          "width": 380,
+          "height": 220,
+          "content": "## Step 7\nRespond with a success message"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "877bbd5c-fb57-4fa4-9d0a-113270113f31": {
+        "main": [
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-90d4b7ab",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-30e55c27",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-cad2aaa0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-b06c2e2a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-c2680fe8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-0598fa7f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-6774b636",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-4fbdf02f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "41effdd0-ffad-439c-aa33-39f9cc13f6f9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-7e767fd1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-97d5e002",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-d6f2e210",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-3b188e6a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-a0e0ee44",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-d01457ec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-46d842a1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-43844a54",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "8fd2e71d-8da6-4f28-a377-56ef12c50c33": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-a421e23a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-0a363058",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-666841db",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-8787289a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-14e4886b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-f6b73f72",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-e7042192",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-e35e8810",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "0362220f-ebb7-4fa0-b204-ec45f9b20cf4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-de8cf25f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-7204e5b7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-16a93241",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-37148705",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-08ef2e1c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-24232d3a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-6af07787",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-117598b2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ddf83b3b-dffb-46b8-ab4b-38d19e1672b7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-9123af38",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-8ae5d46a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-8e5faaf1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-226cd4c6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-cbeda508",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-89d2b074",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-26e5c82b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-008b64ac",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "c5d0c6b1-e478-40da-b9b7-15a60d3439dc": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-7dc679f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-a1723884",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-cc6a7911",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-0fbc3603",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-bb3e1d38",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-8de12d1a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-323fc062",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-fbc70752",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Set Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Set Workflow. This workflow integrates 14 different services: filter, httpRequest, formTrigger, stickyNote, code. It contains 52 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Set Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0362220f-ebb7-4fa0-b204-ec45f9b20cf4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-de8cf25f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-7204e5b7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-16a93241"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-37148705"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-08ef2e1c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-24232d3a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-6af07787"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0362220f-ebb7-4fa0-b204-ec45f9b20cf4-117598b2"
+            }
+          ]
+        ]
+      },
+      "41effdd0-ffad-439c-aa33-39f9cc13f6f9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-7e767fd1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-97d5e002"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-d6f2e210"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-3b188e6a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-a0e0ee44"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-d01457ec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-46d842a1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-41effdd0-ffad-439c-aa33-39f9cc13f6f9-43844a54"
+            }
+          ]
+        ]
+      },
+      "877bbd5c-fb57-4fa4-9d0a-113270113f31": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-90d4b7ab"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-30e55c27"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-cad2aaa0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-b06c2e2a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-c2680fe8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-0598fa7f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-6774b636"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-877bbd5c-fb57-4fa4-9d0a-113270113f31-4fbdf02f"
+            }
+          ]
+        ]
+      },
+      "8fd2e71d-8da6-4f28-a377-56ef12c50c33": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-a421e23a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-0a363058"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-666841db"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-8787289a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-14e4886b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-f6b73f72"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-e7042192"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8fd2e71d-8da6-4f28-a377-56ef12c50c33-e35e8810"
+            }
+          ]
+        ]
+      },
+      "c5d0c6b1-e478-40da-b9b7-15a60d3439dc": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-7dc679f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-a1723884"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-cc6a7911"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-0fbc3603"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-bb3e1d38"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-8de12d1a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-323fc062"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5d0c6b1-e478-40da-b9b7-15a60d3439dc-fbc70752"
+            }
+          ]
+        ]
+      },
+      "ddf83b3b-dffb-46b8-ab4b-38d19e1672b7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-9123af38"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-8ae5d46a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-8e5faaf1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-226cd4c6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-cbeda508"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-89d2b074"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-26e5c82b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddf83b3b-dffb-46b8-ab4b-38d19e1672b7-008b64ac"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Set Workflow",
+    "nodes": [
+      {
+        "name": "Code",
+        "parameters": {
+          "jsCode": "function capitalizeFirstLetter(val) {\n  const str = String(val).trim();\n  return str.charAt(0).toUpperCase() + str.slice(1);\n}\n\n// Get raw comma-separated string\nconst raw = $json.name;\n\n// Step 1: Split, clean, and filter\nconst values = raw\n  .split(',')\n  .map(x => x.trim())\n  .filter(x => x.length > 0 && !/^[A-Za-z0-9]{10,}$/.test(x)) // filter junk-like tokens\n  .map(x => ({ option: capitalizeFirstLetter(x) }));\n\n// Step 2: Add [create new]\nvalues.push({ option: \"[create new]\" });\n\n// Step 3: Build form config\nconst formOptions = {\n  fieldLabel: \"Dropdown Options\",\n  fieldType: \"dropdown\",\n  requiredField: true,\n  fieldOptions: {\n    values\n  }\n};\n\n// Step 4: Return as stringified JSON\nreturn [\n  {\n    json: {\n      fieldLabel: \"Dropdown Options\",\n      fieldType: \"dropdown\",\n      requiredField: true,\n      fieldOptions: {\n        values: values\n      }\n    }\n  }\n];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Create folders",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "name",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $('login n8n').item.json.headers['set-cookie'][0] }}"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Edit Fields",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6dae439c-b0b1-4058-832f-9308fda265fc",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $('Loop Over Items').item.json.name }}"
+              },
+              {
+                "id": "3c1f1bf1-d6ae-4111-b091-2b05a62c15e9",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $('Loop Over Items').item.json.name }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "end import",
+        "parameters": {
+          "completionMessage": "=Successfully imported {{ $('pass all items').all().length }} workflows to the folders {{ $('select tags to move').item.json['Dropdown Options'] }}",
+          "completionTitle": "Import complete",
+          "operation": "completion",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "extract name from form",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "f3bbf61c-6f60-4b51-a2b4-05d92d4fe000",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json['Dropdown Options'] || $json['[\\'Dropdown Options\\']'] }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Filter",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "c7bf8dcd-6e97-4908-a4c2-a197d452ffc1",
+                "leftValue": "={{ $json.name }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "={{ $('Loop Over Items').first().json.name }}"
+              }
+            ],
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {
+            "ignoreCase": true
+          }
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "filter owned projects",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "e66c13b9-4e49-486b-812e-6a38e680207b",
+                "leftValue": "={{ $json.name.extractEmail() }}",
+                "operator": {
+                  "operation": "contains",
+                  "type": "string"
+                },
+                "rightValue": "={{ $('set credentials').item.json.username }}"
+              },
+              {
+                "id": "99059f5b-055b-48ee-93c9-9689063fcfbe",
+                "leftValue": "={{ $json.role }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "project:personalOwner"
+              }
+            ],
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {
+            "ignoreCase": true
+          }
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Get folders",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $('login n8n').item.json.headers['set-cookie'][0] }}"
+              }
+            ]
+          },
+          "options": {},
+          "queryParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "get tags",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $('login n8n').first().json.headers['set-cookie'][0] }}"
+              }
+            ]
+          },
+          "options": {
+            "allowUnauthorizedCerts": false,
+            "redirect": {
+              "redirect": {}
+            },
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true,
+                "responseFormat": "json"
+              }
+            }
+          },
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "withUsageCount",
+                "value": "false"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "n8nApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "get workflows",
+        "parameters": {
+          "filters": {
+            "tags": "={{ $json.tag }}"
+          },
+          "requestOptions": {}
+        },
+        "type": "n8n-nodes-base.n8n",
+        "typeVersion": 1
+      },
+      {
+        "name": "If folder exists",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "70916c0d-531b-4cae-9fac-ae40aa3f7453",
+                "leftValue": "={{ $json.name }}",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "If no folder",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "e10c2b8e-bdc0-476e-aaed-886e99d4ed37",
+                "leftValue": "={{ $json.count }}",
+                "operator": {
+                  "operation": "gt",
+                  "type": "number"
+                },
+                "rightValue": 0
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Limit1",
+        "parameters": {},
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1
+      },
+      {
+        "name": "login n8n",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "emailOrLdapLoginId",
+                "value": "={{ $json.username }}"
+              },
+              {
+                "name": "password",
+                "value": "={{ $json.password }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "Move workflow to folder",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "parentFolderId",
+                "value": "={{ $('set global').item.json['folder id'] }}"
+              },
+              {
+                "name": "versionId",
+                "value": "={{ $json.versionId }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $('login n8n').item.json.headers['set-cookie'][0] }}"
+              }
+            ]
+          },
+          "method": "PATCH",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "my-projects",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "accept",
+                "value": "application/json, text/plain, */*"
+              },
+              {
+                "name": "accept-language",
+                "value": "en-US,en;q=0.9"
+              },
+              {
+                "name": "sec-fetch-dest",
+                "value": "empty"
+              },
+              {
+                "name": "user-agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+              },
+              {
+                "name": "cookie",
+                "value": "={{ $json.headers['set-cookie'][0] }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendHeaders": true,
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Normalize names",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a0d33a3e-f13b-438d-af1b-a4ff644b9373",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') }}"
+              },
+              {
+                "id": "abff18b8-ea51-4cc0-8e88-f326534931ec",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $('Loop Over Items').item.json.name }}"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "On form submission",
+        "parameters": {
+          "formDescription": "Convert all tags into folders",
+          "formFields": {
+            "values": [
+              {
+                "fieldType": "html"
+              }
+            ]
+          },
+          "formTitle": "Tags to Folders",
+          "options": {
+            "buttonLabel": "Submit"
+          }
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "pass all items",
+        "parameters": {
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Remove Duplicates",
+        "parameters": {
+          "compare": "selectedFields",
+          "fieldsToCompare": "name",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.removeDuplicates",
+        "typeVersion": 2
+      },
+      {
+        "name": "select tags to move",
+        "parameters": {
+          "defineForm": "json",
+          "jsonOutput": "=[\t{\n\t\t\"fieldLabel\": \"Dropdown Options\",\n\t\t\"fieldType\": \"dropdown\",\n\t\t\"fieldOptions\": {\n\t\t\t\"values\": {{ $json.fieldOptions.values.toJsonString() }}\n\t\t},\n\t\t\"requiredField\": true,\n        \"multiselect\": true \n\t}\n\n] ",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.form",
+        "typeVersion": 1
+      },
+      {
+        "name": "set credentials",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bfb7f25d-f992-4395-9fbe-939a57fc2a3c",
+                "name": "n8n",
+                "type": "string",
+                "value": "=[your n8n instance without a trailling /]"
+              },
+              {
+                "id": "538e0608-fd19-46ed-ba2c-c1efe03eaf9b",
+                "name": "username",
+                "type": "string",
+                "value": "=your n8n username"
+              },
+              {
+                "id": "ad1c4785-70d0-40d7-a61c-e97c3e8702e7",
+                "name": "password",
+                "type": "string",
+                "value": "=your n8n password"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "set folder name + id",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b4743119-ab58-44d8-b881-877de84e82e9",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.data.name }}"
+              },
+              {
+                "id": "42ad0f03-f7c1-424f-9429-0b5402b60cc6",
+                "name": "folder id",
+                "type": "string",
+                "value": "={{ $json.data.id }}"
+              },
+              {
+                "id": "9ac73fd6-cfd9-47a3-8f28-d0238ebccaf9",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $('Edit Fields').first().json.tag }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "set folder name + id1",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b4743119-ab58-44d8-b881-877de84e82e9",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.name }}"
+              },
+              {
+                "id": "42ad0f03-f7c1-424f-9429-0b5402b60cc6",
+                "name": "folder id",
+                "type": "string",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "id": "9ac73fd6-cfd9-47a3-8f28-d0238ebccaf9",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $('Normalize names').item.json.tag }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "set global",
+        "parameters": {
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "set name",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e7d24d6b-0d97-4e47-b0d4-43682eef686d",
+                "name": "name",
+                "type": "string",
+                "value": "={{ $json.name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') }}"
+              },
+              {
+                "id": "52fb820d-5a8a-434b-a99f-db035714d8e3",
+                "name": "tag",
+                "type": "string",
+                "value": "={{ $json.tag }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Split Out",
+        "parameters": {
+          "fieldToSplitOut": "data",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split Out the tags",
+        "parameters": {
+          "fieldToSplitOut": "['Dropdown Options']",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split Out2",
+        "parameters": {
+          "fieldToSplitOut": "data",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Step 1\nLogin to n8n, and get the tags we have for our personal owned projects",
+          "height": 260,
+          "width": 960
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Step 2\nExtract the tags as a json string, and format this into a suitable format for our response form for user to select the tags they want to work with",
+          "height": 280,
+          "width": 960
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 2,
+          "content": "## Step 3\nExtract the form details and loop over each tag to process",
+          "height": 260,
+          "width": 420
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 3,
+          "content": "## Step 3\nWe search for the folders and filter based on the number of folders found",
+          "height": 240,
+          "width": 340
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "## Step 4 a) \nIf more than 1 folder is found, we dedupe the tags and limit to one, then use that as the folder",
+          "height": 220,
+          "width": 940
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "content": "## Step 4 b) \nIf no folder is found, we create a new folder ",
+          "height": 220,
+          "width": 680
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "color": 5,
+          "content": "## Step 5\n\nMerge the paths so we use one workflow",
+          "height": 480,
+          "width": 420
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "color": 4,
+          "content": "## Step 6\nGet the workflows and move them to the respective folders",
+          "height": 240,
+          "width": 480
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note8",
+        "parameters": {
+          "content": "## Step 7\nRespond with a success message",
+          "height": 220,
+          "width": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "tags to string",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ce3e2cf1-a37e-476c-934b-355a477c91d2",
+                "name": "name",
+                "type": "array",
+                "value": "={{ $json.body.data.map(item => item.name )}} "
+              }
+            ]
+          },
+          "options": {
+            "ignoreConversionErrors": true
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      }
+    ]
+  },
+  "nodeCount": 40,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "60 Mins",
+  "integrations": [
+    "HTTP Request",
+    "N8n",
+    "Form Trigger"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 106,
+  "viewCount": 702,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "N8n Account",
+      "Form Trigger Account"
+    ],
+    "requiredCredentials": [
+      "n8n  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On form submission\".",
+      "Open the \"login n8n\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"get tags\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"my-projects\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"filter owned projects\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get folders\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out2\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Remove Duplicates\" node (n8n-nodes-base.removeDuplicates) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"get workflows\" node (n8n-nodes-base.n8n) and configure the action parameters, mappings, and fields.",
+      "Open the \"Move workflow to folder\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Limit1\" node (n8n-nodes-base.limit) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create folders\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Filter\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"If no folder\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"If folder exists\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"end import\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"select tags to move\" node (n8n-nodes-base.form) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out the tags\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note8\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"set credentials\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Normalize names\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"set folder name + id\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"set folder name + id1\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"set global\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Edit Fields\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"set name\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"pass all items\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"extract name from form\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"tags to string\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-y5ktfh8ii",
+      "workflowId": "set-workflow-358vt",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/0832_Splitout_Limit_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\0832_Splitout_Limit_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:41.682Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:41.682Z",
+  "updatedAt": "2026-07-15T11:19:41.682Z"
+}

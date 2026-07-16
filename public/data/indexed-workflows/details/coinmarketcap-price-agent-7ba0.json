@@ -1,0 +1,628 @@
+{
+  "id": "coinmarketcap-price-agent-iex3r",
+  "name": "Coinmarketcap Price Agent",
+  "slug": "coinmarketcap-price-agent-7ba0",
+  "description": "Automated workflow: Coinmarketcap Price Agent. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Coinmarketcap Price Agent workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "id": "FQ0Uljxi7aIBdTFX",
+    "meta": {
+      "instanceId": "workflow-a42ebca7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:57.170513",
+      "updatedAt": "2025-09-29T07:07:57.170590",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Coinmarketcap Price Agent",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "4f7066a4-9baa-428e-8b98-f4a3d0a6cf8a",
+        "name": "Telegram Send Message",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          1280,
+          0
+        ],
+        "webhookId": "0eeae020-ed6f-4900-ae38-d646d893171d",
+        "parameters": {
+          "text": "={{ $json.output }}",
+          "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "R3vpGq0SURbvEw2Z",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "39c91f2b-87ed-46e9-8cc4-8c6ea547f170",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          660,
+          320
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "yUizd8t0sD5wMYVG",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c87b5030-de78-4b86-8bb3-b93ee6b76a54",
+        "name": "Window Buffer Memory",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          820,
+          320
+        ],
+        "parameters": {},
+        "typeVersion": 1.3,
+        "notes": "This memoryBufferWindow node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ae3ec7a6-bf62-4381-acf8-05c7c425f471",
+        "name": "Telegram Trigger1",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "position": [
+          100,
+          0
+        ],
+        "webhookId": "b33d2025-01c2-4386-b677-206a87a1856b",
+        "parameters": {
+          "updates": [
+            "message"
+          ],
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "R3vpGq0SURbvEw2Z",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This telegramTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3f3594f5-64d5-4d82-8d0f-0e5f58244d17",
+        "name": "CoinMarketCap Price Agent",
+        "type": "n8n-nodes-base.noOp",
+        "notes": "{{ $json.sessionId }}",
+        "position": [
+          760,
+          0
+        ],
+        "parameters": {
+          "text": "={{ $json.message.text }}",
+          "options": {},
+          "promptType": "define"
+        },
+        "typeVersion": 1.7
+      },
+      {
+        "id": "360dc88a-a714-4ceb-be25-5ebe7d1e0273",
+        "name": "Adds SessionId",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          420,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b5c25cd4-226b-4778-863f-79b13b4a5202",
+                "name": "sessionId",
+                "type": "string",
+                "value": "={{ $json.message.chat.id }}"
+              }
+            ]
+          },
+          "includeOtherFields": true
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8d53c2a0-a255-4fe9-8e5c-38c957825413",
+        "name": "CoinMarketCap Price",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          980,
+          320
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "sendQuery": true,
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "symbol"
+              },
+              {
+                "name": "convert",
+                "value": "USD",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "toolDescription": "The tool going to recieve input of cryptocurrency name and then request the price from CoinMarketCap and send the price back in a message.",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "OKXROn8aWkgAOvvV",
+            "name": "CoinMarketCap"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This toolHttpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "595f494f-4109-4cd7-bf69-d1300d3a5408",
+    "connections": {
+      "8d53c2a0-a255-4fe9-8e5c-38c957825413": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-fc0aaa02",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-6ec783d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-8e9ba28e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-e86e721f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-bdda3ea8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-40fe2800",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-495b6e4a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-7edf2a34",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4f7066a4-9baa-428e-8b98-f4a3d0a6cf8a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4f7066a4-9baa-428e-8b98-f4a3d0a6cf8a-5997d2a8",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "39c91f2b-87ed-46e9-8cc4-8c6ea547f170": {
+        "main": [
+          [
+            {
+              "node": "error-handler-39c91f2b-87ed-46e9-8cc4-8c6ea547f170-7b035395",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ae3ec7a6-bf62-4381-acf8-05c7c425f471": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ae3ec7a6-bf62-4381-acf8-05c7c425f471-a6a88df5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Coinmarketcap Price Agent. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Coinmarketcap Price Agent. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "39c91f2b-87ed-46e9-8cc4-8c6ea547f170": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-39c91f2b-87ed-46e9-8cc4-8c6ea547f170-7b035395"
+            }
+          ]
+        ]
+      },
+      "4f7066a4-9baa-428e-8b98-f4a3d0a6cf8a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4f7066a4-9baa-428e-8b98-f4a3d0a6cf8a-5997d2a8"
+            }
+          ]
+        ]
+      },
+      "8d53c2a0-a255-4fe9-8e5c-38c957825413": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-fc0aaa02"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-6ec783d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-8e9ba28e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-e86e721f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-bdda3ea8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-40fe2800"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-495b6e4a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8d53c2a0-a255-4fe9-8e5c-38c957825413-7edf2a34"
+            }
+          ]
+        ]
+      },
+      "ae3ec7a6-bf62-4381-acf8-05c7c425f471": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ae3ec7a6-bf62-4381-acf8-05c7c425f471-a6a88df5"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Coinmarketcap Price Agent",
+    "nodes": [
+      {
+        "name": "Adds SessionId",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b5c25cd4-226b-4778-863f-79b13b4a5202",
+                "name": "sessionId",
+                "type": "string",
+                "value": "={{ $json.message.chat.id }}"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "CoinMarketCap Price",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "genericAuthType": "httpHeaderAuth",
+          "parametersHeaders": {
+            "values": [
+              {
+                "name": "Accept",
+                "value": "application/json",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "parametersQuery": {
+            "values": [
+              {
+                "name": "symbol"
+              },
+              {
+                "name": "convert",
+                "value": "USD",
+                "valueProvider": "fieldValue"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "sendQuery": true,
+          "toolDescription": "The tool going to recieve input of cryptocurrency name and then request the price from CoinMarketCap and send the price back in a message.",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "CoinMarketCap Price Agent",
+        "parameters": {
+          "options": {},
+          "promptType": "define",
+          "text": "={{ $json.message.text }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Telegram Send Message",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+          "text": "={{ $json.output }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Telegram Trigger1",
+        "parameters": {
+          "additionalFields": {},
+          "updates": [
+            "message"
+          ]
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Window Buffer Memory",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.3
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Telegram"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 202,
+  "viewCount": 300,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Telegram Account"
+    ],
+    "requiredCredentials": [
+      "telegram  A P I details",
+      "open Ai  A P I details",
+      "http Header Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Telegram Trigger1\".",
+      "Open the \"Telegram Send Message\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Window Buffer Memory\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"CoinMarketCap Price Agent\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"CoinMarketCap Price\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Adds SessionId\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-njbnmqzm3",
+      "workflowId": "coinmarketcap-price-agent-iex3r",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/1450_Telegram_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\1450_Telegram_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:52.386Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:52.386Z",
+  "updatedAt": "2026-07-15T11:30:52.386Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

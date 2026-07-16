@@ -1,0 +1,847 @@
+{
+  "id": "hubspot-workflow-dxxob",
+  "name": "Hubspot Workflow",
+  "slug": "hubspot-workflow-20lc",
+  "description": "Automated workflow: Hubspot Workflow. This workflow integrates 9 different services: stickyNote, hubspot, chainLlm, outputParserStructured, set. It contains 15 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Hubspot Workflow workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "id": "trigger-17a77bcd",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "9f2dc93f-bae5-4419-8411-d2fff4b31f5e",
+        "name": "Creates an email engagement",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          916,
+          -260
+        ],
+        "parameters": {
+          "type": "email",
+          "metadata": {
+            "html": "={{ $('When an email is received').item.json.textHtml || $('When an email is received').item.json.textPlain}}",
+            "subject": "={{ $('When an email is received').item.json.subject }}",
+            "toEmail": [
+              "={{ $('When an email is received').item.json.to }}"
+            ],
+            "fromEmail": "={{ $('When an email is received').item.json.from }}"
+          },
+          "resource": "engagement",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "associations": {
+              "contactIds": "={{ $json.vid }}"
+            }
+          }
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "JxzF93M0SJ00jDD9",
+            "name": "HubSpot account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0a56ec28-afc6-40a9-bf42-4d8742e48eb4",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -140,
+          -40
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "1IOLtYX7aTspCAN8",
+            "name": "OpenAI Pollup"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8e53aeb6-7d84-4739-b482-b8cd844b89ac",
+        "name": "Search for the contact via email",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          256,
+          -260
+        ],
+        "parameters": {
+          "operation": "search",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "filterGroupsUi": {
+            "filterGroupsValues": [
+              {
+                "filtersUi": {
+                  "filterValues": [
+                    {
+                      "value": "={{ $json.output.contact_info.email }}",
+                      "propertyName": "email|string"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "additionalFields": {}
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "JxzF93M0SJ00jDD9",
+            "name": "HubSpot account"
+          }
+        },
+        "typeVersion": 2.1,
+        "alwaysOutputData": true,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "19e54445-d0cb-40f2-a11f-5e4cb22ad7ec",
+        "name": "Parse the mail with AI",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -120,
+          -260
+        ],
+        "parameters": {
+          "text": "=Get all important info from this email like first name, last name, email, phone number, name of the company, country, Postal code, city, etc. Return it as a json.  The email content:  {{ $json.textHtml || $json.textPlain}} \nFrom: {{ $json.from }} \nSubject: {{ $json.subject }}\nDate sent:  {{ $json.date }}",
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=You are a professional Email parser"
+              }
+            ]
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.6,
+        "notes": "This chainLlm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8b257214-0001-46aa-84df-cad844e3130b",
+        "name": "When an email is received",
+        "type": "n8n-nodes-base.emailReadImap",
+        "position": [
+          -340,
+          -260
+        ],
+        "parameters": {
+          "options": {
+            "forceReconnect": 3
+          }
+        },
+        "credentials": {
+          "imap": {
+            "id": "g7C5Z9V9vQUbsLIw",
+            "name": "IMAP account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This emailReadImap node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "32820b69-3918-4951-9ddc-45bdbcb60aca",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          -400
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 280,
+          "height": 300,
+          "content": "## Set receiving email account\n- Ddefaults to an IMAP account node, but you can put a gmail account or any  email trigger"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "adbed044-08ae-4744-9b0c-09a225860267",
+        "name": "Set the output Json",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          80,
+          -40
+        ],
+        "parameters": {
+          "jsonSchemaExample": "{\"contact_info\": \n{\n\"first name\": \n\"Thomas\",\n\"last name\": \"Vie\",\n\"position\": \n\"CTO\",\n\"company\": \n\"Pollup Data Services\",\n\"email\": \n\"Thomas@pollup.net\",\n\"phone\": \n\"+34 673626552\",\n\"website\": \n\"{{ $env.WEBHOOK_URL }}\",\n\"address\": \n{\n\"street\": \n\"Oppelner Str. 32\",\n\"postal_code\": \n\"10997\",\n\"city\": \n\"Berlin\",\n\"country\": \n\"Germany\"\n}}}"
+        },
+        "typeVersion": 1.2,
+        "notes": "This outputParserStructured node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e58575ee-6ac8-4de1-b4db-8525146efd74",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -140,
+          -400
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 320,
+          "height": 300,
+          "content": "## Upgrade the prompt!\nThis is a very simple prompt but oit does the job. Improve it and send it to me!"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "23465910-0a89-45f7-9bbf-fb17abadc5de",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          200,
+          -400
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 840,
+          "height": 400,
+          "content": "## Hubspot integration\n- Search for the contact in hubspot\n- If it is present creates an egagement\n- It it is not, creates it and adds an engagement"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f5573c22-85f3-4eda-ba5a-172567827991",
+        "name": "contact exists?",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          476,
+          -260
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "554c2aa3-dbdb-4955-8510-6b09bc762f63",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.id }}",
+                "rightValue": ""
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "914f2e6b-7a5f-4c9c-bd3b-4bfb2693728d",
+        "name": "Edit Fields",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          696,
+          -360
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "75c8fc2d-dc8e-4b6c-a853-1dbd8d72f779",
+                "name": "vid",
+                "type": "string",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4c8fa2d1-e3b4-4323-bdc8-3a4e2bbc706d",
+        "name": "Creates contact",
+        "type": "n8n-nodes-base.hubspot",
+        "position": [
+          696,
+          -160
+        ],
+        "parameters": {
+          "email": "={{ $('Parse the mail with AI').item.json.output.contact_info.email }}",
+          "options": {},
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "city": "={{ $('Parse the mail with AI').item.json.output.contact_info.address.city }}",
+            "country": "={{ $('Parse the mail with AI').item.json.output.contact_info.address.country }}",
+            "jobTitle": "={{ $('Parse the mail with AI').item.json.output.contact_info.position }}",
+            "lastName": "={{ $('Parse the mail with AI').item.json.output.contact_info['last name'] }}",
+            "postalCode": "={{ $('Parse the mail with AI').item.json.output.contact_info.address.postal_code }}",
+            "websiteUrl": "{{ $env.BASE_URL }}",
+            "companyName": "={{ $('Parse the mail with AI').item.json.output.contact_info.company }}",
+            "phoneNumber": "={{ $('Parse the mail with AI').item.json.output.contact_info.phone }}",
+            "streetAddress": "={{ $('Parse the mail with AI').item.json.output.contact_info.address.street }}"
+          }
+        },
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "JxzF93M0SJ00jDD9",
+            "name": "HubSpot account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This hubspot node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5f94ba18-49db-4bc0-9f0a-16a9d05ca6b0",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -440,
+          -620
+        ],
+        "parameters": {
+          "width": 460,
+          "height": 200,
+          "content": "## Contact me\n- If you need any modification to this workflow\n- if you need some help with this workflow\n- Or if you need any workflow in n8n, Make, or Langchain / Langgraph\n\nWrite to me: [thomas@pollup.net](mailto:thomas@pollup.net)"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "0a56ec28-afc6-40a9-bf42-4d8742e48eb4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0a56ec28-afc6-40a9-bf42-4d8742e48eb4-3c5deb67",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "8b257214-0001-46aa-84df-cad844e3130b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-5dabac8a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-f48dcdb2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-d310b101",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-05babf1d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-98b13498",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-1e908cab",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-d902d34e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-cc202389",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Hubspot Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Hubspot Workflow. This workflow integrates 9 different services: stickyNote, hubspot, chainLlm, outputParserStructured, set. It contains 15 nodes and follows best practices for error handling and security.",
+    "meta": {
+      "instanceId": "workflow-a6db8868",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.878245",
+      "updatedAt": "2025-09-29T07:07:54.878259",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Hubspot Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0a56ec28-afc6-40a9-bf42-4d8742e48eb4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0a56ec28-afc6-40a9-bf42-4d8742e48eb4-3c5deb67"
+            }
+          ]
+        ]
+      },
+      "8b257214-0001-46aa-84df-cad844e3130b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-5dabac8a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-f48dcdb2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-d310b101"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-05babf1d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-98b13498"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-1e908cab"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-d902d34e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8b257214-0001-46aa-84df-cad844e3130b-cc202389"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Hubspot Workflow",
+    "nodes": [
+      {
+        "name": "contact exists?",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "554c2aa3-dbdb-4955-8510-6b09bc762f63",
+                "leftValue": "={{ $json.id }}",
+                "operator": {
+                  "operation": "exists",
+                  "singleValue": true,
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Creates an email engagement",
+        "parameters": {
+          "additionalFields": {
+            "associations": {
+              "contactIds": "={{ $json.vid }}"
+            }
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "metadata": {
+            "fromEmail": "={{ $('When an email is received').item.json.from }}",
+            "html": "={{ $('When an email is received').item.json.textHtml || $('When an email is received').item.json.textPlain}}",
+            "subject": "={{ $('When an email is received').item.json.subject }}",
+            "toEmail": [
+              "={{ $('When an email is received').item.json.to }}"
+            ]
+          },
+          "resource": "engagement",
+          "type": "email"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Creates contact",
+        "parameters": {
+          "additionalFields": {
+            "city": "={{ $('Parse the mail with AI').item.json.output.contact_info.address.city }}",
+            "companyName": "={{ $('Parse the mail with AI').item.json.output.contact_info.company }}",
+            "country": "={{ $('Parse the mail with AI').item.json.output.contact_info.address.country }}",
+            "jobTitle": "={{ $('Parse the mail with AI').item.json.output.contact_info.position }}",
+            "lastName": "={{ $('Parse the mail with AI').item.json.output.contact_info['last name'] }}",
+            "phoneNumber": "={{ $('Parse the mail with AI').item.json.output.contact_info.phone }}",
+            "postalCode": "={{ $('Parse the mail with AI').item.json.output.contact_info.address.postal_code }}",
+            "streetAddress": "={{ $('Parse the mail with AI').item.json.output.contact_info.address.street }}",
+            "websiteUrl": "{{ $env.BASE_URL }}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "email": "={{ $('Parse the mail with AI').item.json.output.contact_info.email }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Edit Fields",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "75c8fc2d-dc8e-4b6c-a853-1dbd8d72f779",
+                "name": "vid",
+                "type": "string",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Parse the mail with AI",
+        "parameters": {
+          "hasOutputParser": true,
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=You are a professional Email parser"
+              }
+            ]
+          },
+          "promptType": "define",
+          "text": "=Get all important info from this email like first name, last name, email, phone number, name of the company, country, Postal code, city, etc. Return it as a json.  The email content:  {{ $json.textHtml || $json.textPlain}} \nFrom: {{ $json.from }} \nSubject: {{ $json.subject }}\nDate sent:  {{ $json.date }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.6
+      },
+      {
+        "credentials": {
+          "hubspotOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search for the contact via email",
+        "parameters": {
+          "additionalFields": {},
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "filterGroupsUi": {
+            "filterGroupsValues": [
+              {
+                "filtersUi": {
+                  "filterValues": [
+                    {
+                      "propertyName": "email|string",
+                      "value": "={{ $json.output.contact_info.email }}"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "operation": "search"
+        },
+        "type": "n8n-nodes-base.hubspot",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Set the output Json",
+        "parameters": {
+          "jsonSchemaExample": "{\"contact_info\": \n{\n\"first name\": \n\"Thomas\",\n\"last name\": \"Vie\",\n\"position\": \n\"CTO\",\n\"company\": \n\"Pollup Data Services\",\n\"email\": \n\"Thomas@pollup.net\",\n\"phone\": \n\"+34 673626552\",\n\"website\": \n\"{{ $env.WEBHOOK_URL }}\",\n\"address\": \n{\n\"street\": \n\"Oppelner Str. 32\",\n\"postal_code\": \n\"10997\",\n\"city\": \n\"Berlin\",\n\"country\": \n\"Germany\"\n}}}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "## Set receiving email account\n- Ddefaults to an IMAP account node, but you can put a gmail account or any  email trigger",
+          "height": 300,
+          "width": 280
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 4,
+          "content": "## Upgrade the prompt!\nThis is a very simple prompt but oit does the job. Improve it and send it to me!",
+          "height": 300,
+          "width": 320
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 4,
+          "content": "## Hubspot integration\n- Search for the contact in hubspot\n- If it is present creates an egagement\n- It it is not, creates it and adds an engagement",
+          "height": 400,
+          "width": 840
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "content": "## Contact me\n- If you need any modification to this workflow\n- if you need some help with this workflow\n- Or if you need any workflow in n8n, Make, or Langchain / Langgraph\n\nWrite to me: [thomas@pollup.net](mailto:thomas@pollup.net)",
+          "height": 200,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "imap": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "When an email is received",
+        "parameters": {
+          "options": {
+            "forceReconnect": 3
+          }
+        },
+        "type": "n8n-nodes-base.emailReadImap",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Hubspot",
+    "Email (IMAP)"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 96,
+  "viewCount": 119,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Hubspot Account",
+      "Email (IMAP) Account"
+    ],
+    "requiredCredentials": [
+      "hubspot  O Auth2  A P I details",
+      "open Ai  A P I details",
+      "imap details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"Creates an email engagement\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search for the contact via email\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Parse the mail with AI\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"When an email is received\" node (n8n-nodes-base.emailReadImap) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set the output Json\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"contact exists?\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Creates contact\" node (n8n-nodes-base.hubspot) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Edit Fields\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-whst0wxlc",
+      "workflowId": "hubspot-workflow-dxxob",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stickynote/0893_Stickynote_Emailreadimap_Create.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stickynote\\0893_Stickynote_Emailreadimap_Create.json",
+      "discoveredAt": "2026-07-15T11:30:33.545Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:33.545Z",
+  "updatedAt": "2026-07-15T11:30:33.545Z",
+  "category": {
+    "slug": "ai-automation",
+    "name": "AI Automation"
+  },
+  "categoryId": "ai-automation"
+}

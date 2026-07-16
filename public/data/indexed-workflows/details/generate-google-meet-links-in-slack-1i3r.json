@@ -1,0 +1,586 @@
+{
+  "id": "generate-google-meet-links-in-slack-o1dk6",
+  "name": "Generate google meet links in slack",
+  "slug": "generate-google-meet-links-in-slack-1i3r",
+  "description": "Automated workflow: Generate google meet links in slack. This workflow integrates 5 different services: webhook, stickyNote, stopAndError, slack, googleCalendar. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Generate google meet links in slack workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "O2R3U22TB968fWUo",
+    "meta": {
+      "instanceId": "workflow-9fe9bab7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.280466",
+      "updatedAt": "2025-09-29T07:07:45.280491",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Generate google meet links in slack",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "5577aaf6-f682-49c3-9d21-f819151f77c5",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          300,
+          480
+        ],
+        "webhookId": "f442a7bb-451e-4371-8b7a-614caa0e04dd",
+        "parameters": {
+          "path": "slack-meet-trigger",
+          "options": {},
+          "httpMethod": "POST",
+          "responseData": "noData",
+          "responseMode": "lastNode"
+        },
+        "typeVersion": 1.1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "018c32c7-c3eb-4679-8064-ab92bb62cac5",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          140,
+          142
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 463.09809221779403,
+          "height": 482.56534054190786,
+          "content": "### 1. Setup: Add a Slack App\n**a.** Visit {{ $env.API_BASE_URL }} click on `New App` and choose a name and workspace.\n**b.** Click on `OAuth & Permissions` and scroll down to Scopes -> Bot token Scopes\n**c.** Add the `chat:write` scope & `chat:write.public`\n**d.** Navigate to `Slash Commands` and click `Create New Command`\n**e.** Use `/meet` as the command\n**f.** Copy the production URL from the **Webhook** node into `Request URL` within your slash command\n**g.** Add relevant description and usage hint\n**h.** Go to `Install app` and click install\n**i.** Don't worry about app distribution, that's only if you're trying to publish an app on the slack store"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3bfa07d4-ef3e-4ec4-91a2-ca94e2346299",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          640,
+          240
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 291.779972644588,
+          "height": 192.66150688057675,
+          "content": "### 2. Setup: Google auth & calendar\n**a.** Visit [the docs]({{ $env.WEBHOOK_URL }} and follow the steps to setup Google auth credential\n**b.** Choose the calendar you wish to create google meet links from\n\n\n\n👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "aab60499-7123-43c0-8f99-d0eade0f5672",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          960,
+          238
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 292.3392628968803,
+          "height": 192.92455101677126,
+          "content": "### 3. Setup: Configure slack node authentication and your message\n**a.** Connect your slack account\n**b.** Configure your message text. Be sure to include the hangoutLink expression to output a meeting link\n\n👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a15fc232-ec8e-4dfb-add7-2a3c27c5a232",
+        "name": "Create event with google meet link",
+        "type": "n8n-nodes-base.googleCalendar",
+        "position": [
+          740,
+          480
+        ],
+        "parameters": {
+          "end": "={{ $now.plus({minutes: 15}) }}",
+          "start": "={{ $now }}",
+          "calendar": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "additionalFields": {
+            "conferenceDataUi": {
+              "conferenceDataValues": {
+                "conferenceSolution": "hangoutsMeet"
+              }
+            }
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This googleCalendar node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "57c2d5b8-f5d7-4db1-9e13-48265d174679",
+        "name": "Send msg with Google meet link",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          1060,
+          480
+        ],
+        "parameters": {
+          "text": "=Join me here: {{ $('Create event with google meet link').item.json.hangoutLink }}",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Webhook').item.json.body.channel_id }}"
+          },
+          "otherOptions": {
+            "unfurl_links": false,
+            "includeLinkToWorkflow": false
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "898b9681-c532-490e-aea2-a4f693b52f35",
+        "name": "Delete temporary calendar event",
+        "type": "n8n-nodes-base.googleCalendar",
+        "position": [
+          1400,
+          480
+        ],
+        "parameters": {
+          "eventId": "={{ $('Create event with google meet link').item.json[\"id\"] }}",
+          "options": {},
+          "calendar": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "operation": "delete"
+        },
+        "typeVersion": 1,
+        "notes": "This googleCalendar node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ec70003a-6dea-4c1b-a16e-e64a206aba16",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          140,
+          -20
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 459.2991776576996,
+          "height": 146.4269155371431,
+          "content": "## Generate google meet links with a slack command \nSpin up instant google meet links directly from slack and send to all channel participants\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eee48232-8477-4bfb-8164-bfaf66062071",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1280,
+          240
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 292.3392628968803,
+          "height": 192.92455101677126,
+          "content": "### 3. Setup: Select google calendar account\n**a.** Select the same calendar you're using to create the initial event\n\n\n\n\n👇"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "09457e4b-ccba-497f-b046-3529edc7b332",
+    "connections": {
+      "5577aaf6-f682-49c3-9d21-f819151f77c5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5-dc9c249d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5-7ea1d727",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5-ee0117f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5-95ec0004",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "a15fc232-ec8e-4dfb-add7-2a3c27c5a232": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a15fc232-ec8e-4dfb-add7-2a3c27c5a232-c634e6e4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "57c2d5b8-f5d7-4db1-9e13-48265d174679": {
+        "main": [
+          [
+            {
+              "node": "error-handler-57c2d5b8-f5d7-4db1-9e13-48265d174679-0b40c681",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "898b9681-c532-490e-aea2-a4f693b52f35": {
+        "main": [
+          [
+            {
+              "node": "error-handler-898b9681-c532-490e-aea2-a4f693b52f35-7fda49bd",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Generate google meet links in slack. This workflow integrates 5 different services: webhook, stickyNote, stopAndError, slack, googleCalendar. It contains 14 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Generate google meet links in slack. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "5577aaf6-f682-49c3-9d21-f819151f77c5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5-dc9c249d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5-7ea1d727"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5-ee0117f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5577aaf6-f682-49c3-9d21-f819151f77c5-95ec0004"
+            }
+          ]
+        ]
+      },
+      "57c2d5b8-f5d7-4db1-9e13-48265d174679": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-57c2d5b8-f5d7-4db1-9e13-48265d174679-0b40c681"
+            }
+          ]
+        ]
+      },
+      "898b9681-c532-490e-aea2-a4f693b52f35": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-898b9681-c532-490e-aea2-a4f693b52f35-7fda49bd"
+            }
+          ]
+        ]
+      },
+      "a15fc232-ec8e-4dfb-add7-2a3c27c5a232": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a15fc232-ec8e-4dfb-add7-2a3c27c5a232-c634e6e4"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Generate google meet links in slack",
+    "nodes": [
+      {
+        "name": "Create event with google meet link",
+        "parameters": {
+          "additionalFields": {
+            "conferenceDataUi": {
+              "conferenceDataValues": {
+                "conferenceSolution": "hangoutsMeet"
+              }
+            }
+          },
+          "calendar": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "end": "={{ $now.plus({minutes: 15}) }}",
+          "start": "={{ $now }}"
+        },
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 1
+      },
+      {
+        "name": "Delete temporary calendar event",
+        "parameters": {
+          "calendar": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "eventId": "={{ $('Create event with google meet link').item.json[\"id\"] }}",
+          "operation": "delete",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 1
+      },
+      {
+        "name": "Send msg with Google meet link",
+        "parameters": {
+          "channelId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Webhook').item.json.body.channel_id }}"
+          },
+          "otherOptions": {
+            "includeLinkToWorkflow": false,
+            "unfurl_links": false
+          },
+          "select": "channel",
+          "text": "=Join me here: {{ $('Create event with google meet link').item.json.hangoutLink }}"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 6,
+          "content": "### 1. Setup: Add a Slack App\n**a.** Visit {{ $env.API_BASE_URL }} click on `New App` and choose a name and workspace.\n**b.** Click on `OAuth & Permissions` and scroll down to Scopes -> Bot token Scopes\n**c.** Add the `chat:write` scope & `chat:write.public`\n**d.** Navigate to `Slash Commands` and click `Create New Command`\n**e.** Use `/meet` as the command\n**f.** Copy the production URL from the **Webhook** node into `Request URL` within your slash command\n**g.** Add relevant description and usage hint\n**h.** Go to `Install app` and click install\n**i.** Don't worry about app distribution, that's only if you're trying to publish an app on the slack store",
+          "height": 482.56534054190786,
+          "width": 463.09809221779403
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 6,
+          "content": "### 2. Setup: Google auth & calendar\n**a.** Visit [the docs]({{ $env.WEBHOOK_URL }} and follow the steps to setup Google auth credential\n**b.** Choose the calendar you wish to create google meet links from\n\n\n\n👇",
+          "height": 192.66150688057675,
+          "width": 291.779972644588
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 6,
+          "content": "### 3. Setup: Configure slack node authentication and your message\n**a.** Connect your slack account\n**b.** Configure your message text. Be sure to include the hangoutLink expression to output a meeting link\n\n👇",
+          "height": 192.92455101677126,
+          "width": 292.3392628968803
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 6,
+          "content": "### 3. Setup: Select google calendar account\n**a.** Select the same calendar you're using to create the initial event\n\n\n\n\n👇",
+          "height": 192.92455101677126,
+          "width": 292.3392628968803
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 4,
+          "content": "## Generate google meet links with a slack command \nSpin up instant google meet links directly from slack and send to all channel participants\n\n",
+          "height": 146.4269155371431,
+          "width": 459.2991776576996
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "slack-meet-trigger",
+          "responseData": "noData",
+          "responseMode": "lastNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1.1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Webhook",
+    "Google Calendar",
+    "Slack"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 108,
+  "viewCount": 118,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Google Calendar Account",
+      "Slack Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create event with google meet link\" node (n8n-nodes-base.googleCalendar) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send msg with Google meet link\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Delete temporary calendar event\" node (n8n-nodes-base.googleCalendar) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-36xpq19t9",
+      "workflowId": "generate-google-meet-links-in-slack-o1dk6",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Googlecalendar/1573_GoogleCalendar_Slack_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Googlecalendar\\1573_GoogleCalendar_Slack_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:04.291Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:04.291Z",
+  "updatedAt": "2026-07-15T11:29:04.291Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

@@ -1,0 +1,703 @@
+{
+  "id": "openai-e-mail-classification-application-iz78p",
+  "name": "OpenAI e-mail classification - application",
+  "slug": "openai-e-mail-classification-application-pbsp",
+  "description": "Automated workflow: OpenAI e-mail classification - application. This workflow integrates 8 different services: textClassifier, stickyNote, informationExtractor, stopAndError, lmChatOpenAi. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "OpenAI e-mail classification - application workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "id": "39KuujB1fbOvx8Al",
+    "meta": {
+      "instanceId": "workflow-12d927de",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.157861",
+      "updatedAt": "2025-09-29T07:07:51.157880",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "OpenAI e-mail classification - application",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "trigger-e9c787b2",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          100
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "6156844f-d1ba-413d-9ab2-02148bef5bf0",
+        "name": "Email trigger",
+        "type": "n8n-nodes-base.emailReadImap",
+        "position": [
+          -440,
+          120
+        ],
+        "parameters": {
+          "format": "resolved",
+          "options": {},
+          "postProcessAction": "nothing",
+          "dataPropertyAttachmentsPrefixName": "attachment"
+        },
+        "credentials": {
+          "imap": {
+            "id": "il5dS1iQxJvOMWbE",
+            "name": "IMAP account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This emailReadImap node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1aedaa56-d988-469b-86b9-61d50e707950",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "height": 200,
+          "content": "### Change or add any category you want\nEach category can be assigned it's own specific workflow"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d41ba844-2b99-42bb-80df-cff1b97dcbb9",
+        "name": "Classify email",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          0,
+          120
+        ],
+        "parameters": {
+          "options": {},
+          "inputText": "={{ $('Email trigger').first().json.text }}\n\nattachment:\n{{ $('Extract data from attachment').first().json.text }}\n",
+          "categories": {
+            "categories": [
+              {
+                "category": "job_application",
+                "description": "for job applications"
+              },
+              {
+                "category": "inbound_lead",
+                "description": "for sales inquiries or requests for more information about our products/services"
+              },
+              {
+                "category": "invoice",
+                "description": "for invoices"
+              },
+              {
+                "category": "other",
+                "description": "for all other sorts of emails"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This textClassifier node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b63a864f-f968-4e7e-9da4-d704f3ffa022",
+        "name": "Extract variables - email & attachment",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          440,
+          20
+        ],
+        "parameters": {
+          "text": "={{ $('Email trigger').first().json.text }}\n\nResume:\n{{ $('Extract data from attachment').first().json.text }}\n",
+          "options": {},
+          "attributes": {
+            "attributes": [
+              {
+                "name": "first_name",
+                "description": "first name of the applicant"
+              },
+              {
+                "name": "last_name",
+                "description": "last name of the applicant"
+              },
+              {
+                "name": "age",
+                "description": "age of the applicant"
+              },
+              {
+                "name": "residence",
+                "description": "residence of the applicant"
+              },
+              {
+                "name": "study",
+                "description": "relevant completed study of the applicant"
+              },
+              {
+                "name": "work_experience",
+                "description": "relevant work experience of the applicant"
+              },
+              {
+                "name": "personal_character",
+                "description": "personal characteristics of the applicant"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This informationExtractor node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "398b9240-0d9c-416e-af3b-31ba9e1ac9b2",
+        "name": "Extract data from attachment",
+        "type": "n8n-nodes-base.extractFromFile",
+        "onError": "continueRegularOutput",
+        "position": [
+          -220,
+          120
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "pdf",
+          "binaryPropertyName": "attachment0"
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": false,
+        "notes": "This extractFromFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9f949aac-1681-4f04-983e-8bd5c949987a",
+        "name": "OpenAI Chat Model 2",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          660,
+          200
+        ],
+        "parameters": {
+          "model": "gpt-4o",
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "by5xbXU1Yz36JahE",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c7a61afe-d68d-407e-8653-46cb123877e9",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          100,
+          320
+        ],
+        "parameters": {
+          "model": "gpt-4o",
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "by5xbXU1Yz36JahE",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5a22e81b-8b60-443e-985b-47d493724389",
+        "name": "Workflow 2",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          440,
+          180
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "808e4f35-604e-4354-ab8b-3ba68940016b",
+        "name": "Workflow 3",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          600,
+          360
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d793675d-c68d-4f73-a99d-6451be5bea30",
+        "name": "workflow 4",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          440,
+          360
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "errorWorkflow": null,
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "28448ab7-6d45-41df-9de3-aad0e187edc5",
+    "connections": {
+      "6156844f-d1ba-413d-9ab2-02148bef5bf0": {
+        "main": [
+          [
+            {
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-7ff9c7d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-4b6e3b8a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-b37e52ec",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-c73584da",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-94c2978f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-d9a3e960",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-3d8b85d1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-3376e123",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "398b9240-0d9c-416e-af3b-31ba9e1ac9b2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-398b9240-0d9c-416e-af3b-31ba9e1ac9b2-bfde3401",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9f949aac-1681-4f04-983e-8bd5c949987a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9f949aac-1681-4f04-983e-8bd5c949987a-d94f2e29",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "c7a61afe-d68d-407e-8653-46cb123877e9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c7a61afe-d68d-407e-8653-46cb123877e9-5f0e1d09",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: OpenAI e-mail classification - application. This workflow integrates 8 different services: textClassifier, stickyNote, informationExtractor, stopAndError, lmChatOpenAi. It contains 14 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: OpenAI e-mail classification - application. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "398b9240-0d9c-416e-af3b-31ba9e1ac9b2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-398b9240-0d9c-416e-af3b-31ba9e1ac9b2-bfde3401"
+            }
+          ]
+        ]
+      },
+      "6156844f-d1ba-413d-9ab2-02148bef5bf0": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-7ff9c7d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-4b6e3b8a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-b37e52ec"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-c73584da"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-94c2978f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-d9a3e960"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-3d8b85d1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-6156844f-d1ba-413d-9ab2-02148bef5bf0-3376e123"
+            }
+          ]
+        ]
+      },
+      "9f949aac-1681-4f04-983e-8bd5c949987a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9f949aac-1681-4f04-983e-8bd5c949987a-d94f2e29"
+            }
+          ]
+        ]
+      },
+      "c7a61afe-d68d-407e-8653-46cb123877e9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c7a61afe-d68d-407e-8653-46cb123877e9-5f0e1d09"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "OpenAI e-mail classification - application",
+    "nodes": [
+      {
+        "name": "Classify email",
+        "parameters": {
+          "categories": {
+            "categories": [
+              {
+                "category": "job_application",
+                "description": "for job applications"
+              },
+              {
+                "category": "inbound_lead",
+                "description": "for sales inquiries or requests for more information about our products/services"
+              },
+              {
+                "category": "invoice",
+                "description": "for invoices"
+              },
+              {
+                "category": "other",
+                "description": "for all other sorts of emails"
+              }
+            ]
+          },
+          "inputText": "={{ $('Email trigger').first().json.text }}\n\nattachment:\n{{ $('Extract data from attachment').first().json.text }}\n",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "imap": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Email trigger",
+        "parameters": {
+          "dataPropertyAttachmentsPrefixName": "attachment",
+          "format": "resolved",
+          "options": {},
+          "postProcessAction": "nothing"
+        },
+        "type": "n8n-nodes-base.emailReadImap",
+        "typeVersion": 2
+      },
+      {
+        "name": "Extract data from attachment",
+        "parameters": {
+          "binaryPropertyName": "attachment0",
+          "operation": "pdf",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract variables - email & attachment",
+        "parameters": {
+          "attributes": {
+            "attributes": [
+              {
+                "description": "first name of the applicant",
+                "name": "first_name"
+              },
+              {
+                "description": "last name of the applicant",
+                "name": "last_name"
+              },
+              {
+                "description": "age of the applicant",
+                "name": "age"
+              },
+              {
+                "description": "residence of the applicant",
+                "name": "residence"
+              },
+              {
+                "description": "relevant completed study of the applicant",
+                "name": "study"
+              },
+              {
+                "description": "relevant work experience of the applicant",
+                "name": "work_experience"
+              },
+              {
+                "description": "personal characteristics of the applicant",
+                "name": "personal_character"
+              }
+            ]
+          },
+          "options": {},
+          "text": "={{ $('Email trigger').first().json.text }}\n\nResume:\n{{ $('Extract data from attachment').first().json.text }}\n"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Manual Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": "gpt-4o",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model 2",
+        "parameters": {
+          "model": "gpt-4o",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "### Change or add any category you want\nEach category can be assigned it's own specific workflow",
+          "height": 200
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Workflow 2",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Workflow 3",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "workflow 4",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Email (IMAP)"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 208,
+  "viewCount": 571,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Email (IMAP) Account"
+    ],
+    "requiredCredentials": [
+      "imap details",
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Trigger\".",
+      "Open the \"Email trigger\" node (n8n-nodes-base.emailReadImap) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Classify email\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract variables - email & attachment\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract data from attachment\" node (n8n-nodes-base.extractFromFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model 2\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Workflow 2\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Workflow 3\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"workflow 4\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-vzjaq4rxi",
+      "workflowId": "openai-e-mail-classification-application-iz78p",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Noop/0929_Noop_Extractfromfile_Automation.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Noop\\0929_Noop_Extractfromfile_Automation.json",
+      "discoveredAt": "2026-07-15T11:19:15.348Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:15.348Z",
+  "updatedAt": "2026-07-15T11:19:15.348Z"
+}

@@ -1,0 +1,629 @@
+{
+  "id": "respondtowebhook-workflow-w7xi2",
+  "name": "Respondtowebhook Workflow",
+  "slug": "respondtowebhook-workflow-rfbm",
+  "description": "Automated workflow: Respondtowebhook Workflow. This workflow integrates 6 different services: webhook, stickyNote, clickUp, set, respondToWebhook. It contains 10 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Respondtowebhook Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-1a1a26d7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.296535",
+      "updatedAt": "2025-09-29T07:07:42.296544",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "c39381ac-4795-4408-9383-7bae62755569",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "position": [
+          1580,
+          640
+        ],
+        "parameters": {
+          "options": {},
+          "respondWith": "text",
+          "responseBody": "=Task Created: ID  {{ $json.id }}"
+        },
+        "typeVersion": 1,
+        "notes": "This respondToWebhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ff72f0cb-1ea2-41e5-8f9f-7aa7ce994632",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          900,
+          500
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 874,
+          "height": 359,
+          "content": "## Create new tasks to airtable from a slack command"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "263f6c3b-5225-4d3f-a8ce-5052946b4251",
+        "name": "Receives slack command",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          960,
+          640
+        ],
+        "webhookId": "09d30853-66a3-4494-ba4b-115d28402811",
+        "parameters": {
+          "path": "09d30853-66a3-4494-ba4b-115d28402811/slackcommand",
+          "options": {},
+          "httpMethod": "POST",
+          "responseMode": "responseNode"
+        },
+        "typeVersion": 1.1,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bbb46ec6-0b43-4a15-b12a-5e5d4b8d6c3d",
+        "name": "Set your nodes",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1160,
+          640
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "8f6664ce-a3ad-42fb-84f7-58608d3c0ce8",
+                "name": "channel_name",
+                "type": "string",
+                "value": "={{ $json.body.channel_name }}"
+              },
+              {
+                "id": "54bf76f5-f00a-4f8e-bfcb-addd8af75a1a",
+                "name": "command",
+                "type": "string",
+                "value": "={{ $json.body.command }}"
+              },
+              {
+                "id": "37e273c0-2775-420b-9eb2-baeab3d1fdb6",
+                "name": "user_name",
+                "type": "string",
+                "value": "={{ $json.body.user_name }}"
+              },
+              {
+                "id": "6926bdae-e5eb-429d-a17d-7775b87184b1",
+                "name": "text",
+                "type": "string",
+                "value": "={{ $json.body.text }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f8b66cdb-3c56-4ec6-b2a2-f3fab8ba392c",
+        "name": "Create new clickup task",
+        "type": "n8n-nodes-base.clickUp",
+        "position": [
+          1340,
+          640
+        ],
+        "parameters": {
+          "list": "900900727522",
+          "name": "={{ $json.text }}",
+          "team": "9009074051",
+          "space": "90090146907",
+          "folderless": true,
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "additionalFields": {
+            "content": "={{ $json.text }}",
+            "assignees": []
+          }
+        },
+        "credentials": {
+          "clickUpOAuth2Api": {
+            "id": "Cs34tMBCqaT1yt1w",
+            "name": "ClickUp account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This clickUp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "47aa82ae-8a9c-40fa-be79-2bd602ffa045",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          400,
+          300
+        ],
+        "parameters": {
+          "width": 467,
+          "height": 861.9451537637377,
+          "content": "## Create new Clickup Tasks from Slack commands\nThis workflow aims to make it easy to create new tasks on Clickup from normal Slack messages using simple slack command. \n\nFor example We can have a slack command as \n\n/newTask Set task to update new contacts on CRM and assign them to the sales team\nThis will have an new task on Clickup with the same title and description on Clickup \n\nFor most teams, getting tasks from Slack to Clickup involves manually entering the new tasks into Clickup. What if we could do this with a simple slash command?\n\n## Step 1\nThe first step is to Create an endpoint URL for your slack command by creating an events API from the link [below] {{ $env.API_BASE_URL }}\n\n## STEP 2 \nNext step is defining the endpoint for your URL\nCreate a new webhook endpoint from your n8n with a POST and paste the endpoint URL to your event API. This will send all slash commands associated with the Slash to the desired endpoint\n\n\nOnce you have tested the webhook slash command is working with the webhook, create a new Clickup API that can be used to create new tasks in ClickUp\n\nThis workflow creates a new task with the start dates on Clikup that can be assigned to the respective team members\n\nMore details about the document setup can be found on this document [below]({{ $env.WEBHOOK_URL }}\n\n   ####  Happy Productivity\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "c39381ac-4795-4408-9383-7bae62755569": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-8f2e9881",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-136b37a3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-684b8955",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-3613c813",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-1e9d3163",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-249ed6cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-3d6c2b30",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-a9154379",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "263f6c3b-5225-4d3f-a8ce-5052946b4251": {
+        "main": [
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-7feea844",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-fd161654",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-661b67f5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-c387387b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-047c6766",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-970074d3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-59c5c2fa",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-08c21a86",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Respondtowebhook Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Respondtowebhook Workflow. This workflow integrates 6 different services: webhook, stickyNote, clickUp, set, respondToWebhook. It contains 10 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Respondtowebhook Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "263f6c3b-5225-4d3f-a8ce-5052946b4251": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-7feea844"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-fd161654"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-661b67f5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-c387387b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-047c6766"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-970074d3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-59c5c2fa"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-263f6c3b-5225-4d3f-a8ce-5052946b4251-08c21a86"
+            }
+          ]
+        ]
+      },
+      "c39381ac-4795-4408-9383-7bae62755569": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-8f2e9881"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-136b37a3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-684b8955"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-3613c813"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-1e9d3163"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-249ed6cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-3d6c2b30"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c39381ac-4795-4408-9383-7bae62755569-a9154379"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Respondtowebhook Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "clickUpOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create new clickup task",
+        "parameters": {
+          "additionalFields": {
+            "assignees": [],
+            "content": "={{ $json.text }}"
+          },
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "folderless": true,
+          "list": "900900727522",
+          "name": "={{ $json.text }}",
+          "space": "90090146907",
+          "team": "9009074051"
+        },
+        "type": "n8n-nodes-base.clickUp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Receives slack command",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "09d30853-66a3-4494-ba4b-115d28402811/slackcommand",
+          "responseMode": "responseNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Respond to Webhook",
+        "parameters": {
+          "options": {},
+          "respondWith": "text",
+          "responseBody": "=Task Created: ID  {{ $json.id }}"
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set your nodes",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "8f6664ce-a3ad-42fb-84f7-58608d3c0ce8",
+                "name": "channel_name",
+                "type": "string",
+                "value": "={{ $json.body.channel_name }}"
+              },
+              {
+                "id": "54bf76f5-f00a-4f8e-bfcb-addd8af75a1a",
+                "name": "command",
+                "type": "string",
+                "value": "={{ $json.body.command }}"
+              },
+              {
+                "id": "37e273c0-2775-420b-9eb2-baeab3d1fdb6",
+                "name": "user_name",
+                "type": "string",
+                "value": "={{ $json.body.user_name }}"
+              },
+              {
+                "id": "6926bdae-e5eb-429d-a17d-7775b87184b1",
+                "name": "text",
+                "type": "string",
+                "value": "={{ $json.body.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 4,
+          "content": "## Create new tasks to airtable from a slack command",
+          "height": 359,
+          "width": 874
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "## Create new Clickup Tasks from Slack commands\nThis workflow aims to make it easy to create new tasks on Clickup from normal Slack messages using simple slack command. \n\nFor example We can have a slack command as \n\n/newTask Set task to update new contacts on CRM and assign them to the sales team\nThis will have an new task on Clickup with the same title and description on Clickup \n\nFor most teams, getting tasks from Slack to Clickup involves manually entering the new tasks into Clickup. What if we could do this with a simple slash command?\n\n## Step 1\nThe first step is to Create an endpoint URL for your slack command by creating an events API from the link [below] {{ $env.API_BASE_URL }}\n\n## STEP 2 \nNext step is defining the endpoint for your URL\nCreate a new webhook endpoint from your n8n with a POST and paste the endpoint URL to your event API. This will send all slash commands associated with the Slash to the desired endpoint\n\n\nOnce you have tested the webhook slash command is working with the webhook, create a new Clickup API that can be used to create new tasks in ClickUp\n\nThis workflow creates a new task with the start dates on Clikup that can be assigned to the respective team members\n\nMore details about the document setup can be found on this document [below]({{ $env.WEBHOOK_URL }}\n\n   ####  Happy Productivity\n",
+          "height": 861.9451537637377,
+          "width": 467
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Webhook",
+    "Clickup"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 158,
+  "viewCount": 185,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Clickup Account"
+    ],
+    "requiredCredentials": [
+      "click Up  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Respond to Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Receives slack command\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create new clickup task\" node (n8n-nodes-base.clickUp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set your nodes\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-tfo5c3ijv",
+      "workflowId": "respondtowebhook-workflow-w7xi2",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Clickup/0469_Clickup_Respondtowebhook_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Clickup\\0469_Clickup_Respondtowebhook_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:16.355Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.355Z",
+  "updatedAt": "2026-07-15T11:18:16.355Z"
+}

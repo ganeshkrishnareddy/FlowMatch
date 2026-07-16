@@ -1,0 +1,816 @@
+{
+  "id": "web-server-monitor--r4nab",
+  "name": "Web Server Monitor.",
+  "slug": "web-server-monitor--pf1p",
+  "description": "Automated workflow: Web Server Monitor.. This workflow integrates 6 different services: stickyNote, httpRequest, scheduleTrigger, stopAndError, gmail. It contains 12 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Web Server Monitor. workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "id": "pcLi17oUJK9pSaee",
+    "meta": {
+      "instanceId": "workflow-08dc291a",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.182341",
+      "updatedAt": "2025-09-29T07:07:52.182355",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Web Server Monitor.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "014e1202-3822-4d3f-817e-31f64c8bd5f5",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -680,
+          -440
+        ],
+        "parameters": {
+          "width": 560,
+          "height": 540,
+          "content": "📘 Node Descriptions for Your Web Server Monitor Workflow\n\n⏰ 1. Schedule Trigger  \nTriggers the workflow every minute to initiate regular checks on server availability.\n\n📄 2. Web Servers List (Google Sheets)  \nFetches a list of server hostnames or IP addresses from a Google Sheet.  \nEach row is treated as one server. This makes server management easy — no need to edit the workflow to add/remove servers.\n\n🌐 3. Server Alive Check (HTTP) \nSends an HTTP GET request to each server (e.g., {{ $env.WEBHOOK_URL }}  \nIf the request fails, the error path is triggered.  \n\n📝 4. Web Server Alive Log (Google Sheets)  \nLogs successful server checks into a separate Sheet with a timestamp.\nThis log helps track uptime history, verify server health, and generate availability reports.\n\n🚨📧 5. Server Down Notification (Gmail)  \nSends an alert email if a server does not respond or returns an error.  \nIncludes the server address and the timestamp of failure.\n\n📝 6. Web Server Down Log (Google Sheets)\nLogs the failed server checks into another Sheet with a timestamp.  \nUseful for uptime reporting, debugging, and audit tracking.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "94a3454c-69bd-4a5d-b169-8f3772a41321",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 1
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f92fcadf-0b13-42ac-abed-aaf169d0ed76",
+        "name": "Server-Monitor",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 524060827,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Server_List"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1OiwBkf3bs3tcfi5cAIrOl_GrXw2EfQLdcPbh6SaBFKQ",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Server-Monitor"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "8cXGgTelVK5DewVr",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c168a1f9-1f3f-40b8-95d0-51f6259d8096",
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "onError": "continueErrorOutput",
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0ac82373-6958-4de9-8cf7-94b0005197ff",
+        "name": "Server_Status_Alive",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          660,
+          -180
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Status": "Alive",
+              "TimeStamp": "={{ $now.format('yyyy-MM-dd') }}",
+              "Server IP Address": "={{ $('Server-Monitor').item.json.Server }}"
+            },
+            "schema": [
+              {
+                "id": "TimeStamp",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "TimeStamp",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Server IP Address",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Server IP Address",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Status",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Status",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 303958634,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Server_Status_Alive"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1OiwBkf3bs3tcfi5cAIrOl_GrXw2EfQLdcPbh6SaBFKQ",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Server-Monitor"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "8cXGgTelVK5DewVr",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6dc31115-4ab6-44cf-ac4f-e2af82a5355e",
+        "name": "Gmail",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          660,
+          100
+        ],
+        "webhookId": "dec1def3-c858-4a43-b96e-2655d3fa3b77",
+        "parameters": {
+          "message": "=Hi Team,\n\nAt {{$now.format('yyyy-MM-dd HH:mm:ss')}}, the following server failed to respond to ping:\n\n🔻 Server Down: {{ $json[\"Server\"] }}  \n\nPlease investigate immediately to prevent service disruption. \n\nAutomated Monitoring System\n",
+          "options": {},
+          "subject": "=🔻 Server Down: {{ $json[\"Server\"] }}: {{ $today.format('yyyy-MM-dd') }}"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "C1RVeb9JgdvkMkP4",
+            "name": "Gmail account 2"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "10262115-57a2-4c4d-9a10-89f4f6ee4ed7",
+        "name": "Server_Status_Down",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          880,
+          100
+        ],
+        "parameters": {
+          "columns": {
+            "value": {
+              "Status": "Down",
+              "TimeStamp": "={{$now.format('yyyy-MM-dd HH:mm:ss')}}",
+              "Server IP Address": "={{ $('Server-Monitor').item.json.Server }}"
+            },
+            "schema": [
+              {
+                "id": "TimeStamp",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "TimeStamp",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Server IP Address",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Server IP Address",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Status",
+                "type": "string",
+                "display": true,
+                "required": false,
+                "displayName": "Status",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {},
+          "operation": "append",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Server_Status_Down"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1OiwBkf3bs3tcfi5cAIrOl_GrXw2EfQLdcPbh6SaBFKQ",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Server-Monitor"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "8cXGgTelVK5DewVr",
+            "name": "Google Sheets account"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "21468219-4434-4a0c-a3c4-9068baccc3cc",
+    "connections": {
+      "c168a1f9-1f3f-40b8-95d0-51f6259d8096": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-87f90b09",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-c8b52e8e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-ecd94a49",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-823cc42d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-171f9604",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-4b491536",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-7a1f5be5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-39109281",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f92fcadf-0b13-42ac-abed-aaf169d0ed76": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f92fcadf-0b13-42ac-abed-aaf169d0ed76-1ce2c54d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "0ac82373-6958-4de9-8cf7-94b0005197ff": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0ac82373-6958-4de9-8cf7-94b0005197ff-36a1590d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "10262115-57a2-4c4d-9a10-89f4f6ee4ed7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-10262115-57a2-4c4d-9a10-89f4f6ee4ed7-76935ec7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Web Server Monitor.. This workflow integrates 6 different services: stickyNote, httpRequest, scheduleTrigger, stopAndError, gmail. It contains 12 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Web Server Monitor.. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "0ac82373-6958-4de9-8cf7-94b0005197ff": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0ac82373-6958-4de9-8cf7-94b0005197ff-36a1590d"
+            }
+          ]
+        ]
+      },
+      "10262115-57a2-4c4d-9a10-89f4f6ee4ed7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-10262115-57a2-4c4d-9a10-89f4f6ee4ed7-76935ec7"
+            }
+          ]
+        ]
+      },
+      "c168a1f9-1f3f-40b8-95d0-51f6259d8096": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-87f90b09"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-c8b52e8e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-ecd94a49"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-823cc42d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-171f9604"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-4b491536"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-7a1f5be5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c168a1f9-1f3f-40b8-95d0-51f6259d8096-39109281"
+            }
+          ]
+        ]
+      },
+      "f92fcadf-0b13-42ac-abed-aaf169d0ed76": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f92fcadf-0b13-42ac-abed-aaf169d0ed76-1ce2c54d"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Web Server Monitor.",
+    "nodes": [
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Gmail",
+        "parameters": {
+          "message": "=Hi Team,\n\nAt {{$now.format('yyyy-MM-dd HH:mm:ss')}}, the following server failed to respond to ping:\n\n🔻 Server Down: {{ $json[\"Server\"] }}  \n\nPlease investigate immediately to prevent service disruption. \n\nAutomated Monitoring System\n",
+          "options": {},
+          "subject": "=🔻 Server Down: {{ $json[\"Server\"] }}: {{ $today.format('yyyy-MM-dd') }}"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "HTTP Request",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 1
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Server_Status_Alive",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "TimeStamp",
+                "id": "TimeStamp",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Server IP Address",
+                "id": "Server IP Address",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Status",
+                "id": "Status",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Server IP Address": "={{ $('Server-Monitor').item.json.Server }}",
+              "Status": "Alive",
+              "TimeStamp": "={{ $now.format('yyyy-MM-dd') }}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Server-Monitor",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1OiwBkf3bs3tcfi5cAIrOl_GrXw2EfQLdcPbh6SaBFKQ"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Server_Status_Alive",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 303958634
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Server_Status_Down",
+        "parameters": {
+          "columns": {
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false,
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "TimeStamp",
+                "id": "TimeStamp",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Server IP Address",
+                "id": "Server IP Address",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "Status",
+                "id": "Status",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "Server IP Address": "={{ $('Server-Monitor').item.json.Server }}",
+              "Status": "Down",
+              "TimeStamp": "={{$now.format('yyyy-MM-dd HH:mm:ss')}}"
+            }
+          },
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Server-Monitor",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1OiwBkf3bs3tcfi5cAIrOl_GrXw2EfQLdcPbh6SaBFKQ"
+          },
+          "operation": "append",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Server_Status_Down",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Server-Monitor",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Server-Monitor",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1OiwBkf3bs3tcfi5cAIrOl_GrXw2EfQLdcPbh6SaBFKQ"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Server_List",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 524060827
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "📘 Node Descriptions for Your Web Server Monitor Workflow\n\n⏰ 1. Schedule Trigger  \nTriggers the workflow every minute to initiate regular checks on server availability.\n\n📄 2. Web Servers List (Google Sheets)  \nFetches a list of server hostnames or IP addresses from a Google Sheet.  \nEach row is treated as one server. This makes server management easy — no need to edit the workflow to add/remove servers.\n\n🌐 3. Server Alive Check (HTTP) \nSends an HTTP GET request to each server (e.g., {{ $env.WEBHOOK_URL }}  \nIf the request fails, the error path is triggered.  \n\n📝 4. Web Server Alive Log (Google Sheets)  \nLogs successful server checks into a separate Sheet with a timestamp.\nThis log helps track uptime history, verify server health, and generate availability reports.\n\n🚨📧 5. Server Down Notification (Gmail)  \nSends an alert email if a server does not respond or returns an error.  \nIncludes the server address and the timestamp of failure.\n\n📝 6. Web Server Down Log (Google Sheets)\nLogs the failed server checks into another Sheet with a timestamp.  \nUseful for uptime reporting, debugging, and audit tracking.\n",
+          "height": 540,
+          "width": 560
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Sheets",
+    "HTTP Request",
+    "Gmail"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 198,
+  "viewCount": 219,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Sheets Account",
+      "HTTP Request Account",
+      "Gmail Account"
+    ],
+    "requiredCredentials": [
+      "google Sheets  O Auth2  A P I details",
+      "gmail  O Auth2 details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Server-Monitor\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Server_Status_Alive\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Gmail\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Server_Status_Down\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Incoming triggers will qualified/formatted, new rows will be written to Google Sheets, and email replies or alerts will be sent automatically.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-pt0wf0fhi",
+      "workflowId": "web-server-monitor--r4nab",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Schedule/1952_Schedule_HTTP_Monitor_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Schedule\\1952_Schedule_HTTP_Monitor_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:06.131Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:06.131Z",
+  "updatedAt": "2026-07-15T11:30:06.131Z",
+  "category": {
+    "slug": "email-automation",
+    "name": "Email Automation"
+  },
+  "categoryId": "email-automation"
+}

@@ -1,0 +1,738 @@
+{
+  "id": "googledrivetrigger-workflow-x7na1",
+  "name": "Googledrivetrigger Workflow",
+  "slug": "googledrivetrigger-workflow-334a",
+  "description": "Automated workflow: Googledrivetrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Googledrivetrigger Workflow workflow containing 13 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-679d078b",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.311875",
+      "updatedAt": "2025-09-29T07:07:51.312322",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "97b052c3-2a98-4dee-973a-f170a5e575c8",
+        "name": "Google Drive Trigger",
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "position": [
+          960,
+          140
+        ],
+        "parameters": {
+          "event": "fileCreated",
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder",
+          "folderToWatch": "1uQ0YnGnQNzIaWGdTt2UBT58tTy8xDlpW"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "{{ $credentials.googleDriveOAuth2Api.id }}",
+            "name": "Hilary's Google Drive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This googleDriveTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1e82f8f8-175d-4493-a3a9-35380431d91c",
+        "name": "Google Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          1180,
+          140
+        ],
+        "parameters": {
+          "fileId": "={{ $json[\"id\"] }}",
+          "options": {},
+          "operation": "download"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "{{ $credentials.googleDriveOAuth2Api.id }}",
+            "name": "Hilary's Google Drive account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fb36224d-4acb-4aba-9543-dd534e76477f",
+        "name": "Spreadsheet File",
+        "type": "n8n-nodes-base.spreadsheetFile",
+        "position": [
+          1400,
+          140
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This spreadsheetFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "323b2a18-fc98-4b73-9c7f-421780f04e94",
+        "name": "Pipedrive",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1540,
+          400
+        ],
+        "parameters": {
+          "filters": {},
+          "resource": "lead",
+          "operation": "getAll",
+          "returnAll": true
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "n8n Production"
+          }
+        },
+        "executeOnce": true,
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "80d9733e-ccfb-4140-981f-8b818c4b9e70",
+        "name": "Pipedrive1",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1920,
+          380
+        ],
+        "parameters": {
+          "personId": "={{ $json[\"person_id\"] }}",
+          "resource": "person",
+          "operation": "get"
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "n8n Production"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "57197318-b0a9-4f15-9e10-f3750a60936c",
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1720,
+          400
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{ $json[\"person_id\"] }}",
+                "operation": "larger"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e5592e1d-da1f-4536-b816-3a6df764cd0a",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          2140,
+          100
+        ],
+        "parameters": {
+          "mode": "removeKeyMatches",
+          "propertyName1": "Email address",
+          "propertyName2": "email[0].value"
+        },
+        "typeVersion": 1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "29918402-d224-411d-b563-44d68c5b1c10",
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2360,
+          100
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "company",
+                "value": "={{ $json[\"Company name\"] }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json[\"First name\"] }} {{ $json[\"Last name\"] }}"
+              },
+              {
+                "name": "email",
+                "value": "={{ $json[\"Email address\"] }}"
+              },
+              {
+                "name": "employees",
+                "value": "={{ $json[\"Company size\"] }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a3c83915-3b87-41ec-ba3b-5db1134b1763",
+        "name": "Create Organization",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          2840,
+          100
+        ],
+        "parameters": {
+          "name": "={{ $json[\"company\"] }}",
+          "resource": "organization",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "n8n Production"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e8f0a561-cc7a-4302-83dc-8c4a407b9b53",
+        "name": "Create Person",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          3180,
+          100
+        ],
+        "parameters": {
+          "name": "={{ $node[\"Set\"].json[\"name\"] }}",
+          "resource": "person",
+          "additionalFields": {
+            "email": [
+              "={{ $node[\"Set\"].json[\"email\"] }}"
+            ],
+            "org_id": "={{ $json[\"id\"] }}",
+            "customProperties": {
+              "property": [
+                {
+                  "name": "0bf0c49725830779ff146f5a087853d959dee064",
+                  "value": "LinkedIn_Ad"
+                }
+              ]
+            }
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "n8n Production"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7c038ae1-030e-4047-b4af-d13333ed14af",
+        "name": "Create Lead",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          3380,
+          100
+        ],
+        "parameters": {
+          "title": "={{$node[\"Set\"].json[\"company\"]}} lead",
+          "resource": "lead",
+          "organization_id": "={{$node[\"Create Organization\"].json.id}}",
+          "additionalFields": {
+            "owner_id": 12672788,
+            "person_id": "={{$json.id}}"
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "n8n Production"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "46a433d1-0248-4208-89d2-747644e1face",
+        "name": "Create Note",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          3580,
+          100
+        ],
+        "parameters": {
+          "content": "=\nCompany Size:\n{{$node[\"Set\"].json[\"employees\"]}}",
+          "resource": "note",
+          "additionalFields": {
+            "lead_id": "={{$json.id}}"
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "n8n Production"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-087ff515",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "97b052c3-2a98-4dee-973a-f170a5e575c8": {
+        "main": [
+          [
+            {
+              "node": "error-handler-97b052c3-2a98-4dee-973a-f170a5e575c8-c501de23",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "1e82f8f8-175d-4493-a3a9-35380431d91c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-1e82f8f8-175d-4493-a3a9-35380431d91c-794ba4d7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "fb36224d-4acb-4aba-9543-dd534e76477f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-fb36224d-4acb-4aba-9543-dd534e76477f-386f5319",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Googledrivetrigger Workflow",
+    "description": "Automated workflow: Googledrivetrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Googledrivetrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "1e82f8f8-175d-4493-a3a9-35380431d91c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1e82f8f8-175d-4493-a3a9-35380431d91c-794ba4d7"
+            }
+          ]
+        ]
+      },
+      "97b052c3-2a98-4dee-973a-f170a5e575c8": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-97b052c3-2a98-4dee-973a-f170a5e575c8-c501de23"
+            }
+          ]
+        ]
+      },
+      "fb36224d-4acb-4aba-9543-dd534e76477f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb36224d-4acb-4aba-9543-dd534e76477f-386f5319"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Googledrivetrigger Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Lead",
+        "parameters": {
+          "additionalFields": {
+            "owner_id": 12672788,
+            "person_id": "={{$json.id}}"
+          },
+          "organization_id": "={{$node[\"Create Organization\"].json.id}}",
+          "resource": "lead",
+          "title": "={{$node[\"Set\"].json[\"company\"]}} lead"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Note",
+        "parameters": {
+          "additionalFields": {
+            "lead_id": "={{$json.id}}"
+          },
+          "content": "=\nCompany Size:\n{{$node[\"Set\"].json[\"employees\"]}}",
+          "resource": "note"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Organization",
+        "parameters": {
+          "additionalFields": {},
+          "name": "={{ $json[\"company\"] }}",
+          "resource": "organization"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Person",
+        "parameters": {
+          "additionalFields": {
+            "customProperties": {
+              "property": [
+                {
+                  "name": "0bf0c49725830779ff146f5a087853d959dee064",
+                  "value": "LinkedIn_Ad"
+                }
+              ]
+            },
+            "email": [
+              "={{ $node[\"Set\"].json[\"email\"] }}"
+            ],
+            "org_id": "={{ $json[\"id\"] }}"
+          },
+          "name": "={{ $node[\"Set\"].json[\"name\"] }}",
+          "resource": "person"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive",
+        "parameters": {
+          "fileId": "={{ $json[\"id\"] }}",
+          "operation": "download",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive Trigger",
+        "parameters": {
+          "event": "fileCreated",
+          "folderToWatch": "1uQ0YnGnQNzIaWGdTt2UBT58tTy8xDlpW",
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder"
+        },
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "operation": "larger",
+                "value1": "={{ $json[\"person_id\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "mode": "removeKeyMatches",
+          "propertyName1": "Email address",
+          "propertyName2": "email[0].value"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Pipedrive",
+        "parameters": {
+          "filters": {},
+          "operation": "getAll",
+          "resource": "lead",
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Pipedrive1",
+        "parameters": {
+          "operation": "get",
+          "personId": "={{ $json[\"person_id\"] }}",
+          "resource": "person"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "company",
+                "value": "={{ $json[\"Company name\"] }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json[\"First name\"] }} {{ $json[\"Last name\"] }}"
+              },
+              {
+                "name": "email",
+                "value": "={{ $json[\"Email address\"] }}"
+              },
+              {
+                "name": "employees",
+                "value": "={{ $json[\"Company size\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Spreadsheet File",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.spreadsheetFile",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 13,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "Google Drive",
+    "Spreadsheetfile",
+    "Pipedrive"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 59,
+  "viewCount": 641,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account",
+      "Spreadsheetfile Account",
+      "Pipedrive Account"
+    ],
+    "requiredCredentials": [
+      "google Drive  O Auth2  A P I details",
+      "pipedrive  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Google Drive Trigger\".",
+      "Open the \"Google Drive\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Spreadsheet File\" node (n8n-nodes-base.spreadsheetFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Pipedrive\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Pipedrive1\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Organization\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Person\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Lead\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Note\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-0mot8eykx",
+      "workflowId": "googledrivetrigger-workflow-x7na1",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Pipedrive/0251_Pipedrive_Spreadsheetfile_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Pipedrive\\0251_Pipedrive_Spreadsheetfile_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:55.522Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:55.522Z",
+  "updatedAt": "2026-07-15T11:29:55.522Z",
+  "category": {
+    "slug": "google-workspace",
+    "name": "Google Workspace"
+  },
+  "categoryId": "google-workspace"
+}

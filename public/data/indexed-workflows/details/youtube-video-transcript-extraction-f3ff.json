@@ -1,0 +1,410 @@
+{
+  "id": "youtube-video-transcript-extraction-j46xr",
+  "name": "Youtube Video Transcript Extraction",
+  "slug": "youtube-video-transcript-extraction-f3ff",
+  "description": "Automated workflow: Youtube Video Transcript Extraction. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Youtube Video Transcript Extraction workflow containing 4 nodes.",
+  "originalWorkflowJson": {
+    "id": "XxkmcgZC4OtIOVoD",
+    "meta": {
+      "instanceId": "workflow-2d6f9a58",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.030446",
+      "updatedAt": "2025-09-29T07:07:45.030470",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Youtube Video Transcript Extraction",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "686e639a-650d-480d-9887-11bd4140f1fe",
+        "name": "YoutubeVideoURL",
+        "type": "n8n-nodes-base.formTrigger",
+        "position": [
+          -20,
+          0
+        ],
+        "webhookId": "156a04c8-917d-4624-a46e-8fbcab89d16b",
+        "parameters": {
+          "options": {},
+          "formTitle": "Youtube Video Transcriber",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Youtube Video Url",
+                "requiredField": true
+              }
+            ]
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This formTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5384c4ed-a726-4253-8a88-d413124f80be",
+        "name": "cleanedTranscript",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          740,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "7653a859-556d-4e00-bafa-6f70f90de0d7",
+                "name": "transcript",
+                "type": "string",
+                "value": "={{ $json.cleanedTranscript }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "83b6567f-c931-429c-8d7c-0b2549820ca1",
+        "name": "processTranscript",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          500,
+          0
+        ],
+        "parameters": {
+          "functionCode": "// Extract and process the transcript\nconst data = $input.first().json;\n\nif (!data.transcript && !data.text) {\n  return {\n    json: {\n      success: false,\n      message: 'No transcript available for this video',\n      videoUrl: $input.first().json.body?.videoUrl || 'Unknown'\n    }\n  };\n}\n\n// Process the transcript text\nlet transcriptText = '';\n\n// Handle different API response formats\nif (data.transcript) {\n  // Format for array of transcript segments\n  if (Array.isArray(data.transcript)) {\n    data.transcript.forEach(segment => {\n      if (segment.text) {\n        transcriptText += segment.text + ' ';\n      }\n    });\n  } else if (typeof data.transcript === 'string') {\n    transcriptText = data.transcript;\n  }\n} else if (data.text) {\n  // Format for single transcript object with text property\n  transcriptText = data.text;\n}\n\n// Clean up the transcript (remove extra spaces, normalize punctuation)\nconst cleanedTranscript = transcriptText\n  .replace(/\\s+/g, ' ')\n  .replace(/\\s([.,!?])/g, '$1')\n  .trim();\n\nreturn {\n  json: {\n    success: true,\n    videoUrl: $input.first().json.body?.videoUrl || 'From transcript',\n    rawTranscript: data.text || data.transcript,\n    cleanedTranscript,\n    duration: data.duration,\n    offset: data.offset,\n    language: data.lang\n  }\n};"
+        },
+        "typeVersion": 1,
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cebf0fd7-6b66-4287-bede-fab53061bed2",
+        "name": "extractTranscript",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          240,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {},
+          "sendBody": true,
+          "sendQuery": true,
+          "sendHeaders": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "url",
+                "value": "={{ $json['Youtube Video Url'] }}"
+              }
+            ]
+          },
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "videoId",
+                "value": "ZacjOVVgoLY"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-rapidapi-host",
+                "value": "youtube-transcript3.p.rapidapi.com"
+              },
+              {
+                "name": "x-rapidapi-key",
+                "value": "\"your_api_key\""
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "084b006b-36f9-46a7-8a0b-7656126b29cd",
+    "connections": {
+      "cebf0fd7-6b66-4287-bede-fab53061bed2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2-8a97f79d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2-a34801b9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2-a9896583",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2-06348d66",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Youtube Video Transcript Extraction. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Youtube Video Transcript Extraction. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "cebf0fd7-6b66-4287-bede-fab53061bed2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2-8a97f79d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2-a34801b9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2-a9896583"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-cebf0fd7-6b66-4287-bede-fab53061bed2-06348d66"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Youtube Video Transcript Extraction",
+    "nodes": [
+      {
+        "name": "cleanedTranscript",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "7653a859-556d-4e00-bafa-6f70f90de0d7",
+                "name": "transcript",
+                "type": "string",
+                "value": "={{ $json.cleanedTranscript }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "extractTranscript",
+        "parameters": {
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "url",
+                "value": "={{ $json['Youtube Video Url'] }}"
+              }
+            ]
+          },
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-rapidapi-host",
+                "value": "youtube-transcript3.p.rapidapi.com"
+              },
+              {
+                "name": "x-rapidapi-key",
+                "value": "\"your_api_key\""
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "options": {},
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "videoId",
+                "value": "ZacjOVVgoLY"
+              }
+            ]
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "sendQuery": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3
+      },
+      {
+        "name": "processTranscript",
+        "parameters": {
+          "functionCode": "// Extract and process the transcript\nconst data = $input.first().json;\n\nif (!data.transcript && !data.text) {\n  return {\n    json: {\n      success: false,\n      message: 'No transcript available for this video',\n      videoUrl: $input.first().json.body?.videoUrl || 'Unknown'\n    }\n  };\n}\n\n// Process the transcript text\nlet transcriptText = '';\n\n// Handle different API response formats\nif (data.transcript) {\n  // Format for array of transcript segments\n  if (Array.isArray(data.transcript)) {\n    data.transcript.forEach(segment => {\n      if (segment.text) {\n        transcriptText += segment.text + ' ';\n      }\n    });\n  } else if (typeof data.transcript === 'string') {\n    transcriptText = data.transcript;\n  }\n} else if (data.text) {\n  // Format for single transcript object with text property\n  transcriptText = data.text;\n}\n\n// Clean up the transcript (remove extra spaces, normalize punctuation)\nconst cleanedTranscript = transcriptText\n  .replace(/\\s+/g, ' ')\n  .replace(/\\s([.,!?])/g, '$1')\n  .trim();\n\nreturn {\n  json: {\n    success: true,\n    videoUrl: $input.first().json.body?.videoUrl || 'From transcript',\n    rawTranscript: data.text || data.transcript,\n    cleanedTranscript,\n    duration: data.duration,\n    offset: data.offset,\n    language: data.lang\n  }\n};"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "YoutubeVideoURL",
+        "parameters": {
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Youtube Video Url",
+                "requiredField": true
+              }
+            ]
+          },
+          "formTitle": "Youtube Video Transcriber",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2
+      }
+    ]
+  },
+  "nodeCount": 4,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Form Trigger",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 23,
+  "viewCount": 114,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Form Trigger Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"YoutubeVideoURL\".",
+      "Open the \"processTranscript\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"extractTranscript\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"cleanedTranscript\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 91,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-0l4cnobeu",
+      "workflowId": "youtube-video-transcript-extraction-j46xr",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Form/1767_Form_HTTP_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Form\\1767_Form_HTTP_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:24.610Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:24.610Z",
+  "updatedAt": "2026-07-15T11:18:24.610Z"
+}

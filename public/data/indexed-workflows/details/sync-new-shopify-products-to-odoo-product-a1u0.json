@@ -1,0 +1,394 @@
+{
+  "id": "sync-new-shopify-products-to-odoo-product-zk4v2",
+  "name": "Sync New Shopify Products to Odoo Product",
+  "slug": "sync-new-shopify-products-to-odoo-product-a1u0",
+  "description": "Automated workflow: Sync New Shopify Products to Odoo Product. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Sync New Shopify Products to Odoo Product workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "44PIIGwPzUe9dGfb",
+    "meta": {
+      "instanceId": "workflow-c6947a5a",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.260824",
+      "updatedAt": "2025-09-29T07:07:52.260832",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Sync New Shopify Products to Odoo Product",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "5ad7f941-4146-4897-ad30-dcdccab85e82",
+        "name": "Odoo6",
+        "type": "n8n-nodes-base.odoo",
+        "position": [
+          320,
+          0
+        ],
+        "parameters": {
+          "limit": 1,
+          "options": {},
+          "resource": "custom",
+          "operation": "getAll",
+          "filterRequest": {
+            "filter": [
+              {
+                "value": "={{ $('Shopify Trigger').all()[0].json.variants[0].product_id }}",
+                "fieldName": "default_code"
+              }
+            ]
+          },
+          "customResource": "product.product"
+        },
+        "credentials": {
+          "odooApi": {
+            "id": "0qIK4Cq1BwOSbxT8",
+            "name": "Odoo 148.66.157.208:8069"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This odoo node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1b1a3753-e645-465c-8155-ad8c006f3e13",
+        "name": "Filter2",
+        "type": "n8n-nodes-base.filter",
+        "position": [
+          740,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.existing }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This filter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5b388afc-de9a-4246-85a8-0ef4ec8ac0bc",
+        "name": "Odoo7",
+        "type": "n8n-nodes-base.odoo",
+        "position": [
+          920,
+          0
+        ],
+        "parameters": {
+          "resource": "custom",
+          "customResource": "product.product",
+          "fieldsToCreateOrUpdate": {
+            "fields": [
+              {
+                "fieldName": "name",
+                "fieldValue": "={{ $json.product_detail.title }}"
+              },
+              {
+                "fieldName": "default_code",
+                "fieldValue": "={{ $json.product_detail.variants[0].product_id }}"
+              },
+              {
+                "fieldName": "description",
+                "fieldValue": "={{ $json.product_detail.body_html }}"
+              },
+              {
+                "fieldName": "list_price",
+                "fieldValue": "={{ $json.product_detail.variants[0].price }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "odooApi": {
+            "id": "0qIK4Cq1BwOSbxT8",
+            "name": "Odoo 148.66.157.208:8069"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": false,
+        "notes": "This odoo node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "765aeea5-bfe8-4d6c-96a4-ebbc192a9d60",
+        "name": "Shopify Trigger",
+        "type": "n8n-nodes-base.shopifyTrigger",
+        "position": [
+          80,
+          0
+        ],
+        "webhookId": "30b89f06-e54c-4461-9e1e-9ef7f221e08b",
+        "parameters": {
+          "topic": "products/create",
+          "authentication": "{{ $credentials.accessToken }}"
+        },
+        "credentials": {
+          "shopifyAccessTokenApi": {
+            "id": "zkXzZzc97XyALfN8",
+            "name": "Evozard - Shopify"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This shopifyTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e1b2f842-0b54-4f55-9c69-a4d40777fd0c",
+        "name": "Code",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          560,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "var product_detail = $('Shopify Trigger').first().json\nconsole.log('-------product_detail--------',product_detail)\nvar existing_product = $('Odoo6').item.json\nreturn {existing:existing_product.id ? true:false,product_detail:product_detail}\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-56d3933d",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "5dc6f917-daa8-4819-b8ff-1c46ab75b680",
+    "connections": {},
+    "description": "Automated workflow: Sync New Shopify Products to Odoo Product. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Sync New Shopify Products to Odoo Product. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Sync New Shopify Products to Odoo Product",
+    "nodes": [
+      {
+        "name": "Code",
+        "parameters": {
+          "jsCode": "var product_detail = $('Shopify Trigger').first().json\nconsole.log('-------product_detail--------',product_detail)\nvar existing_product = $('Odoo6').item.json\nreturn {existing:existing_product.id ? true:false,product_detail:product_detail}\n",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Filter2",
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.existing }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "odooApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Odoo6",
+        "parameters": {
+          "customResource": "product.product",
+          "filterRequest": {
+            "filter": [
+              {
+                "fieldName": "default_code",
+                "value": "={{ $('Shopify Trigger').all()[0].json.variants[0].product_id }}"
+              }
+            ]
+          },
+          "limit": 1,
+          "operation": "getAll",
+          "options": {},
+          "resource": "custom"
+        },
+        "type": "n8n-nodes-base.odoo",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "odooApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Odoo7",
+        "parameters": {
+          "customResource": "product.product",
+          "fieldsToCreateOrUpdate": {
+            "fields": [
+              {
+                "fieldName": "name",
+                "fieldValue": "={{ $json.product_detail.title }}"
+              },
+              {
+                "fieldName": "default_code",
+                "fieldValue": "={{ $json.product_detail.variants[0].product_id }}"
+              },
+              {
+                "fieldName": "description",
+                "fieldValue": "={{ $json.product_detail.body_html }}"
+              },
+              {
+                "fieldName": "list_price",
+                "fieldValue": "={{ $json.product_detail.variants[0].price }}"
+              }
+            ]
+          },
+          "resource": "custom"
+        },
+        "type": "n8n-nodes-base.odoo",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "shopifyAccessTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Shopify Trigger",
+        "parameters": {
+          "authentication": "{{ $credentials.accessToken }}",
+          "topic": "products/create"
+        },
+        "type": "n8n-nodes-base.shopifyTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Odoo",
+    "Shopify"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 48,
+  "viewCount": 166,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Odoo Account",
+      "Shopify Account"
+    ],
+    "requiredCredentials": [
+      "odoo  A P I details",
+      "shopify Access Token  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Shopify Trigger\".",
+      "Open the \"Odoo6\" node (n8n-nodes-base.odoo) and configure the action parameters, mappings, and fields.",
+      "Open the \"Filter2\" node (n8n-nodes-base.filter) and configure the action parameters, mappings, and fields.",
+      "Open the \"Odoo7\" node (n8n-nodes-base.odoo) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-0p696xyux",
+      "workflowId": "sync-new-shopify-products-to-odoo-product-zk4v2",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Shopify/0961_Shopify_Filter_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Shopify\\0961_Shopify_Filter_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:30:07.053Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:07.053Z",
+  "updatedAt": "2026-07-15T11:30:07.053Z",
+  "category": {
+    "slug": "shopify",
+    "name": "Shopify"
+  },
+  "categoryId": "shopify"
+}

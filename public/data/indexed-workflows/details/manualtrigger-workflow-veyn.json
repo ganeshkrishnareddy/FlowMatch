@@ -1,0 +1,859 @@
+{
+  "id": "manualtrigger-workflow-ic01l",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-veyn",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 13 different services: stickyNote, httpRequest, textSplitterRecursiveCharacterTextSplitter, splitOut, merge. It contains 20 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-e6018044",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.279220",
+      "updatedAt": "2025-09-29T07:07:54.279229",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "67850bd7-f9f4-4d5b-8c9e-bd1451247ba6",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -740,
+          1000
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0d9133f9-b6d3-4101-95c6-3cd24cdb70c3",
+        "name": "Fetch essay list",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -520,
+          1000
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ee634297-a456-4f70-a995-55b02950571e",
+        "name": "Extract essay names",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          -300,
+          1000
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "extractHtmlContent",
+          "dataPropertyName": "=data",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "attribute": "href",
+                "cssSelector": "table table a",
+                "returnArray": true,
+                "returnValue": "attribute"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "83d75693-dbb8-44c4-8533-da06f611c59c",
+        "name": "Fetch essay texts",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          360,
+          1000
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "151022b5-8570-4176-bf3f-137f27ac7036",
+        "name": "Extract title",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          700,
+          700
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "extractHtmlContent",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "title"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "07bcf095-3c4d-4a72-9bcb-341411750ff5",
+        "name": "Clean up",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1360,
+          980
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "title",
+                "stringValue": "={{ $json.title }}"
+              },
+              {
+                "name": "summary",
+                "stringValue": "={{ $json.response.text }}"
+              },
+              {
+                "name": "url",
+                "stringValue": "={{ $env.WEBHOOK_URL }}{{ $('Limit to first 3').item.json.essay }}"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "typeVersion": 3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "11285de0-3c5d-4296-a322-9b7585af9acc",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -580,
+          920
+        ],
+        "parameters": {
+          "width": 1071.752021563343,
+          "height": 285.66037735849045,
+          "content": "## Scrape latest Paul Graham essays"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c32f905d-dd7a-4b68-bbe0-dd8115ee0944",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          620,
+          920
+        ],
+        "parameters": {
+          "width": 465.3908355795153,
+          "height": 606.7924528301882,
+          "content": "## Summarize them with GPT"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "29d264f4-df6d-4a41-ab38-58e1b1becc9a",
+        "name": "Split out into items",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          -80,
+          1000
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "essay"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ccfa3a1d-f170-44b4-a1f2-3573c88cae98",
+        "name": "Limit to first 3",
+        "type": "n8n-nodes-base.limit",
+        "position": [
+          140,
+          1000
+        ],
+        "parameters": {
+          "maxItems": 3
+        },
+        "typeVersion": 1,
+        "notes": "This limit node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c3d05068-9d1a-4ef5-8249-e7384dc617ee",
+        "name": "Default Data Loader",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          820,
+          1200
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This documentDefaultDataLoader node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "db75adad-cb16-4e72-b16e-34684a733b05",
+        "name": "Recursive Character Text Splitter",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          820,
+          1340
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This textSplitterRecursiveCharacterTextSplitter node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "022cc091-9b4c-45c2-bc8e-4037ec2d0d60",
+        "name": "OpenAI Chat Model1",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          680,
+          1200
+        ],
+        "parameters": {
+          "model": "gpt-4o-mini",
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "8gccIjcuf3gvaoEr",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cda47bb7-36c5-4d15-a1ef-0c66b1194825",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1160,
+          980
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combineBy": "combineByPosition"
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "28144e4c-e425-428d-b3d1-f563bfd4e5b3",
+        "name": "Summarization Chain",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          720,
+          1000
+        ],
+        "parameters": {
+          "options": {},
+          "operationMode": "documentLoader"
+        },
+        "typeVersion": 2,
+        "notes": "This chainSummarization node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "0d9133f9-b6d3-4101-95c6-3cd24cdb70c3": {
+        "main": [
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-f0e4962f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-d7b8b378",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-d2a70e68",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-2c5337b4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-298a0043",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-e3bf6a34",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-4193fa59",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-3de49096",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "83d75693-dbb8-44c4-8533-da06f611c59c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-49e6cbd2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-eeef59f5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-b3fbe03f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-fcb7ef10",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-c0a7b5b5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-9a66718a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-b87d9b10",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-0759681d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "022cc091-9b4c-45c2-bc8e-4037ec2d0d60": {
+        "main": [
+          [
+            {
+              "node": "error-handler-022cc091-9b4c-45c2-bc8e-4037ec2d0d60-94dd3f9f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 13 different services: stickyNote, httpRequest, textSplitterRecursiveCharacterTextSplitter, splitOut, merge. It contains 20 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "022cc091-9b4c-45c2-bc8e-4037ec2d0d60": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-022cc091-9b4c-45c2-bc8e-4037ec2d0d60-94dd3f9f"
+            }
+          ]
+        ]
+      },
+      "0d9133f9-b6d3-4101-95c6-3cd24cdb70c3": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-f0e4962f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-d7b8b378"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-d2a70e68"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-2c5337b4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-298a0043"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-e3bf6a34"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-4193fa59"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-0d9133f9-b6d3-4101-95c6-3cd24cdb70c3-3de49096"
+            }
+          ]
+        ]
+      },
+      "83d75693-dbb8-44c4-8533-da06f611c59c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-49e6cbd2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-eeef59f5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-b3fbe03f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-fcb7ef10"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-c0a7b5b5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-9a66718a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-b87d9b10"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-83d75693-dbb8-44c4-8533-da06f611c59c-0759681d"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Clean up",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "title",
+                "stringValue": "={{ $json.title }}"
+              },
+              {
+                "name": "summary",
+                "stringValue": "={{ $json.response.text }}"
+              },
+              {
+                "name": "url",
+                "stringValue": "={{ $env.WEBHOOK_URL }}{{ $('Limit to first 3').item.json.essay }}"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3
+      },
+      {
+        "name": "Default Data Loader",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract essay names",
+        "parameters": {
+          "dataPropertyName": "=data",
+          "extractionValues": {
+            "values": [
+              {
+                "attribute": "href",
+                "cssSelector": "table table a",
+                "key": "YOUR_CREDENTIAL_HERE",
+                "returnArray": true,
+                "returnValue": "attribute"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract title",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "title",
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1
+      },
+      {
+        "name": "Fetch essay list",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Fetch essay texts",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Limit to first 3",
+        "parameters": {
+          "maxItems": 3
+        },
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "combineBy": "combineByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model1",
+        "parameters": {
+          "model": "gpt-4o-mini",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Recursive Character Text Splitter",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Split out into items",
+        "parameters": {
+          "fieldToSplitOut": "essay",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Scrape latest Paul Graham essays",
+          "height": 285.66037735849045,
+          "width": 1071.752021563343
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "## Summarize them with GPT",
+          "height": 606.7924528301882,
+          "width": 465.3908355795153
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Summarization Chain",
+        "parameters": {
+          "operationMode": "documentLoader",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 2
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Html"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 152,
+  "viewCount": 355,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Html Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"Fetch essay list\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract essay names\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch essay texts\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract title\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split out into items\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"Limit to first 3\" node (n8n-nodes-base.limit) and configure the action parameters, mappings, and fields.",
+      "Open the \"Default Data Loader\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Recursive Character Text Splitter\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"OpenAI Chat Model1\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Summarization Chain\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Clean up\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-rpc31lm99",
+      "workflowId": "manualtrigger-workflow-ic01l",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/1647_Splitout_Limit_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\1647_Splitout_Limit_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:26.156Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:26.156Z",
+  "updatedAt": "2026-07-15T11:30:26.156Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

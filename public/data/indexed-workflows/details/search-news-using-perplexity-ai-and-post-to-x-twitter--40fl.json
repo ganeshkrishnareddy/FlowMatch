@@ -1,0 +1,478 @@
+{
+  "id": "search-news-using-perplexity-ai-and-post-to-x-twitter--fas4m",
+  "name": "Search news using Perplexity AI and post to X (Twitter)",
+  "slug": "search-news-using-perplexity-ai-and-post-to-x-twitter--40fl",
+  "description": "Automated workflow: Search news using Perplexity AI and post to X (Twitter). This workflow processes data and performs automated tasks.",
+  "shortDescription": "Search news using Perplexity AI and post to X (Twitter) workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "id": "v9K61fCQhrG6gt6Z",
+    "meta": {
+      "instanceId": "workflow-1c55a6a2",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:47.157331",
+      "updatedAt": "2025-09-29T07:07:47.157342",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Search news using Perplexity AI and post to X (Twitter)",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "9b2fdc0f-8c71-4ea9-a9d0-df470f2778df",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          -560,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 21,
+                "triggerAtMinute": "={{Math.floor(Math.random() * 60)}}\n"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d549c019-1f3e-4758-a5ee-e4ac7e03cc2d",
+        "name": "searchQuery",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -340,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4cfbc312-5dcd-444d-ae08-0bab417c084c",
+                "name": "searchInput",
+                "type": "string",
+                "value": "What's the latest news in artificial intelligence?"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "87c28d43-6cd6-4292-a563-a9f22467e162",
+        "name": "Perplexity",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          100,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n  \"model\": \"llama-3.1-sonar-small-128k-online\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a social media assistant summarizing tech news for Twitter/X. Only return one article. Your output must follow this exact format: a short, engaging headline (max 140 characters), followed by a single space, then the direct article link. Do not use markdown, hashtags, emojis, or line breaks. Keep the total output under 200 characters. Be precise, objective, and newsworthy.Example: Mastercard launches Agent Pay, allowing AI agents to make purchases for users. {{ $env.WEBHOOK_URL }}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $('searchQuery').item.json.searchInput }}\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"top_p\": 0.9,\n  \"return_citations\": true,\n  \"search_domain_filter\": [\n    \"perplexity.ai\"\n  ],\n  \"search_recency_filter\": \"day\",\n  \"return_images\": true,\n  \"return_related_questions\": false,\n  \"max_tokens\": 80,\n  \"stream\": false,\n  \"presence_penalty\": 0,\n  \"frequency_penalty\": 1\n}\n",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $json.perplexityAPI }}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c1ed633d-d318-403c-9577-c3c63ac2e68e",
+        "name": "set API key",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -120,
+          0
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4f9bd3a0-5587-410f-b145-a287f65f9576",
+                "name": "perplexityAPI",
+                "type": "string",
+                "value": "<yourPerplexityAPI>"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e228e352-2ddd-4e2c-a434-993910ced7be",
+        "name": "Post to X",
+        "type": "n8n-nodes-base.twitter",
+        "position": [
+          320,
+          0
+        ],
+        "parameters": {
+          "text": "={{ $json.choices[0].message.content }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "twitterOAuth2Api": {
+            "id": "NY8wGzcN4f9f1UN4",
+            "name": "X account 2 for images"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This twitter node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "74e316fe-561f-4c80-b446-bba795654cef",
+    "connections": {
+      "87c28d43-6cd6-4292-a563-a9f22467e162": {
+        "main": [
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-fdc60531",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-4169525b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-76ed808d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-c793965c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-4c8c1cff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-7d933c90",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-aa62b4fe",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-63271be2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Search news using Perplexity AI and post to X (Twitter). This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Search news using Perplexity AI and post to X (Twitter). This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "87c28d43-6cd6-4292-a563-a9f22467e162": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-fdc60531"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-4169525b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-76ed808d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-c793965c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-4c8c1cff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-7d933c90"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-aa62b4fe"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-87c28d43-6cd6-4292-a563-a9f22467e162-63271be2"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Search news using Perplexity AI and post to X (Twitter)",
+    "nodes": [
+      {
+        "name": "Perplexity",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $json.perplexityAPI }}"
+              }
+            ]
+          },
+          "jsonBody": "={\n  \"model\": \"llama-3.1-sonar-small-128k-online\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a social media assistant summarizing tech news for Twitter/X. Only return one article. Your output must follow this exact format: a short, engaging headline (max 140 characters), followed by a single space, then the direct article link. Do not use markdown, hashtags, emojis, or line breaks. Keep the total output under 200 characters. Be precise, objective, and newsworthy.Example: Mastercard launches Agent Pay, allowing AI agents to make purchases for users. {{ $env.WEBHOOK_URL }}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $('searchQuery').item.json.searchInput }}\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"top_p\": 0.9,\n  \"return_citations\": true,\n  \"search_domain_filter\": [\n    \"perplexity.ai\"\n  ],\n  \"search_recency_filter\": \"day\",\n  \"return_images\": true,\n  \"return_related_questions\": false,\n  \"max_tokens\": 80,\n  \"stream\": false,\n  \"presence_penalty\": 0,\n  \"frequency_penalty\": 1\n}\n",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "twitterOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Post to X",
+        "parameters": {
+          "additionalFields": {},
+          "text": "={{ $json.choices[0].message.content }}"
+        },
+        "type": "n8n-nodes-base.twitter",
+        "typeVersion": 2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 21,
+                "triggerAtMinute": "={{Math.floor(Math.random() * 60)}}\n"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "searchQuery",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4cfbc312-5dcd-444d-ae08-0bab417c084c",
+                "name": "searchInput",
+                "type": "string",
+                "value": "What's the latest news in artificial intelligence?"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "set API key",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4f9bd3a0-5587-410f-b145-a287f65f9576",
+                "name": "perplexityAPI",
+                "type": "string",
+                "value": "<yourPerplexityAPI>"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Twitter/X"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 151,
+  "viewCount": 309,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Twitter/X Account"
+    ],
+    "requiredCredentials": [
+      "twitter  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Perplexity\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post to X\" node (n8n-nodes-base.twitter) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"searchQuery\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"set API key\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 90,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-h7to7ek3y",
+      "workflowId": "search-news-using-perplexity-ai-and-post-to-x-twitter--fas4m",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1989_HTTP_Schedule_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1989_HTTP_Schedule_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:15.958Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:15.958Z",
+  "updatedAt": "2026-07-15T11:29:15.958Z",
+  "category": {
+    "slug": "social-media",
+    "name": "Social Media"
+  },
+  "categoryId": "social-media"
+}

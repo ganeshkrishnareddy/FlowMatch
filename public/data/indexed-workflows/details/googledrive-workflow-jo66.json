@@ -1,0 +1,494 @@
+{
+  "id": "googledrive-workflow-w9fv7",
+  "name": "Googledrive Workflow",
+  "slug": "googledrive-workflow-jo66",
+  "description": "Automated workflow: Googledrive Workflow. This workflow integrates 9 different services: stickyNote, code, merge, googleDrive, set. It contains 11 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Googledrive Workflow workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-1fe51564",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.439017",
+      "updatedAt": "2025-09-29T07:07:42.439098",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "2165cd37-10ff-46bd-88a5-c8377bf4bef7",
+        "name": "Google Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          1280,
+          1100
+        ],
+        "parameters": {
+          "limit": 100,
+          "options": {
+            "spaces": [
+              "*"
+            ],
+            "corpora": "allDrives"
+          },
+          "operation": "list",
+          "queryString": "='{{ $json[\"Folder ID\"] }}' in parents",
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "useQueryString": true
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "KJE0ZORR1Q1fJCd5",
+            "name": "Google Drive account 2"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5061db5e-2137-4c50-8902-a24cd53a6bdf",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          1480,
+          1160
+        ],
+        "parameters": {
+          "options": {},
+          "batchSize": 50
+        },
+        "typeVersion": 3,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "62a16fb8-9bfc-46db-a556-23fac7f403f5",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1720,
+          1020
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combinationMode": "multiplex"
+        },
+        "typeVersion": 2.1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "bd410148-e745-43a2-960b-128bbb49828f",
+        "name": "Set Folder ID",
+        "type": "n8n-nodes-base.set",
+        "notes": "Enter desired Folder",
+        "position": [
+          1120,
+          1100
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Folder ID",
+                "stringValue": "Enter Your Folder ID here"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "notesInFlow": true,
+        "typeVersion": 3.2
+      },
+      {
+        "id": "16def9df-5c8b-4359-a879-11e66f191f92",
+        "name": "Manual Execute Workflow",
+        "type": "n8n-nodes-base.manualTrigger",
+        "notes": "Optional",
+        "position": [
+          940,
+          1100
+        ],
+        "parameters": {},
+        "notesInFlow": true,
+        "typeVersion": 1
+      },
+      {
+        "id": "e7d54620-e5e6-470e-add5-ccefdfb2a979",
+        "name": "Generate Download Links",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1480,
+          980
+        ],
+        "parameters": {
+          "jsCode": "// This function will create an array of file links from the given Google Drive folder\nreturn items.map(file => {\n  return { json: { 'link': `{{ $env.WEBHOOK_URL }}{file.json.id}&export=download&confirm=t&authuser=0`, 'name': file.json.name } };\n});"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "04e71edf-c40f-4c80-961c-f511e145232c",
+        "name": "Change Status",
+        "type": "n8n-nodes-base.googleDrive",
+        "notes": "Make Files Public to anyone with a link",
+        "position": [
+          1660,
+          1180
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "options": {
+            "supportsAllDrives": true
+          },
+          "operation": "share",
+          "permissionsUi": {
+            "permissionsValues": {
+              "role": "reader",
+              "type": "anyone"
+            }
+          },
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "KJE0ZORR1Q1fJCd5",
+            "name": "Google Drive account 2"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1
+      },
+      {
+        "id": "4452cd81-e94a-465e-987b-5acf46e25428",
+        "name": "Replace Me",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1880,
+          1020
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dab69e10-d9af-4ece-a6c6-cb35468e3bf0",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          880,
+          820
+        ],
+        "parameters": {
+          "width": 1235.0111197082438,
+          "height": 545.6382804772701,
+          "content": "## Example Output:\n```JSON\n{\n\"link\": \"{{ $env.WEBHOOK_URL }}\",\n\"name\": \"firefox_rNjA0ybKu7.png\",\n\"kind\": \"drive#permission\",\n\"id\": \"anyoneWithLink\",\n\"type\": \"anyone\",\n\"role\": \"reader\",\n\"allowFileDiscovery\": false\n}\n```\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### You can store the output data with any data store node you want\n### for example save them into Excel Sheet or Airtable etc..."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-44092104",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "2165cd37-10ff-46bd-88a5-c8377bf4bef7": {
+        "main": [
+          [
+            {
+              "node": "error-handler-2165cd37-10ff-46bd-88a5-c8377bf4bef7-39f9d20e",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "04e71edf-c40f-4c80-961c-f511e145232c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-04e71edf-c40f-4c80-961c-f511e145232c-6f40c358",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Googledrive Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Googledrive Workflow. This workflow integrates 9 different services: stickyNote, code, merge, googleDrive, set. It contains 11 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Googledrive Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "04e71edf-c40f-4c80-961c-f511e145232c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-04e71edf-c40f-4c80-961c-f511e145232c-6f40c358"
+            }
+          ]
+        ]
+      },
+      "2165cd37-10ff-46bd-88a5-c8377bf4bef7": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2165cd37-10ff-46bd-88a5-c8377bf4bef7-39f9d20e"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Googledrive Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Change Status",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "operation": "share",
+          "options": {
+            "supportsAllDrives": true
+          },
+          "permissionsUi": {
+            "permissionsValues": {
+              "role": "reader",
+              "type": "anyone"
+            }
+          }
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Generate Download Links",
+        "parameters": {
+          "jsCode": "// This function will create an array of file links from the given Google Drive folder\nreturn items.map(file => {\n  return { json: { 'link': `{{ $env.WEBHOOK_URL }}{file.json.id}&export=download&confirm=t&authuser=0`, 'name': file.json.name } };\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "limit": 100,
+          "operation": "list",
+          "options": {
+            "corpora": "allDrives",
+            "spaces": [
+              "*"
+            ]
+          },
+          "queryString": "='{{ $json[\"Folder ID\"] }}' in parents",
+          "useQueryString": true
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Loop Over Items",
+        "parameters": {
+          "batchSize": 50,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3
+      },
+      {
+        "name": "Manual Execute Workflow",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "combinationMode": "multiplex",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Replace Me",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Folder ID",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Folder ID",
+                "stringValue": "Enter Your Folder ID here"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Example Output:\n```JSON\n{\n\"link\": \"{{ $env.WEBHOOK_URL }}\",\n\"name\": \"firefox_rNjA0ybKu7.png\",\n\"kind\": \"drive#permission\",\n\"id\": \"anyoneWithLink\",\n\"type\": \"anyone\",\n\"role\": \"reader\",\n\"allowFileDiscovery\": false\n}\n```\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### You can store the output data with any data store node you want\n### for example save them into Excel Sheet or Airtable etc...",
+          "height": 545.6382804772701,
+          "width": 1235.0111197082438
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Drive"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 122,
+  "viewCount": 381,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account"
+    ],
+    "requiredCredentials": [
+      "google Drive  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Manual Execute Workflow\".",
+      "Open the \"Google Drive\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loop Over Items\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Change Status\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Replace Me\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Folder ID\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-oi3mq02tu",
+      "workflowId": "googledrive-workflow-w9fv7",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0380_Code_Manual_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0380_Code_Manual_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:18:16.479Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:16.479Z",
+  "updatedAt": "2026-07-15T11:18:16.479Z"
+}

@@ -1,0 +1,410 @@
+{
+  "id": "convert-parquet-avro-orc-feather-via-parquetreader-to-json-bas6o",
+  "name": "Convert Parquet, Avro, ORC & Feather via ParquetReader to JSON",
+  "slug": "convert-parquet-avro-orc-feather-via-parquetreader-to-json-nz0c",
+  "description": "Automated workflow: Convert Parquet, Avro, ORC & Feather via ParquetReader to JSON. This workflow integrates 5 different services: webhook, stickyNote, httpRequest, code, stopAndError. It contains 8 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Convert Parquet, Avro, ORC & Feather via ParquetReader to JSON workflow containing 4 nodes.",
+  "originalWorkflowJson": {
+    "id": "VU0kmvnWzctSFm2M",
+    "meta": {
+      "instanceId": "workflow-fed4e900",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.736268",
+      "updatedAt": "2025-09-29T07:07:46.736294",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Convert Parquet, Avro, ORC & Feather via ParquetReader to JSON",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "651a10dc-1c91-4957-bcdd-3e55d7328f04",
+        "name": "Send to Parquet API",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1100,
+          440
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {
+            "bodyContentType": "multipart-form-data"
+          },
+          "requestMethod": "POST",
+          "jsonParameters": true,
+          "sendBinaryData": true,
+          "binaryPropertyName": "=file0"
+        },
+        "typeVersion": 1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "42a7e623-ca11-4d38-94bb-cfb48d021a5c",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "notes": "Example trigger flow:\n\ncurl -X POST {{ $env.WEBHOOK_URL }} \\\n  -F \"file=@converted.parquet\"",
+        "position": [
+          900,
+          440
+        ],
+        "webhookId": "0b1223c9-c117-45f9-9931-909f2db28955",
+        "parameters": {
+          "path": "convert",
+          "options": {
+            "binaryPropertyName": "file"
+          },
+          "httpMethod": "POST",
+          "responseData": "allEntries",
+          "responseMode": "lastNode"
+        },
+        "notesInFlow": false,
+        "typeVersion": 2
+      },
+      {
+        "id": "9b87f027-7ef2-40a7-88d7-a0ae9ef73375",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "width": 840,
+          "height": 580,
+          "content": "### ✅ **How to Use This Flow**\n\n#### 📥 Trigger via File Upload\n\nYou can trigger this flow by sending a `POST` request with a file using **curl**, **Postman**, or **from another n8n flow**.\n\n#### 🔧 Example (via `curl`):\n```bash\ncurl -X POST {{ $env.WEBHOOK_URL }} \\\n-F \"file=@converted.parquet\"\n```\n> Replace `converted.parquet` with your local file path. You can also send Avro, ORC or Feather files.\n\n#### 🔁 Reuse from Other Flows\nYou can **reuse this flow** by calling the webhook from another n8n workflow using an **HTTP Request** node.  \nMake sure to send the file as **form-data** with the field name `file`.\n\n#### 🔍 What This Flow Does:\n- Receives the uploaded file via webhook (`file`)\n- Sends it to `{{ $env.API_BASE_URL }}` as `multipart/form-data` (field name: `file`)\n- Receives parsed data, schema, and metadata\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "06d3e569-8724-48f2-951f-a1af5e0f9362",
+        "name": "Parse API Response",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1280,
+          440
+        ],
+        "parameters": {
+          "jsCode": "const item = items[0];\n\n// Convert `data` (stringified JSON array) → actual array\nif (typeof item.json.data === 'string') {\n  item.json.data = JSON.parse(item.json.data);\n}\n\n// Convert `meta_data` (stringified JSON object) → actual object\nif (typeof item.json.meta_data === 'string') {\n  item.json.meta_data = JSON.parse(item.json.meta_data);\n}\n\nreturn [item];\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": true,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "c10e1897-094e-42c6-bde9-1724972ada3e",
+    "connections": {
+      "651a10dc-1c91-4957-bcdd-3e55d7328f04": {
+        "main": [
+          [
+            {
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04-105b8ea1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04-b79b126e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04-0620041b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04-db01e9c1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "42a7e623-ca11-4d38-94bb-cfb48d021a5c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c-9dc8e3bf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c-53c0994d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c-acb895b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c-55ae5760",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Convert Parquet, Avro, ORC & Feather via ParquetReader to JSON. This workflow integrates 5 different services: webhook, stickyNote, httpRequest, code, stopAndError. It contains 8 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Convert Parquet, Avro, ORC & Feather via ParquetReader to JSON. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "42a7e623-ca11-4d38-94bb-cfb48d021a5c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c-9dc8e3bf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c-53c0994d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c-acb895b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-42a7e623-ca11-4d38-94bb-cfb48d021a5c-55ae5760"
+            }
+          ]
+        ]
+      },
+      "651a10dc-1c91-4957-bcdd-3e55d7328f04": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04-105b8ea1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04-b79b126e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04-0620041b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-651a10dc-1c91-4957-bcdd-3e55d7328f04-db01e9c1"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Convert Parquet, Avro, ORC & Feather via ParquetReader to JSON",
+    "nodes": [
+      {
+        "name": "Parse API Response",
+        "parameters": {
+          "jsCode": "const item = items[0];\n\n// Convert `data` (stringified JSON array) → actual array\nif (typeof item.json.data === 'string') {\n  item.json.data = JSON.parse(item.json.data);\n}\n\n// Convert `meta_data` (stringified JSON object) → actual object\nif (typeof item.json.meta_data === 'string') {\n  item.json.meta_data = JSON.parse(item.json.meta_data);\n}\n\nreturn [item];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Send to Parquet API",
+        "parameters": {
+          "binaryPropertyName": "=file0",
+          "jsonParameters": true,
+          "options": {
+            "bodyContentType": "multipart-form-data"
+          },
+          "requestMethod": "POST",
+          "sendBinaryData": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "### ✅ **How to Use This Flow**\n\n#### 📥 Trigger via File Upload\n\nYou can trigger this flow by sending a `POST` request with a file using **curl**, **Postman**, or **from another n8n flow**.\n\n#### 🔧 Example (via `curl`):\n```bash\ncurl -X POST {{ $env.WEBHOOK_URL }} \\\n-F \"file=@converted.parquet\"\n```\n> Replace `converted.parquet` with your local file path. You can also send Avro, ORC or Feather files.\n\n#### 🔁 Reuse from Other Flows\nYou can **reuse this flow** by calling the webhook from another n8n workflow using an **HTTP Request** node.  \nMake sure to send the file as **form-data** with the field name `file`.\n\n#### 🔍 What This Flow Does:\n- Receives the uploaded file via webhook (`file`)\n- Sends it to `{{ $env.API_BASE_URL }}` as `multipart/form-data` (field name: `file`)\n- Receives parsed data, schema, and metadata\n",
+          "height": 580,
+          "width": 840
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {
+            "binaryPropertyName": "file"
+          },
+          "path": "convert",
+          "responseData": "allEntries",
+          "responseMode": "lastNode"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 4,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Webhook"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 27,
+  "viewCount": 578,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Webhook Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Send to Parquet API\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 85,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-qs2fwo3qm",
+      "workflowId": "convert-parquet-avro-orc-feather-via-parquetreader-to-json-bas6o",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1725_HTTP_Code_Process_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1725_HTTP_Code_Process_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:14.369Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:14.369Z",
+  "updatedAt": "2026-07-15T11:29:14.369Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

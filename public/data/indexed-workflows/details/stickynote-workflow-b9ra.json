@@ -1,0 +1,337 @@
+{
+  "id": "stickynote-workflow-3a5ap",
+  "name": "Stickynote Workflow",
+  "slug": "stickynote-workflow-b9ra",
+  "description": "Automated workflow: Stickynote Workflow. This workflow integrates 3 different services: stickyNote, facebookLeadAdsTrigger, klicktipp. It contains 3 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Stickynote Workflow workflow containing 4 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-a419df55",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:44.766323",
+      "updatedAt": "2025-09-29T07:07:44.766433",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "0b6d74c3-e034-40be-9f42-df42c2ffbb03",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1080,
+          1040
+        ],
+        "parameters": {
+          "width": 1219,
+          "height": 674,
+          "content": "### Introduction\nThis workflow streamlines the process of capturing leads via Facebook Lead Ads and transferring them automatically into KlickTipp. It ensures that contact data is accurately mapped and added to KlickTipp to trigger personalized email campaigns.\n\n### Benefits\n- **Automated lead import**: New leads from Facebook forms are automatically synced to KlickTipp without manual effort.\n- **Seamless campaign activation**: Tags can be assigned during the process, instantly triggering follow-up campaigns like welcome emails or webinar reminders.\n- **Reliable data structure**: Validated form entries are mapped to predefined custom fields, ensuring a high-quality contact base in KlickTipp.\n\n### Key Feature\n- **Facebook Lead Ads Trigger**: Captures form submissions from Facebook Ads in real-time.\n- **Data Processing**: Assigns and formats lead data based on field mappings:\n  - Maps standard Facebook fields (name, email) directly.\n  - Matches custom fields such as course selection, payment method, and comments to KlickTipp custom fields.\n- **Subscriber Management in KlickTipp**: Adds or updates contacts with structured mapping to custom fields. Tags can be dynamically added for segmentation:\n  - Personal data: First name, email address.\n  - Form responses: Selected course, payment method, comments.\n  - Tag-based segmentation for automated workflows.\n\n#### Setup Instructions\n1. Set up the Facebook Leads Ads (choose your form) and KlickTipp nodes (choose opt-in, tagging and field mapping) in your n8n instance.\n2. Authenticate your Facebook Lead Ads and KlickTipp accounts.\n3. Create the necessary custom fields to match the data structure\n4. Verify and customize field assignments in the workflow to align with your specific form and subscriber list setup.\n\nCustom Fields:\n   - `Facebook_Leads_Ads_Kommentar` (Text)\n   - `Facebook_Leads_Ads_Kursauswahl` (Text)\n   - `Facebook_Leads_Ads_Zahlungsweise` (Text)\n\n\n### Testing and Deployment\n1. Perform a test with the meta developer tool verify the transmission. (⚠️ Attention: KlickTipp rightfully rejects this test address test@fb.com due to its validation rules, as it cannot receive emails. You can manipulate the output in the node for testing.)\n2. Confirm new subscribers appear in KlickTipp with mapped fields and tags.\n3. Launch your campaign in Facebook with full automation in place.\n\n- **Customization**: Adjust tag names and field mappings in the KlickTipp module of Make to fit your specific setup. Ensure any additional fields are created beforehand in KlickTipp to avoid sync errors."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "84d11f91-5a50-49a0-a511-93d83fa434f4",
+        "name": "Facebook Lead Ads Trigger",
+        "type": "n8n-nodes-base.facebookLeadAdsTrigger",
+        "notes": "This node listens for new leads generated via Facebook Lead Ads. When a user submits a form on Facebook or Instagram, it triggers the workflow and captures the lead's details.",
+        "position": [
+          1460,
+          840
+        ],
+        "webhookId": "04c33978-2df7-4ab1-a37c-3ab3c0a0d21f",
+        "parameters": {
+          "form": {
+            "__rl": true,
+            "mode": "list",
+            "value": "989636452637732",
+            "cachedResultName": "Integrations Manual - Kursregistrierung"
+          },
+          "page": {
+            "__rl": true,
+            "mode": "list",
+            "value": "315574741814190",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "KlickTipp"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "facebookLeadAdsOAuth2Api": {
+            "id": "bBzZPOu1M8YbIM9L",
+            "name": "Facebook Lead Ads account 3"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1
+      },
+      {
+        "id": "e4532533-b447-4340-b750-6e3c47809cb8",
+        "name": "Subscribe lead in KlickTipp",
+        "type": "n8n-nodes-klicktipp.klicktipp",
+        "notes": "Subscribes the incoming Facebook lead to the KlickTipp. This allows automatic follow-up, tagging, or integration with email campaigns.",
+        "position": [
+          1780,
+          840
+        ],
+        "parameters": {
+          "email": "={{ $json.data.email }}",
+          "fields": {
+            "dataFields": [
+              {
+                "fieldId": "fieldFirstName",
+                "fieldValue": "={{ // Extracts the first name (the first part of the full name), which will be identified by the letters before the first empty space \" \". This implementation only supports the first name.\n$json[\"data\"][\"full name\"].split(\" \")[0] }}"
+              },
+              {
+                "fieldId": "fieldLastName",
+                "fieldValue": "={{ // Extracts the last name (the last part of the full name), which will be identified by the letters after the last empty space \" \". This implementation does not support double names.\n$json[\"data\"][\"full name\"].split(\" \").pop() }}"
+              },
+              {
+                "fieldId": "field216784",
+                "fieldValue": "={{ $json.data['hast_du_zusätzliche_kommentare_für_uns?'] }}"
+              },
+              {
+                "fieldId": "field216785",
+                "fieldValue": "={{ $json.data['welcher_kurs_interessiert_dich?'] }}"
+              },
+              {
+                "fieldId": "field216786",
+                "fieldValue": "={{ $json.data['was_ist_deine_bevorzugte_zahlungsweise?'] }}"
+              }
+            ]
+          },
+          "listId": "358895",
+          "resource": "subscriber",
+          "operation": "subscribe"
+        },
+        "credentials": {
+          "klickTippApi": {
+            "id": "K9JyBdCM4SZc1cXl",
+            "name": "DEMO KlickTipp account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2
+      },
+      {
+        "id": "error-0cd62883",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {},
+    "name": "Stickynote Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Stickynote Workflow. This workflow integrates 3 different services: stickyNote, facebookLeadAdsTrigger, klicktipp. It contains 3 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Stickynote Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Stickynote Workflow",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "facebookLeadAdsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Facebook Lead Ads Trigger",
+        "parameters": {
+          "form": {
+            "__rl": true,
+            "cachedResultName": "Integrations Manual - Kursregistrierung",
+            "mode": "list",
+            "value": "989636452637732"
+          },
+          "options": {},
+          "page": {
+            "__rl": true,
+            "cachedResultName": "KlickTipp",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "315574741814190"
+          }
+        },
+        "type": "n8n-nodes-base.facebookLeadAdsTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "### Introduction\nThis workflow streamlines the process of capturing leads via Facebook Lead Ads and transferring them automatically into KlickTipp. It ensures that contact data is accurately mapped and added to KlickTipp to trigger personalized email campaigns.\n\n### Benefits\n- **Automated lead import**: New leads from Facebook forms are automatically synced to KlickTipp without manual effort.\n- **Seamless campaign activation**: Tags can be assigned during the process, instantly triggering follow-up campaigns like welcome emails or webinar reminders.\n- **Reliable data structure**: Validated form entries are mapped to predefined custom fields, ensuring a high-quality contact base in KlickTipp.\n\n### Key Feature\n- **Facebook Lead Ads Trigger**: Captures form submissions from Facebook Ads in real-time.\n- **Data Processing**: Assigns and formats lead data based on field mappings:\n  - Maps standard Facebook fields (name, email) directly.\n  - Matches custom fields such as course selection, payment method, and comments to KlickTipp custom fields.\n- **Subscriber Management in KlickTipp**: Adds or updates contacts with structured mapping to custom fields. Tags can be dynamically added for segmentation:\n  - Personal data: First name, email address.\n  - Form responses: Selected course, payment method, comments.\n  - Tag-based segmentation for automated workflows.\n\n#### Setup Instructions\n1. Set up the Facebook Leads Ads (choose your form) and KlickTipp nodes (choose opt-in, tagging and field mapping) in your n8n instance.\n2. Authenticate your Facebook Lead Ads and KlickTipp accounts.\n3. Create the necessary custom fields to match the data structure\n4. Verify and customize field assignments in the workflow to align with your specific form and subscriber list setup.\n\nCustom Fields:\n   - `Facebook_Leads_Ads_Kommentar` (Text)\n   - `Facebook_Leads_Ads_Kursauswahl` (Text)\n   - `Facebook_Leads_Ads_Zahlungsweise` (Text)\n\n\n### Testing and Deployment\n1. Perform a test with the meta developer tool verify the transmission. (⚠️ Attention: KlickTipp rightfully rejects this test address test@fb.com due to its validation rules, as it cannot receive emails. You can manipulate the output in the node for testing.)\n2. Confirm new subscribers appear in KlickTipp with mapped fields and tags.\n3. Launch your campaign in Facebook with full automation in place.\n\n- **Customization**: Adjust tag names and field mappings in the KlickTipp module of Make to fit your specific setup. Ensure any additional fields are created beforehand in KlickTipp to avoid sync errors.",
+          "height": 674,
+          "width": 1219
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "klickTippApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Subscribe lead in KlickTipp",
+        "parameters": {
+          "email": "={{ $json.data.email }}",
+          "fields": {
+            "dataFields": [
+              {
+                "fieldId": "fieldFirstName",
+                "fieldValue": "={{ // Extracts the first name (the first part of the full name), which will be identified by the letters before the first empty space \" \". This implementation only supports the first name.\n$json[\"data\"][\"full name\"].split(\" \")[0] }}"
+              },
+              {
+                "fieldId": "fieldLastName",
+                "fieldValue": "={{ // Extracts the last name (the last part of the full name), which will be identified by the letters after the last empty space \" \". This implementation does not support double names.\n$json[\"data\"][\"full name\"].split(\" \").pop() }}"
+              },
+              {
+                "fieldId": "field216784",
+                "fieldValue": "={{ $json.data['hast_du_zusätzliche_kommentare_für_uns?'] }}"
+              },
+              {
+                "fieldId": "field216785",
+                "fieldValue": "={{ $json.data['welcher_kurs_interessiert_dich?'] }}"
+              },
+              {
+                "fieldId": "field216786",
+                "fieldValue": "={{ $json.data['was_ist_deine_bevorzugte_zahlungsweise?'] }}"
+              }
+            ]
+          },
+          "listId": "358895",
+          "operation": "subscribe",
+          "resource": "subscriber"
+        },
+        "type": "n8n-nodes-klicktipp.klicktipp",
+        "typeVersion": 2
+      }
+    ]
+  },
+  "nodeCount": 4,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Facebook",
+    "Klicktipp"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 103,
+  "viewCount": 626,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Facebook Account",
+      "Klicktipp Account"
+    ],
+    "requiredCredentials": [
+      "facebook Lead Ads  O Auth2  A P I details",
+      "klick Tipp  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Facebook Lead Ads Trigger\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Subscribe lead in KlickTipp\" node (n8n-nodes-klicktipp.klicktipp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 90,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-bmr3gzun0",
+      "workflowId": "stickynote-workflow-3a5ap",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Facebookleadads/0896_Facebookleadads_Stickynote_Automate_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Facebookleadads\\0896_Facebookleadads_Stickynote_Automate_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:00.406Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:00.406Z",
+  "updatedAt": "2026-07-15T11:29:00.406Z",
+  "category": {
+    "slug": "social-media",
+    "name": "Social Media"
+  },
+  "categoryId": "social-media"
+}

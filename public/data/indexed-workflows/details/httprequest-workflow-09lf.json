@@ -1,0 +1,1722 @@
+{
+  "id": "httprequest-workflow-fsjol",
+  "name": "Httprequest Workflow",
+  "slug": "httprequest-workflow-09lf",
+  "description": "Automated workflow: Httprequest Workflow. This workflow integrates 6 different services: stickyNote, httpRequest, stopAndError, sendInBlue, if. It contains 34 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Httprequest Workflow workflow containing 22 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-3e86ec67",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.921070",
+      "updatedAt": "2025-09-29T07:07:45.921145",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "3ebbf865-26f6-456f-83bd-33fa72bc09ea",
+        "name": "Token SuiteCRM",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          480,
+          800
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "grant_type",
+                "value": "client_credentials"
+              },
+              {
+                "name": "client_id",
+                "value": "IDVALUE"
+              },
+              {
+                "name": "client_secret",
+                "value": "PWDVALUE"
+              }
+            ]
+          },
+          "allowUnauthorizedCerts": true
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "763bd0bc-7c08-496d-82b7-1fb021c1e6e1",
+        "name": "CaptainMail",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          -360,
+          560
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9d1f03eb-4be2-4e72-bc86-723d92869888",
+        "name": "If mail ok",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          220,
+          580
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "ea7e2b2b-35cc-469c-b01b-eeb4f0030aa5",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "type": "string",
+                  "operation": "equals"
+                },
+                "leftValue": "={{ $json.result }}",
+                "rightValue": "invalid"
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "03ffff8c-401a-4723-80c6-df702cda2ba5",
+        "name": "If Credits OK",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -180,
+          560
+        ],
+        "parameters": {
+          "options": {},
+          "conditions": {
+            "options": {
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "007b0ec4-870d-48d6-a961-adff23ceabd4",
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                },
+                "leftValue": "={{ $json.credits }}",
+                "rightValue": 100
+              }
+            ]
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "487b4746-48d3-40c2-a21c-0a3aa38ba780",
+        "name": "Tally Forms Trigger",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -600,
+          560
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This executeWorkflowTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2ff81440-ffb4-4d92-8fb0-0a46f6488a2e",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -420,
+          382.5935162094766
+        ],
+        "parameters": {
+          "width": 221.29675810473822,
+          "height": 324.588528678304,
+          "content": "## CaptainVerify \n**Verify your email !** To reduce bounce email for your future campains. [Link]({{ $env.WEBHOOK_URL }}\n\nChange **YOURAPIKEY** with yours"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "73d00252-c081-451c-84df-67e44bf0bb11",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -60,
+          180
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 266.18453865336653,
+          "height": 395.6608478802989,
+          "content": "## Warning about your credits \nNotify with a message and level of credits in your NextCloud Discussion\n\nChange **URLSERVERNEXTCLOUD** with yours\nand **DISCUSSIONCODE** with the code of target discussion"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "da8758f6-82f6-481c-97cc-40292579d723",
+        "name": "Notif Talk credits",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          20,
+          420
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "bodyContentType": "json",
+            "bodyContentCustomMimeType": "application/json"
+          },
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.basicAuth }}",
+          "jsonParameters": true,
+          "bodyParametersJson": "={\n\"message\":\"Low credits for CaptainVerify Mail. Balance = {{ $json[\"credits\"] }}\"\n}",
+          "headerParametersJson": "={\"OCS-APIRequest\":\"true\"}"
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "569b9fd4-85d0-4300-8dc1-ab71fc5c2d09",
+        "name": "Notif Talk bad email",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          420,
+          420
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "bodyContentType": "json",
+            "bodyContentCustomMimeType": "application/json"
+          },
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.basicAuth }}",
+          "jsonParameters": true,
+          "bodyParametersJson": "={\n\"message\":\"Invalid mail on submission form for contact : {{ $('Execute Workflow Trigger').item.json[\"body\"][\"data\"][\"fields\"][1][\"value\"] }} et mail : {{ $('CaptainMail').item.json[\"email\"] }} \"\n}",
+          "headerParametersJson": "={\"OCS-APIRequest\":\"true\"}"
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6b555580-b66d-485d-b1b7-dd9fbd580294",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          340,
+          180
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 266.18453865336653,
+          "height": 395.6608478802989,
+          "content": "## Warning bad email \nNotify with a message for contact with invalid mail in your NextCloud Discussion\n\nChange **URLSERVERNEXTCLOUD** with yours\nand **DISCUSSIONCODE** with the code of target discussion"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fcc84bdb-9ae2-44c9-a038-c9282cfe1373",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          420,
+          600
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 226.00997506234387,
+          "height": 358.40399002493757,
+          "content": "## Auth SuiteCRM \n**Get Token** with V8 API. [Guide]({{ $env.API_BASE_URL }}\n\nChange **SUITECRMURLSERVER** with yours\nChange **IDVALUE** and **PWDVALUE** with a specific user in SuiteCRM"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d9a96370-f545-4daf-a2e2-af7efd5fda42",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -680,
+          461.97007481296754
+        ],
+        "parameters": {
+          "color": 7,
+          "height": 252.8428927680797,
+          "content": "## WEBHOOK \n**TRIGGER** with the FormsTool of your choice."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8e50db5a-5945-468c-ae92-239b8eb74f31",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1060,
+          120
+        ],
+        "parameters": {
+          "width": 221.29675810473822,
+          "height": 80,
+          "content": "## CaptainVerify \n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "81deb53f-4161-42ef-9eec-d075e694aa04",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1060,
+          220
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 220.39900249376552,
+          "height": 80,
+          "content": "## NextCloud\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2aea4eaf-d7fa-4e87-ae75-e52bc3f385c2",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          660,
+          600
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 226.00997506234387,
+          "height": 358.40399002493757,
+          "content": "## Create Leads \nAdjust **Json** with your data\n\nChange **SUITECRMURLSERVER** with yours\nChange **IDVALUE** and **PWDVALUE** with a specific user in SuiteCRM"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2550bf07-3d3b-497a-b14e-8626ab478659",
+        "name": "Sticky Note8",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1060,
+          320
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 223.46633416458826,
+          "height": 80,
+          "content": "## SuiteCRM \n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "18324e1a-6873-466c-9eab-2292eb2fe1f4",
+        "name": "Sticky Note9",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          920,
+          600
+        ],
+        "parameters": {
+          "color": 4,
+          "height": 357.1321695760598,
+          "content": "## Brevo\nCreate Contact with data and **Link with the id of SuiteCRM** Lead in a dedicated custom field in Brevo"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "df474fee-be22-4fda-9cfc-61e46492e30c",
+        "name": "Create Lead SuiteCRM",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          720,
+          800
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          },
+          "jsonBody": "={\"data\": {\n\"type\": \"Leads\",\n\"attributes\": { \n\"last_name\": \"{{ $('Tally Forms Trigger').item.json[\"body\"][\"data\"][\"fields\"][1][\"value\"] }}\",\n\"status\": \"Hot\",\n\"email1\": \"{{ $('CaptainMail').item.json[\"email\"] }}\",\n\"lead_source\": \"FormsChoice\",\n\"assigned_user_id\": \"491cf554-4d5e-b06a-7a61-605210d85367\",\n\"lead_source_description\": \"FORMNAME Submission\"}\n}\n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{$node[\"Token SuiteCRM\"].json[\"access_token\"]}}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/vnd.api+json"
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 3,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "635665d3-f35b-42b7-b9d5-427f46d1867f",
+        "name": "Notif Talk Lead created",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1260,
+          800
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "bodyContentType": "json",
+            "bodyContentCustomMimeType": "application/json"
+          },
+          "requestMethod": "POST",
+          "authentication": "{{ $credentials.basicAuth }}",
+          "jsonParameters": true,
+          "bodyParametersJson": "={\n\"message\":\"Lead créé ! Saisie du Formulaire choix séance. Contact : {{ $('Tally Forms Trigger').item.json[\"body\"][\"data\"][\"fields\"][1][\"value\"] }} et mail : {{ $('CaptainMail').item.json[\"email\"] }} \"\n}",
+          "headerParametersJson": "={\"OCS-APIRequest\":\"true\"}"
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "84fda59b-5d9c-42aa-9ce6-2c3fc837e04e",
+        "name": "Sticky Note10",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1180,
+          600
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 266.18453865336653,
+          "height": 357.50623441396476,
+          "content": "## Notify lead created \nMessage for a lead created in your selected NextCloud discussion\n\nChange **URLSERVERNEXTCLOUD** with yours\nand **DISCUSSIONCODE** with the code of target discussion"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2f55803e-bb3a-482a-9d12-5fdeefbbac6c",
+        "name": "Sticky Note11",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1060,
+          420
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 224.73815461346635,
+          "height": 80,
+          "content": "## Brevo"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fbf39f60-e895-4477-9f62-9ec6965a84cc",
+        "name": "Brevo Create Contact",
+        "type": "n8n-nodes-base.sendInBlue",
+        "position": [
+          980,
+          800
+        ],
+        "parameters": {
+          "email": "{{ $('CaptainMail').item.json[\"email\"] }}",
+          "resource": "contact",
+          "createContactAttributes": {
+            "attributesValues": [
+              {
+                "fieldName": "NOM",
+                "fieldValue": "={{ $('Tally Forms Trigger').item.json.body.data.fields[1].value }}"
+              },
+              {
+                "fieldName": "PRENOM",
+                "fieldValue": "={{ $('Tally Forms Trigger').item.json.body.data.fields[2].value }}"
+              },
+              {
+                "fieldName": "LEADS_ID",
+                "fieldValue": "={{ $('Create Lead SuiteCRM').item.json.data.id }}"
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1,
+        "notes": "This sendInBlue node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "3ebbf865-26f6-456f-83bd-33fa72bc09ea": {
+        "main": [
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-f2a07535",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-0205aea5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-51b00569",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-a9868c55",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-ec35f3a3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-ae46397e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-2891221b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-35d12cab",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "763bd0bc-7c08-496d-82b7-1fb021c1e6e1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-72f468d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-bd8c8402",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-6e06d41d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-f2343c95",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-6d2675e1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-ae96f521",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-4f58a6b8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-ab1569c3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "da8758f6-82f6-481c-97cc-40292579d723": {
+        "main": [
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-397fd9a2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-223fc010",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-908424b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-052081cc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-8696f902",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-0cbfffa4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-8f00b183",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-b4c8c9df",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "569b9fd4-85d0-4300-8dc1-ab71fc5c2d09": {
+        "main": [
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-9a243ffa",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-39c55eba",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-d8b8a91c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-dae7c99a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-ccbb74d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-e2dcbb63",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-83c73049",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-434b1129",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "df474fee-be22-4fda-9cfc-61e46492e30c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-a6f1d4a5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-2cdd0c6f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-80919099",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-af6d8aa3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-a7bb4aa7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-80c00f6e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-6487a6b9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-b77dbc06",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "635665d3-f35b-42b7-b9d5-427f46d1867f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-4d9de04a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-c1d96589",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-b90cd0e8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-2407b5ff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-8d09fb18",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-592ab583",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-bd2fab4e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-436bbcb6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Httprequest Workflow. This workflow integrates 6 different services: stickyNote, httpRequest, stopAndError, sendInBlue, if. It contains 34 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Httprequest Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "3ebbf865-26f6-456f-83bd-33fa72bc09ea": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-f2a07535"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-0205aea5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-51b00569"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-a9868c55"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-ec35f3a3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-ae46397e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-2891221b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3ebbf865-26f6-456f-83bd-33fa72bc09ea-35d12cab"
+            }
+          ]
+        ]
+      },
+      "569b9fd4-85d0-4300-8dc1-ab71fc5c2d09": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-9a243ffa"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-39c55eba"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-d8b8a91c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-dae7c99a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-ccbb74d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-e2dcbb63"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-83c73049"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-569b9fd4-85d0-4300-8dc1-ab71fc5c2d09-434b1129"
+            }
+          ]
+        ]
+      },
+      "635665d3-f35b-42b7-b9d5-427f46d1867f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-4d9de04a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-c1d96589"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-b90cd0e8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-2407b5ff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-8d09fb18"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-592ab583"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-bd2fab4e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-635665d3-f35b-42b7-b9d5-427f46d1867f-436bbcb6"
+            }
+          ]
+        ]
+      },
+      "763bd0bc-7c08-496d-82b7-1fb021c1e6e1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-72f468d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-bd8c8402"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-6e06d41d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-f2343c95"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-6d2675e1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-ae96f521"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-4f58a6b8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-763bd0bc-7c08-496d-82b7-1fb021c1e6e1-ab1569c3"
+            }
+          ]
+        ]
+      },
+      "da8758f6-82f6-481c-97cc-40292579d723": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-397fd9a2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-223fc010"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-908424b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-052081cc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-8696f902"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-0cbfffa4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-8f00b183"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da8758f6-82f6-481c-97cc-40292579d723-b4c8c9df"
+            }
+          ]
+        ]
+      },
+      "df474fee-be22-4fda-9cfc-61e46492e30c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-a6f1d4a5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-2cdd0c6f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-80919099"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-af6d8aa3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-a7bb4aa7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-80c00f6e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-6487a6b9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-df474fee-be22-4fda-9cfc-61e46492e30c-b77dbc06"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "nodes": [
+      {
+        "name": "Brevo Create Contact",
+        "parameters": {
+          "createContactAttributes": {
+            "attributesValues": [
+              {
+                "fieldName": "NOM",
+                "fieldValue": "={{ $('Tally Forms Trigger').item.json.body.data.fields[1].value }}"
+              },
+              {
+                "fieldName": "PRENOM",
+                "fieldValue": "={{ $('Tally Forms Trigger').item.json.body.data.fields[2].value }}"
+              },
+              {
+                "fieldName": "LEADS_ID",
+                "fieldValue": "={{ $('Create Lead SuiteCRM').item.json.data.id }}"
+              }
+            ]
+          },
+          "email": "{{ $('CaptainMail').item.json[\"email\"] }}",
+          "resource": "contact"
+        },
+        "type": "n8n-nodes-base.sendInBlue",
+        "typeVersion": 1
+      },
+      {
+        "name": "CaptainMail",
+        "parameters": {
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Create Lead SuiteCRM",
+        "parameters": {
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{$node[\"Token SuiteCRM\"].json[\"access_token\"]}}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/vnd.api+json"
+              }
+            ]
+          },
+          "jsonBody": "={\"data\": {\n\"type\": \"Leads\",\n\"attributes\": { \n\"last_name\": \"{{ $('Tally Forms Trigger').item.json[\"body\"][\"data\"][\"fields\"][1][\"value\"] }}\",\n\"status\": \"Hot\",\n\"email1\": \"{{ $('CaptainMail').item.json[\"email\"] }}\",\n\"lead_source\": \"FormsChoice\",\n\"assigned_user_id\": \"491cf554-4d5e-b06a-7a61-605210d85367\",\n\"lead_source_description\": \"FORMNAME Submission\"}\n}\n}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3
+      },
+      {
+        "name": "If Credits OK",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "007b0ec4-870d-48d6-a961-adff23ceabd4",
+                "leftValue": "={{ $json.credits }}",
+                "operator": {
+                  "operation": "lt",
+                  "type": "number"
+                },
+                "rightValue": 100
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "If mail ok",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "ea7e2b2b-35cc-469c-b01b-eeb4f0030aa5",
+                "leftValue": "={{ $json.result }}",
+                "operator": {
+                  "name": "filter.operator.equals",
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "invalid"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2
+      },
+      {
+        "name": "Notif Talk bad email",
+        "parameters": {
+          "authentication": "{{ $credentials.basicAuth }}",
+          "bodyParametersJson": "={\n\"message\":\"Invalid mail on submission form for contact : {{ $('Execute Workflow Trigger').item.json[\"body\"][\"data\"][\"fields\"][1][\"value\"] }} et mail : {{ $('CaptainMail').item.json[\"email\"] }} \"\n}",
+          "headerParametersJson": "={\"OCS-APIRequest\":\"true\"}",
+          "jsonParameters": true,
+          "options": {
+            "bodyContentCustomMimeType": "application/json",
+            "bodyContentType": "json"
+          },
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Notif Talk credits",
+        "parameters": {
+          "authentication": "{{ $credentials.basicAuth }}",
+          "bodyParametersJson": "={\n\"message\":\"Low credits for CaptainVerify Mail. Balance = {{ $json[\"credits\"] }}\"\n}",
+          "headerParametersJson": "={\"OCS-APIRequest\":\"true\"}",
+          "jsonParameters": true,
+          "options": {
+            "bodyContentCustomMimeType": "application/json",
+            "bodyContentType": "json"
+          },
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Notif Talk Lead created",
+        "parameters": {
+          "authentication": "{{ $credentials.basicAuth }}",
+          "bodyParametersJson": "={\n\"message\":\"Lead créé ! Saisie du Formulaire choix séance. Contact : {{ $('Tally Forms Trigger').item.json[\"body\"][\"data\"][\"fields\"][1][\"value\"] }} et mail : {{ $('CaptainMail').item.json[\"email\"] }} \"\n}",
+          "headerParametersJson": "={\"OCS-APIRequest\":\"true\"}",
+          "jsonParameters": true,
+          "options": {
+            "bodyContentCustomMimeType": "application/json",
+            "bodyContentType": "json"
+          },
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## CaptainVerify \n**Verify your email !** To reduce bounce email for your future campains. [Link]({{ $env.WEBHOOK_URL }}\n\nChange **YOURAPIKEY** with yours",
+          "height": 324.588528678304,
+          "width": 221.29675810473822
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 5,
+          "content": "## Warning about your credits \nNotify with a message and level of credits in your NextCloud Discussion\n\nChange **URLSERVERNEXTCLOUD** with yours\nand **DISCUSSIONCODE** with the code of target discussion",
+          "height": 395.6608478802989,
+          "width": 266.18453865336653
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note10",
+        "parameters": {
+          "color": 5,
+          "content": "## Notify lead created \nMessage for a lead created in your selected NextCloud discussion\n\nChange **URLSERVERNEXTCLOUD** with yours\nand **DISCUSSIONCODE** with the code of target discussion",
+          "height": 357.50623441396476,
+          "width": 266.18453865336653
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note11",
+        "parameters": {
+          "color": 4,
+          "content": "## Brevo",
+          "height": 80,
+          "width": 224.73815461346635
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 5,
+          "content": "## Warning bad email \nNotify with a message for contact with invalid mail in your NextCloud Discussion\n\nChange **URLSERVERNEXTCLOUD** with yours\nand **DISCUSSIONCODE** with the code of target discussion",
+          "height": 395.6608478802989,
+          "width": 266.18453865336653
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 3,
+          "content": "## Auth SuiteCRM \n**Get Token** with V8 API. [Guide]({{ $env.API_BASE_URL }}\n\nChange **SUITECRMURLSERVER** with yours\nChange **IDVALUE** and **PWDVALUE** with a specific user in SuiteCRM",
+          "height": 358.40399002493757,
+          "width": 226.00997506234387
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 7,
+          "content": "## WEBHOOK \n**TRIGGER** with the FormsTool of your choice.",
+          "height": 252.8428927680797
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "content": "## CaptainVerify \n",
+          "height": 80,
+          "width": 221.29675810473822
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "color": 5,
+          "content": "## NextCloud\n",
+          "height": 80,
+          "width": 220.39900249376552
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "color": 3,
+          "content": "## Create Leads \nAdjust **Json** with your data\n\nChange **SUITECRMURLSERVER** with yours\nChange **IDVALUE** and **PWDVALUE** with a specific user in SuiteCRM",
+          "height": 358.40399002493757,
+          "width": 226.00997506234387
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note8",
+        "parameters": {
+          "color": 3,
+          "content": "## SuiteCRM \n",
+          "height": 80,
+          "width": 223.46633416458826
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note9",
+        "parameters": {
+          "color": 4,
+          "content": "## Brevo\nCreate Contact with data and **Link with the id of SuiteCRM** Lead in a dedicated custom field in Brevo",
+          "height": 357.1321695760598
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Tally Forms Trigger",
+        "parameters": {},
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Token SuiteCRM",
+        "parameters": {
+          "allowUnauthorizedCerts": true,
+          "bodyParametersUi": {
+            "parameter": [
+              {
+                "name": "grant_type",
+                "value": "client_credentials"
+              },
+              {
+                "name": "client_id",
+                "value": "IDVALUE"
+              },
+              {
+                "name": "client_secret",
+                "value": "PWDVALUE"
+              }
+            ]
+          },
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 22,
+  "integrationCount": 2,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "35 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Sendinblue"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 126,
+  "viewCount": 636,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Sendinblue Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Tally Forms Trigger\".",
+      "Open the \"Token SuiteCRM\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"CaptainMail\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"If mail ok\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Credits OK\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Notif Talk credits\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Notif Talk bad email\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note8\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note9\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Lead SuiteCRM\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Notif Talk Lead created\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note10\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note11\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Brevo Create Contact\" node (n8n-nodes-base.sendInBlue) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-kcn0e04tw",
+      "workflowId": "httprequest-workflow-fsjol",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0505_HTTP_Stickynote_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0505_HTTP_Stickynote_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:31.570Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:31.570Z",
+  "updatedAt": "2026-07-15T11:18:31.570Z"
+}

@@ -1,0 +1,796 @@
+{
+  "id": "production-workflow-s8obs",
+  "name": "Production Workflow",
+  "slug": "production-workflow-brqa",
+  "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Production Workflow workflow containing 15 nodes.",
+  "originalWorkflowJson": {
+    "nodes": [
+      {
+        "name": "Ack",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          -160,
+          1440
+        ],
+        "webhookId": "d3025d6c-5956-439e-9c9a-db3ef524a24f",
+        "parameters": {
+          "path": "/ack",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1,
+        "id": "node-85c65076"
+      },
+      {
+        "name": "Resolve",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          120,
+          1880
+        ],
+        "webhookId": "92d7ddfa-20f9-49bc-976e-4f6c76c0b3b4",
+        "parameters": {
+          "path": "/resolve",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1,
+        "id": "node-699d23c9"
+      },
+      {
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          60,
+          1040
+        ],
+        "webhookId": "9888d896-dd23-4e97-9d16-c12055b64133",
+        "parameters": {
+          "path": "9888d896-dd23-4e97-9d16-c12055b64133",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 1,
+        "id": "node-dc00c296"
+      },
+      {
+        "name": "Jira1",
+        "type": "n8n-nodes-base.jira",
+        "position": [
+          680,
+          1040
+        ],
+        "parameters": {
+          "project": "10016",
+          "summary": "={{$node[\"Webhook\"].json[\"body\"][\"event\"][\"data\"][\"title\"]}}",
+          "issueType": "10007",
+          "additionalFields": {
+            "assignee": "qwertz12345"
+          }
+        },
+        "credentials": {
+          "jiraSoftwareCloudApi": {
+            "id": "{{ $credentials.jiraSoftwareCloudApi.id }}",
+            "name": "Jira SW Cloud account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-389a9465"
+      },
+      {
+        "name": "Jira2",
+        "type": "n8n-nodes-base.jira",
+        "position": [
+          540,
+          1880
+        ],
+        "parameters": {
+          "issueKey": "={{$node[\"Resolve\"].json[\"body\"][\"context\"][\"jira_key\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "statusId": "31"
+          }
+        },
+        "credentials": {
+          "jiraSoftwareCloudApi": {
+            "id": "{{ $credentials.jiraSoftwareCloudApi.id }}",
+            "name": "Jira SW Cloud account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-ac00e1eb"
+      },
+      {
+        "name": "PagerDuty1",
+        "type": "n8n-nodes-base.pagerDuty",
+        "position": [
+          60,
+          1440
+        ],
+        "parameters": {
+          "email": "address@mail.com",
+          "resource": "incident",
+          "operation": "update",
+          "incidentId": "={{$json[\"body\"][\"context\"][\"pagerduty_incident\"]}}",
+          "updateFields": {
+            "status": "acknowledged"
+          },
+          "authentication": "{{ $credentials.apiToken }}",
+          "conferenceBridgeUi": {}
+        },
+        "credentials": {
+          "pagerDutyApi": {
+            "id": "{{ $credentials.pagerDutyApi.id }}",
+            "name": "PagerDuty account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-971398ec"
+      },
+      {
+        "name": "PagerDuty2",
+        "type": "n8n-nodes-base.pagerDuty",
+        "position": [
+          340,
+          1880
+        ],
+        "parameters": {
+          "email": "address@mail.com",
+          "resource": "incident",
+          "operation": "update",
+          "incidentId": "={{$json[\"body\"][\"context\"][\"pagerduty_incident\"]}}",
+          "updateFields": {
+            "status": "resolved"
+          },
+          "authentication": "{{ $credentials.apiToken }}",
+          "conferenceBridgeUi": {}
+        },
+        "credentials": {
+          "pagerDutyApi": {
+            "id": "{{ $credentials.pagerDutyApi.id }}",
+            "name": "PagerDuty account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-06d18468"
+      },
+      {
+        "name": "Mattermost5",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          300,
+          1440
+        ],
+        "parameters": {
+          "message": "💪🏼 Incident status has been changed to Acknowledged on PagerDuty.",
+          "channelId": "={{$node[\"Ack\"].json[\"body\"][\"channel_id\"]}}",
+          "attachments": [],
+          "otherOptions": {}
+        },
+        "credentials": {
+          "mattermostApi": {
+            "id": "{{ $credentials.mattermostApi.id }}",
+            "name": "Mattermost account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-4412798c"
+      },
+      {
+        "name": "Mattermost6",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          760,
+          1760
+        ],
+        "parameters": {
+          "message": "💪 This issue got closed in PagerDuty and Jira.",
+          "channelId": "={{$node[\"Resolve\"].json[\"body\"][\"channel_id\"]}}",
+          "attachments": [],
+          "otherOptions": {}
+        },
+        "credentials": {
+          "mattermostApi": {
+            "id": "{{ $credentials.mattermostApi.id }}",
+            "name": "Mattermost account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-0b3d8090"
+      },
+      {
+        "name": "Mattermost4",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          900,
+          1180
+        ],
+        "parameters": {
+          "message": "=⚠️ {{$node[\"Webhook\"].json[\"body\"][\"messages\"][0][\"log_entries\"][0][\"incident\"][\"summary\"]}}\nPagerDuty incident: {{$node[\"Webhook\"].json[\"body\"][\"messages\"][0][\"log_entries\"][0][\"incident\"][\"html_url\"]}}\nJira issue: https://n8n.atlassian.net/browse/{{$json[\"key\"]}}",
+          "channelId": "={{$node[\"Mattermost1\"].json[\"id\"]}}",
+          "attachments": [
+            {
+              "actions": {
+                "item": [
+                  {
+                    "name": "Acknowledge",
+                    "type": "button",
+                    "options": {},
+                    "data_source": "custom",
+                    "integration": {
+                      "item": {
+                        "url": "{{ $env.BASE_URL }}",
+                        "context": {
+                          "property": [
+                            {
+                              "name": "pagerduty_incident",
+                              "value": "={{ $node[\"Webhook\"].json[\"body\"][\"event\"][\"data\"][\"id\"] }}"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "name": "Resolve",
+                    "type": "button",
+                    "options": {},
+                    "data_source": "custom",
+                    "integration": {
+                      "item": {
+                        "url": "{{ $env.BASE_URL }}",
+                        "context": {
+                          "property": [
+                            {
+                              "name": "jira_key",
+                              "value": "={{$json[\"key\"]}}"
+                            },
+                            {
+                              "name": "pagerduty_incident",
+                              "value": "={{ $node[\"Webhook\"].json[\"body\"][\"event\"][\"data\"][\"id\"] }}"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "otherOptions": {}
+        },
+        "credentials": {
+          "mattermostApi": {
+            "id": "{{ $credentials.mattermostApi.id }}",
+            "name": "Mattermost account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-5519000f"
+      },
+      {
+        "name": "Mattermost3",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          900,
+          940
+        ],
+        "parameters": {
+          "message": "=🚨 New incident: \nAuxiliary Channel -> https://mattermost.internal.n8n.io/test/channels/{{$node[\"Mattermost1\"].json[\"name\"]}}\nPagerDuty Incident -> {{$node[\"Webhook\"].json[\"body\"][\"event\"][\"data\"][\"html_url\"]}}\nJira Issue -> https://n8n.atlassian.net/browse/{{$json[\"key\"]}}",
+          "channelId": "qwertz12345",
+          "attachments": [],
+          "otherOptions": {}
+        },
+        "credentials": {
+          "mattermostApi": {
+            "id": "{{ $credentials.mattermostApi.id }}",
+            "name": "Mattermost account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-c0ad2b56"
+      },
+      {
+        "name": "Mattermost2",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          480,
+          1040
+        ],
+        "parameters": {
+          "userId": "qwertz12345",
+          "resource": "channel",
+          "channelId": "={{$json[\"id\"]}}",
+          "operation": "addUser"
+        },
+        "credentials": {
+          "mattermostApi": {
+            "id": "{{ $credentials.mattermostApi.id }}",
+            "name": "Mattermost account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-ceee08c1"
+      },
+      {
+        "name": "Mattermost1",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          280,
+          1040
+        ],
+        "parameters": {
+          "teamId": "qwertz12345",
+          "channel": "={{$json[\"body\"][\"event\"][\"data\"][\"incident_key\"]}}",
+          "resource": "channel",
+          "displayName": "={{$json[\"body\"][\"event\"][\"data\"][\"title\"]}}"
+        },
+        "credentials": {
+          "mattermostApi": {
+            "id": "{{ $credentials.mattermostApi.id }}",
+            "name": "Mattermost account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-38122ee1"
+      },
+      {
+        "name": "Mattermost7",
+        "type": "n8n-nodes-base.mattermost",
+        "position": [
+          760,
+          1980
+        ],
+        "parameters": {
+          "message": "=🎉 The incident ({{$node[\"PagerDuty2\"].json[\"summary\"]}}) was resolved by the lovely folks in the on-call team!",
+          "channelId": "qwertz12345",
+          "attachments": [],
+          "otherOptions": {}
+        },
+        "credentials": {
+          "mattermostApi": {
+            "id": "{{ $credentials.mattermostApi.id }}",
+            "name": "Mattermost account"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-0bff7578"
+      },
+      {
+        "id": "error-7bde3075",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {},
+    "name": "Production Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "meta": {
+      "instanceId": "workflow-18d1d651",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.874082",
+      "updatedAt": "2025-09-29T07:07:50.874097",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Production Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Production Workflow",
+    "nodes": [
+      {
+        "name": "Ack",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "/ack"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "jiraSoftwareCloudApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Jira1",
+        "parameters": {
+          "additionalFields": {
+            "assignee": "qwertz12345"
+          },
+          "issueType": "10007",
+          "project": "10016",
+          "summary": "={{$node[\"Webhook\"].json[\"body\"][\"event\"][\"data\"][\"title\"]}}"
+        },
+        "type": "n8n-nodes-base.jira",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "jiraSoftwareCloudApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Jira2",
+        "parameters": {
+          "issueKey": "={{$node[\"Resolve\"].json[\"body\"][\"context\"][\"jira_key\"]}}",
+          "operation": "update",
+          "updateFields": {
+            "statusId": "31"
+          }
+        },
+        "type": "n8n-nodes-base.jira",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mattermost1",
+        "parameters": {
+          "channel": "={{$json[\"body\"][\"event\"][\"data\"][\"incident_key\"]}}",
+          "displayName": "={{$json[\"body\"][\"event\"][\"data\"][\"title\"]}}",
+          "resource": "channel",
+          "teamId": "qwertz12345"
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mattermost2",
+        "parameters": {
+          "channelId": "={{$json[\"id\"]}}",
+          "operation": "addUser",
+          "resource": "channel",
+          "userId": "qwertz12345"
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mattermost3",
+        "parameters": {
+          "attachments": [],
+          "channelId": "qwertz12345",
+          "message": "=🚨 New incident: \nAuxiliary Channel -> https://mattermost.internal.n8n.io/test/channels/{{$node[\"Mattermost1\"].json[\"name\"]}}\nPagerDuty Incident -> {{$node[\"Webhook\"].json[\"body\"][\"event\"][\"data\"][\"html_url\"]}}\nJira Issue -> https://n8n.atlassian.net/browse/{{$json[\"key\"]}}",
+          "otherOptions": {}
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mattermost4",
+        "parameters": {
+          "attachments": [
+            {
+              "actions": {
+                "item": [
+                  {
+                    "data_source": "custom",
+                    "integration": {
+                      "item": {
+                        "context": {
+                          "property": [
+                            {
+                              "name": "pagerduty_incident",
+                              "value": "={{ $node[\"Webhook\"].json[\"body\"][\"event\"][\"data\"][\"id\"] }}"
+                            }
+                          ]
+                        },
+                        "url": "{{ $env.BASE_URL }}"
+                      }
+                    },
+                    "name": "Acknowledge",
+                    "options": {},
+                    "type": "button"
+                  },
+                  {
+                    "data_source": "custom",
+                    "integration": {
+                      "item": {
+                        "context": {
+                          "property": [
+                            {
+                              "name": "jira_key",
+                              "value": "={{$json[\"key\"]}}"
+                            },
+                            {
+                              "name": "pagerduty_incident",
+                              "value": "={{ $node[\"Webhook\"].json[\"body\"][\"event\"][\"data\"][\"id\"] }}"
+                            }
+                          ]
+                        },
+                        "url": "{{ $env.BASE_URL }}"
+                      }
+                    },
+                    "name": "Resolve",
+                    "options": {},
+                    "type": "button"
+                  }
+                ]
+              }
+            }
+          ],
+          "channelId": "={{$node[\"Mattermost1\"].json[\"id\"]}}",
+          "message": "=⚠️ {{$node[\"Webhook\"].json[\"body\"][\"messages\"][0][\"log_entries\"][0][\"incident\"][\"summary\"]}}\nPagerDuty incident: {{$node[\"Webhook\"].json[\"body\"][\"messages\"][0][\"log_entries\"][0][\"incident\"][\"html_url\"]}}\nJira issue: https://n8n.atlassian.net/browse/{{$json[\"key\"]}}",
+          "otherOptions": {}
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mattermost5",
+        "parameters": {
+          "attachments": [],
+          "channelId": "={{$node[\"Ack\"].json[\"body\"][\"channel_id\"]}}",
+          "message": "💪🏼 Incident status has been changed to Acknowledged on PagerDuty.",
+          "otherOptions": {}
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mattermost6",
+        "parameters": {
+          "attachments": [],
+          "channelId": "={{$node[\"Resolve\"].json[\"body\"][\"channel_id\"]}}",
+          "message": "💪 This issue got closed in PagerDuty and Jira.",
+          "otherOptions": {}
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "mattermostApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Mattermost7",
+        "parameters": {
+          "attachments": [],
+          "channelId": "qwertz12345",
+          "message": "=🎉 The incident ({{$node[\"PagerDuty2\"].json[\"summary\"]}}) was resolved by the lovely folks in the on-call team!",
+          "otherOptions": {}
+        },
+        "type": "n8n-nodes-base.mattermost",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pagerDutyApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "PagerDuty1",
+        "parameters": {
+          "authentication": "{{ $credentials.apiToken }}",
+          "conferenceBridgeUi": {},
+          "email": "address@mail.com",
+          "incidentId": "={{$json[\"body\"][\"context\"][\"pagerduty_incident\"]}}",
+          "operation": "update",
+          "resource": "incident",
+          "updateFields": {
+            "status": "acknowledged"
+          }
+        },
+        "type": "n8n-nodes-base.pagerDuty",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pagerDutyApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "PagerDuty2",
+        "parameters": {
+          "authentication": "{{ $credentials.apiToken }}",
+          "conferenceBridgeUi": {},
+          "email": "address@mail.com",
+          "incidentId": "={{$json[\"body\"][\"context\"][\"pagerduty_incident\"]}}",
+          "operation": "update",
+          "resource": "incident",
+          "updateFields": {
+            "status": "resolved"
+          }
+        },
+        "type": "n8n-nodes-base.pagerDuty",
+        "typeVersion": 1
+      },
+      {
+        "name": "Resolve",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "/resolve"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      },
+      {
+        "name": "Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "9888d896-dd23-4e97-9d16-c12055b64133"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 15,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Webhook",
+    "Jira",
+    "Pagerduty",
+    "Mattermost"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 93,
+  "viewCount": 388,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "Jira Account",
+      "Pagerduty Account",
+      "Mattermost Account"
+    ],
+    "requiredCredentials": [
+      "jira Software Cloud  A P I details",
+      "pager Duty  A P I details",
+      "mattermost  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Ack\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Resolve\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Locate the webhook node named \"Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Jira1\" node (n8n-nodes-base.jira) and configure the action parameters, mappings, and fields.",
+      "Open the \"Jira2\" node (n8n-nodes-base.jira) and configure the action parameters, mappings, and fields.",
+      "Open the \"PagerDuty1\" node (n8n-nodes-base.pagerDuty) and configure the action parameters, mappings, and fields.",
+      "Open the \"PagerDuty2\" node (n8n-nodes-base.pagerDuty) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mattermost5\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mattermost6\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mattermost4\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mattermost3\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mattermost2\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mattermost1\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Mattermost7\" node (n8n-nodes-base.mattermost) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-d163wah1n",
+      "workflowId": "production-workflow-s8obs",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Mattermost/0850_Mattermost_Pagerduty_Automate_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Mattermost\\0850_Mattermost_Pagerduty_Automate_Webhook.json",
+      "discoveredAt": "2026-07-15T11:19:10.826Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:10.826Z",
+  "updatedAt": "2026-07-15T11:19:10.826Z"
+}

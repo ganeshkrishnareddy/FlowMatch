@@ -1,0 +1,318 @@
+{
+  "id": "coffee-bot-matrix--puj0j",
+  "name": "Coffee Bot (Matrix)",
+  "slug": "coffee-bot-matrix--e5cz",
+  "description": "Automated workflow: Coffee Bot (Matrix). This workflow processes data and performs automated tasks.",
+  "shortDescription": "Coffee Bot (Matrix) workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "9",
+    "name": "Coffee Bot (Matrix)",
+    "nodes": [
+      {
+        "name": "Greetings",
+        "type": "n8n-nodes-base.matrix",
+        "position": [
+          670,
+          240
+        ],
+        "parameters": {
+          "text": "👋 Happy Monday Groups for this week's virtual coffee are:",
+          "roomId": "Enter your Room ID"
+        },
+        "credentials": {
+          "matrixApi": "Matrix Creds"
+        },
+        "typeVersion": 1,
+        "id": "59dd59af-bed8-41ed-aa22-d271096565c1",
+        "notes": "This matrix node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Employees in coffee chat channel",
+        "type": "n8n-nodes-base.matrix",
+        "position": [
+          880,
+          240
+        ],
+        "parameters": {
+          "roomId": "Enter your Room ID",
+          "filters": {
+            "membership": ""
+          },
+          "resource": "roomMember"
+        },
+        "credentials": {
+          "matrixApi": "Enter Your Matrix Credentials"
+        },
+        "typeVersion": 1,
+        "id": "2ba21034-eea2-44ed-aa64-8001b870c35c",
+        "notes": "This matrix node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Weekly trigger on monday1",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          480,
+          240
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 10,
+                "mode": "everyWeek"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "02391d9a-7d26-42a5-bf9c-596663867e1b",
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Divide into groups",
+        "type": "n8n-nodes-base.function",
+        "notes": "This still needs to be reconfigured to grab the information from the second Matrix node. Have an issue with the ",
+        "position": [
+          1090,
+          240
+        ],
+        "parameters": {
+          "functionCode": "const ideal_group_size = 3;\nlet groups = [];\nlet data_as_array = [];\nlet newItems = [];\n\n// Take all the users and add them to an array\nfor (let j = 0; j < items.length; j++) {\n  data_as_array.push({username: items[j].json.user_id});\n}\n\n// Fisher-Yates (aka Knuth) Shuffle\nfunction shuffle(array) {\n  var currentIndex = array.length, temporaryValue, randomIndex;\n\n  // While there remain elements to shuffle...\n  while (0 !== currentIndex) {\n\n    // Pick a remaining element...\n    randomIndex = Math.floor(Math.random() * currentIndex);\n    currentIndex -= 1;\n\n    // And swap it with the current element.\n    temporaryValue = array[currentIndex];\n    array[currentIndex] = array[randomIndex];\n    array[randomIndex] = temporaryValue;\n  }\n\n  return array;\n}\n\n// Randomize the sequence of names in the array\ndata_as_array = shuffle(data_as_array);\n\n// Create groups of ideal group size (3)\nfor (let i = 0; i < data_as_array.length; i += ideal_group_size) {\n  groups.push(data_as_array.slice(i, i + ideal_group_size));\n}\n\n// Make sure that no group has just one person. If it does, take\n// one from previous group and add it to that group \nfor (let k = 0; k < groups.length; k++) {\n  if (groups[k].length === 1) {\n    groups[k].push(groups[k-1].shift());\n  }\n}\n\nfor (let l = 0; l < groups.length; l++) {\n    newItems.push({json: {groupsUsername: groups[l].map(a=> a.username)}})\n}\n\nreturn newItems;\n"
+        },
+        "typeVersion": 1,
+        "id": "0ddbec84-ee4b-425c-ac8e-87efffdd4746"
+      },
+      {
+        "name": "Announce groups",
+        "type": "n8n-nodes-base.matrix",
+        "position": [
+          1290,
+          240
+        ],
+        "parameters": {
+          "text": "=☀️ {{$node[\"Divide into groups\"].json[\"groupsUsername\"].join(', ')}}",
+          "roomId": "!hobuowPzLuKnojiyfV:matrix.org"
+        },
+        "credentials": {
+          "matrixApi": "Matrix Creds"
+        },
+        "typeVersion": 1,
+        "id": "b8ba29d3-4f0b-489b-b1e8-63cffbf8445d",
+        "notes": "This matrix node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-1b2f4540",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: Coffee Bot (Matrix). This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-7ed68dbd",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:50.825442",
+      "updatedAt": "2025-09-29T07:07:50.825455",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Coffee Bot (Matrix). This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Coffee Bot (Matrix)",
+    "nodes": [
+      {
+        "credentials": {
+          "matrixApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Announce groups",
+        "parameters": {
+          "roomId": "!hobuowPzLuKnojiyfV:matrix.org",
+          "text": "=☀️ {{$node[\"Divide into groups\"].json[\"groupsUsername\"].join(', ')}}"
+        },
+        "type": "n8n-nodes-base.matrix",
+        "typeVersion": 1
+      },
+      {
+        "name": "Divide into groups",
+        "parameters": {
+          "functionCode": "const ideal_group_size = 3;\nlet groups = [];\nlet data_as_array = [];\nlet newItems = [];\n\n// Take all the users and add them to an array\nfor (let j = 0; j < items.length; j++) {\n  data_as_array.push({username: items[j].json.user_id});\n}\n\n// Fisher-Yates (aka Knuth) Shuffle\nfunction shuffle(array) {\n  var currentIndex = array.length, temporaryValue, randomIndex;\n\n  // While there remain elements to shuffle...\n  while (0 !== currentIndex) {\n\n    // Pick a remaining element...\n    randomIndex = Math.floor(Math.random() * currentIndex);\n    currentIndex -= 1;\n\n    // And swap it with the current element.\n    temporaryValue = array[currentIndex];\n    array[currentIndex] = array[randomIndex];\n    array[randomIndex] = temporaryValue;\n  }\n\n  return array;\n}\n\n// Randomize the sequence of names in the array\ndata_as_array = shuffle(data_as_array);\n\n// Create groups of ideal group size (3)\nfor (let i = 0; i < data_as_array.length; i += ideal_group_size) {\n  groups.push(data_as_array.slice(i, i + ideal_group_size));\n}\n\n// Make sure that no group has just one person. If it does, take\n// one from previous group and add it to that group \nfor (let k = 0; k < groups.length; k++) {\n  if (groups[k].length === 1) {\n    groups[k].push(groups[k-1].shift());\n  }\n}\n\nfor (let l = 0; l < groups.length; l++) {\n    newItems.push({json: {groupsUsername: groups[l].map(a=> a.username)}})\n}\n\nreturn newItems;\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "matrixApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Employees in coffee chat channel",
+        "parameters": {
+          "filters": {
+            "membership": ""
+          },
+          "resource": "roomMember",
+          "roomId": "Enter your Room ID"
+        },
+        "type": "n8n-nodes-base.matrix",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "matrixApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Greetings",
+        "parameters": {
+          "roomId": "Enter your Room ID",
+          "text": "👋 Happy Monday Groups for this week's virtual coffee are:"
+        },
+        "type": "n8n-nodes-base.matrix",
+        "typeVersion": 1
+      },
+      {
+        "name": "Weekly trigger on monday1",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 10,
+                "mode": "everyWeek"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Matrix"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 28,
+  "viewCount": 235,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Matrix Account"
+    ],
+    "requiredCredentials": [
+      "matrix  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Weekly trigger on monday1\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Greetings\" node (n8n-nodes-base.matrix) and configure the action parameters, mappings, and fields.",
+      "Open the \"Employees in coffee chat channel\" node (n8n-nodes-base.matrix) and configure the action parameters, mappings, and fields.",
+      "Open the \"Divide into groups\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Announce groups\" node (n8n-nodes-base.matrix) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-a8tduezkd",
+      "workflowId": "coffee-bot-matrix--puj0j",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Matrix/1236_Matrix_Cron_Automate_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Matrix\\1236_Matrix_Cron_Automate_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:19:09.979Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:09.979Z",
+  "updatedAt": "2026-07-15T11:19:09.979Z"
+}

@@ -1,0 +1,517 @@
+{
+  "id": "manualtrigger-workflow-okchk",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-dxj5",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 7 different services: stickyNote, httpRequest, code, readWriteFile, set. It contains 9 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-fc78a2e0",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:42.561430",
+      "updatedAt": "2025-09-29T07:07:42.561445",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "3409b6e3-aef1-4eb4-acfb-72a73101e109",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          380,
+          240
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4942cdfc-bc9a-43ac-a60d-06e1ddf52d07",
+        "name": "Write Result File to Disk",
+        "type": "n8n-nodes-base.readWriteFile",
+        "position": [
+          1360,
+          240
+        ],
+        "parameters": {
+          "options": {},
+          "fileName": "document.pdf",
+          "operation": "write",
+          "dataPropertyName": "=data"
+        },
+        "typeVersion": 1,
+        "notes": "This readWriteFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1467a9ab-144d-48cc-a52f-3dca86ca0e8b",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          880,
+          100
+        ],
+        "parameters": {
+          "width": 218,
+          "height": 132,
+          "content": "## Authentication\nConversion requests must be authenticated. Please create \n[ConvertAPI account to get authentication secret]({{ $env.API_BASE_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4d85a311-8e39-48ce-868e-95efec509247",
+        "name": "Create HTML",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          580,
+          240
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ad325c1b-1597-45ab-98cd-1801da32e3f1",
+                "name": "data",
+                "type": "string",
+                "value": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>ConvertAPI Test Document</title>\n</head>\n<body>\n    <h1>ConvertAPI Test Document</h1>\n    <p>This is a minimal HTML5 document used for testing ConvertAPI's conversion capabilities.</p>\n    <section>\n        <h2>Section Title</h2>\n        <p>This is a section within the document.</p>\n    </section>\n    <footer>\n        <p>&copy; 2024 Test Document</p>\n    </footer>\n</body>\n</html>"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.3,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a0e4e17a-097f-4127-9b60-c6ae637816a0",
+        "name": "Convert HTML to File",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          760,
+          240
+        ],
+        "parameters": {
+          "jsCode": "const text = $node[\"Create HTML\"].json[\"data\"]\nconst buffer = Buffer.from(text, 'utf8');\nconst binaryData = {\n  data: buffer.toString('base64'),\n  mimeType: 'application/octet-stream',\n  fileName: 'file.html',\n};\nitems[0].binary = { data: binaryData };\nreturn items;\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "653b21eb-dae5-44e0-858a-a2905f495911",
+        "name": "Convert File to PDF",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          940,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "file",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "data"
+              }
+            ]
+          },
+          "genericAuthType": "httpQueryAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/octet-stream"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpQueryAuth": {
+            "id": "WdAklDMod8fBEMRk",
+            "name": "Query Auth account"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "653b21eb-dae5-44e0-858a-a2905f495911": {
+        "main": [
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-018e990f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-45f8c94b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-809993f7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-8be1062a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-2690c351",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-d5cfb884",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-f070b700",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-111b0b27",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4942cdfc-bc9a-43ac-a60d-06e1ddf52d07": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4942cdfc-bc9a-43ac-a60d-06e1ddf52d07-b0e0cb9b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 7 different services: stickyNote, httpRequest, code, readWriteFile, set. It contains 9 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4942cdfc-bc9a-43ac-a60d-06e1ddf52d07": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4942cdfc-bc9a-43ac-a60d-06e1ddf52d07-b0e0cb9b"
+            }
+          ]
+        ]
+      },
+      "653b21eb-dae5-44e0-858a-a2905f495911": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-018e990f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-45f8c94b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-809993f7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-8be1062a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-2690c351"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-d5cfb884"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-f070b700"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-653b21eb-dae5-44e0-858a-a2905f495911-111b0b27"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "httpQueryAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Convert File to PDF",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "inputDataFieldName": "data",
+                "name": "file",
+                "parameterType": "formBinaryData"
+              }
+            ]
+          },
+          "contentType": "multipart-form-data",
+          "genericAuthType": "httpQueryAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/octet-stream"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Convert HTML to File",
+        "parameters": {
+          "jsCode": "const text = $node[\"Create HTML\"].json[\"data\"]\nconst buffer = Buffer.from(text, 'utf8');\nconst binaryData = {\n  data: buffer.toString('base64'),\n  mimeType: 'application/octet-stream',\n  fileName: 'file.html',\n};\nitems[0].binary = { data: binaryData };\nreturn items;\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Create HTML",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ad325c1b-1597-45ab-98cd-1801da32e3f1",
+                "name": "data",
+                "type": "string",
+                "value": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>ConvertAPI Test Document</title>\n</head>\n<body>\n    <h1>ConvertAPI Test Document</h1>\n    <p>This is a minimal HTML5 document used for testing ConvertAPI's conversion capabilities.</p>\n    <section>\n        <h2>Section Title</h2>\n        <p>This is a section within the document.</p>\n    </section>\n    <footer>\n        <p>&copy; 2024 Test Document</p>\n    </footer>\n</body>\n</html>"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Authentication\nConversion requests must be authenticated. Please create \n[ConvertAPI account to get authentication secret]({{ $env.API_BASE_URL }}",
+          "height": 132,
+          "width": 218
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Write Result File to Disk",
+        "parameters": {
+          "dataPropertyName": "=data",
+          "fileName": "document.pdf",
+          "operation": "write",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Readwritefile",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 29,
+  "viewCount": 815,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Readwritefile Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Query Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Write Result File to Disk\" node (n8n-nodes-base.readWriteFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Convert File to PDF\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Create HTML\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-7hav8k3ad",
+      "workflowId": "manualtrigger-workflow-okchk",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/0519_Code_Manual_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\0519_Code_Manual_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:28:53.986Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:28:53.986Z",
+  "updatedAt": "2026-07-15T11:28:53.986Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

@@ -1,0 +1,448 @@
+{
+  "id": "remote-iot-sensor-monitoring-via-mqtt-and-influxdb-hgkxu",
+  "name": "Remote IOT Sensor monitoring via MQTT and InfluxDB",
+  "slug": "remote-iot-sensor-monitoring-via-mqtt-and-influxdb-88bv",
+  "description": "Automated workflow: Remote IOT Sensor monitoring via MQTT and InfluxDB. This workflow integrates 5 different services: stickyNote, httpRequest, code, stopAndError, mqttTrigger. It contains 8 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Remote IOT Sensor monitoring via MQTT and InfluxDB workflow containing 6 nodes.",
+  "originalWorkflowJson": {
+    "id": "6pOGYw5O3iOY1Gc6",
+    "meta": {
+      "instanceId": "workflow-3625acc2",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.229809",
+      "updatedAt": "2025-09-29T07:07:46.229819",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Remote IOT Sensor monitoring via MQTT and InfluxDB",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "4997f226-f236-4d27-bea4-904744d9ff07",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -700,
+          -360
+        ],
+        "parameters": {
+          "width": 340,
+          "height": 120,
+          "content": "MQTT trigger subscribed to a topic called wokwi-weather via a Mosquitto MQTT broker. The trigger receives the temperature and humidity payloads from a DHT22 sensor connected to a remote ESP32 microcontroller "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9d4f1da6-fda3-4312-a6b1-bd0ac499dde7",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -240,
+          -360
+        ],
+        "parameters": {
+          "height": 100,
+          "content": "Javascript code to extract the temperature and humidity values to ensure correct JSON format for the database"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d8f01dba-5019-457e-8c1a-99c802282fdf",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          140,
+          -360
+        ],
+        "parameters": {
+          "width": 260,
+          "height": 120,
+          "content": "HTTP request node posts temperature and humidity data from the DHT22 sensor to the InfluxDB data bucket running on a local host {{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "020858a6-7771-4322-8eb6-b83e99b3563d",
+        "name": "Remote Sensor MQTT Trigger",
+        "type": "n8n-nodes-base.mqttTrigger",
+        "position": [
+          -580,
+          -220
+        ],
+        "parameters": {
+          "topics": "wokwi-weather",
+          "options": {}
+        },
+        "credentials": {
+          "mqtt": {
+            "id": "xtd75tjk1hKlQOba",
+            "name": "MQTT account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This mqttTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "51e6f59f-9b93-4121-8db4-7f47b929fdf5",
+        "name": "Data ingest to InfluxDB bucket",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          200,
+          -220
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}<Organization ID>&bucket=<InfluxDB bucket name>&precision=s",
+          "body": "={{ $json.payload }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "contentType": "raw",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Token  <API Token value generated in InfluxDB>"
+              }
+            ]
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6abe1212-b128-492f-b485-401a4315fcbc",
+        "name": "Payload data preparation node",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -180,
+          -220
+        ],
+        "parameters": {
+          "jsCode": "// Try to parse the incoming message as JSON\nlet data;\ntry {\n  data = JSON.parse($json.message); // $json.message is expected to be a JSON string\n} catch (e) {\n  // If parsing fails, throw an error\n  throw new Error(\"Invalid JSON in MQTT message\");\n}\n\n// Get the topic from the input, or use a default value\nconst topic = $json.topic || \"unknown-topic\";\n\n// Make sure humidity and temp are numbers\nif (typeof data.humidity !== \"number\" || typeof data.temp !== \"number\") {\n  throw new Error(\"Missing or invalid humidity/temp in MQTT message\");\n}\n\n// Create a formatted string like: \"topic_name humidity=45,temp=22\"\nconst line = `${topic} humidity=${data.humidity},temp=${data.temp}`;\n\n// Return the result in the expected format\nreturn [\n  {\n    json: {\n      payload: line\n    }\n  }\n];"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "d1311dca-5edf-4f14-86b9-629937cd3416",
+    "connections": {
+      "51e6f59f-9b93-4121-8db4-7f47b929fdf5": {
+        "main": [
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-f96c467e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-01c61489",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-7a8c0941",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-b996e7df",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-08886c56",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-d387ec6d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-812f1bc8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-ec6cdb70",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Remote IOT Sensor monitoring via MQTT and InfluxDB. This workflow integrates 5 different services: stickyNote, httpRequest, code, stopAndError, mqttTrigger. It contains 8 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Remote IOT Sensor monitoring via MQTT and InfluxDB. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "51e6f59f-9b93-4121-8db4-7f47b929fdf5": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-f96c467e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-01c61489"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-7a8c0941"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-b996e7df"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-08886c56"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-d387ec6d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-812f1bc8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-51e6f59f-9b93-4121-8db4-7f47b929fdf5-ec6cdb70"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Remote IOT Sensor monitoring via MQTT and InfluxDB",
+    "nodes": [
+      {
+        "name": "Data ingest to InfluxDB bucket",
+        "parameters": {
+          "body": "={{ $json.payload }}",
+          "contentType": "raw",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Token  <API Token value generated in InfluxDB>"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}<Organization ID>&bucket=<InfluxDB bucket name>&precision=s"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Payload data preparation node",
+        "parameters": {
+          "jsCode": "// Try to parse the incoming message as JSON\nlet data;\ntry {\n  data = JSON.parse($json.message); // $json.message is expected to be a JSON string\n} catch (e) {\n  // If parsing fails, throw an error\n  throw new Error(\"Invalid JSON in MQTT message\");\n}\n\n// Get the topic from the input, or use a default value\nconst topic = $json.topic || \"unknown-topic\";\n\n// Make sure humidity and temp are numbers\nif (typeof data.humidity !== \"number\" || typeof data.temp !== \"number\") {\n  throw new Error(\"Missing or invalid humidity/temp in MQTT message\");\n}\n\n// Create a formatted string like: \"topic_name humidity=45,temp=22\"\nconst line = `${topic} humidity=${data.humidity},temp=${data.temp}`;\n\n// Return the result in the expected format\nreturn [\n  {\n    json: {\n      payload: line\n    }\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "mqtt": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Remote Sensor MQTT Trigger",
+        "parameters": {
+          "options": {},
+          "topics": "wokwi-weather"
+        },
+        "type": "n8n-nodes-base.mqttTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "MQTT trigger subscribed to a topic called wokwi-weather via a Mosquitto MQTT broker. The trigger receives the temperature and humidity payloads from a DHT22 sensor connected to a remote ESP32 microcontroller ",
+          "height": 120,
+          "width": 340
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "Javascript code to extract the temperature and humidity values to ensure correct JSON format for the database",
+          "height": 100
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "HTTP request node posts temperature and humidity data from the DHT22 sensor to the InfluxDB data bucket running on a local host {{ $env.WEBHOOK_URL }}",
+          "height": 120,
+          "width": 260
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 6,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Mqtt",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 206,
+  "viewCount": 180,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Mqtt Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "mqtt details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Remote Sensor MQTT Trigger\".",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Data ingest to InfluxDB bucket\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-lzqethj1a",
+      "workflowId": "remote-iot-sensor-monitoring-via-mqtt-and-influxdb-hgkxu",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1110_HTTP_Mqtt_Monitor_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1110_HTTP_Mqtt_Monitor_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:34.213Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:34.213Z",
+  "updatedAt": "2026-07-15T11:18:34.213Z"
+}

@@ -1,0 +1,748 @@
+{
+  "id": "transform-image-to-lego-style-using-line-and-dall-e-wu9q9",
+  "name": "Transform Image to Lego Style Using Line and Dall-E",
+  "slug": "transform-image-to-lego-style-using-line-and-dall-e-bso3",
+  "description": "Automated workflow: Transform Image to Lego Style Using Line and Dall-E. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Transform Image to Lego Style Using Line and Dall-E workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-ccbfebe3",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.705672",
+      "updatedAt": "2025-09-29T07:07:46.705707",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Transform Image to Lego Style Using Line and Dall-E",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "82b62d4e-a263-4232-9bae-4c581db2269c",
+        "name": "Receive a Line Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "2a27c148-3977-485f-b197-567c96671023",
+        "parameters": {
+          "path": "lineimage",
+          "options": {},
+          "httpMethod": "POST"
+        },
+        "typeVersion": 2,
+        "notes": "This webhook node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f861c4eb-3d4f-4253-810f-8032602f079b",
+        "name": "Receive Line Messages",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "jsonHeaders": "={\n\"Authorization\": \"Bearer YOUR_LINE_BOT_TOKEN\",\n\"Content-Type\": \"application/json\"\n}",
+          "sendHeaders": true,
+          "specifyHeaders": "json"
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "da3a9188-028d-4c75-b23f-5f1f4e50784c",
+        "name": "Creating an Image using Dall-E",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          860,
+          0
+        ],
+        "parameters": {
+          "prompt": "={{ $json.content }}",
+          "options": {
+            "returnImageUrls": true
+          },
+          "resource": "image"
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.7,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "36c826e5-eacd-43ad-b663-4d788005e61a",
+        "name": "Creating a Prompt for Dall-E (Lego Style)",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          540,
+          0
+        ],
+        "parameters": {
+          "text": "Creating the DALL·E 3 prompt to transform this kind of image into a isometric LEGO image (Only provide me with a prompt).",
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {},
+          "resource": "image",
+          "inputType": "base64",
+          "operation": "analyze",
+          "binaryPropertyName": "=data"
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.7,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3c19f931-9ca0-4bd7-b4eb-1628d89bbba1",
+        "name": "Send Back an Image through Line",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1160,
+          0
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "jsonBody": "={\n \"replyToken\": \"{{ $('Receive a Line Webhook').item.json.body.events[0].replyToken }}\",\n \"messages\": [\n {\n \"type\": \"image\",\n \"originalContentUrl\": \"{{ $json.url }}\",\n \"previewImageUrl\": \"{{ $json.url }}\"\n }\n ]\n}",
+          "sendBody": true,
+          "jsonHeaders": "{\n\"Authorization\": \"Bearer YOUR_LINE_BOT_TOKEN\",\n\"Content-Type\": \"application/json\"\n}",
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "specifyHeaders": "json"
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "",
+    "connections": {
+      "82b62d4e-a263-4232-9bae-4c581db2269c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-e0ab1216",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-90963330",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-0abe6711",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-1d79b8f1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-9ec61b59",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-7f01c551",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-85a735a8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-c9ea8d6d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f861c4eb-3d4f-4253-810f-8032602f079b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-201490db",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-1a44912e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-0c698c8b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-d9d359d8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-47cf8dd7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-8dc89218",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-13102fda",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-492daaa9",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "3c19f931-9ca0-4bd7-b4eb-1628d89bbba1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-5d5966b0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-2507cca2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-36ddd118",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-bce8b5c8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-692db215",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-8e68b320",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-69e1499e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-8d82b270",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "da3a9188-028d-4c75-b23f-5f1f4e50784c": {
+        "main": [
+          [
+            {
+              "node": "error-handler-da3a9188-028d-4c75-b23f-5f1f4e50784c-068c9100",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "36c826e5-eacd-43ad-b663-4d788005e61a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-36c826e5-eacd-43ad-b663-4d788005e61a-5941e6ed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Transform Image to Lego Style Using Line and Dall-E. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: Transform Image to Lego Style Using Line and Dall-E. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "36c826e5-eacd-43ad-b663-4d788005e61a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-36c826e5-eacd-43ad-b663-4d788005e61a-5941e6ed"
+            }
+          ]
+        ]
+      },
+      "3c19f931-9ca0-4bd7-b4eb-1628d89bbba1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-5d5966b0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-2507cca2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-36ddd118"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-bce8b5c8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-692db215"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-8e68b320"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-69e1499e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-3c19f931-9ca0-4bd7-b4eb-1628d89bbba1-8d82b270"
+            }
+          ]
+        ]
+      },
+      "82b62d4e-a263-4232-9bae-4c581db2269c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-e0ab1216"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-90963330"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-0abe6711"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-1d79b8f1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-9ec61b59"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-7f01c551"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-85a735a8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-82b62d4e-a263-4232-9bae-4c581db2269c-c9ea8d6d"
+            }
+          ]
+        ]
+      },
+      "da3a9188-028d-4c75-b23f-5f1f4e50784c": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-da3a9188-028d-4c75-b23f-5f1f4e50784c-068c9100"
+            }
+          ]
+        ]
+      },
+      "f861c4eb-3d4f-4253-810f-8032602f079b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-201490db"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-1a44912e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-0c698c8b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-d9d359d8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-47cf8dd7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-8dc89218"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-13102fda"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f861c4eb-3d4f-4253-810f-8032602f079b-492daaa9"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Transform Image to Lego Style Using Line and Dall-E",
+    "nodes": [
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Creating a Prompt for Dall-E (Lego Style)",
+        "parameters": {
+          "binaryPropertyName": "=data",
+          "inputType": "base64",
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "operation": "analyze",
+          "options": {},
+          "resource": "image",
+          "text": "Creating the DALL·E 3 prompt to transform this kind of image into a isometric LEGO image (Only provide me with a prompt)."
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Creating an Image using Dall-E",
+        "parameters": {
+          "options": {
+            "returnImageUrls": true
+          },
+          "prompt": "={{ $json.content }}",
+          "resource": "image"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.7
+      },
+      {
+        "name": "Receive a Line Webhook",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "lineimage"
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2
+      },
+      {
+        "name": "Receive Line Messages",
+        "parameters": {
+          "jsonHeaders": "={\n\"Authorization\": \"Bearer YOUR_LINE_BOT_TOKEN\",\n\"Content-Type\": \"application/json\"\n}",
+          "options": {},
+          "sendHeaders": true,
+          "specifyHeaders": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Send Back an Image through Line",
+        "parameters": {
+          "jsonBody": "={\n \"replyToken\": \"{{ $('Receive a Line Webhook').item.json.body.events[0].replyToken }}\",\n \"messages\": [\n {\n \"type\": \"image\",\n \"originalContentUrl\": \"{{ $json.url }}\",\n \"previewImageUrl\": \"{{ $json.url }}\"\n }\n ]\n}",
+          "jsonHeaders": "{\n\"Authorization\": \"Bearer YOUR_LINE_BOT_TOKEN\",\n\"Content-Type\": \"application/json\"\n}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "specifyHeaders": "json",
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Webhook",
+    "HTTP Request"
+  ],
+  "securityStatus": "Potential Risk",
+  "verified": false,
+  "featured": true,
+  "downloadCount": 105,
+  "viewCount": 86,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Webhook Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Locate the webhook node named \"Receive a Line Webhook\".",
+      "Copy the Test Webhook URL provided by n8n.",
+      "Configure your source application (e.g. Stripe, Typeform) to send event payloads to this URL.",
+      "Open the \"Receive Line Messages\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Creating an Image using Dall-E\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Creating a Prompt for Dall-E (Lego Style)\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Back an Image through Line\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 86,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-885y890hs",
+      "workflowId": "transform-image-to-lego-style-using-line-and-dall-e-wu9q9",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/1700_HTTP_Webhook_Process_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\1700_HTTP_Webhook_Process_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:36.886Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:36.886Z",
+  "updatedAt": "2026-07-15T11:18:36.886Z"
+}

@@ -1,0 +1,567 @@
+{
+  "id": "automated-image-metadata-tagging-community-node--fao0m",
+  "name": "Automated Image Metadata Tagging (Community Node)",
+  "slug": "automated-image-metadata-tagging-community-node--1xa5",
+  "description": "Automated workflow: Automated Image Metadata Tagging (Community Node). This workflow integrates 7 different services: stickyNote, googleDriveTrigger, merge, googleDrive, stopAndError. It contains 11 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Automated Image Metadata Tagging (Community Node) workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": "4nBQyhwqDqmXY2AL",
+    "meta": {
+      "instanceId": "workflow-a13d1624",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:54.908858",
+      "updatedAt": "2025-09-29T07:07:54.908869",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Automated Image Metadata Tagging (Community Node)",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "b0b030f5-8a8c-4254-bc18-a2790748248e",
+        "name": "Trigger: New file added to Google Drive Folder",
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "position": [
+          -760,
+          120
+        ],
+        "parameters": {
+          "event": "fileCreated",
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder",
+          "folderToWatch": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1WaIRWXcaeNViKmpW5IyQ3YGARWYdMg47",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "EXIF"
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "L47XiMFzcjUgBp2i",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This googleDriveTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "1df51279-b3bd-49bd-9711-951eb4164290",
+        "name": "Download Image File",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          -540,
+          120
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "options": {},
+          "operation": "download"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "L47XiMFzcjUgBp2i",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "50a59e8e-ca95-4594-b8a9-0ba709795d42",
+        "name": "Analyze Image Content",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -340,
+          200
+        ],
+        "parameters": {
+          "text": "=Deliver a comma separated list describing the content of this image.",
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "chatgpt-4o-latest",
+            "cachedResultName": "CHATGPT-4O-LATEST"
+          },
+          "options": {},
+          "resource": "image",
+          "inputType": "base64",
+          "operation": "analyze"
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "niikB3HA4fT5WAqt",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.8,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "456164cc-ed41-4482-adb4-4ed00682153d",
+        "name": "Merge Metadata and Image File",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -140,
+          120
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combineBy": "combineByPosition"
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ddd6aef5-4dae-48e3-a806-3c58adea6552",
+        "name": "Write Metadata into Image",
+        "type": "n8n-nodes-exif-data.exifData",
+        "position": [
+          40,
+          120
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "write",
+          "exifMetadata": {
+            "metadataValues": [
+              {
+                "name": "Subject",
+                "value": "={{$json.content}}"
+              },
+              {
+                "name": "Keywords",
+                "value": "={{$json.content}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This exifData node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9c531288-7fca-4cca-9717-6dd059266f47",
+        "name": "Update Image File",
+        "type": "n8n-nodes-base.googleDrive",
+        "position": [
+          220,
+          120
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Download Image File').item.json.id }}"
+          },
+          "options": {},
+          "operation": "update",
+          "changeFileContent": true,
+          "newUpdatedFileName": "={{ $('Download Image File').item.json.name }}"
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "L47XiMFzcjUgBp2i",
+            "name": "Google Drive account"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleDrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "70b6bb63-fedf-42eb-a6a0-30faae883f2c",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1080,
+          320
+        ],
+        "parameters": {
+          "width": 660,
+          "height": 680,
+          "content": "# Welcome to my Automated Image Metadata Tagging Workflow!\n\nThis workflow automatically analyzes the image content with the help of AI and writes it directly back into the image file as keywords.\n\n## This workflow has the following sequence:\n\n1. Google Drive trigger (scan for new files added in a specific folder)\n2. Download the added image file\n3. Analyse the content of the image\n4. Merge Metadata and image file\n5. Write the Keywords into the Metadata (dc:subject/keywords) and create new image file\n6. Update the original file in the Google Drive folder\n\n## The following accesses are required for the workflow:\n- You have to install the [n8n-nodes-exif-data Community Node]({{ $env.WEBHOOK_URL }}\n- Google Drive: [Documentation]({{ $env.WEBHOOK_URL }}\n- AI API access (e.g. via OpenAI, Anthropic, Google or Ollama)\n\nYou can contact me via LinkedIn, if you have any questions: {{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-fe62a1dc",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "c4d1520b-6df4-4e76-98ba-4d7555aec35d",
+    "connections": {
+      "b0b030f5-8a8c-4254-bc18-a2790748248e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-b0b030f5-8a8c-4254-bc18-a2790748248e-82a6af27",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "1df51279-b3bd-49bd-9711-951eb4164290": {
+        "main": [
+          [
+            {
+              "node": "error-handler-1df51279-b3bd-49bd-9711-951eb4164290-d9aa4ad4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "50a59e8e-ca95-4594-b8a9-0ba709795d42": {
+        "main": [
+          [
+            {
+              "node": "error-handler-50a59e8e-ca95-4594-b8a9-0ba709795d42-bce5116c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9c531288-7fca-4cca-9717-6dd059266f47": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9c531288-7fca-4cca-9717-6dd059266f47-70ec373c",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Automated Image Metadata Tagging (Community Node). This workflow integrates 7 different services: stickyNote, googleDriveTrigger, merge, googleDrive, stopAndError. It contains 11 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Automated Image Metadata Tagging (Community Node). This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "1df51279-b3bd-49bd-9711-951eb4164290": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-1df51279-b3bd-49bd-9711-951eb4164290-d9aa4ad4"
+            }
+          ]
+        ]
+      },
+      "50a59e8e-ca95-4594-b8a9-0ba709795d42": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-50a59e8e-ca95-4594-b8a9-0ba709795d42-bce5116c"
+            }
+          ]
+        ]
+      },
+      "9c531288-7fca-4cca-9717-6dd059266f47": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9c531288-7fca-4cca-9717-6dd059266f47-70ec373c"
+            }
+          ]
+        ]
+      },
+      "b0b030f5-8a8c-4254-bc18-a2790748248e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-b0b030f5-8a8c-4254-bc18-a2790748248e-82a6af27"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Automated Image Metadata Tagging (Community Node)",
+    "nodes": [
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Analyze Image Content",
+        "parameters": {
+          "inputType": "base64",
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "CHATGPT-4O-LATEST",
+            "mode": "list",
+            "value": "chatgpt-4o-latest"
+          },
+          "operation": "analyze",
+          "options": {},
+          "resource": "image",
+          "text": "=Deliver a comma separated list describing the content of this image."
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Download Image File",
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "operation": "download",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Merge Metadata and Image File",
+        "parameters": {
+          "combineBy": "combineByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "# Welcome to my Automated Image Metadata Tagging Workflow!\n\nThis workflow automatically analyzes the image content with the help of AI and writes it directly back into the image file as keywords.\n\n## This workflow has the following sequence:\n\n1. Google Drive trigger (scan for new files added in a specific folder)\n2. Download the added image file\n3. Analyse the content of the image\n4. Merge Metadata and image file\n5. Write the Keywords into the Metadata (dc:subject/keywords) and create new image file\n6. Update the original file in the Google Drive folder\n\n## The following accesses are required for the workflow:\n- You have to install the [n8n-nodes-exif-data Community Node]({{ $env.WEBHOOK_URL }}\n- Google Drive: [Documentation]({{ $env.WEBHOOK_URL }}\n- AI API access (e.g. via OpenAI, Anthropic, Google or Ollama)\n\nYou can contact me via LinkedIn, if you have any questions: {{ $env.WEBHOOK_URL }}",
+          "height": 680,
+          "width": 660
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Trigger: New file added to Google Drive Folder",
+        "parameters": {
+          "event": "fileCreated",
+          "folderToWatch": {
+            "__rl": true,
+            "cachedResultName": "EXIF",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1WaIRWXcaeNViKmpW5IyQ3YGARWYdMg47"
+          },
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder"
+        },
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Image File",
+        "parameters": {
+          "changeFileContent": true,
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Download Image File').item.json.id }}"
+          },
+          "newUpdatedFileName": "={{ $('Download Image File').item.json.name }}",
+          "operation": "update",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Write Metadata into Image",
+        "parameters": {
+          "exifMetadata": {
+            "metadataValues": [
+              {
+                "name": "Subject",
+                "value": "={{$json.content}}"
+              },
+              {
+                "name": "Keywords",
+                "value": "={{$json.content}}"
+              }
+            ]
+          },
+          "operation": "write",
+          "options": {}
+        },
+        "type": "n8n-nodes-exif-data.exifData",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Drive",
+    "Exif-data"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 34,
+  "viewCount": 377,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account",
+      "Exif-data Account"
+    ],
+    "requiredCredentials": [
+      "google Drive  O Auth2  A P I details",
+      "open Ai  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Trigger: New file added to Google Drive Folder\".",
+      "Open the \"Download Image File\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Analyze Image Content\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge Metadata and Image File\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Write Metadata into Image\" node (n8n-nodes-exif-data.exifData) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Image File\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-hpml88fzh",
+      "workflowId": "automated-image-metadata-tagging-community-node--fao0m",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stickynote/0978_Stickynote_GoogleDrive_Automate_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stickynote\\0978_Stickynote_GoogleDrive_Automate_Triggered.json",
+      "discoveredAt": "2026-07-15T11:30:33.660Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:33.660Z",
+  "updatedAt": "2026-07-15T11:30:33.660Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

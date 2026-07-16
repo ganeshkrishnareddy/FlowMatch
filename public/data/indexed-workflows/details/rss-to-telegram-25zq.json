@@ -1,0 +1,369 @@
+{
+  "id": "rss-to-telegram-p1rxi",
+  "name": "RSS to Telegram",
+  "slug": "rss-to-telegram-25zq",
+  "description": "Automated workflow: RSS to Telegram. This workflow processes data and performs automated tasks.",
+  "shortDescription": "RSS to Telegram workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": 2,
+    "name": "RSS to Telegram",
+    "nodes": [
+      {
+        "name": "Telegram",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          440,
+          30
+        ],
+        "parameters": {
+          "text": "=💹 #日幣匯率 {{$json[\"title\"]}}\n\n{{$json[\"link\"]}}",
+          "chatId": "",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": ""
+        },
+        "typeVersion": 1,
+        "id": "64084e30-507e-45ef-bbbf-b295b4b29392",
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "RSS Feed Read",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "position": [
+          -359.5,
+          130
+        ],
+        "parameters": {
+          "url": ""
+        },
+        "typeVersion": 1,
+        "id": "50de2337-548c-4cba-9773-070598a0c715",
+        "notes": "This rssFeedRead node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Latest Read",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -160,
+          130
+        ],
+        "parameters": {
+          "functionCode": "const staticData = this.getWorkflowStaticData('global');\n\nlatestRead = staticData.latestRead;\n\nfor (let item of items) {\n  item.json.latestRead = latestRead || '2021-06-01';\n}\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "e6e8e82a-997f-4c55-9c6d-808b3c34e2e6",
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "If Node",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          40,
+          130
+        ],
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{new Date($node[\"Latest Read\"].data[\"latestRead\"]).getTime()}}",
+                "value2": "={{new Date($node[\"RSS Feed Read\"].data[\"isoDate\"]).getTime()}}"
+              }
+            ],
+            "string": [
+              {
+                "value1": "={{$json[\"title\"]}}",
+                "value2": "",
+                "operation": "contains"
+              }
+            ],
+            "boolean": []
+          }
+        },
+        "typeVersion": 1,
+        "id": "0ce0898d-bf6e-4dc8-8898-3bc0720f93b2",
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Write Latest Read",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          240,
+          30
+        ],
+        "parameters": {
+          "functionCode": "const staticData = this.getWorkflowStaticData('global');\n\nif (items.length > 0) {\n  staticData.latestRead = items[0].json.isoDate || staticData.latestRead;\n}\n\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "b3a53ea9-5d08-4aa9-9c8a-81494e91332b",
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "NoOp",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          230,
+          270
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "6addae59-5e9b-4c10-b561-4df95bc7b64e",
+        "notes": "This noOp node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          -560,
+          130
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "1fe24299-94a1-4d45-8c87-6eef192f5c58",
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-6e8c414f",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "settings": {
+      "timezone": "UTC",
+      "errorWorkflow": null,
+      "saveExecutionProgress": "DEFAULT",
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: RSS to Telegram. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-87270542",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:51.121157",
+      "updatedAt": "2025-09-29T07:07:51.121171",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: RSS to Telegram. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "RSS to Telegram",
+    "nodes": [
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "If Node",
+        "parameters": {
+          "conditions": {
+            "boolean": [],
+            "number": [
+              {
+                "value1": "={{new Date($node[\"Latest Read\"].data[\"latestRead\"]).getTime()}}",
+                "value2": "={{new Date($node[\"RSS Feed Read\"].data[\"isoDate\"]).getTime()}}"
+              }
+            ],
+            "string": [
+              {
+                "operation": "contains",
+                "value1": "={{$json[\"title\"]}}",
+                "value2": ""
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Latest Read",
+        "parameters": {
+          "functionCode": "const staticData = this.getWorkflowStaticData('global');\n\nlatestRead = staticData.latestRead;\n\nfor (let item of items) {\n  item.json.latestRead = latestRead || '2021-06-01';\n}\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "NoOp",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "RSS Feed Read",
+        "parameters": {
+          "url": ""
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Telegram",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "",
+          "text": "=💹 #日幣匯率 {{$json[\"title\"]}}\n\n{{$json[\"link\"]}}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1
+      },
+      {
+        "name": "Write Latest Read",
+        "parameters": {
+          "functionCode": "const staticData = this.getWorkflowStaticData('global');\n\nif (items.length > 0) {\n  staticData.latestRead = items[0].json.isoDate || staticData.latestRead;\n}\n\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Telegram",
+    "Rssfeedread"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 152,
+  "viewCount": 509,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Telegram Account",
+      "Rssfeedread Account"
+    ],
+    "requiredCredentials": [
+      "telegram  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Telegram\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"RSS Feed Read\" node (n8n-nodes-base.rssFeedRead) and configure the action parameters, mappings, and fields.",
+      "Open the \"Latest Read\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"If Node\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Write Latest Read\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"NoOp\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-65dhq8awh",
+      "workflowId": "rss-to-telegram-p1rxi",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Noop/0748_Noop_Telegram_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Noop\\0748_Noop_Telegram_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:19:15.203Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:19:15.203Z",
+  "updatedAt": "2026-07-15T11:19:15.203Z"
+}

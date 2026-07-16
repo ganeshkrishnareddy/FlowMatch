@@ -1,0 +1,887 @@
+{
+  "id": "lmchatopenai-workflow-sx3xm",
+  "name": "Lmchatopenai Workflow",
+  "slug": "lmchatopenai-workflow-n95j",
+  "description": "Automated workflow: Lmchatopenai Workflow. This workflow integrates 11 different services: telegramTrigger, stickyNote, telegram, chainLlm, outputParserStructured. It contains 18 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Lmchatopenai Workflow workflow containing 14 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-fa4d97e7",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:56.307937",
+      "updatedAt": "2025-09-29T07:07:56.307948",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "e87d3723-7e7a-4ff3-bffb-b2bd2096bd34",
+        "name": "OpenAI Chat Model",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1080,
+          260
+        ],
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "uFPD9I4pWJ4xUVf7",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This lmChatOpenAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d25bf3ea-0de4-4317-9205-651f8a1a6ba8",
+        "name": "Basic LLM Chain",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1060,
+          40
+        ],
+        "parameters": {
+          "text": "={{ $json.text }}",
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=Okay, I've further refined the system prompt to include only the \"content\" and \"priority\" fields in the JSON output for the Todoist tool. Here's the updated prompt:\n\n**System Prompt:**\n\n```\nYou are an AI agent acting as a project management assistant. The user will provide you with a task or project description. Your job is to break down this task or project into smaller, manageable sub-tasks. You will then format each sub-task into a JSON object suitable for input to the \"Todoist\" tool and provide these JSON objects in a list.\n\n**Requirements:**\n\n1.  **Sub-Task Decomposition:** Break down the task or project provided by the user into logical and actionable sub-tasks. Each sub-task should be self-contained, completable, and measurable.\n2.  **JSON Format for Todoist:** Format each sub-task as a JSON object with the following structure:\n\n    ```json\n    {\n      \"content\": \"[Task Description]\",\n      \"priority\": [Priority Level (1-4, where 4 is highest)]\n    }\n    ```\n\n    *   `content`: A clear and concise description of the task.\n    *   `priority`: An integer representing the task priority, ranging from 1 (lowest) to 4 (highest). Consider the importance and urgency of the task when assigning the priority.\n\n3.  **Tool Usage - Todoist JSON Output:** After decomposing the project into sub-tasks, you **MUST** format each sub-task into the JSON structure specified above and present all the JSON objects in a Python list. This list will be the direct input to the \"Todoist\" tool.\n\n4.  **Contextual Understanding:** Fully understand the context of the task or project provided by the user. If necessary, ask for additional information or clarification to resolve any ambiguities.\n\n5.  **Limitations:**\n\n    *   Avoid very general or abstract sub-tasks.\n    *   Ensure that each sub-task is completable and measurable.\n    *   When creating sub-tasks, consider the user's skills and resources.\n    *   Ensure all the output is valid JSON format within a python list\n\n**User Input:**\n\nThe user will provide you with a task or project description in the following format:\n\n```\nProject Description: [User's Entered Task or Project Description]\n```\n\n**Example:**\n\n**User Input:**\n\n```\nProject Description: Plan a team offsite.\n```\n\n**LLM Response:**\n\n```python\n[\n  {\n    \"content\": \"Research potential offsite locations.\",\n    \"priority\": 3\n  },\n  {\n    \"content\": \"Determine the budget for the offsite.\",\n    \"priority\": 4\n  },\n  {\n    \"content\": \"Send out a survey to gather team preferences.\",\n    \"priority\": 3\n  },\n  {\n    \"content\": \"Book the chosen venue.\",\n    \"priority\": 4\n  },\n  {\n    \"content\": \"Plan team-building activities.\",\n    \"priority\": 2\n  }\n]\n```\n\n**Key Changes and Explanations:**\n\n*   **Simplified JSON Structure:** The JSON object now only includes `content` and `priority`.\n*   **Example Updated:** The example response reflects the simplified JSON format.\n*   **Conciseness:** The prompt is now more concise, focusing only on the necessary fields.\n\n**Jinja2 Template Version**\n\n```python\nfrom jinja2 import Template\n\ntemplate_string = \"\"\"\nYou are an AI agent acting as a project management assistant. The user will provide you with a task or project description. Your job is to break down this task or project into smaller, manageable sub-tasks. You will then format each sub-task into a JSON object suitable for input to the \"Todoist\" tool and provide these JSON objects in a list.\n\n**Requirements:**\n\n1.  **Sub-Task Decomposition:** Break down the task or project provided by the user into logical and actionable sub-tasks. Each sub-task should be self-contained, completable, and measurable.\n2.  **JSON Format for Todoist:** Format each sub-task as a JSON object with the following structure:\n\n    ```json\n    {\n      \"content\": \"[Task Description]\",\n      \"priority\": [Priority Level (1-4, where 4 is highest)]\n    }\n    ```\n\n    *   `content`: A clear and concise description of the task.\n    *   `priority`: An integer representing the task priority, ranging from 1 (lowest) to 4 (highest). Consider the importance and urgency of the task when assigning the priority.\n\n3.  **Tool Usage - Todoist JSON Output:** After decomposing the project into sub-tasks, you **MUST** format each sub-task into the JSON structure specified above and present all the JSON objects in a Python list. This list will be the direct input to the \"Todoist\" tool.\n\n4.  **Contextual Understanding:** Fully understand the context of the task or project provided by the user. If necessary, ask for additional information or clarification to resolve any ambiguities.\n\n5.  **Limitations:**\n\n    *   Avoid very general or abstract sub-tasks.\n    *   Ensure that each sub-task is completable and measurable.\n    *   When creating sub-tasks, consider the user's skills and resources.\n    *   Ensure all the output is valid JSON format within a python list\n\n**User Input:**\n\nThe user will provide you with a task or project description in the following format:\n\n```\nProject Description: {{ project_description }}\n```\n\n**Example:**\n\n**User Input:**\n\n```\nProject Description: Plan a team offsite.\n```\n\n**LLM Response:**\n\n```python\n[\n  {\n    \"content\": \"Research potential offsite locations.\",\n    \"priority\": 3\n  },\n  {\n    \"content\": \"Determine the budget for the offsite.\",\n    \"priority\": 4\n  },\n  {\n    \"content\": \"Send out a survey to gather team preferences.\",\n    \"priority\": 3\n  },\n  {\n    \"content\": \"Book the chosen venue.\",\n    \"priority\": 4\n  },\n  {\n    \"content\": \"Plan team-building activities.\",\n    \"priority\": 2\n  }\n]\n```\n\"\"\"\n\ntemplate = Template(template_string)\n\n# Example Usage\nproject_description = \"Plan a team offsite.\"\nprompt = template.render(project_description=project_description)\n\nprint(prompt)\n```\n \n"
+              }
+            ]
+          },
+          "promptType": "define",
+          "hasOutputParser": true
+        },
+        "typeVersion": 1.5,
+        "notes": "This chainLlm node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ddfe59c5-574c-470b-b2cc-efa05da74972",
+        "name": "Receive Telegram Messages",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "position": [
+          -220,
+          -100
+        ],
+        "webhookId": "4e2cd560-ae4e-4ed7-a8ea-984518404e51",
+        "parameters": {
+          "updates": [
+            "message"
+          ],
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "lff3pLERRdQmkmeV",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1.1,
+        "notes": "This telegramTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "23f2cedd-bcd2-4a94-acc1-8829b30553dc",
+        "name": "Voice or Text?",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          140,
+          -20
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "af30c479-4542-405f-b315-37c50c4e2bef",
+                      "operator": {
+                        "type": "string",
+                        "operation": "exists",
+                        "singleValue": true
+                      },
+                      "leftValue": "={{ $json.message.voice.file_id }}",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "a3ca8cd4-fbb2-40b5-829a-24724f2fbc85",
+                      "operator": {
+                        "type": "string",
+                        "operation": "exists",
+                        "singleValue": true
+                      },
+                      "leftValue": "={{ $json.message.text || \"\" }}",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              },
+              {
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "9bcfdee0-2f09-4037-a7b9-689ef392371d",
+                      "operator": {
+                        "type": "string",
+                        "operation": "exists",
+                        "singleValue": true
+                      },
+                      "leftValue": "error",
+                      "rightValue": ""
+                    }
+                  ]
+                },
+                "renameOutput": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This switch node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "128e8268-a256-4256-8757-9ece8be86d75",
+        "name": "Fetch Voice Message",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          500,
+          -120
+        ],
+        "webhookId": "23645237-4943-4c32-b18c-97c410cc3409",
+        "parameters": {
+          "fileId": "={{ $json.message.voice.file_id }}",
+          "resource": "file"
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "lff3pLERRdQmkmeV",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d8219ba5-bb33-44f5-a9a2-65fd16be335b",
+        "name": "Transcribe Voice to Text",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          720,
+          -120
+        ],
+        "parameters": {
+          "options": {},
+          "resource": "audio",
+          "operation": "translate"
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "uFPD9I4pWJ4xUVf7",
+            "name": "OpenAi account"
+          }
+        },
+        "typeVersion": 1.8,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0c5f5568-fd14-4c65-8661-ebc5803158ce",
+        "name": "Prepare for LLM",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          620,
+          100
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b324a329-3c49-4f7f-b683-74331b7fe7f8",
+                "name": "=text",
+                "type": "string",
+                "value": "={{$json.message.text}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "76ed8f5c-59f7-4cb9-9e59-25ac7e9e8c60",
+        "name": "Extract Tasks",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1220,
+          260
+        ],
+        "parameters": {
+          "jsonSchemaExample": "  {\n    \"content\": \"Send out invitations.\",\n    \"priority\": 3\n  }"
+        },
+        "typeVersion": 1.2,
+        "notes": "This outputParserStructured node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7d0dbcb7-aac1-4eea-8f0b-6173148bfd3f",
+        "name": "Create Todoist Tasks",
+        "type": "n8n-nodes-base.todoist",
+        "position": [
+          1620,
+          40
+        ],
+        "parameters": {
+          "content": "={{ $json.output.content }}",
+          "options": {
+            "priority": "={{ $json.output.priority }}"
+          },
+          "project": {
+            "__rl": true,
+            "mode": "list",
+            "value": "2349786654",
+            "cachedResultName": "Task"
+          }
+        },
+        "credentials": {
+          "todoistApi": {
+            "id": "yqSn5VBXyA4R6hgt",
+            "name": "Todoist account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This todoist node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "544b3f63-8ac1-4f81-9c24-943df16d9324",
+        "name": "Send Confirmation",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          1880,
+          40
+        ],
+        "webhookId": "5699aecd-e061-4b7f-af7b-4a23eb7201c6",
+        "parameters": {
+          "text": "=Task : {{ $json.content }} Task Link :{{ $json.url }}",
+          "chatId": "={{ $('Receive Telegram Messages').item.json.message.chat.id }}",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "lff3pLERRdQmkmeV",
+            "name": "Telegram account"
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This telegram node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b244f935-3047-4581-84ac-b01b2f962c1d",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -260,
+          -240
+        ],
+        "parameters": {
+          "width": 260,
+          "height": 320,
+          "content": " \n**This workflow listens for incoming voice or text messages from Telegram users.** "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fa99930d-8e75-4f1e-aa9b-47c38e611538",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          440,
+          -220
+        ],
+        "parameters": {
+          "width": 460,
+          "height": 260,
+          "content": " **Voice messages are fetched from Telegram and transcribed into text using OpenAI's Whisper API.**  "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "beb460c9-0412-40c4-a3cf-76660eb0e1b8",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1000,
+          -60
+        ],
+        "parameters": {
+          "width": 380,
+          "height": 440,
+          "content": " \n**The LLM (OpenAI Chat Model) analyzes the text and breaks it down into tasks and sub-tasks, formatted for Todoist.**  "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-0e2aac17",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "e87d3723-7e7a-4ff3-bffb-b2bd2096bd34": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e87d3723-7e7a-4ff3-bffb-b2bd2096bd34-ad52f658",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ddfe59c5-574c-470b-b2cc-efa05da74972": {
+        "main": [
+          [
+            {
+              "node": "error-handler-ddfe59c5-574c-470b-b2cc-efa05da74972-b6f34f8f",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "128e8268-a256-4256-8757-9ece8be86d75": {
+        "main": [
+          [
+            {
+              "node": "error-handler-128e8268-a256-4256-8757-9ece8be86d75-8463fd90",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "d8219ba5-bb33-44f5-a9a2-65fd16be335b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-d8219ba5-bb33-44f5-a9a2-65fd16be335b-2a52dd09",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "544b3f63-8ac1-4f81-9c24-943df16d9324": {
+        "main": [
+          [
+            {
+              "node": "error-handler-544b3f63-8ac1-4f81-9c24-943df16d9324-124c7438",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Lmchatopenai Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Lmchatopenai Workflow. This workflow integrates 11 different services: telegramTrigger, stickyNote, telegram, chainLlm, outputParserStructured. It contains 18 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Lmchatopenai Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "128e8268-a256-4256-8757-9ece8be86d75": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-128e8268-a256-4256-8757-9ece8be86d75-8463fd90"
+            }
+          ]
+        ]
+      },
+      "544b3f63-8ac1-4f81-9c24-943df16d9324": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-544b3f63-8ac1-4f81-9c24-943df16d9324-124c7438"
+            }
+          ]
+        ]
+      },
+      "d8219ba5-bb33-44f5-a9a2-65fd16be335b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-d8219ba5-bb33-44f5-a9a2-65fd16be335b-2a52dd09"
+            }
+          ]
+        ]
+      },
+      "ddfe59c5-574c-470b-b2cc-efa05da74972": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-ddfe59c5-574c-470b-b2cc-efa05da74972-b6f34f8f"
+            }
+          ]
+        ]
+      },
+      "e87d3723-7e7a-4ff3-bffb-b2bd2096bd34": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e87d3723-7e7a-4ff3-bffb-b2bd2096bd34-ad52f658"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Lmchatopenai Workflow",
+    "nodes": [
+      {
+        "name": "Basic LLM Chain",
+        "parameters": {
+          "hasOutputParser": true,
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=Okay, I've further refined the system prompt to include only the \"content\" and \"priority\" fields in the JSON output for the Todoist tool. Here's the updated prompt:\n\n**System Prompt:**\n\n```\nYou are an AI agent acting as a project management assistant. The user will provide you with a task or project description. Your job is to break down this task or project into smaller, manageable sub-tasks. You will then format each sub-task into a JSON object suitable for input to the \"Todoist\" tool and provide these JSON objects in a list.\n\n**Requirements:**\n\n1.  **Sub-Task Decomposition:** Break down the task or project provided by the user into logical and actionable sub-tasks. Each sub-task should be self-contained, completable, and measurable.\n2.  **JSON Format for Todoist:** Format each sub-task as a JSON object with the following structure:\n\n    ```json\n    {\n      \"content\": \"[Task Description]\",\n      \"priority\": [Priority Level (1-4, where 4 is highest)]\n    }\n    ```\n\n    *   `content`: A clear and concise description of the task.\n    *   `priority`: An integer representing the task priority, ranging from 1 (lowest) to 4 (highest). Consider the importance and urgency of the task when assigning the priority.\n\n3.  **Tool Usage - Todoist JSON Output:** After decomposing the project into sub-tasks, you **MUST** format each sub-task into the JSON structure specified above and present all the JSON objects in a Python list. This list will be the direct input to the \"Todoist\" tool.\n\n4.  **Contextual Understanding:** Fully understand the context of the task or project provided by the user. If necessary, ask for additional information or clarification to resolve any ambiguities.\n\n5.  **Limitations:**\n\n    *   Avoid very general or abstract sub-tasks.\n    *   Ensure that each sub-task is completable and measurable.\n    *   When creating sub-tasks, consider the user's skills and resources.\n    *   Ensure all the output is valid JSON format within a python list\n\n**User Input:**\n\nThe user will provide you with a task or project description in the following format:\n\n```\nProject Description: [User's Entered Task or Project Description]\n```\n\n**Example:**\n\n**User Input:**\n\n```\nProject Description: Plan a team offsite.\n```\n\n**LLM Response:**\n\n```python\n[\n  {\n    \"content\": \"Research potential offsite locations.\",\n    \"priority\": 3\n  },\n  {\n    \"content\": \"Determine the budget for the offsite.\",\n    \"priority\": 4\n  },\n  {\n    \"content\": \"Send out a survey to gather team preferences.\",\n    \"priority\": 3\n  },\n  {\n    \"content\": \"Book the chosen venue.\",\n    \"priority\": 4\n  },\n  {\n    \"content\": \"Plan team-building activities.\",\n    \"priority\": 2\n  }\n]\n```\n\n**Key Changes and Explanations:**\n\n*   **Simplified JSON Structure:** The JSON object now only includes `content` and `priority`.\n*   **Example Updated:** The example response reflects the simplified JSON format.\n*   **Conciseness:** The prompt is now more concise, focusing only on the necessary fields.\n\n**Jinja2 Template Version**\n\n```python\nfrom jinja2 import Template\n\ntemplate_string = \"\"\"\nYou are an AI agent acting as a project management assistant. The user will provide you with a task or project description. Your job is to break down this task or project into smaller, manageable sub-tasks. You will then format each sub-task into a JSON object suitable for input to the \"Todoist\" tool and provide these JSON objects in a list.\n\n**Requirements:**\n\n1.  **Sub-Task Decomposition:** Break down the task or project provided by the user into logical and actionable sub-tasks. Each sub-task should be self-contained, completable, and measurable.\n2.  **JSON Format for Todoist:** Format each sub-task as a JSON object with the following structure:\n\n    ```json\n    {\n      \"content\": \"[Task Description]\",\n      \"priority\": [Priority Level (1-4, where 4 is highest)]\n    }\n    ```\n\n    *   `content`: A clear and concise description of the task.\n    *   `priority`: An integer representing the task priority, ranging from 1 (lowest) to 4 (highest). Consider the importance and urgency of the task when assigning the priority.\n\n3.  **Tool Usage - Todoist JSON Output:** After decomposing the project into sub-tasks, you **MUST** format each sub-task into the JSON structure specified above and present all the JSON objects in a Python list. This list will be the direct input to the \"Todoist\" tool.\n\n4.  **Contextual Understanding:** Fully understand the context of the task or project provided by the user. If necessary, ask for additional information or clarification to resolve any ambiguities.\n\n5.  **Limitations:**\n\n    *   Avoid very general or abstract sub-tasks.\n    *   Ensure that each sub-task is completable and measurable.\n    *   When creating sub-tasks, consider the user's skills and resources.\n    *   Ensure all the output is valid JSON format within a python list\n\n**User Input:**\n\nThe user will provide you with a task or project description in the following format:\n\n```\nProject Description: {{ project_description }}\n```\n\n**Example:**\n\n**User Input:**\n\n```\nProject Description: Plan a team offsite.\n```\n\n**LLM Response:**\n\n```python\n[\n  {\n    \"content\": \"Research potential offsite locations.\",\n    \"priority\": 3\n  },\n  {\n    \"content\": \"Determine the budget for the offsite.\",\n    \"priority\": 4\n  },\n  {\n    \"content\": \"Send out a survey to gather team preferences.\",\n    \"priority\": 3\n  },\n  {\n    \"content\": \"Book the chosen venue.\",\n    \"priority\": 4\n  },\n  {\n    \"content\": \"Plan team-building activities.\",\n    \"priority\": 2\n  }\n]\n```\n\"\"\"\n\ntemplate = Template(template_string)\n\n# Example Usage\nproject_description = \"Plan a team offsite.\"\nprompt = template.render(project_description=project_description)\n\nprint(prompt)\n```\n \n"
+              }
+            ]
+          },
+          "promptType": "define",
+          "text": "={{ $json.text }}"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.5
+      },
+      {
+        "credentials": {
+          "todoistApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Todoist Tasks",
+        "parameters": {
+          "content": "={{ $json.output.content }}",
+          "options": {
+            "priority": "={{ $json.output.priority }}"
+          },
+          "project": {
+            "__rl": true,
+            "cachedResultName": "Task",
+            "mode": "list",
+            "value": "2349786654"
+          }
+        },
+        "type": "n8n-nodes-base.todoist",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Extract Tasks",
+        "parameters": {
+          "jsonSchemaExample": "  {\n    \"content\": \"Send out invitations.\",\n    \"priority\": 3\n  }"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Fetch Voice Message",
+        "parameters": {
+          "fileId": "={{ $json.message.voice.file_id }}",
+          "resource": "file"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI Chat Model",
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Prepare for LLM",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b324a329-3c49-4f7f-b683-74331b7fe7f8",
+                "name": "=text",
+                "type": "string",
+                "value": "={{$json.message.text}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Receive Telegram Messages",
+        "parameters": {
+          "additionalFields": {},
+          "updates": [
+            "message"
+          ]
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.1
+      },
+      {
+        "credentials": {
+          "telegramApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Confirmation",
+        "parameters": {
+          "additionalFields": {},
+          "chatId": "={{ $('Receive Telegram Messages').item.json.message.chat.id }}",
+          "text": "=Task : {{ $json.content }} Task Link :{{ $json.url }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": " \n**This workflow listens for incoming voice or text messages from Telegram users.** ",
+          "height": 320,
+          "width": 260
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": " **Voice messages are fetched from Telegram and transcribed into text using OpenAI's Whisper API.**  ",
+          "height": 260,
+          "width": 460
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": " \n**The LLM (OpenAI Chat Model) analyzes the text and breaks it down into tasks and sub-tasks, formatted for Todoist.**  ",
+          "height": 440,
+          "width": 380
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Transcribe Voice to Text",
+        "parameters": {
+          "operation": "translate",
+          "options": {},
+          "resource": "audio"
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.8
+      },
+      {
+        "name": "Voice or Text?",
+        "parameters": {
+          "options": {},
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "af30c479-4542-405f-b315-37c50c4e2bef",
+                      "leftValue": "={{ $json.message.voice.file_id }}",
+                      "operator": {
+                        "operation": "exists",
+                        "singleValue": true,
+                        "type": "string"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "a3ca8cd4-fbb2-40b5-829a-24724f2fbc85",
+                      "leftValue": "={{ $json.message.text || \"\" }}",
+                      "operator": {
+                        "operation": "exists",
+                        "singleValue": true,
+                        "type": "string"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "9bcfdee0-2f09-4037-a7b9-689ef392371d",
+                      "leftValue": "error",
+                      "operator": {
+                        "operation": "exists",
+                        "singleValue": true,
+                        "type": "string"
+                      },
+                      "rightValue": ""
+                    }
+                  ],
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  }
+                },
+                "outputKey": "YOUR_CREDENTIAL_HERE",
+                "renameOutput": true
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2
+      }
+    ]
+  },
+  "nodeCount": 14,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "25 Mins",
+  "integrations": [
+    "Telegram",
+    "Todoist"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 153,
+  "viewCount": 774,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Telegram Account",
+      "Todoist Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "telegram  A P I details",
+      "todoist  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Receive Telegram Messages\".",
+      "Open the \"OpenAI Chat Model\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Basic LLM Chain\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Voice or Text?\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Fetch Voice Message\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Transcribe Voice to Text\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Extract Tasks\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Todoist Tasks\" node (n8n-nodes-base.todoist) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Confirmation\" node (n8n-nodes-base.telegram) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Prepare for LLM\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-7uux3ss30",
+      "workflowId": "lmchatopenai-workflow-sx3xm",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Telegram/0768_Telegram_Stickynote_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Telegram\\0768_Telegram_Stickynote_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:30:46.852Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:46.852Z",
+  "updatedAt": "2026-07-15T11:30:46.852Z",
+  "category": {
+    "slug": "ai-automation",
+    "name": "AI Automation"
+  },
+  "categoryId": "ai-automation"
+}

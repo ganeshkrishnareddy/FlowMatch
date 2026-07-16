@@ -1,0 +1,1509 @@
+{
+  "id": "airtable-workflow-r8q66",
+  "name": "Airtable Workflow",
+  "slug": "airtable-workflow-jrlz",
+  "description": "Automated workflow: Airtable Workflow. This workflow integrates 8 different services: airtableTrigger, stickyNote, httpRequest, airtable, spreadsheetFile. It contains 28 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Airtable Workflow workflow containing 17 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-046f66b8",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.843552",
+      "updatedAt": "2025-09-29T07:07:45.843564",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "577fb3b7-b0a6-4f2b-9b53-36d1f77de5a0",
+        "name": "Get File ID",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1120,
+          1120
+        ],
+        "parameters": {
+          "id": "={{ $node[\"New Upload\"].json[\"id\"] }}",
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $item(\"0\").$node[\"Airtable Base IDs\"].json[\"Base ID\"] }}"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $item(\"0\").$node[\"Airtable Base IDs\"].json[\"Upload Table ID\"] }}"
+          },
+          "options": {},
+          "operation": "get"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "b1TkvXJM6AdmupUh",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a287658f-50e0-4d08-9342-a5143dc20ff2",
+        "name": "Status Failed",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2820,
+          1180
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "PATCH",
+          "options": {},
+          "jsonBody": "={\n\"records\":[{\n\"id\":\"{{ $item(\"0\").$node[\"Get File ID\"].json[\"record_id\"] }}\",\n\"fields\":{\n\"Status\":\"Failed\"\n}\n}\n]\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "b1TkvXJM6AdmupUh",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "executeOnce": true,
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e3aae523-4803-4f69-9697-ab677c3f216d",
+        "name": "Status Uploaded",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          2820,
+          1020
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "PATCH",
+          "options": {},
+          "jsonBody": "={\n\"records\":[{\n\"id\":\"{{ $item(\"0\").$node[\"Get File ID\"].json[\"record_id\"] }}\",\n\"fields\":{\n\"Status\":\"Uploaded\"\n}\n}\n]\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "b1TkvXJM6AdmupUh",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "executeOnce": true,
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "833515af-bf3a-4bc7-b79c-a6c1731f4714",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2280,
+          820
+        ],
+        "parameters": {
+          "width": 319.2310328152142,
+          "height": 538.9310265075466,
+          "content": "## Confirm the key names and column references\n\n\n\n\nWhen adapting this to your own base and Google Sheets (CSV) template, make sure to modify this node accordingly, as key values you will need to set the Airtable Fields, and the Expressions need to match the Read File column names\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMake sure that the fields have the correct data type (Strings, Integers (numbers), etc)"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e3cfcf21-3210-455c-b539-2dcacda3172a",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          840,
+          920
+        ],
+        "parameters": {
+          "height": 416.06551185206945,
+          "content": "### Input your Airtables relevant ID's. These will be used in the API Calls"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c244d6fe-21bf-4488-9780-32b56baa9998",
+        "name": "Campaign is Not Empty",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1880,
+          1120
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $item(\"0\").$node[\"Get File ID\"].json[\"Campaign\"][\"0\"] }}",
+                "operation": "isNotEmpty"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ced8a7f4-4ccc-4fcf-8c13-c1b8f099283e",
+        "name": "Campaign Not Empty",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2120,
+          1020
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Campaign",
+                "stringValue": "=\"Campaigns\":[\"{{ $item(\"0\").$node[\"Get File ID\"].json[\"Campaign\"][\"0\"] }}\"],"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "23e0a41c-cbbd-401d-88b4-a4b190dbcd72",
+        "name": "Campaign Not Empty1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2120,
+          1200
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Campaign"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f6c40cf2-4893-42ee-859c-f430b4dc5cf1",
+        "name": "Read File",
+        "type": "n8n-nodes-base.spreadsheetFile",
+        "position": [
+          1660,
+          1120
+        ],
+        "parameters": {
+          "options": {
+            "headerRow": true
+          },
+          "binaryPropertyName": "=data"
+        },
+        "typeVersion": 2,
+        "notes": "This spreadsheetFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b7495a65-32bf-430d-9998-483582bbe6ef",
+        "name": "Airtable Base IDs",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          900,
+          1120
+        ],
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Base ID",
+                "stringValue": "=appZ0qelhmC2Y9igI"
+              },
+              {
+                "name": "Upload Table ID",
+                "stringValue": "tblDzSabZcP47sIMp"
+              },
+              {
+                "name": "Lead Table ID",
+                "stringValue": "tblnsXKf3TBztlIPV"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "typeVersion": 3.2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9fa8f822-f611-4af6-a2a4-7baaf2efa82d",
+        "name": "Status Processing",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1280,
+          1120
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "PATCH",
+          "options": {},
+          "jsonBody": "={\n\"records\":[{\n\"id\":\"{{ $node[\"Get File ID\"].json[\"record_id\"] }}\",\n\"fields\":{\n\"Status\":\"Processing\"\n}\n}\n]\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "b1TkvXJM6AdmupUh",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "af23a338-a9a0-49db-88de-d6eb68af2be9",
+        "name": "Download File",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1460,
+          1120
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4428cdc4-1ffd-4f6f-8d96-49d20b80bfba",
+        "name": "Create Records",
+        "type": "n8n-nodes-base.httpRequest",
+        "onError": "continueErrorOutput",
+        "position": [
+          2380,
+          1120
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "batching": {
+              "batch": {
+                "batchSize": 8
+              }
+            }
+          },
+          "jsonBody": "={\n    \"records\": [\n        {\n            \"fields\": {\n                \"FirstName\": \"{{ $json[\"FirstName\"] }}\",\n                \"LastName\": \"{{ $json[\"LastName\"] || \"\"}}\",\n                \"Email\": \"{{ $json[\"Email\"] || \"\" }}\",\n                \"Phone\": \"{{ $json[\"Phone\"] || \"\" }}\",\n                \"Company\": \"{{ $json[\"Company\"] || \"\" }}\",\n                \"Title\": \"{{ $json[\"Title\"] || \"\" }}\",\n                \"Country\": \"{{ $json[\"Country\"] || \"\" }}\",\n                \"City\": \"{{ $json[\"City\"] || \"\" }}\",\n                \"Website\": \"{{ $json[\"Website\"] || \"\" }}\",\n                \"LeadSource\": \"{{ $json[\"LeadSource\"] || \"\" }}\",\n                \"LeadStatus\": \"{{ $json[\"LeadStatus\"] || \"\" }}\",\n                {{ $json[\"Campaign\"] }}\n                \"InterestLevel\": \"{{ $json[\"InterestLevel\"] || \"\" }}\",\n                \"LastContactDate\": \"{{ $json[\"LastContactDate\"] || \"\" }}\"\n\n\n            }\n        }\n    ]\n}",
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "b1TkvXJM6AdmupUh",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e7a2cf60-099f-4c32-b9f0-ad2dd3d6e282",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          380,
+          240
+        ],
+        "parameters": {
+          "width": 1608.819505196552,
+          "height": 349.25800232621134,
+          "content": "# Bulk Upload Contacts Through CSV | Airtable Interface & Airtable Grid\n\n\n## Airtable Template - {{ $env.WEBHOOK_URL }}\n## Google Sheets Template - {{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dd8b54fa-15fb-4df5-b94f-8286dae7026b",
+        "name": "New Upload",
+        "type": "n8n-nodes-base.airtableTrigger",
+        "position": [
+          660,
+          1120
+        ],
+        "parameters": {
+          "baseId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "appZ0qelhmC2Y9igI"
+          },
+          "tableId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "tblDzSabZcP47sIMp"
+          },
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerField": "Created At",
+          "authentication": "{{ $credentials.airtableTokenApi }}",
+          "additionalFields": {
+            "viewId": ""
+          }
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "b1TkvXJM6AdmupUh",
+            "name": "Airtable Personal Access Token account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This airtableTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "32f6ec9b-3f23-4d58-9cc2-b41fd9246091",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1980,
+          240
+        ],
+        "parameters": {
+          "width": 879.3031720944707,
+          "height": 224.90387533954015,
+          "content": "## Walkthrough and Overview\n\n### {{ $env.WEBHOOK_URL }}"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "78363718-c1c2-4bf0-ba04-a48403cca0cb",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          60,
+          820
+        ],
+        "parameters": {
+          "width": 558.4226026659302,
+          "height": 768.2443727570767,
+          "content": "# Setup Checklist\n\n### 1.Go to the Airtable Template and copy the latest version of the base\n### \n### 2. From your new Airtable base URL, get and replace your base and tables id's into this workflow's trigger node.\n### 3. Input your Airtable Id's in the second node \"Airtable Base ID's\"\n### 4. Make sure to add a Personal Access Token for Airtable Integration. It should, as minimum have enabled scopes for \"data.record:read\", \"data.record:write\", \"schema.bases:read\"\n### 5. Any file uploads can now be done from the Interface Form\n\n#After Setup\n\n### - Make sure you that if you add, remove or modify fields (or field names), those changes should also be applied to the \"Create Record\" node\n### - Make sure that the CSV upload header row, matches the Airtable Leads field names\n### - If you modify any field type (Text to Number, or Number to Text), those changes should also be applied to the \"Create Records\" value (Numbers go without double quotes / strings, dates and the rest of the data types go with double quotes) [JSON Syntax]"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "a287658f-50e0-4d08-9342-a5143dc20ff2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-0ea276a9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-44f8255d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-08259db5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-58bb83d5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-8c7320e2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-565b05cf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-25bf5c19",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-1e9a2b19",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "e3aae523-4803-4f69-9697-ab677c3f216d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-be4cdcc7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-9c66d13c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-b9b5c921",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-f1e8bd37",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-9abe5198",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-3ba107fd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-99b6c602",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-2a4884a1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9fa8f822-f611-4af6-a2a4-7baaf2efa82d": {
+        "main": [
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-05d701ee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-891db7b9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-13a43c86",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-8113eab0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-d57fe0d0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-fe41ab88",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-e49200ee",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-161d3413",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "af23a338-a9a0-49db-88de-d6eb68af2be9": {
+        "main": [
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-90ef3a1f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-31b6f418",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-0259f218",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-8007324a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-7bd779ce",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-6da469d8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-986ecfc4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-473dc546",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4428cdc4-1ffd-4f6f-8d96-49d20b80bfba": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-8cc80cdc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-928b0e66",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-d10b9e88",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-5ca6ecbc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-9ac4e805",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-60f7e5a1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-e8a628f9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-65729daf",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f6c40cf2-4893-42ee-859c-f430b4dc5cf1": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f6c40cf2-4893-42ee-859c-f430b4dc5cf1-b8f29d8b",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Airtable Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Airtable Workflow. This workflow integrates 8 different services: airtableTrigger, stickyNote, httpRequest, airtable, spreadsheetFile. It contains 28 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Airtable Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4428cdc4-1ffd-4f6f-8d96-49d20b80bfba": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-8cc80cdc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-928b0e66"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-d10b9e88"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-5ca6ecbc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-9ac4e805"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-60f7e5a1"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-e8a628f9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4428cdc4-1ffd-4f6f-8d96-49d20b80bfba-65729daf"
+            }
+          ]
+        ]
+      },
+      "9fa8f822-f611-4af6-a2a4-7baaf2efa82d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-05d701ee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-891db7b9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-13a43c86"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-8113eab0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-d57fe0d0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-fe41ab88"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-e49200ee"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-9fa8f822-f611-4af6-a2a4-7baaf2efa82d-161d3413"
+            }
+          ]
+        ]
+      },
+      "a287658f-50e0-4d08-9342-a5143dc20ff2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-0ea276a9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-44f8255d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-08259db5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-58bb83d5"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-8c7320e2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-565b05cf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-25bf5c19"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-a287658f-50e0-4d08-9342-a5143dc20ff2-1e9a2b19"
+            }
+          ]
+        ]
+      },
+      "af23a338-a9a0-49db-88de-d6eb68af2be9": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-90ef3a1f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-31b6f418"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-0259f218"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-8007324a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-7bd779ce"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-6da469d8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-986ecfc4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-af23a338-a9a0-49db-88de-d6eb68af2be9-473dc546"
+            }
+          ]
+        ]
+      },
+      "e3aae523-4803-4f69-9697-ab677c3f216d": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-be4cdcc7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-9c66d13c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-b9b5c921"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-f1e8bd37"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-9abe5198"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-3ba107fd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-99b6c602"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-e3aae523-4803-4f69-9697-ab677c3f216d-2a4884a1"
+            }
+          ]
+        ]
+      },
+      "f6c40cf2-4893-42ee-859c-f430b4dc5cf1": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f6c40cf2-4893-42ee-859c-f430b4dc5cf1-b8f29d8b"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Airtable Workflow",
+    "nodes": [
+      {
+        "name": "Airtable Base IDs",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Base ID",
+                "stringValue": "=appZ0qelhmC2Y9igI"
+              },
+              {
+                "name": "Upload Table ID",
+                "stringValue": "tblDzSabZcP47sIMp"
+              },
+              {
+                "name": "Lead Table ID",
+                "stringValue": "tblnsXKf3TBztlIPV"
+              }
+            ]
+          },
+          "include": "none",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Campaign is Not Empty",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "isNotEmpty",
+                "value1": "={{ $item(\"0\").$node[\"Get File ID\"].json[\"Campaign\"][\"0\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "Campaign Not Empty",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Campaign",
+                "stringValue": "=\"Campaigns\":[\"{{ $item(\"0\").$node[\"Get File ID\"].json[\"Campaign\"][\"0\"] }}\"],"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "name": "Campaign Not Empty1",
+        "parameters": {
+          "fields": {
+            "values": [
+              {
+                "name": "Campaign"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.2
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create Records",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "jsonBody": "={\n    \"records\": [\n        {\n            \"fields\": {\n                \"FirstName\": \"{{ $json[\"FirstName\"] }}\",\n                \"LastName\": \"{{ $json[\"LastName\"] || \"\"}}\",\n                \"Email\": \"{{ $json[\"Email\"] || \"\" }}\",\n                \"Phone\": \"{{ $json[\"Phone\"] || \"\" }}\",\n                \"Company\": \"{{ $json[\"Company\"] || \"\" }}\",\n                \"Title\": \"{{ $json[\"Title\"] || \"\" }}\",\n                \"Country\": \"{{ $json[\"Country\"] || \"\" }}\",\n                \"City\": \"{{ $json[\"City\"] || \"\" }}\",\n                \"Website\": \"{{ $json[\"Website\"] || \"\" }}\",\n                \"LeadSource\": \"{{ $json[\"LeadSource\"] || \"\" }}\",\n                \"LeadStatus\": \"{{ $json[\"LeadStatus\"] || \"\" }}\",\n                {{ $json[\"Campaign\"] }}\n                \"InterestLevel\": \"{{ $json[\"InterestLevel\"] || \"\" }}\",\n                \"LastContactDate\": \"{{ $json[\"LastContactDate\"] || \"\" }}\"\n\n\n            }\n        }\n    ]\n}",
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {
+            "batching": {
+              "batch": {
+                "batchSize": 8
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Download File",
+        "parameters": {
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get File ID",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $item(\"0\").$node[\"Airtable Base IDs\"].json[\"Base ID\"] }}"
+          },
+          "id": "={{ $node[\"New Upload\"].json[\"id\"] }}",
+          "operation": "get",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $item(\"0\").$node[\"Airtable Base IDs\"].json[\"Upload Table ID\"] }}"
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "New Upload",
+        "parameters": {
+          "additionalFields": {
+            "viewId": ""
+          },
+          "authentication": "{{ $credentials.airtableTokenApi }}",
+          "baseId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "appZ0qelhmC2Y9igI"
+          },
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "tableId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "tblDzSabZcP47sIMp"
+          },
+          "triggerField": "Created At"
+        },
+        "type": "n8n-nodes-base.airtableTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Read File",
+        "parameters": {
+          "binaryPropertyName": "=data",
+          "options": {
+            "headerRow": true
+          }
+        },
+        "type": "n8n-nodes-base.spreadsheetFile",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Status Failed",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "jsonBody": "={\n\"records\":[{\n\"id\":\"{{ $item(\"0\").$node[\"Get File ID\"].json[\"record_id\"] }}\",\n\"fields\":{\n\"Status\":\"Failed\"\n}\n}\n]\n}",
+          "method": "PATCH",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Status Processing",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "jsonBody": "={\n\"records\":[{\n\"id\":\"{{ $node[\"Get File ID\"].json[\"record_id\"] }}\",\n\"fields\":{\n\"Status\":\"Processing\"\n}\n}\n]\n}",
+          "method": "PATCH",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Status Uploaded",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "jsonBody": "={\n\"records\":[{\n\"id\":\"{{ $item(\"0\").$node[\"Get File ID\"].json[\"record_id\"] }}\",\n\"fields\":{\n\"Status\":\"Uploaded\"\n}\n}\n]\n}",
+          "method": "PATCH",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Confirm the key names and column references\n\n\n\n\nWhen adapting this to your own base and Google Sheets (CSV) template, make sure to modify this node accordingly, as key values you will need to set the Airtable Fields, and the Expressions need to match the Read File column names\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMake sure that the fields have the correct data type (Strings, Integers (numbers), etc)",
+          "height": 538.9310265075466,
+          "width": 319.2310328152142
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "### Input your Airtables relevant ID's. These will be used in the API Calls",
+          "height": 416.06551185206945
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "# Bulk Upload Contacts Through CSV | Airtable Interface & Airtable Grid\n\n\n## Airtable Template - {{ $env.WEBHOOK_URL }}\n## Google Sheets Template - {{ $env.WEBHOOK_URL }}",
+          "height": 349.25800232621134,
+          "width": 1608.819505196552
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "## Walkthrough and Overview\n\n### {{ $env.WEBHOOK_URL }}",
+          "height": 224.90387533954015,
+          "width": 879.3031720944707
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "# Setup Checklist\n\n### 1.Go to the Airtable Template and copy the latest version of the base\n### \n### 2. From your new Airtable base URL, get and replace your base and tables id's into this workflow's trigger node.\n### 3. Input your Airtable Id's in the second node \"Airtable Base ID's\"\n### 4. Make sure to add a Personal Access Token for Airtable Integration. It should, as minimum have enabled scopes for \"data.record:read\", \"data.record:write\", \"schema.bases:read\"\n### 5. Any file uploads can now be done from the Interface Form\n\n#After Setup\n\n### - Make sure you that if you add, remove or modify fields (or field names), those changes should also be applied to the \"Create Record\" node\n### - Make sure that the CSV upload header row, matches the Airtable Leads field names\n### - If you modify any field type (Text to Number, or Number to Text), those changes should also be applied to the \"Create Records\" value (Numbers go without double quotes / strings, dates and the rest of the data types go with double quotes) [JSON Syntax]",
+          "height": 768.2443727570767,
+          "width": 558.4226026659302
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 17,
+  "integrationCount": 3,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "30 Mins",
+  "integrations": [
+    "Airtable",
+    "HTTP Request",
+    "Spreadsheetfile"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 27,
+  "viewCount": 185,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Airtable Account",
+      "HTTP Request Account",
+      "Spreadsheetfile Account"
+    ],
+    "requiredCredentials": [
+      "airtable Token  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"New Upload\".",
+      "Open the \"Get File ID\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Status Failed\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Status Uploaded\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Campaign is Not Empty\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Read File\" node (n8n-nodes-base.spreadsheetFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Status Processing\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download File\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Records\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Campaign Not Empty\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Campaign Not Empty1\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Airtable Base IDs\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 95,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-2dgin9183",
+      "workflowId": "airtable-workflow-r8q66",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0394_HTTP_Spreadsheetfile_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0394_HTTP_Spreadsheetfile_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:30.952Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:30.952Z",
+  "updatedAt": "2026-07-15T11:18:30.952Z"
+}

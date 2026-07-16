@@ -1,0 +1,355 @@
+{
+  "id": "youtube-to-raindrop-0vm4h",
+  "name": "YouTube to Raindrop",
+  "slug": "youtube-to-raindrop-jg64",
+  "description": "Automated workflow: YouTube to Raindrop. This workflow processes data and performs automated tasks.",
+  "shortDescription": "YouTube to Raindrop workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "id": 7,
+    "name": "YouTube to Raindrop",
+    "nodes": [
+      {
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -610,
+          160
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "6cd88172-3b77-4ac1-a41b-251fae9fd48b",
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "YouTube",
+        "type": "n8n-nodes-base.youTube",
+        "position": [
+          -440,
+          240
+        ],
+        "parameters": {
+          "part": [
+            "snippet"
+          ],
+          "options": {},
+          "resource": "playlistItem",
+          "operation": "getAll",
+          "playlistId": "CHANGE_ME"
+        },
+        "credentials": {
+          "youTubeOAuth2Api": "Google n8n"
+        },
+        "typeVersion": 1,
+        "id": "9cccacd5-5aee-422f-8712-0aa5fccb2400",
+        "notes": "This youTube node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Filter new items",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -120,
+          240
+        ],
+        "parameters": {
+          "functionCode": "const staticData = getWorkflowStaticData('global');\nconst newIds = items.map(item => item.json[\"resourceId\"][\"videoId\"]);\nconst oldIds = staticData.oldIds; \n\nif (!oldIds) {\n  staticData.oldIds = newIds;\n  return items;\n}\n\n\nconst actualNewIds = newIds.filter((id) => !oldIds.includes(id));\nconst actualNew = items.filter((data) => actualNewIds.includes(data.json[\"resourceId\"][\"videoId\"]));\nstaticData.oldIds = [...actualNewIds, ...oldIds];\n\nreturn actualNew;\n"
+        },
+        "typeVersion": 1,
+        "id": "3ffea276-4dc8-46d8-9596-4beb446f1df1",
+        "notes": "This function node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Flatten JSON",
+        "type": "n8n-nodes-base.functionItem",
+        "position": [
+          -280,
+          240
+        ],
+        "parameters": {
+          "functionCode": "item = item[\"snippet\"]\n\nreturn item;"
+        },
+        "typeVersion": 1,
+        "id": "459b921c-d004-413e-b112-8ba76caac1a7",
+        "notes": "This functionItem node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Raindrop Bookmark",
+        "type": "n8n-nodes-base.raindrop",
+        "position": [
+          40,
+          240
+        ],
+        "parameters": {
+          "link": "={{ $env.WEBHOOK_URL }}{{$json[\"resourceId\"][\"videoId\"]}}",
+          "resource": "bookmark",
+          "operation": "create",
+          "collectionId": 0,
+          "additionalFields": {
+            "tags": "youtube",
+            "title": "={{$json[\"videoOwnerChannelTitle\"]}} | {{$json[\"title\"]}}"
+          }
+        },
+        "credentials": {
+          "raindropOAuth2Api": "Raindrop"
+        },
+        "typeVersion": 1,
+        "id": "61ae5210-2575-47cb-9a18-b308e9706f59",
+        "notes": "This raindrop node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Every 30 mins",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          -610,
+          320
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 30
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "41962cf7-abbe-4d16-82ad-08071c3ba119",
+        "notes": "This cron node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-dd3ffb64",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: YouTube to Raindrop. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-fcd2ae00",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.080777",
+      "updatedAt": "2025-09-29T07:07:45.080790",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: YouTube to Raindrop. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "YouTube to Raindrop",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Every 30 mins",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 30
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Filter new items",
+        "parameters": {
+          "functionCode": "const staticData = getWorkflowStaticData('global');\nconst newIds = items.map(item => item.json[\"resourceId\"][\"videoId\"]);\nconst oldIds = staticData.oldIds; \n\nif (!oldIds) {\n  staticData.oldIds = newIds;\n  return items;\n}\n\n\nconst actualNewIds = newIds.filter((id) => !oldIds.includes(id));\nconst actualNew = items.filter((data) => actualNewIds.includes(data.json[\"resourceId\"][\"videoId\"]));\nstaticData.oldIds = [...actualNewIds, ...oldIds];\n\nreturn actualNew;\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Flatten JSON",
+        "parameters": {
+          "functionCode": "item = item[\"snippet\"]\n\nreturn item;"
+        },
+        "type": "n8n-nodes-base.functionItem",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "raindropOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Raindrop Bookmark",
+        "parameters": {
+          "additionalFields": {
+            "tags": "youtube",
+            "title": "={{$json[\"videoOwnerChannelTitle\"]}} | {{$json[\"title\"]}}"
+          },
+          "collectionId": 0,
+          "link": "={{ $env.WEBHOOK_URL }}{{$json[\"resourceId\"][\"videoId\"]}}",
+          "operation": "create",
+          "resource": "bookmark"
+        },
+        "type": "n8n-nodes-base.raindrop",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "youTubeOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "YouTube",
+        "parameters": {
+          "operation": "getAll",
+          "options": {},
+          "part": [
+            "snippet"
+          ],
+          "playlistId": "CHANGE_ME",
+          "resource": "playlistItem"
+        },
+        "type": "n8n-nodes-base.youTube",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "YouTube",
+    "Functionitem",
+    "Raindrop"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 70,
+  "viewCount": 157,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "YouTube Account",
+      "Functionitem Account",
+      "Raindrop Account"
+    ],
+    "requiredCredentials": [
+      "you Tube  O Auth2  A P I details",
+      "raindrop  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the scheduler node \"Every 30 mins\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"YouTube\" node (n8n-nodes-base.youTube) and configure the action parameters, mappings, and fields.",
+      "Open the \"Filter new items\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Flatten JSON\" node (n8n-nodes-base.functionItem) and configure the action parameters, mappings, and fields.",
+      "Open the \"Raindrop Bookmark\" node (n8n-nodes-base.raindrop) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-mio1z7p04",
+      "workflowId": "youtube-to-raindrop-0vm4h",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Functionitem/1140_Functionitem_Raindrop_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Functionitem\\1140_Functionitem_Raindrop_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:29:02.692Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:02.692Z",
+  "updatedAt": "2026-07-15T11:29:02.692Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

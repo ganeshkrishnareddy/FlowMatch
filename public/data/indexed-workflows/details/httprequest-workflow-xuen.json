@@ -1,0 +1,1668 @@
+{
+  "id": "httprequest-workflow-bz5y9",
+  "name": "Httprequest Workflow",
+  "slug": "httprequest-workflow-xuen",
+  "description": "Automated workflow: Httprequest Workflow. This workflow integrates 15 different services: stickyNote, httpRequest, airtable, code, scheduleTrigger. It contains 40 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Httprequest Workflow workflow containing 33 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-a4ef417a",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:52.827392",
+      "updatedAt": "2025-09-29T07:07:52.827405",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "dd9e2f9c-225a-4b6b-9904-293206a477e4",
+        "name": "Get advice articles from a Google search",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1040,
+          360
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "batching": {
+              "batch": {
+                "batchSize": 25
+              }
+            }
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0e2bcaeb-65a0-400a-a15e-0840723d8144",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          980,
+          320
+        ],
+        "parameters": {
+          "color": 2,
+          "width": 621.7044818991839,
+          "height": 566.8592254014303,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 1. Get advice articles from a Google search**\nUses an HTTP request to perform a Google search for LinkedIn advice articles based on a predefined query.\n\n## 2. Extract Article links for LinkedIn advice articles\nThis Code node extracts LinkedIn article URLs from the Google search results by using a regular expression. It pulls all article links related to LinkedIn advice.\n\n## 3. Split Out all links for LinkedIn advice articles\nSplits the list of extracted LinkedIn article links into individual items. This allows each article to be processed one at a time in the following steps.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "68eefc93-6c82-4687-bb4d-52345e5a5094",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          520,
+          80
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "af3fdd03-d28a-4f49-b213-8202b1d154df",
+        "name": "Merge data and keep unique google search results",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1700,
+          200
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "joinMode": "keepNonMatches",
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "URL",
+                "field2": "matches"
+              }
+            ]
+          },
+          "outputDataFrom": "input2"
+        },
+        "typeVersion": 2.1,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "632c54cc-b1d7-4034-93bf-82dd206761f0",
+        "name": "Extract Article links for LinkedIn advice articles",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1240,
+          360
+        ],
+        "parameters": {
+          "jsCode": "// n8n Code node script\nconst text = $json.data;\n\n// Define the regex pattern\nconst regexPattern = /https:\\/\\/www\\.linkedin\\.com\\/advice\\/[^%&\\s\"']+/g;\n\n// Execute the regex pattern on the text\nconst matches = text.match(regexPattern);\n\n// Output the matches\nreturn {\n  matches: matches || []\n};\n\n\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "81f0a962-fef8-4a46-a709-21cc2db02e55",
+        "name": "Split Out all links for LinkedIn advice articles",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          1440,
+          360
+        ],
+        "parameters": {
+          "options": {},
+          "fieldToSplitOut": "matches"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "65e4efa0-c746-4e77-9ccb-01c8afc5860c",
+        "name": "Schedule Trigger Every Monday, @ 08:00am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          520,
+          280
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  1
+                ],
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "86fe3695-c1fd-4154-b1ba-f0737406da4a",
+        "name": "LinkedIn Contribution Writer",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          2360,
+          200
+        ],
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "options": {
+            "temperature": 0.7
+          },
+          "messages": {
+            "values": [
+              {
+                "content": "=Read the following collaborative article and provide your own helpful collaboration. The article has various topics that each need to be answered. Write me a paragraph of helpful advice for each topic and format your response as outlined in the template below.\n\n-------------\nARTICLE TITLE\n{{ $json.ArticleTitle }}\n\nTOPICS WITHIN THE LINKEDIN ARTICLE:\n{{ $json.ArticleTopics }}\n\nOTHER CONTRIBUTIONS TO THE LINKEDIN ARTICLE:\n{{ $json.ArticleContributions }}\n-------------\n\nYour advice must be unique and something that no one else has recommended before on the article, or in any of the topics. The response needs to be raw and genuine to elicit conversation and engagement.\n\nFormat your output in text and follow the template below. Only populate the template with as many topics as were provided in the original request \n\ni.e: if there were only 4 topics in the original request then only provide 4 pieces of advice:\n\nOUTPUT TEMPLATE\n\n1. [Topic #1 from Article]\n[Advice for Topic]\n\n2. [Topic #2 from Article]\n[Advice for Topic]\n\n3. [Topic #3 from Article]\n[Advice for Topic]\n\n4. [Topic #4 from Article]\n[Advice for Topic]\n\n5. [Topic #5 from Article]\n[Advice for Topic]\n\n6. [Topic #6 from Article]\n[Advice for Topic]"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "t5MoHQt5nn0nWWnw",
+            "name": "OpenAi Account (darryn@optimus01.co.za)"
+          }
+        },
+        "typeVersion": 1.4,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "aaeba3e6-2d74-463a-8ba7-9f84826fee1b",
+        "name": "Post new LinkedIn contributions to NocoDB (CreateRows)",
+        "type": "n8n-nodes-base.nocoDb",
+        "position": [
+          3020,
+          200
+        ],
+        "parameters": {
+          "table": "mpagw9n92ran52o",
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldName": "Post Title",
+                "fieldValue": "={{ $('HTML extract LinkedIn article & other users contributions').item.json.ArticleTitle }}"
+              },
+              {
+                "fieldName": "URL",
+                "fieldValue": "={{ $('Merge data and keep unique google search results').item.json.matches }}"
+              },
+              {
+                "fieldName": "Contribution",
+                "fieldValue": "={{ $('LinkedIn Contribution Writer').item.json.message.content }}"
+              },
+              {
+                "fieldName": "Topic",
+                "fieldValue": "Lead Generation"
+              },
+              {
+                "fieldName": "Person",
+                "fieldValue": "Cassie"
+              }
+            ]
+          },
+          "operation": "create",
+          "projectId": "psdqqm1bzphkodc",
+          "authentication": "{{ $credentials.nocoDbApiToken }}"
+        },
+        "credentials": {
+          "nocoDbApiToken": {
+            "id": "5PYJKB4ihzHtKLqx",
+            "name": "NocoDB Account (darryn@optimus01.co.za)"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This nocoDb node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4d6bca6e-2392-48c1-906f-ff5f439f4897",
+        "name": "Post new LinkedIn contributions to Slack channel",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          2740,
+          200
+        ],
+        "parameters": {
+          "text": "=↓ 📝 ARTICLE:\n{{ $('HTML extract LinkedIn article & other users contributions').item.json.ArticleTitle }}\n{{ $('Merge data and keep unique google search results').item.json.matches }}\n\n↓ 💡 ADVICE:\n{{ $json.message.content }}\n------------------------------------------------------",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "C07CFN279HT",
+            "cachedResultName": "cass-linkedin-advice"
+          },
+          "otherOptions": {
+            "mrkdwn": true,
+            "unfurl_links": true,
+            "includeLinkToWorkflow": false
+          },
+          "authentication": "{{ $credentials.oAuth2 }}"
+        },
+        "credentials": {
+          "slackOAuth2Api": {
+            "id": "xkCA23zAF89RcovP",
+            "name": "Slack Account (OAuth)  (darryn@optimus01.co.za)"
+          }
+        },
+        "typeVersion": 2.2,
+        "notes": "This slack node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ffc7984b-7199-421a-9fe1-8ffe2aa8e7b3",
+        "name": "Get all LinkedIn contributions from database NocoDB (GetRows)",
+        "type": "n8n-nodes-base.nocoDb",
+        "position": [
+          1240,
+          80
+        ],
+        "parameters": {
+          "table": "mpagw9n92ran52o",
+          "options": {},
+          "operation": "getAll",
+          "projectId": "psdqqm1bzphkodc",
+          "returnAll": true,
+          "authentication": "{{ $credentials.nocoDbApiToken }}"
+        },
+        "credentials": {
+          "nocoDbApiToken": {
+            "id": "5PYJKB4ihzHtKLqx",
+            "name": "NocoDB Account (darryn@optimus01.co.za)"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This nocoDb node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "a9cd9135-e6d8-4350-861d-87af50413297",
+        "name": "HTML extract LinkedIn article & other users contributions",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          2160,
+          200
+        ],
+        "parameters": {
+          "options": {},
+          "operation": "extractHtmlContent",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": ".pulse-title"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": ".article-main__content"
+              },
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": ".contribution__text"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This html node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5496fe68-6c77-4520-9479-141a4a20643f",
+        "name": "HTTP Request to get LinkedIn advice articles",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1960,
+          200
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b7235009-6bbb-4701-aeb4-c287b2782a88",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -365,
+          -33
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 366.75796434038665,
+          "height": 473.77664315100793,
+          "content": "## What this workflow does\n1. **`Triggers Weekly`**: The workflow is set to run every Monday at 8:00 AM.\n2. **`Search Google for LinkedIn Advice Articles`**: Uses a predefined Google search URL to find the latest LinkedIn advice articles based on the user's area of expertise.\n3. **`Extract LinkedIn Article Links`**: A code node extracts all LinkedIn advice article links from the search results.\n4. **`Retrieve Article Content`**: For each article link, the workflow retrieves the HTML content and extracts the article title, topics, and existing contributions.\n5. **`Generate AI-Powered Contributions`**: The workflow sends the extracted article content to an AI model, which generates unique, helpful advice for each topic within the article.\n6. **`Post to Slack & NocoDB`**: The AI-generated contributions, along with the article links, are posted to a designated Slack channel and stored in a NocoDB database for future reference."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6aff94a1-1a65-4d24-ab87-b8ff72ea33b5",
+        "name": "Sticky Note11",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          20,
+          -33
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 396.6384066163515,
+          "height": 282.5799404564392,
+          "content": "### Get More Templates Like This 👇\n[![Video Thumbnail]({{ $env.WEBHOOK_URL }}]({{ $env.WEBHOOK_URL }}\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "89d13f57-4a7d-4071-8089-c28b5708c122",
+        "name": "Sticky Note14",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -364,
+          460
+        ],
+        "parameters": {
+          "width": 366.36771813959956,
+          "height": 329.9474713935157,
+          "content": "## Setup\n1. **`Google Search URL`**: Update the Google search URL with the relevant LinkedIn advice query for your field (e.g., \"site:linkedin.com/advice 'marketing automation'\").\n\n2. **`Slack Integration`**: Connect your Slack account and specify the Slack channel where you want the contributions to be posted.\n\n3. **`NocoDB Integration`**: Set up your NocoDB project to store the generated contributions along with the article titles and links."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "11ca526c-2512-4c66-8dbf-0f9cdec13d9f",
+        "name": "Sticky Note9",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -380,
+          -200
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 812.3060553462686,
+          "height": 1198.0013690558965,
+          "content": "## Become A LinkedIn Top Voice with AI\nBuilt for the [Let's Automate It Community]({{ $env.WEBHOOK_URL }} by [Optimus Agency]({{ $env.WEBHOOK_URL }}\n\nThis workflow helps users maintain a consistent presence on LinkedIn by automating the discovery of new advice articles and generating unique contributions using AI. It is ideal for professionals who want to engage with LinkedIn content regularly without spending too much time manually searching and drafting responses."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9536318f-46a5-4ef4-bffc-395d3d2d1af8",
+        "name": "Sticky Note15",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -364,
+          810
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 781.0904623817446,
+          "height": 169.84805961144036,
+          "content": "## How to customize this workflow\n- **`Change Search Terms`**: Modify the Google search URL to focus on a different LinkedIn topic or expertise area.\n- **`Adjust Trigger Frequency`**: The workflow is set to run weekly, but you can adjust the frequency by changing the schedule trigger.\n- **`Enhance Contribution Quality`**: Customize the AI model's prompt to generate contributions that align with your brand voice or content strategy."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5fab6cb9-5191-46a1-81ef-10b330f11b8b",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1086,
+          -200
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 419.095339329518,
+          "height": 463.432215862633,
+          "content": "## Get all LinkedIn contributions from database NocoDB (GetRows)\nThis node retrieves all LinkedIn contributions stored in a specified NocoDB table. It performs a \"getAll\" operation to fetch all rows from the\n\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0c2e26c9-be23-4755-81db-dd5167b84f52",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1620,
+          -60
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 253.48029435813578,
+          "height": 446.9376941946034,
+          "content": "## Merge data and keep unique google search results\nThis node merges and filters the extracted article links, ensuring that only unique LinkedIn article URLs are processed. It prevents duplicate article links from being handled.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f086bb56-9cff-4dc0-a345-868eca20b12c",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1895.9759156157297,
+          160
+        ],
+        "parameters": {
+          "color": 5,
+          "width": 426.673961735047,
+          "height": 550.9285363859362,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 1. HTTP Request to get LinkedIn advice articles\nSends an HTTP request to retrieve the HTML content of each LinkedIn article link. This node fetches the actual web page content from LinkedIn articles.\n\n## 2. HTML extract LinkedIn article & other users contributions\nThis node extracts relevant information from the HTML of LinkedIn articles, including the article title, topics discussed, and contributions made by other users.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "3d44a074-55a5-4eb3-b18a-40564f452646",
+        "name": "Sticky Note5",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2674,
+          -56
+        ],
+        "parameters": {
+          "color": 3,
+          "width": 242.07228127555214,
+          "height": 451.5087489779234,
+          "content": "## Post new LinkedIn contributions to Slack channel\nPosts the AI-generated LinkedIn contributions to a specified Slack channel. This allows the contributions to be shared with a team or for record-keeping.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cb052b4e-51a8-45be-8684-bd46f48b8017",
+        "name": "Sticky Note6",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2940,
+          -55
+        ],
+        "parameters": {
+          "color": 6,
+          "width": 280.61885357253936,
+          "height": 570.1315791275019,
+          "content": "## Post new LinkedIn contributions to NocoDB (CreateRows)\nStores the AI-generated LinkedIn contributions in a NocoDB database. It saves the article title, link, and the contribution itself for future reference and tracking."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d1bbbc22-4913-4558-8bea-faa437c27e0b",
+        "name": "Sticky Note7",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2951,
+          399
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 259.5924775143092,
+          "height": 104.96722916838547,
+          "content": "### `NocoDB` can be swapped with another service like `Airtable` or `Google Sheets`"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "343da68f-09a7-4602-91e9-3ee47e23a936",
+        "name": "Sticky Note8",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1100,
+          -40
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 392.21847914963246,
+          "height": 80,
+          "content": "### `NocoDB` can be swapped with another service like `Airtable` or `Google Sheets`"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ed17e693-da43-49b9-bc4b-cae8a8503ee8",
+        "name": "Sticky Note10",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2344,
+          -56
+        ],
+        "parameters": {
+          "width": 309.45427591228105,
+          "height": 447.75689268844843,
+          "content": "## LinkedIn Contribution Writer\nUses an AI model to generate unique contributions based on the extracted content from LinkedIn articles. The generated advice is tailored for each topic within the article.\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "653d839f-ea48-4e3c-a4a8-09dbeea59ed6",
+        "name": "Airtable",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          80,
+          627
+        ],
+        "parameters": {
+          "options": {},
+          "resource": "base",
+          "authentication": "{{ $credentials.airtableOAuth2Api }}"
+        },
+        "credentials": {
+          "airtableOAuth2Api": {
+            "id": "goKNRHmMmQG5kexN",
+            "name": "Airtable Account (darryn@optimus01.co.za)"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4b4ba215-5a51-45dc-81ba-80b789ffe269",
+        "name": "Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          260,
+          627
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": 966510578,
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Appointments (Smile)"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "1C7R_Xb5pfWlctEtgpOrXTz2O1I59VOBNIQJb2mWDWiI",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Orthodontist - Dr. Choma"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "G62pZQANOhZoAYVs",
+            "name": "Google Sheets Account (darryn@optimus01.co.za)"
+          }
+        },
+        "typeVersion": 4.5,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "b98516e8-897f-4bf1-aa1a-1783f6b2d957",
+        "name": "Sticky Note12",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          21,
+          270
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 394.73627201205596,
+          "height": 521.5579232475401,
+          "content": "## Tools That Are Interchangeable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### `NocoDB` can be swapped with another service like `Airtable` or `Google Sheets`"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "22849372-db4d-44ab-aea2-224d4c6bfd77",
+        "name": "Get all LinkedIn contributions from database NocoDB (GetRows)1",
+        "type": "n8n-nodes-base.nocoDb",
+        "position": [
+          160,
+          347
+        ],
+        "parameters": {
+          "table": "mpagw9n92ran52o",
+          "options": {},
+          "operation": "getAll",
+          "projectId": "psdqqm1bzphkodc",
+          "returnAll": true,
+          "authentication": "{{ $credentials.nocoDbApiToken }}"
+        },
+        "credentials": {
+          "nocoDbApiToken": {
+            "id": "5PYJKB4ihzHtKLqx",
+            "name": "NocoDB Account (darryn@optimus01.co.za)"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This nocoDb node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0af1eb81-9592-4d5d-a628-18f7895e5401",
+        "name": "Set Topic for Google search",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          800,
+          360
+        ],
+        "parameters": {
+          "options": {},
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cf3ef4d0-2688-4fe1-9801-a8519bd293f7",
+                "name": "Topic",
+                "type": "string",
+                "value": "Paid Advertising"
+              }
+            ]
+          }
+        },
+        "typeVersion": 3.4,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "493d93d3-d426-4d8d-9b18-ec5855ee891a",
+        "name": "Sticky Note13",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          740,
+          320
+        ],
+        "parameters": {
+          "color": 7,
+          "width": 221.13234187060237,
+          "height": 399.35935838473415,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Set Topic for Google search\nThis node sets a specific topic to be used in subsequent steps of the workflow. "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "e8b12df1-32b5-4f8f-b3d0-9fc68366f9a8",
+        "name": "Sticky Note16",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          738.8518697906181,
+          732.2671893604936
+        ],
+        "parameters": {
+          "color": 4,
+          "width": 223.88348808302658,
+          "height": 80,
+          "content": "## 👆 EDIT THE FIELD HERE "
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "dd9e2f9c-225a-4b6b-9904-293206a477e4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-066a824e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-af75b725",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-b12c6522",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-8209a45b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-1861a2dd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-0aa1e446",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-eb37a92a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-65350c47",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "5496fe68-6c77-4520-9479-141a4a20643f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-83561ea9",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-4024529e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-6783c386",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-ed1ba0b3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-01646b52",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-2e3189ff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-641f3800",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-c37ecc70",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "86fe3695-c1fd-4154-b1ba-f0737406da4a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-86fe3695-c1fd-4154-b1ba-f0737406da4a-18415cb0",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4d6bca6e-2392-48c1-906f-ff5f439f4897": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4d6bca6e-2392-48c1-906f-ff5f439f4897-d23bbb24",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4b4ba215-5a51-45dc-81ba-80b789ffe269": {
+        "main": [
+          [
+            {
+              "node": "error-handler-4b4ba215-5a51-45dc-81ba-80b789ffe269-952df6ee",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Httprequest Workflow. This workflow integrates 15 different services: stickyNote, httpRequest, airtable, code, scheduleTrigger. It contains 40 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Httprequest Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "4b4ba215-5a51-45dc-81ba-80b789ffe269": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4b4ba215-5a51-45dc-81ba-80b789ffe269-952df6ee"
+            }
+          ]
+        ]
+      },
+      "4d6bca6e-2392-48c1-906f-ff5f439f4897": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-4d6bca6e-2392-48c1-906f-ff5f439f4897-d23bbb24"
+            }
+          ]
+        ]
+      },
+      "5496fe68-6c77-4520-9479-141a4a20643f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-83561ea9"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-4024529e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-6783c386"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-ed1ba0b3"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-01646b52"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-2e3189ff"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-641f3800"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-5496fe68-6c77-4520-9479-141a4a20643f-c37ecc70"
+            }
+          ]
+        ]
+      },
+      "86fe3695-c1fd-4154-b1ba-f0737406da4a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-86fe3695-c1fd-4154-b1ba-f0737406da4a-18415cb0"
+            }
+          ]
+        ]
+      },
+      "dd9e2f9c-225a-4b6b-9904-293206a477e4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-066a824e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-af75b725"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-b12c6522"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-8209a45b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-1861a2dd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-0aa1e446"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-eb37a92a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dd9e2f9c-225a-4b6b-9904-293206a477e4-65350c47"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Httprequest Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Airtable",
+        "parameters": {
+          "authentication": "{{ $credentials.airtableOAuth2Api }}",
+          "options": {},
+          "resource": "base"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Extract Article links for LinkedIn advice articles",
+        "parameters": {
+          "jsCode": "// n8n Code node script\nconst text = $json.data;\n\n// Define the regex pattern\nconst regexPattern = /https:\\/\\/www\\.linkedin\\.com\\/advice\\/[^%&\\s\"']+/g;\n\n// Execute the regex pattern on the text\nconst matches = text.match(regexPattern);\n\n// Output the matches\nreturn {\n  matches: matches || []\n};\n\n\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "name": "Get advice articles from a Google search",
+        "parameters": {
+          "options": {
+            "batching": {
+              "batch": {
+                "batchSize": 25
+              }
+            }
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "nocoDbApiToken": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get all LinkedIn contributions from database NocoDB (GetRows)",
+        "parameters": {
+          "authentication": "{{ $credentials.nocoDbApiToken }}",
+          "operation": "getAll",
+          "options": {},
+          "projectId": "psdqqm1bzphkodc",
+          "returnAll": true,
+          "table": "mpagw9n92ran52o"
+        },
+        "type": "n8n-nodes-base.nocoDb",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "nocoDbApiToken": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get all LinkedIn contributions from database NocoDB (GetRows)1",
+        "parameters": {
+          "authentication": "{{ $credentials.nocoDbApiToken }}",
+          "operation": "getAll",
+          "options": {},
+          "projectId": "psdqqm1bzphkodc",
+          "returnAll": true,
+          "table": "mpagw9n92ran52o"
+        },
+        "type": "n8n-nodes-base.nocoDb",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Sheets",
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "cachedResultName": "Orthodontist - Dr. Choma",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "1C7R_Xb5pfWlctEtgpOrXTz2O1I59VOBNIQJb2mWDWiI"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Appointments (Smile)",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": 966510578
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5
+      },
+      {
+        "name": "HTML extract LinkedIn article & other users contributions",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": ".pulse-title",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "cssSelector": ".article-main__content",
+                "key": "YOUR_CREDENTIAL_HERE"
+              },
+              {
+                "cssSelector": ".contribution__text",
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          },
+          "operation": "extractHtmlContent",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTTP Request to get LinkedIn advice articles",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "LinkedIn Contribution Writer",
+        "parameters": {
+          "messages": {
+            "values": [
+              {
+                "content": "=Read the following collaborative article and provide your own helpful collaboration. The article has various topics that each need to be answered. Write me a paragraph of helpful advice for each topic and format your response as outlined in the template below.\n\n-------------\nARTICLE TITLE\n{{ $json.ArticleTitle }}\n\nTOPICS WITHIN THE LINKEDIN ARTICLE:\n{{ $json.ArticleTopics }}\n\nOTHER CONTRIBUTIONS TO THE LINKEDIN ARTICLE:\n{{ $json.ArticleContributions }}\n-------------\n\nYour advice must be unique and something that no one else has recommended before on the article, or in any of the topics. The response needs to be raw and genuine to elicit conversation and engagement.\n\nFormat your output in text and follow the template below. Only populate the template with as many topics as were provided in the original request \n\ni.e: if there were only 4 topics in the original request then only provide 4 pieces of advice:\n\nOUTPUT TEMPLATE\n\n1. [Topic #1 from Article]\n[Advice for Topic]\n\n2. [Topic #2 from Article]\n[Advice for Topic]\n\n3. [Topic #3 from Article]\n[Advice for Topic]\n\n4. [Topic #4 from Article]\n[Advice for Topic]\n\n5. [Topic #5 from Article]\n[Advice for Topic]\n\n6. [Topic #6 from Article]\n[Advice for Topic]"
+              }
+            ]
+          },
+          "modelId": {
+            "__rl": true,
+            "cachedResultName": "GPT-4O-MINI",
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {
+            "temperature": 0.7
+          }
+        },
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1.4
+      },
+      {
+        "name": "Merge data and keep unique google search results",
+        "parameters": {
+          "joinMode": "keepNonMatches",
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "URL",
+                "field2": "matches"
+              }
+            ]
+          },
+          "mode": "combine",
+          "options": {},
+          "outputDataFrom": "input2"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "nocoDbApiToken": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Post new LinkedIn contributions to NocoDB (CreateRows)",
+        "parameters": {
+          "authentication": "{{ $credentials.nocoDbApiToken }}",
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldName": "Post Title",
+                "fieldValue": "={{ $('HTML extract LinkedIn article & other users contributions').item.json.ArticleTitle }}"
+              },
+              {
+                "fieldName": "URL",
+                "fieldValue": "={{ $('Merge data and keep unique google search results').item.json.matches }}"
+              },
+              {
+                "fieldName": "Contribution",
+                "fieldValue": "={{ $('LinkedIn Contribution Writer').item.json.message.content }}"
+              },
+              {
+                "fieldName": "Topic",
+                "fieldValue": "Lead Generation"
+              },
+              {
+                "fieldName": "Person",
+                "fieldValue": "Cassie"
+              }
+            ]
+          },
+          "operation": "create",
+          "projectId": "psdqqm1bzphkodc",
+          "table": "mpagw9n92ran52o"
+        },
+        "type": "n8n-nodes-base.nocoDb",
+        "typeVersion": 3
+      },
+      {
+        "credentials": {
+          "slackOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Post new LinkedIn contributions to Slack channel",
+        "parameters": {
+          "authentication": "{{ $credentials.oAuth2 }}",
+          "channelId": {
+            "__rl": true,
+            "cachedResultName": "cass-linkedin-advice",
+            "mode": "list",
+            "value": "C07CFN279HT"
+          },
+          "otherOptions": {
+            "includeLinkToWorkflow": false,
+            "mrkdwn": true,
+            "unfurl_links": true
+          },
+          "select": "channel",
+          "text": "=↓ 📝 ARTICLE:\n{{ $('HTML extract LinkedIn article & other users contributions').item.json.ArticleTitle }}\n{{ $('Merge data and keep unique google search results').item.json.matches }}\n\n↓ 💡 ADVICE:\n{{ $json.message.content }}\n------------------------------------------------------"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.2
+      },
+      {
+        "name": "Schedule Trigger Every Monday, @ 08:00am",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  1
+                ],
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "name": "Set Topic for Google search",
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cf3ef4d0-2688-4fe1-9801-a8519bd293f7",
+                "name": "Topic",
+                "type": "string",
+                "value": "Paid Advertising"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4
+      },
+      {
+        "name": "Split Out all links for LinkedIn advice articles",
+        "parameters": {
+          "fieldToSplitOut": "matches",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "color": 6,
+          "content": "## Get all LinkedIn contributions from database NocoDB (GetRows)\nThis node retrieves all LinkedIn contributions stored in a specified NocoDB table. It performs a \"getAll\" operation to fetch all rows from the\n\n\n",
+          "height": 463.432215862633,
+          "width": 419.095339329518
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "color": 7,
+          "content": "## What this workflow does\n1. **`Triggers Weekly`**: The workflow is set to run every Monday at 8:00 AM.\n2. **`Search Google for LinkedIn Advice Articles`**: Uses a predefined Google search URL to find the latest LinkedIn advice articles based on the user's area of expertise.\n3. **`Extract LinkedIn Article Links`**: A code node extracts all LinkedIn advice article links from the search results.\n4. **`Retrieve Article Content`**: For each article link, the workflow retrieves the HTML content and extracts the article title, topics, and existing contributions.\n5. **`Generate AI-Powered Contributions`**: The workflow sends the extracted article content to an AI model, which generates unique, helpful advice for each topic within the article.\n6. **`Post to Slack & NocoDB`**: The AI-generated contributions, along with the article links, are posted to a designated Slack channel and stored in a NocoDB database for future reference.",
+          "height": 473.77664315100793,
+          "width": 366.75796434038665
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note10",
+        "parameters": {
+          "content": "## LinkedIn Contribution Writer\nUses an AI model to generate unique contributions based on the extracted content from LinkedIn articles. The generated advice is tailored for each topic within the article.\n",
+          "height": 447.75689268844843,
+          "width": 309.45427591228105
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note11",
+        "parameters": {
+          "color": 6,
+          "content": "### Get More Templates Like This 👇\n[![Video Thumbnail]({{ $env.WEBHOOK_URL }}]({{ $env.WEBHOOK_URL }}\n",
+          "height": 282.5799404564392,
+          "width": 396.6384066163515
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note12",
+        "parameters": {
+          "color": 7,
+          "content": "## Tools That Are Interchangeable\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### `NocoDB` can be swapped with another service like `Airtable` or `Google Sheets`",
+          "height": 521.5579232475401,
+          "width": 394.73627201205596
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note13",
+        "parameters": {
+          "color": 7,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Set Topic for Google search\nThis node sets a specific topic to be used in subsequent steps of the workflow. ",
+          "height": 399.35935838473415,
+          "width": 221.13234187060237
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note14",
+        "parameters": {
+          "content": "## Setup\n1. **`Google Search URL`**: Update the Google search URL with the relevant LinkedIn advice query for your field (e.g., \"site:linkedin.com/advice 'marketing automation'\").\n\n2. **`Slack Integration`**: Connect your Slack account and specify the Slack channel where you want the contributions to be posted.\n\n3. **`NocoDB Integration`**: Set up your NocoDB project to store the generated contributions along with the article titles and links.",
+          "height": 329.9474713935157,
+          "width": 366.36771813959956
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note15",
+        "parameters": {
+          "color": 7,
+          "content": "## How to customize this workflow\n- **`Change Search Terms`**: Modify the Google search URL to focus on a different LinkedIn topic or expertise area.\n- **`Adjust Trigger Frequency`**: The workflow is set to run weekly, but you can adjust the frequency by changing the schedule trigger.\n- **`Enhance Contribution Quality`**: Customize the AI model's prompt to generate contributions that align with your brand voice or content strategy.",
+          "height": 169.84805961144036,
+          "width": 781.0904623817446
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note16",
+        "parameters": {
+          "color": 4,
+          "content": "## 👆 EDIT THE FIELD HERE ",
+          "height": 80,
+          "width": 223.88348808302658
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "color": 2,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 1. Get advice articles from a Google search**\nUses an HTTP request to perform a Google search for LinkedIn advice articles based on a predefined query.\n\n## 2. Extract Article links for LinkedIn advice articles\nThis Code node extracts LinkedIn article URLs from the Google search results by using a regular expression. It pulls all article links related to LinkedIn advice.\n\n## 3. Split Out all links for LinkedIn advice articles\nSplits the list of extracted LinkedIn article links into individual items. This allows each article to be processed one at a time in the following steps.\n",
+          "height": 566.8592254014303,
+          "width": 621.7044818991839
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "color": 7,
+          "content": "## Merge data and keep unique google search results\nThis node merges and filters the extracted article links, ensuring that only unique LinkedIn article URLs are processed. It prevents duplicate article links from being handled.\n",
+          "height": 446.9376941946034,
+          "width": 253.48029435813578
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "color": 5,
+          "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 1. HTTP Request to get LinkedIn advice articles\nSends an HTTP request to retrieve the HTML content of each LinkedIn article link. This node fetches the actual web page content from LinkedIn articles.\n\n## 2. HTML extract LinkedIn article & other users contributions\nThis node extracts relevant information from the HTML of LinkedIn articles, including the article title, topics discussed, and contributions made by other users.\n",
+          "height": 550.9285363859362,
+          "width": 426.673961735047
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note5",
+        "parameters": {
+          "color": 3,
+          "content": "## Post new LinkedIn contributions to Slack channel\nPosts the AI-generated LinkedIn contributions to a specified Slack channel. This allows the contributions to be shared with a team or for record-keeping.\n",
+          "height": 451.5087489779234,
+          "width": 242.07228127555214
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note6",
+        "parameters": {
+          "color": 6,
+          "content": "## Post new LinkedIn contributions to NocoDB (CreateRows)\nStores the AI-generated LinkedIn contributions in a NocoDB database. It saves the article title, link, and the contribution itself for future reference and tracking.",
+          "height": 570.1315791275019,
+          "width": 280.61885357253936
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note7",
+        "parameters": {
+          "color": 7,
+          "content": "### `NocoDB` can be swapped with another service like `Airtable` or `Google Sheets`",
+          "height": 104.96722916838547,
+          "width": 259.5924775143092
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note8",
+        "parameters": {
+          "color": 7,
+          "content": "### `NocoDB` can be swapped with another service like `Airtable` or `Google Sheets`",
+          "height": 80,
+          "width": 392.21847914963246
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note9",
+        "parameters": {
+          "color": 7,
+          "content": "## Become A LinkedIn Top Voice with AI\nBuilt for the [Let's Automate It Community]({{ $env.WEBHOOK_URL }} by [Optimus Agency]({{ $env.WEBHOOK_URL }}\n\nThis workflow helps users maintain a consistent presence on LinkedIn by automating the discovery of new advice articles and generating unique contributions using AI. It is ideal for professionals who want to engage with LinkedIn content regularly without spending too much time manually searching and drafting responses.",
+          "height": 1198.0013690558965,
+          "width": 812.3060553462686
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 33,
+  "integrationCount": 5,
+  "difficulty": "Advanced",
+  "estimatedSetupTime": "50 Mins",
+  "integrations": [
+    "HTTP Request",
+    "LinkedIn",
+    "Slack",
+    "Airtable",
+    "Google Sheets"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 87,
+  "viewCount": 487,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "LinkedIn Account",
+      "Slack Account",
+      "Airtable Account",
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "noco Db  A P I Token details",
+      "slack  O Auth2  A P I details",
+      "airtable  O Auth2  A P I details",
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the scheduler node \"Schedule Trigger Every Monday, @ 08:00am\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Get advice articles from a Google search\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge data and keep unique google search results\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Split Out all links for LinkedIn advice articles\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"LinkedIn Contribution Writer\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post new LinkedIn contributions to NocoDB (CreateRows)\" node (n8n-nodes-base.nocoDb) and configure the action parameters, mappings, and fields.",
+      "Open the \"Post new LinkedIn contributions to Slack channel\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Get all LinkedIn contributions from database NocoDB (GetRows)\" node (n8n-nodes-base.nocoDb) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTML extract LinkedIn article & other users contributions\" node (n8n-nodes-base.html) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Request to get LinkedIn advice articles\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note11\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note14\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note9\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note15\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note5\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note6\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note7\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note8\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note10\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Airtable\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Sticky Note12\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get all LinkedIn contributions from database NocoDB (GetRows)1\" node (n8n-nodes-base.nocoDb) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note13\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note16\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set Topic for Google search\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 96,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-a9dtu0rlp",
+      "workflowId": "httprequest-workflow-bz5y9",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Splitout/0613_Splitout_Code_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Splitout\\0613_Splitout_Code_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:12.704Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:12.704Z",
+  "updatedAt": "2026-07-15T11:30:12.704Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

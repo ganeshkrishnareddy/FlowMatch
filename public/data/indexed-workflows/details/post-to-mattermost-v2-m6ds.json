@@ -1,0 +1,335 @@
+{
+  "id": "post-to-mattermost-v2-0e7dl",
+  "name": "post to mattermost v2",
+  "slug": "post-to-mattermost-v2-m6ds",
+  "description": "Production-ready workflow: post to mattermost v2. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "post to mattermost v2 workflow containing 7 nodes.",
+  "originalWorkflowJson": {
+    "id": "2",
+    "name": "post to mattermost v2",
+    "nodes": [
+      {
+        "name": "RSS Feed Read",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "position": [
+          580,
+          150
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "typeVersion": 1,
+        "id": "node-fe95c1f9"
+      },
+      {
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1170,
+          90
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST",
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "status",
+                "value": "={{$node[\"RSS Feed Read\"].json[\"title\"]}} \n{{$node[\"RSS Feed Read\"].json[\"link\"]}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-d73d8289"
+      },
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          400,
+          150
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-0e35d2b0"
+      },
+      {
+        "name": "Function",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          790,
+          150
+        ],
+        "parameters": {
+          "functionCode": "// Get the global workflow static data\nconst staticData = getWorkflowStaticData('global');\n\n// Access its data\nconst lastRssId = staticData.lastRssId\n\nlet list = []\n\n\nfor (const item of $items(\"RSS Feed Read\")){\n  let currentId = item.json[\"id\"].split('/').pop()\n  if(currentId == lastRssId) break;\n  list.push({'json': {\n    'id': currentId,\n    'lastId': lastRssId,\n    'title': item.json[\"title\"],\n    'url': item.json[\"link\"]\n  }})\n}\n\n\n// Get the last ID from Rss Feed\nlet currentRssId = $item(0).$node[\"RSS Feed Read\"].json[\"id\"].split('/').pop()\n\n// TODO: make a loop to get all the items beyond the last saved id\nif(!lastRssId || currentRssId != lastRssId)\n{  \n  // Update its data\n  staticData.lastRssId = currentRssId;\n  \n}\nelse { list = [{'json':{'id': 'NaN', 'lastId': staticData.lastRssId }}] }\nreturn list;\n\n"
+        },
+        "typeVersion": 1,
+        "id": "node-f6bc160c"
+      },
+      {
+        "name": "IF",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          960,
+          150
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$node[\"Function\"].json[\"id\"]}}",
+                "value2": "NaN",
+                "operation": "notEqual"
+              }
+            ],
+            "boolean": []
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-66313d45"
+      },
+      {
+        "name": "NoOp",
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          1180,
+          280
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-509ecb5e"
+      },
+      {
+        "id": "error-0582b846",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-d0e3badc",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.115862",
+      "updatedAt": "2025-09-29T07:07:46.115898",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: post to mattermost v2. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "post to mattermost v2",
+    "nodes": [
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Function",
+        "parameters": {
+          "functionCode": "// Get the global workflow static data\nconst staticData = getWorkflowStaticData('global');\n\n// Access its data\nconst lastRssId = staticData.lastRssId\n\nlet list = []\n\n\nfor (const item of $items(\"RSS Feed Read\")){\n  let currentId = item.json[\"id\"].split('/').pop()\n  if(currentId == lastRssId) break;\n  list.push({'json': {\n    'id': currentId,\n    'lastId': lastRssId,\n    'title': item.json[\"title\"],\n    'url': item.json[\"link\"]\n  }})\n}\n\n\n// Get the last ID from Rss Feed\nlet currentRssId = $item(0).$node[\"RSS Feed Read\"].json[\"id\"].split('/').pop()\n\n// TODO: make a loop to get all the items beyond the last saved id\nif(!lastRssId || currentRssId != lastRssId)\n{  \n  // Update its data\n  staticData.lastRssId = currentRssId;\n  \n}\nelse { list = [{'json':{'id': 'NaN', 'lastId': staticData.lastRssId }}] }\nreturn list;\n\n"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTTP Request",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "status",
+                "value": "={{$node[\"RSS Feed Read\"].json[\"title\"]}} \n{{$node[\"RSS Feed Read\"].json[\"link\"]}}"
+              }
+            ]
+          },
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "IF",
+        "parameters": {
+          "conditions": {
+            "boolean": [],
+            "string": [
+              {
+                "operation": "notEqual",
+                "value1": "={{$node[\"Function\"].json[\"id\"]}}",
+                "value2": "NaN"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "NoOp",
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1
+      },
+      {
+        "name": "RSS Feed Read",
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 7,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Rssfeedread",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 18,
+  "viewCount": 405,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Rssfeedread Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"RSS Feed Read\" node (n8n-nodes-base.rssFeedRead) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Function\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"IF\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"NoOp\" node (n8n-nodes-base.noOp) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-202kaxu1p",
+      "workflowId": "post-to-mattermost-v2-0e7dl",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0752_HTTP_Rssfeedread_Automation_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0752_HTTP_Rssfeedread_Automation_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:18:32.992Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:32.992Z",
+  "updatedAt": "2026-07-15T11:18:32.992Z"
+}

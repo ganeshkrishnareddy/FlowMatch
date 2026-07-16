@@ -1,0 +1,753 @@
+{
+  "id": "manualtrigger-workflow-9kfld",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-67sx",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 11 different services: stickyNote, httpRequest, wait, scheduleTrigger, splitOut. It contains 14 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 12 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-75b29c8f",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:55.411523",
+      "updatedAt": "2025-09-29T07:07:55.411538",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "0788a3db-20c3-43b6-956a-394f688f7763",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          360,
+          440
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "51460fab-a53c-46cd-a484-d2c038cd102d",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          360,
+          600
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 1
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5326416c-5715-4cc7-acfd-38a32f864bfb",
+        "name": "loop",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          1360,
+          600
+        ],
+        "parameters": {
+          "options": {},
+          "batchSize": 1
+        },
+        "typeVersion": 2,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "fb0ca9f7-ff49-4a4b-9575-42b80594737e",
+        "name": "sitemap_set",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          540,
+          600
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {}
+        },
+        "typeVersion": 4.1,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "150b47fe-f1c8-4dcb-b187-b459ee50c316",
+        "name": "sitemap_convert",
+        "type": "n8n-nodes-base.xml",
+        "position": [
+          700,
+          600
+        ],
+        "parameters": {
+          "options": {
+            "trim": true,
+            "normalize": true,
+            "mergeAttrs": true,
+            "ignoreAttrs": true,
+            "normalizeTags": true
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This xml node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "83cd19d6-81e7-46af-83a3-090cdd66b420",
+        "name": "sitemap_parse",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [
+          920,
+          600
+        ],
+        "parameters": {
+          "options": {
+            "destinationFieldName": "url"
+          },
+          "fieldToSplitOut": "urlset.url"
+        },
+        "typeVersion": 1,
+        "notes": "This splitOut node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "95c784d1-5756-4bf0-b2e5-e25a84c01b72",
+        "name": "url_set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1140,
+          600
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "url",
+                "value": "={{ $json.url.loc }}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 2,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "43b62667-a37e-4bd1-bbb9-7a20a0914c97",
+        "name": "url_index",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1560,
+          580
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {},
+          "sendBody": true,
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "url",
+                "value": "={{ $json.url }}"
+              },
+              {
+                "name": "type",
+                "value": "URL_UPDATED"
+              }
+            ]
+          },
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "googleApi": {
+            "id": "RywvL8c7V2ZtBvdK",
+            "name": "850737154850-compute@developer.gserviceaccount.com"
+          }
+        },
+        "typeVersion": 4,
+        "continueOnFail": true,
+        "alwaysOutputData": true,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "39ae8c01-64e4-44f5-be43-d5c402b00739",
+        "name": "index_check",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1780,
+          580
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json.urlNotificationMetadata.latestUpdate.type }}",
+                "value2": "URL_UPDATED"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c4bf483b-af4b-451e-974b-d4abeb2c70f6",
+        "name": "wait",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          2040,
+          560
+        ],
+        "webhookId": "b0df1fe8-e509-4d0c-a486-f523226621e2",
+        "parameters": {
+          "unit": "seconds",
+          "amount": 2
+        },
+        "typeVersion": 1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "455955a8-c767-453b-805c-77c5b7d2e9bc",
+        "name": "Stop and Error",
+        "type": "n8n-nodes-base.stopAndError",
+        "position": [
+          2040,
+          840
+        ],
+        "parameters": {
+          "errorMessage": "You have reached the Google Indexing API limit (200/day by default)"
+        },
+        "typeVersion": 1,
+        "notes": "This stopAndError node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "275abdd5-be5d-458f-bc75-d9f72824c49f",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          340,
+          180
+        ],
+        "parameters": {
+          "width": 482.7089688834655,
+          "height": 221.39109212934721,
+          "content": "## Simple indexing workflow using the Google Indexing API\n\nThis workflow is the simplest indexing workflow. It simply extracts a sitemap, converts it to a JSON, and loops through each URL. It will output an error if your quota is reached.\n\n*Joachim*"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "fb0ca9f7-ff49-4a4b-9575-42b80594737e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-02719b96",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-b1f9a0df",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-c2e85abd",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-7ed341ab",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-4c034cfc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-6da5811c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-368b9f08",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-5ba0e8a6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "43b62667-a37e-4bd1-bbb9-7a20a0914c97": {
+        "main": [
+          [
+            {
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-46c254a8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-ffe4196e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-3232925b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-4aeb3842",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-30e9c907",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-d36b07bc",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-932f50b6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-0baaea85",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 11 different services: stickyNote, httpRequest, wait, scheduleTrigger, splitOut. It contains 14 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "43b62667-a37e-4bd1-bbb9-7a20a0914c97": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-46c254a8"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-ffe4196e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-3232925b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-4aeb3842"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-30e9c907"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-d36b07bc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-932f50b6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-43b62667-a37e-4bd1-bbb9-7a20a0914c97-0baaea85"
+            }
+          ]
+        ]
+      },
+      "fb0ca9f7-ff49-4a4b-9575-42b80594737e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-02719b96"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-b1f9a0df"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-c2e85abd"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-7ed341ab"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-4c034cfc"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-6da5811c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-368b9f08"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-fb0ca9f7-ff49-4a4b-9575-42b80594737e-5ba0e8a6"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "index_check",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json.urlNotificationMetadata.latestUpdate.type }}",
+                "value2": "URL_UPDATED"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "name": "loop",
+        "parameters": {
+          "batchSize": 1,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 2
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 1
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "sitemap_convert",
+        "parameters": {
+          "options": {
+            "ignoreAttrs": true,
+            "mergeAttrs": true,
+            "normalize": true,
+            "normalizeTags": true,
+            "trim": true
+          }
+        },
+        "type": "n8n-nodes-base.xml",
+        "typeVersion": 1
+      },
+      {
+        "name": "sitemap_parse",
+        "parameters": {
+          "fieldToSplitOut": "urlset.url",
+          "options": {
+            "destinationFieldName": "url"
+          }
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1
+      },
+      {
+        "name": "sitemap_set",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Simple indexing workflow using the Google Indexing API\n\nThis workflow is the simplest indexing workflow. It simply extracts a sitemap, converts it to a JSON, and loops through each URL. It will output an error if your quota is reached.\n\n*Joachim*",
+          "height": 221.39109212934721,
+          "width": 482.7089688834655
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Stop and Error",
+        "parameters": {
+          "errorMessage": "You have reached the Google Indexing API limit (200/day by default)"
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "url_index",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "url",
+                "value": "={{ $json.url }}"
+              },
+              {
+                "name": "type",
+                "value": "URL_UPDATED"
+              }
+            ]
+          },
+          "method": "POST",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "sendBody": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4
+      },
+      {
+        "name": "url_set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "url",
+                "value": "={{ $json.url.loc }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 2
+      },
+      {
+        "name": "wait",
+        "parameters": {
+          "amount": 2,
+          "unit": "seconds"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 12,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Xml"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 105,
+  "viewCount": 81,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Xml Account"
+    ],
+    "requiredCredentials": [
+      "google  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"loop\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"sitemap_set\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"sitemap_convert\" node (n8n-nodes-base.xml) and configure the action parameters, mappings, and fields.",
+      "Open the \"sitemap_parse\" node (n8n-nodes-base.splitOut) and configure the action parameters, mappings, and fields.",
+      "Open the \"url_index\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"index_check\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"wait\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "Open the \"Stop and Error\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"url_set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-0ecp95z61",
+      "workflowId": "manualtrigger-workflow-9kfld",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stopanderror/0427_Stopanderror_Wait_Monitor_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stopanderror\\0427_Stopanderror_Wait_Monitor_Webhook.json",
+      "discoveredAt": "2026-07-15T11:30:39.121Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:30:39.121Z",
+  "updatedAt": "2026-07-15T11:30:39.121Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

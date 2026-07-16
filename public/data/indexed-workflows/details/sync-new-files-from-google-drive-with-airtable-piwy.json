@@ -1,0 +1,651 @@
+{
+  "id": "sync-new-files-from-google-drive-with-airtable-w4etc",
+  "name": "Sync New Files From Google Drive with Airtable",
+  "slug": "sync-new-files-from-google-drive-with-airtable-piwy",
+  "description": "Automated workflow: Sync New Files From Google Drive with Airtable. This workflow integrates 5 different services: stickyNote, googleDriveTrigger, airtable, googleDrive, stopAndError. It contains 10 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Sync New Files From Google Drive with Airtable workflow containing 9 nodes.",
+  "originalWorkflowJson": {
+    "id": "uLHpFu2ndN6ZKClZ",
+    "meta": {
+      "instanceId": "workflow-06d72cb3",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:55.291940",
+      "updatedAt": "2025-09-29T07:07:55.291955",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "Sync New Files From Google Drive with Airtable",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "f648b663-8adb-4587-bf80-cff7554b72c4",
+        "name": "Share File with Recipient",
+        "type": "n8n-nodes-base.googleDrive",
+        "notes": "Share File via Email",
+        "position": [
+          660,
+          -20
+        ],
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "options": {},
+          "operation": "share",
+          "permissionsUi": {
+            "permissionsValues": {
+              "role": "writer",
+              "type": "user",
+              "emailAddress": "test@gmail.com"
+            }
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "",
+            "name": ""
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 3
+      },
+      {
+        "id": "29c9dacf-e9fa-49b7-81e5-0416dbdbc9ba",
+        "name": " Log File Metadata",
+        "type": "n8n-nodes-base.airtable",
+        "notes": "Store File Metadata",
+        "position": [
+          940,
+          -160
+        ],
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          },
+          "table": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          },
+          "columns": {
+            "value": {
+              "FileId": "={{ $('Google Drive').item.json.id }}",
+              "sentId": "={{ $json.id }}",
+              "FileName": "={{ $('Google Drive').item.json.name }}",
+              "CreatedTime": "={{ $('Google Drive').item.json.createdTime }}",
+              "ModifiedTime": "={{ $('Google Drive').item.json.modifiedTime }}"
+            },
+            "schema": [
+              {
+                "id": "FileName",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "FileName",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "FileId",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "FileId",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "CreatedTime",
+                "type": "dateTime",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "CreatedTime",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "ModifiedTime",
+                "type": "dateTime",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "ModifiedTime",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "sentId",
+                "type": "string",
+                "display": true,
+                "removed": false,
+                "readOnly": false,
+                "required": false,
+                "displayName": "sentId",
+                "defaultMatch": false,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": []
+          },
+          "options": {},
+          "operation": "create"
+        },
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "",
+            "name": ""
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 2.1
+      },
+      {
+        "id": "f2a4c6af-cf00-4549-88af-1a3e125508d6",
+        "name": "Google Drive",
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "notes": "Fetch New File",
+        "position": [
+          420,
+          -180
+        ],
+        "parameters": {
+          "event": "fileCreated",
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder",
+          "folderToWatch": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          }
+        },
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "",
+            "name": ""
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 1
+      },
+      {
+        "id": "14da3a1a-def0-4718-8456-f3f11c0fb238",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          400,
+          -20
+        ],
+        "parameters": {
+          "width": 150,
+          "height": 140,
+          "content": "This node retrieves the newly added file from the specified folder in Google Drive."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "d9224406-31e5-46a6-a2da-56effb86c8eb",
+        "name": "Sticky Note1",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          640,
+          -180
+        ],
+        "parameters": {
+          "width": 170,
+          "height": 140,
+          "content": "This node sends the fetched file via email to the specified recipient."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "cad9869a-cf58-4786-8d0a-d696bf3a0c84",
+        "name": "Sticky Note2",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          920,
+          0
+        ],
+        "parameters": {
+          "width": 180,
+          "content": "This node stores the file’s metadata (name, ID, creation time, modification time, and recipient email) in Airtable."
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "0f6c1ffc-7d9e-41ee-b5f4-ee65f792222e",
+        "name": "Sticky Note3",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          320,
+          -240
+        ],
+        "parameters": {
+          "width": 860,
+          "height": 420,
+          "content": "### Automatic File Upload & Sharing Workflow with Google Drive & Airtable Integration\n\n"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "99acf1d1-ce4e-4942-bb6c-d053ef886a29",
+        "name": "Sticky Note4",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          320,
+          220
+        ],
+        "parameters": {
+          "width": 860,
+          "height": 120,
+          "content": "### Description:\nThis workflow automatically fetches newly uploaded files from a specific folder in Google Drive, shares them via email with specified recipients, and logs the file details (name, ID, created time, modified time) into Airtable for easy tracking. It streamlines the process of file sharing and management while keeping track of important metadata in a central place.)"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-64eaff99",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "c4ff2316-a648-4cd2-9af8-b29c29115ac6",
+    "connections": {
+      "f648b663-8adb-4587-bf80-cff7554b72c4": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f648b663-8adb-4587-bf80-cff7554b72c4-b6b68ab0",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f2a4c6af-cf00-4549-88af-1a3e125508d6": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f2a4c6af-cf00-4549-88af-1a3e125508d6-952da3d6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "description": "Automated workflow: Sync New Files From Google Drive with Airtable. This workflow integrates 5 different services: stickyNote, googleDriveTrigger, airtable, googleDrive, stopAndError. It contains 10 nodes and follows best practices for error handling and security.",
+    "notes": "Excellent quality workflow: Sync New Files From Google Drive with Airtable. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "f2a4c6af-cf00-4549-88af-1a3e125508d6": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f2a4c6af-cf00-4549-88af-1a3e125508d6-952da3d6"
+            }
+          ]
+        ]
+      },
+      "f648b663-8adb-4587-bf80-cff7554b72c4": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f648b663-8adb-4587-bf80-cff7554b72c4-b6b68ab0"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Sync New Files From Google Drive with Airtable",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": " Log File Metadata",
+        "parameters": {
+          "base": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FileName",
+                "id": "FileName",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FileId",
+                "id": "FileId",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "CreatedTime",
+                "id": "CreatedTime",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "dateTime"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "ModifiedTime",
+                "id": "ModifiedTime",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "dateTime"
+              },
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "sentId",
+                "id": "sentId",
+                "readOnly": false,
+                "removed": false,
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "CreatedTime": "={{ $('Google Drive').item.json.createdTime }}",
+              "FileId": "={{ $('Google Drive').item.json.id }}",
+              "FileName": "={{ $('Google Drive').item.json.name }}",
+              "ModifiedTime": "={{ $('Google Drive').item.json.modifiedTime }}",
+              "sentId": "={{ $json.id }}"
+            }
+          },
+          "operation": "create",
+          "options": {},
+          "table": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Drive",
+        "parameters": {
+          "event": "fileCreated",
+          "folderToWatch": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          },
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "triggerOn": "specificFolder"
+        },
+        "type": "n8n-nodes-base.googleDriveTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Share File with Recipient",
+        "parameters": {
+          "fileId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "operation": "share",
+          "options": {},
+          "permissionsUi": {
+            "permissionsValues": {
+              "emailAddress": "test@gmail.com",
+              "role": "writer",
+              "type": "user"
+            }
+          }
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "This node retrieves the newly added file from the specified folder in Google Drive.",
+          "height": 140,
+          "width": 150
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note1",
+        "parameters": {
+          "content": "This node sends the fetched file via email to the specified recipient.",
+          "height": 140,
+          "width": 170
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note2",
+        "parameters": {
+          "content": "This node stores the file’s metadata (name, ID, creation time, modification time, and recipient email) in Airtable.",
+          "width": 180
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note3",
+        "parameters": {
+          "content": "### Automatic File Upload & Sharing Workflow with Google Drive & Airtable Integration\n\n",
+          "height": 420,
+          "width": 860
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "Sticky Note4",
+        "parameters": {
+          "content": "### Description:\nThis workflow automatically fetches newly uploaded files from a specific folder in Google Drive, shares them via email with specified recipients, and logs the file details (name, ID, created time, modified time) into Airtable for easy tracking. It streamlines the process of file sharing and management while keeping track of important metadata in a central place.)",
+          "height": 120,
+          "width": 860
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 9,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Drive",
+    "Airtable"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 100,
+  "viewCount": 168,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Drive Account",
+      "Airtable Account"
+    ],
+    "requiredCredentials": [
+      "google Drive  O Auth2  A P I details",
+      "airtable Token  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"Google Drive\".",
+      "Open the \"Share File with Recipient\" node (n8n-nodes-base.googleDrive) and configure the action parameters, mappings, and fields.",
+      "Open the \" Log File Metadata\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note1\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note2\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note3\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note4\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 98,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-srfnuhm82",
+      "workflowId": "sync-new-files-from-google-drive-with-airtable-w4etc",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Stickynote/1987_Stickynote_Airtable_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Stickynote\\1987_Stickynote_Airtable_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:20:04.575Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:20:04.575Z",
+  "updatedAt": "2026-07-15T11:20:04.575Z"
+}

@@ -1,0 +1,364 @@
+{
+  "id": "namecheap-dynamic-dns-ddns--fc6yr",
+  "name": "NameCheap Dynamic DNS (DDNS)",
+  "slug": "namecheap-dynamic-dns-ddns--o5pl",
+  "description": "Production-ready workflow: NameCheap Dynamic DNS (DDNS). This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "NameCheap Dynamic DNS (DDNS) workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": 3,
+    "name": "NameCheap Dynamic DNS (DDNS)",
+    "nodes": [
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          380,
+          300
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 15
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-1930b577"
+      },
+      {
+        "name": "Checks IP if new",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          740,
+          300
+        ],
+        "parameters": {
+          "functionCode": "const staticData = getWorkflowStaticData('global');\nconst newItem = items.map(item => item.json[\"ip\"]);\nconst ildItem = staticData.ildItem; \n\nif (!ildItem) {\n  staticData.ildItem = newItem;\n  return items;\n}\n\n\nconst actualnewItem = newItem.filter((id) => !ildItem.includes(id));\nconst actualItem = items.filter((data) => actualnewItem.includes(data.json['ip']));\nstaticData.ildItem = [...actualnewItem, ...ildItem];\n\nreturn actualItem;"
+        },
+        "typeVersion": 1,
+        "id": "node-2c57c359"
+      },
+      {
+        "name": "subdomains",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1100,
+          300
+        ],
+        "parameters": {
+          "functionCode": "items[0].json = {\n    value: [\n        {id: \"subdomain1\"},\n        {id: \"subdomain2\"},\n        {id: \"subdomain3\"}\n    ]\n};\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-6d8447d4"
+      },
+      {
+        "name": "Loops trough Subdomain list",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1280,
+          300
+        ],
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor (const item of items[0].json.value) {\n  newItems.push({json: item});\n}\n\nreturn newItems;"
+        },
+        "typeVersion": 1,
+        "id": "node-98ef9371"
+      },
+      {
+        "name": "Send data to Namecheap",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1460,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "responseFormat": "string"
+        },
+        "typeVersion": 1,
+        "id": "node-4d5c44b7"
+      },
+      {
+        "name": "Get Public IP address",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          560,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "jsonParameters": true,
+          "allowUnauthorizedCerts": true
+        },
+        "retryOnFail": true,
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "id": "node-dac17a91"
+      },
+      {
+        "name": "yourdomain.com",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          920,
+          300
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "domain",
+                "value": "yourdomain.com"
+              },
+              {
+                "name": "password",
+                "value": "your-namecheap-ddns-password"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-adc424f0"
+      },
+      {
+        "id": "error-dceb92c5",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-434cb0ce",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:46.193315",
+      "updatedAt": "2025-09-29T07:07:46.193325",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: NameCheap Dynamic DNS (DDNS). This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "NameCheap Dynamic DNS (DDNS)",
+    "nodes": [
+      {
+        "name": "Checks IP if new",
+        "parameters": {
+          "functionCode": "const staticData = getWorkflowStaticData('global');\nconst newItem = items.map(item => item.json[\"ip\"]);\nconst ildItem = staticData.ildItem; \n\nif (!ildItem) {\n  staticData.ildItem = newItem;\n  return items;\n}\n\n\nconst actualnewItem = newItem.filter((id) => !ildItem.includes(id));\nconst actualItem = items.filter((data) => actualnewItem.includes(data.json['ip']));\nstaticData.ildItem = [...actualnewItem, ...ildItem];\n\nreturn actualItem;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 15
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Get Public IP address",
+        "parameters": {
+          "allowUnauthorizedCerts": true,
+          "jsonParameters": true,
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Loops trough Subdomain list",
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor (const item of items[0].json.value) {\n  newItems.push({json: item});\n}\n\nreturn newItems;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Send data to Namecheap",
+        "parameters": {
+          "options": {},
+          "responseFormat": "string",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "subdomains",
+        "parameters": {
+          "functionCode": "items[0].json = {\n    value: [\n        {id: \"subdomain1\"},\n        {id: \"subdomain2\"},\n        {id: \"subdomain3\"}\n    ]\n};\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "yourdomain.com",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "domain",
+                "value": "yourdomain.com"
+              },
+              {
+                "name": "password",
+                "value": "your-namecheap-ddns-password"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 1,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 61,
+  "viewCount": 635,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "No custom credentials required for utility-only operations."
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Checks IP if new\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"subdomains\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Loops trough Subdomain list\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send data to Namecheap\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Public IP address\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"yourdomain.com\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 88,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-mgt5mlnum",
+      "workflowId": "namecheap-dynamic-dns-ddns--fc6yr",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0939_HTTP_Cron_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0939_HTTP_Cron_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:10.945Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:10.945Z",
+  "updatedAt": "2026-07-15T11:29:10.945Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

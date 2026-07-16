@@ -1,0 +1,485 @@
+{
+  "id": "google-calendar-to-slack-status-philips-hue-yi3im",
+  "name": "Google Calendar to Slack Status & Philips Hue",
+  "slug": "google-calendar-to-slack-status-philips-hue-z19l",
+  "description": "Production-ready workflow: Google Calendar to Slack Status & Philips Hue. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Google Calendar to Slack Status & Philips Hue workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": 118,
+    "name": "Google Calendar to Slack Status & Philips Hue",
+    "nodes": [
+      {
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "disabled": true,
+        "position": [
+          420,
+          420
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "node-b2b1b8c4"
+      },
+      {
+        "name": "Google Calendar",
+        "type": "n8n-nodes-base.googleCalendar",
+        "position": [
+          720,
+          600
+        ],
+        "parameters": {
+          "eventId": "={{$node[\"Event Started\"].json[\"id\"].split(\"_\")[0]}}",
+          "options": {},
+          "calendar": "youremail@domain.com",
+          "operation": "get"
+        },
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "{{ $credentials.googleCalendarOAuth2Api.id }}",
+            "name": "GoogleCalendar - Personal"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-f5722467"
+      },
+      {
+        "name": "Light - Busy",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1220,
+          180
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST"
+        },
+        "typeVersion": 1,
+        "id": "node-57ec0330"
+      },
+      {
+        "name": "Light - Available",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1220,
+          600
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST"
+        },
+        "typeVersion": 1,
+        "id": "node-669e0b3e"
+      },
+      {
+        "name": "Switch",
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          1040,
+          460
+        ],
+        "parameters": {
+          "rules": {
+            "rules": [
+              {
+                "value2": "4dw_doing",
+                "operation": "startsWith"
+              },
+              {
+                "value2": "4dw_managing",
+                "operation": "startsWith"
+              },
+              {
+                "value2": "4dw_leading",
+                "operation": "startsWith"
+              },
+              {
+                "output": 1,
+                "value2": "4dw_living",
+                "operation": "startsWith"
+              }
+            ]
+          },
+          "value1": "={{$json[\"calColor\"]}}",
+          "dataType": "string",
+          "fallbackOutput": 3
+        },
+        "typeVersion": 1,
+        "id": "node-93256968"
+      },
+      {
+        "name": "Light - Personal",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1220,
+          340
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "requestMethod": "POST"
+        },
+        "typeVersion": 1,
+        "id": "node-369cb9c5"
+      },
+      {
+        "name": "Event Started",
+        "type": "n8n-nodes-base.googleCalendarTrigger",
+        "position": [
+          540,
+          600
+        ],
+        "parameters": {
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 5
+              }
+            ]
+          },
+          "triggerOn": "eventStarted",
+          "calendarId": "youremail@domain.com"
+        },
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "{{ $credentials.googleCalendarOAuth2Api.id }}",
+            "name": "GoogleCalendar - Personal"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-e0200e99"
+      },
+      {
+        "name": "Slack - Status",
+        "type": "n8n-nodes-base.slack",
+        "position": [
+          1040,
+          720
+        ],
+        "parameters": {
+          "resource": "userProfile",
+          "operation": "update",
+          "additionalFields": {
+            "status_text": "={{$json[\"summary\"]}}",
+            "status_emoji": "=:{{$json[\"calColor\"]}}:"
+          }
+        },
+        "credentials": {
+          "slackApi": {
+            "id": "{{ $credentials.slackApi.id }}",
+            "name": "CompanySlack"
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-c6b8728c"
+      },
+      {
+        "name": "Set CalColor",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          880,
+          600
+        ],
+        "parameters": {
+          "functionCode": "for (item of items) {\n\n  switch (item.json.colorId) {\n    case '1':\n      calColor = 'Lavendar';\n      break;\n    case '2':\n      calColor = '4dw_leading';\n      break;\n    case '3':\n      calColor = 'Grape';\n      break;\n    case '4':\n      calColor = 'Flamingo';\n      break;\n    case '5':\n      calColor = '4dw_managing';\n      break;\n    case '6':\n      calColor = 'Tangerine';\n      break;\n    case '7':\n      calColor = '4dw_living';\n      break;\n    case '8':\n      calColor = 'Graphite';\n      break;\n    case '9':\n      calColor = 'Blueberry';\n      break;\n    case '10':\n      calColor = 'Basil';\n      break;\n    case '11':\n      calColor = '4dw_doing';\n      break;\n    default:\n      calColor = 'undefined';\n  }\n  item.json.calColor = calColor;\n}\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-dd829aaf"
+      },
+      {
+        "id": "error-64ecd0eb",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-48f94c16",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.575587",
+      "updatedAt": "2025-09-29T07:07:48.575592",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Google Calendar to Slack Status & Philips Hue. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Google Calendar to Slack Status & Philips Hue",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Event Started",
+        "parameters": {
+          "calendarId": "youremail@domain.com",
+          "options": {},
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "unit": "minutes",
+                "value": 5
+              }
+            ]
+          },
+          "triggerOn": "eventStarted"
+        },
+        "type": "n8n-nodes-base.googleCalendarTrigger",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Calendar",
+        "parameters": {
+          "calendar": "youremail@domain.com",
+          "eventId": "={{$node[\"Event Started\"].json[\"id\"].split(\"_\")[0]}}",
+          "operation": "get",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 1
+      },
+      {
+        "name": "Light - Available",
+        "parameters": {
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Light - Busy",
+        "parameters": {
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Light - Personal",
+        "parameters": {
+          "options": {},
+          "requestMethod": "POST",
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set CalColor",
+        "parameters": {
+          "functionCode": "for (item of items) {\n\n  switch (item.json.colorId) {\n    case '1':\n      calColor = 'Lavendar';\n      break;\n    case '2':\n      calColor = '4dw_leading';\n      break;\n    case '3':\n      calColor = 'Grape';\n      break;\n    case '4':\n      calColor = 'Flamingo';\n      break;\n    case '5':\n      calColor = '4dw_managing';\n      break;\n    case '6':\n      calColor = 'Tangerine';\n      break;\n    case '7':\n      calColor = '4dw_living';\n      break;\n    case '8':\n      calColor = 'Graphite';\n      break;\n    case '9':\n      calColor = 'Blueberry';\n      break;\n    case '10':\n      calColor = 'Basil';\n      break;\n    case '11':\n      calColor = '4dw_doing';\n      break;\n    default:\n      calColor = 'undefined';\n  }\n  item.json.calColor = calColor;\n}\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "slackApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Slack - Status",
+        "parameters": {
+          "additionalFields": {
+            "status_emoji": "=:{{$json[\"calColor\"]}}:",
+            "status_text": "={{$json[\"summary\"]}}"
+          },
+          "operation": "update",
+          "resource": "userProfile"
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 1
+      },
+      {
+        "name": "Switch",
+        "parameters": {
+          "dataType": "string",
+          "fallbackOutput": 3,
+          "rules": {
+            "rules": [
+              {
+                "operation": "startsWith",
+                "value2": "4dw_doing"
+              },
+              {
+                "operation": "startsWith",
+                "value2": "4dw_managing"
+              },
+              {
+                "operation": "startsWith",
+                "value2": "4dw_leading"
+              },
+              {
+                "operation": "startsWith",
+                "output": 1,
+                "value2": "4dw_living"
+              }
+            ]
+          },
+          "value1": "={{$json[\"calColor\"]}}"
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Google Calendar",
+    "HTTP Request",
+    "Slack"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 181,
+  "viewCount": 576,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Google Calendar Account",
+      "HTTP Request Account",
+      "Slack Account"
+    ],
+    "requiredCredentials": [
+      "google Calendar  O Auth2  A P I details",
+      "slack  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Verify the settings of the trigger node \"Event Started\".",
+      "Open the \"Google Calendar\" node (n8n-nodes-base.googleCalendar) and configure the action parameters, mappings, and fields.",
+      "Open the \"Light - Busy\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Light - Available\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Switch\" node (n8n-nodes-base.switch) and configure the action parameters, mappings, and fields.",
+      "Open the \"Light - Personal\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Slack - Status\" Slack node.",
+      "Select the Channel or User ID where message notifications should be delivered.",
+      "Open the \"Set CalColor\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Your Slack channel will receive customized real-time notifications when the automation executes.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-6apetj5za",
+      "workflowId": "google-calendar-to-slack-status-philips-hue-yi3im",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0078_Manual_Slack_Monitor_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0078_Manual_Slack_Monitor_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:23.203Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:23.203Z",
+  "updatedAt": "2026-07-15T11:29:23.203Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

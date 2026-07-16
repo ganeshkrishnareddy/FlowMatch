@@ -1,0 +1,770 @@
+{
+  "id": "manualtrigger-workflow-v33me",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-p6ew",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 11 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-2ee9cb34",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:58.257082",
+      "updatedAt": "2025-09-29T07:07:58.257141",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "04750e9b-6ce3-401b-89e7-f1f17f3a4a28",
+        "name": "When clicking \"Execute Workflow\"",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          -180,
+          300
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2",
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          640,
+          460
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {
+            "redirect": {
+              "redirect": {
+                "followRedirects": true
+              }
+            }
+          }
+        },
+        "typeVersion": 3,
+        "continueOnFail": true,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "6409f0c4-bf93-4a1d-a74c-e294fb39895f",
+        "name": "HTML Extract",
+        "type": "n8n-nodes-base.htmlExtract",
+        "position": [
+          820,
+          460
+        ],
+        "parameters": {
+          "options": {
+            "trimValues": false
+          },
+          "extractionValues": {
+            "values": [
+              {
+                "key": "YOUR_CREDENTIAL_HERE",
+                "cssSelector": "html"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "notes": "This htmlExtract node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f45fcc6a-9ccd-43c9-9eaf-1797768e1e62",
+        "name": "OpenAI",
+        "type": "n8n-nodes-base.openAi",
+        "position": [
+          1140,
+          460
+        ],
+        "parameters": {
+          "prompt": "=This is the content of the website {{ $node[\"Split In Batches\"].json[\"Domain\"] }}:\"{{ $json[\"contentShort\"] }}\"\n\nIn a JSON format:\n\n- Give me the value proposition of the company. In less than 25 words. In English. Casual Tone. Format is: \"[Company Name] helps [target audience] [achieve desired outcome] and [additional benefit]\"\n\n- Give me the industry of the company. (Classify using this industry list: [Agriculture, Arts, Construction, Consumer Goods, Education, Entertainment, Finance, Other, Health Care, Legal, Manufacturing, Media & Communications, Public Administration, Advertisements, Real Estate, Recreation & Travel, Retail, Software, Transportation & Logistics, Wellness & Fitness] if it's ambiguous between Sofware and Consumer Goods, prefer Consumer Goods)\n\n- Guess the target audience of each company.(Classify and choose 1 from this list: [sales teams, marketing teams, HR teams, customer Service teams, consumers, C-levels] Write it in lowercase)\n\n- Tell me if they are B2B or B2C\n\nformat should be:\n{\"value_proposition\": value_proposition,\n\"industry\": industry,\n\"target_audience\": target_audience, \n\"market\": market }\n\nJSON:",
+          "options": {
+            "topP": 1,
+            "maxTokens": "YOUR_TOKEN_HERE",
+            "temperature": 0
+          }
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "{{ $credentials.openAiApi.id }}",
+            "name": "Lucas Open AI"
+          }
+        },
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "notes": "This openAi node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8de6c3d4-316f-4e00-a9f5-a4deefce90b3",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1600,
+          320
+        ],
+        "parameters": {
+          "mode": "combine",
+          "options": {},
+          "combinationMode": "mergeByPosition"
+        },
+        "typeVersion": 2,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "669f888e-1416-4291-a854-07ffbbbfcab1",
+        "name": "Clean Content",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          980,
+          460
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "if ($input.item.json.body){\n\n\n\n$input.item.json.content = $input.item.json.body.replaceAll('/^\\s+|\\s+$/g', '').replace('/(\\r\\n|\\n|\\r)/gm', \"\").replace(/\\s+/g, ' ')\n\n\n  $input.item.json.contentShort = $input.item.json.content.slice(0, 10000)\n}\n\n\n\n\nreturn $input.item"
+        },
+        "executeOnce": false,
+        "typeVersion": 1,
+        "continueOnFail": true,
+        "alwaysOutputData": true,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "dbd5f866-2f5e-4adf-b1b5-a27b08c0425a",
+        "name": "Update Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          1840,
+          320
+        ],
+        "parameters": {
+          "options": {},
+          "fieldsUi": {
+            "values": [
+              {
+                "column": "Market",
+                "fieldValue": "={{ $json[\"market\"] }}"
+              },
+              {
+                "column": "Industry",
+                "fieldValue": "={{ $json[\"industry\"] }}"
+              },
+              {
+                "column": "Value Proposition",
+                "fieldValue": "={{ $json[\"value_proposition\"] }}"
+              },
+              {
+                "column": "Target Audience",
+                "fieldValue": "={{ $json[\"target_audience\"] }}"
+              }
+            ]
+          },
+          "operation": "update",
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}",
+            "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com\\/\\w+\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+          },
+          "valueToMatchOn": "={{ $json[\"Domain\"] }}",
+          "columnToMatchOn": "Domain"
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "{{ $credentials.googleSheetsOAuth2Api.id }}",
+            "name": "Google Sheets account lucas"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "f8bf8b70-6070-447b-af22-4d4e1ffe3539",
+        "name": "Parse JSON",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1300,
+          460
+        ],
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Add a new field called 'myNewField' to the\n// JSON of the item\n$input.item.json.value_proposition=JSON.parse($input.item.json.text).value_proposition\n\n$input.item.json.industry=JSON.parse($input.item.json.text).industry\n\n$input.item.json.market=JSON.parse($input.item.json.text).market\n\n$input.item.json.target_audience=JSON.parse($input.item.json.text).target_audience\n\nreturn $input.item;"
+        },
+        "typeVersion": 1,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "2754c6e1-9cf6-47d4-ad97-0797ec9155df",
+        "name": "Read Google Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "position": [
+          40,
+          300
+        ],
+        "parameters": {
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gid=0",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "cachedResultName": "Sheet1"
+          },
+          "documentId": {
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}",
+            "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com\\/\\w+\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "{{ $credentials.googleSheetsOAuth2Api.id }}",
+            "name": "Google Sheets account lucas"
+          }
+        },
+        "typeVersion": 3,
+        "notes": "This googleSheets node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c2b93428-0dcc-4c02-bb81-496c12442284",
+        "name": "Split In Batches",
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          260,
+          300
+        ],
+        "parameters": {
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This splitInBatches node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "eccf1dc8-a0bb-40f6-9471-95eac8020b02",
+        "name": "Wait",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          2060,
+          560
+        ],
+        "webhookId": "d44bc024-1c21-44e0-b2b4-5cff6fb9f402",
+        "parameters": {
+          "unit": "seconds"
+        },
+        "typeVersion": 1,
+        "notes": "This wait node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2": {
+        "main": [
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-5fb1cf4d",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-effa009f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-70709f7a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-5fc917ae",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-ff95fe81",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-af6d23cf",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-130b9bae",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-7f06a0fe",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "f45fcc6a-9ccd-43c9-9eaf-1797768e1e62": {
+        "main": [
+          [
+            {
+              "node": "error-handler-f45fcc6a-9ccd-43c9-9eaf-1797768e1e62-13ba9051",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "dbd5f866-2f5e-4adf-b1b5-a27b08c0425a": {
+        "main": [
+          [
+            {
+              "node": "error-handler-dbd5f866-2f5e-4adf-b1b5-a27b08c0425a-fd0ffdd1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "2754c6e1-9cf6-47d4-ad97-0797ec9155df": {
+        "main": [
+          [
+            {
+              "node": "error-handler-2754c6e1-9cf6-47d4-ad97-0797ec9155df-7a7d5bf7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "2754c6e1-9cf6-47d4-ad97-0797ec9155df": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-2754c6e1-9cf6-47d4-ad97-0797ec9155df-7a7d5bf7"
+            }
+          ]
+        ]
+      },
+      "7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-5fb1cf4d"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-effa009f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-70709f7a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-5fc917ae"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-ff95fe81"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-af6d23cf"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-130b9bae"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-7a8bb997-5a2d-4ee0-a1ca-bebe9fe32bc2-7f06a0fe"
+            }
+          ]
+        ]
+      },
+      "dbd5f866-2f5e-4adf-b1b5-a27b08c0425a": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-dbd5f866-2f5e-4adf-b1b5-a27b08c0425a-fd0ffdd1"
+            }
+          ]
+        ]
+      },
+      "f45fcc6a-9ccd-43c9-9eaf-1797768e1e62": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-f45fcc6a-9ccd-43c9-9eaf-1797768e1e62-13ba9051"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Clean Content",
+        "parameters": {
+          "jsCode": "if ($input.item.json.body){\n\n\n\n$input.item.json.content = $input.item.json.body.replaceAll('/^\\s+|\\s+$/g', '').replace('/(\\r\\n|\\n|\\r)/gm', \"\").replace(/\\s+/g, ' ')\n\n\n  $input.item.json.contentShort = $input.item.json.content.slice(0, 10000)\n}\n\n\n\n\nreturn $input.item",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTML Extract",
+        "parameters": {
+          "extractionValues": {
+            "values": [
+              {
+                "cssSelector": "html",
+                "key": "YOUR_CREDENTIAL_HERE"
+              }
+            ]
+          },
+          "options": {
+            "trimValues": false
+          }
+        },
+        "type": "n8n-nodes-base.htmlExtract",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTTP Request",
+        "parameters": {
+          "options": {
+            "redirect": {
+              "redirect": {
+                "followRedirects": true
+              }
+            }
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "combinationMode": "mergeByPosition",
+          "mode": "combine",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "openAiApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "OpenAI",
+        "parameters": {
+          "options": {
+            "maxTokens": "YOUR_TOKEN_HERE",
+            "temperature": 0,
+            "topP": 1
+          },
+          "prompt": "=This is the content of the website {{ $node[\"Split In Batches\"].json[\"Domain\"] }}:\"{{ $json[\"contentShort\"] }}\"\n\nIn a JSON format:\n\n- Give me the value proposition of the company. In less than 25 words. In English. Casual Tone. Format is: \"[Company Name] helps [target audience] [achieve desired outcome] and [additional benefit]\"\n\n- Give me the industry of the company. (Classify using this industry list: [Agriculture, Arts, Construction, Consumer Goods, Education, Entertainment, Finance, Other, Health Care, Legal, Manufacturing, Media & Communications, Public Administration, Advertisements, Real Estate, Recreation & Travel, Retail, Software, Transportation & Logistics, Wellness & Fitness] if it's ambiguous between Sofware and Consumer Goods, prefer Consumer Goods)\n\n- Guess the target audience of each company.(Classify and choose 1 from this list: [sales teams, marketing teams, HR teams, customer Service teams, consumers, C-levels] Write it in lowercase)\n\n- Tell me if they are B2B or B2C\n\nformat should be:\n{\"value_proposition\": value_proposition,\n\"industry\": industry,\n\"target_audience\": target_audience, \n\"market\": market }\n\nJSON:"
+        },
+        "type": "n8n-nodes-base.openAi",
+        "typeVersion": 1
+      },
+      {
+        "name": "Parse JSON",
+        "parameters": {
+          "jsCode": "// Add a new field called 'myNewField' to the\n// JSON of the item\n$input.item.json.value_proposition=JSON.parse($input.item.json.text).value_proposition\n\n$input.item.json.industry=JSON.parse($input.item.json.text).industry\n\n$input.item.json.market=JSON.parse($input.item.json.text).market\n\n$input.item.json.target_audience=JSON.parse($input.item.json.text).target_audience\n\nreturn $input.item;",
+          "mode": "runOnceForEachItem"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Read Google Sheets",
+        "parameters": {
+          "documentId": {
+            "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com\\/\\w+\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)",
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          },
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 3
+      },
+      {
+        "name": "Split In Batches",
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Update Google Sheets",
+        "parameters": {
+          "columnToMatchOn": "Domain",
+          "documentId": {
+            "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com\\/\\w+\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)",
+            "__rl": true,
+            "mode": "url",
+            "value": "{{ $env.WEBHOOK_URL }}"
+          },
+          "fieldsUi": {
+            "values": [
+              {
+                "column": "Market",
+                "fieldValue": "={{ $json[\"market\"] }}"
+              },
+              {
+                "column": "Industry",
+                "fieldValue": "={{ $json[\"industry\"] }}"
+              },
+              {
+                "column": "Value Proposition",
+                "fieldValue": "={{ $json[\"value_proposition\"] }}"
+              },
+              {
+                "column": "Target Audience",
+                "fieldValue": "={{ $json[\"target_audience\"] }}"
+              }
+            ]
+          },
+          "operation": "update",
+          "options": {},
+          "sheetName": {
+            "__rl": true,
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "{{ $env.WEBHOOK_URL }}",
+            "mode": "list",
+            "value": "gid=0"
+          },
+          "valueToMatchOn": "={{ $json[\"Domain\"] }}"
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 3
+      },
+      {
+        "name": "Wait",
+        "parameters": {
+          "unit": "seconds"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking \"Execute Workflow\"",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 11,
+  "integrationCount": 4,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "20 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Htmlextract",
+    "OpenAI",
+    "Google Sheets"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 182,
+  "viewCount": 115,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Htmlextract Account",
+      "OpenAI Account",
+      "Google Sheets Account"
+    ],
+    "requiredCredentials": [
+      "open Ai  A P I details",
+      "google Sheets  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking \"Execute Workflow\"\".",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"HTML Extract\" node (n8n-nodes-base.htmlExtract) and configure the action parameters, mappings, and fields.",
+      "Open the AI node \"OpenAI\".",
+      "Adjust the Model settings (e.g. gpt-4o, gpt-3.5-turbo) and write or refine the System Prompt parameters.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Update Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Read Google Sheets\" Google Sheets node.",
+      "Ensure you select the spreadsheet file and specific tab/sheet from the dropdown menus.",
+      "Map the input JSON keys to your target sheet columns.",
+      "Open the \"Split In Batches\" node (n8n-nodes-base.splitInBatches) and configure the action parameters, mappings, and fields.",
+      "Open the \"Wait\" node (n8n-nodes-base.wait) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-syeshrxki",
+      "workflowId": "manualtrigger-workflow-v33me",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Wait/0290_Wait_Code_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Wait\\0290_Wait_Code_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:31:03.878Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:31:03.878Z",
+  "updatedAt": "2026-07-15T11:31:03.878Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

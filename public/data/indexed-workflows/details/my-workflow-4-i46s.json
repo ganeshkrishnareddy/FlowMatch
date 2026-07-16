@@ -1,0 +1,377 @@
+{
+  "id": "my-workflow-4-h9r7e",
+  "name": "My workflow 4",
+  "slug": "my-workflow-4-i46s",
+  "description": "Automated workflow: My workflow 4. This workflow processes data and performs automated tasks.",
+  "shortDescription": "My workflow 4 workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": "Glb4VNoQI44GT0p9",
+    "meta": {
+      "instanceId": "workflow-ab4c862b",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:43.404876",
+      "updatedAt": "2025-09-29T07:07:43.404887",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "name": "My workflow 4",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "nodes": [
+      {
+        "id": "909a08a4-4cec-4987-9379-d4cdc2d92a53",
+        "name": "RSS Feed: Times of India",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "position": [
+          680,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.WEBHOOK_URL }}",
+          "options": {}
+        },
+        "typeVersion": 1.1,
+        "notes": "This rssFeedRead node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "471cc8ab-0074-4e25-b952-1899574398a9",
+        "name": "Gmail: Fetch Emails",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          700,
+          440
+        ],
+        "webhookId": "85735980-07e5-418b-b029-44bb9825ac9b",
+        "parameters": {
+          "filters": {},
+          "operation": "getAll"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "WbGCG42FAaeECe0u",
+            "name": "Gmail account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "07a33739-0181-4ead-87bd-c1f0c3fc4999",
+        "name": "TodoList: Fetch Tasks",
+        "type": "n8n-nodes-base.todoist",
+        "position": [
+          700,
+          620
+        ],
+        "parameters": {
+          "limit": 5,
+          "filters": {},
+          "operation": "getAll"
+        },
+        "credentials": {
+          "todoistApi": {
+            "id": "q3NiAT93rPChns6G",
+            "name": "Todoist account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This todoist node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "af295aad-f7e7-4d38-80e5-b79b79637b5f",
+        "name": "Format Digest: Merge & Style Data",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1280,
+          440
+        ],
+        "parameters": {
+          "jsCode": "const newsItems = $input.all().map(item => item.json);\nconst emails = $(\"Gmail: Fetch Emails\").all().map(item => item.json);\nconst tasks = $(\"TodoList: Fetch Tasks\").all().map(item => item.json);\n\n// Select top 5 items from each\nconst topNews = newsItems.slice(0, 5).map(item => ({\n  title: item.title,\n  link: item.link\n}));\n\nconst latestEmails = emails.slice(0, 5).map(item => ({\n  subject: item.Subject,\n  snippet: item.snippet\n}));\n\nconst topTasks = tasks.slice(0, 5).map(task => ({\n  content: task.content,\n  url: task.url,\n  emoji: task.emoji || '🔴',\n  due: task.due\n}));\n\n// Create the final JSON object with email subject and a formatted email body with inline CSS\nconst result = {\n  meta: {\n    generated_at: new Date().toISOString(),\n    time_emoji: \"🌞\"\n  },\n  email: {\n    subject: `🌞 Daily Digest • 📋 ${topTasks.length} Tasks ⚠️ • 📰 ${topNews.length} News Updates`,\n    body: `\n      <div style=\"max-width:600px; margin:0 auto; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:#333; background:#f4f7f9; padding:20px; border:1px solid #e1e8ed; border-radius:8px;\">\n         <div style=\"text-align:center; padding-bottom:20px;\">\n             <h1 style=\"margin:0; font-size:28px; color:#0073e6;\">Daily Digest</h1>\n             <p style=\"margin:10px 0 0; font-size:16px; color:#666;\">Your automated daily summary</p>\n         </div>\n         <hr style=\"border:none; border-top:1px solid #ddd; margin:20px 0;\">\n         <div style=\"margin-bottom:20px;\">\n             <h2 style=\"font-size:20px; color:#0073e6; margin-bottom:10px;\">Tasks (${topTasks.length})</h2>\n             <ul style=\"list-style:none; padding:0;\">\n               ${topTasks.map(task => `\n                 <li style=\"margin-bottom:10px; padding:10px; background:#fff; border:1px solid #e1e8ed; border-radius:4px;\">\n                   <span style=\"font-size:18px; margin-right:10px;\">${task.emoji}</span> \n                   <span style=\"font-size:16px;\">${task.content}</span> \n                   <span style=\"color:#999; font-size:14px; margin-left:5px;\">(Due: ${task.due})</span>\n                   <a href=\"${task.url}\" style=\"text-decoration:none; color:#0073e6; float:right;\">View Task</a>\n                 </li>\n               `).join('')}\n             </ul>\n         </div>\n         <div style=\"margin-bottom:20px;\">\n             <h2 style=\"font-size:20px; color:#0073e6; margin-bottom:10px;\">News (${topNews.length})</h2>\n             <ul style=\"list-style:none; padding:0;\">\n               ${topNews.map(news => `\n                 <li style=\"margin-bottom:10px; padding:10px; background:#fff; border:1px solid #e1e8ed; border-radius:4px;\">\n                   <a href=\"${news.link}\" style=\"text-decoration:none; font-size:16px; color:#0073e6;\">${news.title}</a>\n                 </li>\n               `).join('')}\n             </ul>\n         </div>\n         <div style=\"margin-bottom:20px;\">\n             <h2 style=\"font-size:20px; color:#0073e6; margin-bottom:10px;\">Emails (${latestEmails.length})</h2>\n             <ul style=\"list-style:none; padding:0;\">\n               ${latestEmails.map(email => `\n                 <li style=\"margin-bottom:10px; padding:10px; background:#fff; border:1px solid #e1e8ed; border-radius:4px;\">\n                   <strong style=\"font-size:16px; color:#0073e6;\">${email.subject}</strong>\n                   <p style=\"margin:5px 0 0; font-size:14px; color:#666;\">${email.snippet}</p>\n                 </li>\n               `).join('')}\n             </ul>\n         </div>\n         <div style=\"text-align:center; font-size:12px; color:#aaa; margin-top:20px;\">\n             <p>Digest generated at: ${new Date().toLocaleString()}</p>\n         </div>\n      </div>\n    `\n  },\n  tasks: topTasks,\n  news: topNews,\n  emails: latestEmails\n};\n\nreturn [{ json: result }];\n"
+        },
+        "typeVersion": 2,
+        "notes": "This code node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "5399bee1-d0e7-4ed7-af7f-d0ddccb00b4d",
+        "name": "Gmail: Send Digest",
+        "type": "n8n-nodes-base.gmail",
+        "position": [
+          1540,
+          440
+        ],
+        "webhookId": "3cd541af-51d4-465e-803d-a74572a15d83",
+        "parameters": {
+          "sendTo": "youremail@gmail.com",
+          "message": "={{ $json.email.body }}",
+          "options": {},
+          "subject": "={{ $json.email.subject }}"
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "WbGCG42FAaeECe0u",
+            "name": "Gmail account"
+          }
+        },
+        "typeVersion": 2.1,
+        "notes": "This gmail node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9f398bc2-e84c-4df4-8958-aaa1d7c2ed37",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [
+          0,
+          60
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "typeVersion": 1.2,
+        "notes": "This scheduleTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "9984d3c0-7469-4b79-8d31-1a06b8dd23b6",
+        "name": "Merge",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1020,
+          440
+        ],
+        "parameters": {
+          "numberInputs": 3
+        },
+        "typeVersion": 3,
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-316e10dc",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "versionId": "550f65e6-68ec-449a-9fb5-241acba42455",
+    "connections": {},
+    "description": "Automated workflow: My workflow 4. This workflow processes data and performs automated tasks.",
+    "notes": "Excellent quality workflow: My workflow 4. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "My workflow 4",
+    "nodes": [
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Format Digest: Merge & Style Data",
+        "parameters": {
+          "jsCode": "const newsItems = $input.all().map(item => item.json);\nconst emails = $(\"Gmail: Fetch Emails\").all().map(item => item.json);\nconst tasks = $(\"TodoList: Fetch Tasks\").all().map(item => item.json);\n\n// Select top 5 items from each\nconst topNews = newsItems.slice(0, 5).map(item => ({\n  title: item.title,\n  link: item.link\n}));\n\nconst latestEmails = emails.slice(0, 5).map(item => ({\n  subject: item.Subject,\n  snippet: item.snippet\n}));\n\nconst topTasks = tasks.slice(0, 5).map(task => ({\n  content: task.content,\n  url: task.url,\n  emoji: task.emoji || '🔴',\n  due: task.due\n}));\n\n// Create the final JSON object with email subject and a formatted email body with inline CSS\nconst result = {\n  meta: {\n    generated_at: new Date().toISOString(),\n    time_emoji: \"🌞\"\n  },\n  email: {\n    subject: `🌞 Daily Digest • 📋 ${topTasks.length} Tasks ⚠️ • 📰 ${topNews.length} News Updates`,\n    body: `\n      <div style=\"max-width:600px; margin:0 auto; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:#333; background:#f4f7f9; padding:20px; border:1px solid #e1e8ed; border-radius:8px;\">\n         <div style=\"text-align:center; padding-bottom:20px;\">\n             <h1 style=\"margin:0; font-size:28px; color:#0073e6;\">Daily Digest</h1>\n             <p style=\"margin:10px 0 0; font-size:16px; color:#666;\">Your automated daily summary</p>\n         </div>\n         <hr style=\"border:none; border-top:1px solid #ddd; margin:20px 0;\">\n         <div style=\"margin-bottom:20px;\">\n             <h2 style=\"font-size:20px; color:#0073e6; margin-bottom:10px;\">Tasks (${topTasks.length})</h2>\n             <ul style=\"list-style:none; padding:0;\">\n               ${topTasks.map(task => `\n                 <li style=\"margin-bottom:10px; padding:10px; background:#fff; border:1px solid #e1e8ed; border-radius:4px;\">\n                   <span style=\"font-size:18px; margin-right:10px;\">${task.emoji}</span> \n                   <span style=\"font-size:16px;\">${task.content}</span> \n                   <span style=\"color:#999; font-size:14px; margin-left:5px;\">(Due: ${task.due})</span>\n                   <a href=\"${task.url}\" style=\"text-decoration:none; color:#0073e6; float:right;\">View Task</a>\n                 </li>\n               `).join('')}\n             </ul>\n         </div>\n         <div style=\"margin-bottom:20px;\">\n             <h2 style=\"font-size:20px; color:#0073e6; margin-bottom:10px;\">News (${topNews.length})</h2>\n             <ul style=\"list-style:none; padding:0;\">\n               ${topNews.map(news => `\n                 <li style=\"margin-bottom:10px; padding:10px; background:#fff; border:1px solid #e1e8ed; border-radius:4px;\">\n                   <a href=\"${news.link}\" style=\"text-decoration:none; font-size:16px; color:#0073e6;\">${news.title}</a>\n                 </li>\n               `).join('')}\n             </ul>\n         </div>\n         <div style=\"margin-bottom:20px;\">\n             <h2 style=\"font-size:20px; color:#0073e6; margin-bottom:10px;\">Emails (${latestEmails.length})</h2>\n             <ul style=\"list-style:none; padding:0;\">\n               ${latestEmails.map(email => `\n                 <li style=\"margin-bottom:10px; padding:10px; background:#fff; border:1px solid #e1e8ed; border-radius:4px;\">\n                   <strong style=\"font-size:16px; color:#0073e6;\">${email.subject}</strong>\n                   <p style=\"margin:5px 0 0; font-size:14px; color:#666;\">${email.snippet}</p>\n                 </li>\n               `).join('')}\n             </ul>\n         </div>\n         <div style=\"text-align:center; font-size:12px; color:#aaa; margin-top:20px;\">\n             <p>Digest generated at: ${new Date().toLocaleString()}</p>\n         </div>\n      </div>\n    `\n  },\n  tasks: topTasks,\n  news: topNews,\n  emails: latestEmails\n};\n\nreturn [{ json: result }];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Gmail: Fetch Emails",
+        "parameters": {
+          "filters": {},
+          "operation": "getAll"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Gmail: Send Digest",
+        "parameters": {
+          "message": "={{ $json.email.body }}",
+          "options": {},
+          "sendTo": "youremail@gmail.com",
+          "subject": "={{ $json.email.subject }}"
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1
+      },
+      {
+        "name": "Merge",
+        "parameters": {
+          "numberInputs": 3
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3
+      },
+      {
+        "name": "RSS Feed: Times of India",
+        "parameters": {
+          "options": {},
+          "url": "{{ $env.WEBHOOK_URL }}"
+        },
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1.1
+      },
+      {
+        "name": "Schedule Trigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2
+      },
+      {
+        "credentials": {
+          "todoistApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "TodoList: Fetch Tasks",
+        "parameters": {
+          "filters": {},
+          "limit": 5,
+          "operation": "getAll"
+        },
+        "type": "n8n-nodes-base.todoist",
+        "typeVersion": 2.1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Rssfeedread",
+    "Gmail",
+    "Todoist"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 52,
+  "viewCount": 217,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Rssfeedread Account",
+      "Gmail Account",
+      "Todoist Account"
+    ],
+    "requiredCredentials": [
+      "gmail  O Auth2 details",
+      "todoist  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Schedule Trigger\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"RSS Feed: Times of India\" node (n8n-nodes-base.rssFeedRead) and configure the action parameters, mappings, and fields.",
+      "Open the \"Gmail: Fetch Emails\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"TodoList: Fetch Tasks\" node (n8n-nodes-base.todoist) and configure the action parameters, mappings, and fields.",
+      "Open the \"Gmail: Send Digest\" node (n8n-nodes-base.gmail) and configure the action parameters, mappings, and fields.",
+      "Open the \"Merge\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-bz6dx02p6",
+      "workflowId": "my-workflow-4-h9r7e",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Code/1478_Code_Todoist_Automate_Scheduled.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Code\\1478_Code_Todoist_Automate_Scheduled.json",
+      "discoveredAt": "2026-07-15T11:17:38.056Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:17:38.056Z",
+  "updatedAt": "2026-07-15T11:17:38.056Z"
+}

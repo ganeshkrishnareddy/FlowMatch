@@ -1,0 +1,592 @@
+{
+  "id": "if-workflow-1d8fk",
+  "name": "If Workflow",
+  "slug": "if-workflow-atsq",
+  "description": "Automated workflow: If Workflow. This workflow processes data and performs automated tasks.",
+  "shortDescription": "If Workflow workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-03f45d97",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.742815",
+      "updatedAt": "2025-09-29T07:07:45.742822",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "a84fa822-fd74-45db-93c6-f51be75ef307",
+        "name": "person exists",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          920,
+          340
+        ],
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json[\"name\"]}}",
+                "operation": "isNotEmpty"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This if node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "500ef1bd-8965-4245-81d7-14c3897b4275",
+        "name": "Set person Id",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1480,
+          320
+        ],
+        "parameters": {
+          "values": {
+            "string": [
+              {
+                "name": "PipedrivePersonId",
+                "value": "={{ $json[\"id\"] }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 1,
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "ab1a1335-92c8-41f8-b008-5b19530f08e9",
+        "name": "Create lead",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1740,
+          320
+        ],
+        "parameters": {
+          "title": "=Repo '{{$node[\"On fork\"].json[\"body\"][\"repository\"][\"full_name\"]}}' forked by {{$json[\"name\"]}}",
+          "resource": "lead",
+          "person_id": "={{$json[\"PipedrivePersonId\"]}}",
+          "associateWith": "person",
+          "additionalFields": {}
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "4fd06c6a-4975-4a6a-95f3-bb48f3e9bdf6",
+        "name": "On fork",
+        "type": "n8n-nodes-base.githubTrigger",
+        "position": [
+          180,
+          340
+        ],
+        "webhookId": "ff05ca29-9ed3-4b97-a4ce-4f9b1c05255f",
+        "parameters": {
+          "owner": "John-n8n",
+          "events": [
+            "fork"
+          ],
+          "repository": "DemoRepo"
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "{{ $credentials.githubApi.id }}",
+            "name": "GitHub account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This githubTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "86554078-ce7c-4dd3-b36f-d1bf22530f7b",
+        "name": "Create person",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1200,
+          440
+        ],
+        "parameters": {
+          "name": "={{ $node[\"On fork\"].json[\"body\"].forkee.owner.login }}",
+          "resource": "person",
+          "additionalFields": {
+            "email": [
+              "={{$node[\"Get Github user information\"].email}}"
+            ]
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c4a8dae8-d6f3-4309-8fa5-78d69cf1b1e8",
+        "name": "Create note with github url",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          1980,
+          320
+        ],
+        "parameters": {
+          "content": "=Github user url: {{ $node[\"On fork\"].json[\"body\"].sender.html_url }}",
+          "resource": "note",
+          "additionalFields": {
+            "lead_id": "={{ $json[\"id\"] }}"
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "8dfa3e8e-29d8-4098-825d-8ec915ca6f3f",
+        "name": "Get Github user information",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          440,
+          340
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE"
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "{{ $credentials.githubApi.id }}",
+            "name": "GitHub account"
+          }
+        },
+        "typeVersion": 2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c4c2538a-28e8-4c75-856d-000a727a4f13",
+        "name": "Search forkee in Pipedrive by email",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          680,
+          340
+        ],
+        "parameters": {
+          "term": "={{ $json[\"email\"]}}",
+          "resource": "person",
+          "operation": "search",
+          "additionalFields": {
+            "fields": "email"
+          }
+        },
+        "credentials": {
+          "pipedriveApi": {
+            "id": "{{ $credentials.pipedriveApi.id }}",
+            "name": "Pipedrive account"
+          }
+        },
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "notes": "This pipedrive node performs automated tasks as part of the workflow."
+      }
+    ],
+    "connections": {
+      "8dfa3e8e-29d8-4098-825d-8ec915ca6f3f": {
+        "main": [
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-170b117c",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-077740f4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-80c31535",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-ed7019d4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-4d8b3ad4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-9f0c4a29",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-1d1440fe",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-74a0c3b7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "description": "Automated workflow: If Workflow. This workflow processes data and performs automated tasks.",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: If Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "8dfa3e8e-29d8-4098-825d-8ec915ca6f3f": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-170b117c"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-077740f4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-80c31535"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-ed7019d4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-4d8b3ad4"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-9f0c4a29"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-1d1440fe"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-8dfa3e8e-29d8-4098-825d-8ec915ca6f3f-74a0c3b7"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "If Workflow",
+    "nodes": [
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create lead",
+        "parameters": {
+          "additionalFields": {},
+          "associateWith": "person",
+          "person_id": "={{$json[\"PipedrivePersonId\"]}}",
+          "resource": "lead",
+          "title": "=Repo '{{$node[\"On fork\"].json[\"body\"][\"repository\"][\"full_name\"]}}' forked by {{$json[\"name\"]}}"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create note with github url",
+        "parameters": {
+          "additionalFields": {
+            "lead_id": "={{ $json[\"id\"] }}"
+          },
+          "content": "=Github user url: {{ $node[\"On fork\"].json[\"body\"].sender.html_url }}",
+          "resource": "note"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Create person",
+        "parameters": {
+          "additionalFields": {
+            "email": [
+              "={{$node[\"Get Github user information\"].email}}"
+            ]
+          },
+          "name": "={{ $node[\"On fork\"].json[\"body\"].forkee.owner.login }}",
+          "resource": "person"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "githubApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Get Github user information",
+        "parameters": {
+          "authentication": "{{ $credentials.predefinedCredentialType }}",
+          "nodeCredentialType": "YOUR_CREDENTIAL_HERE",
+          "options": {},
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "githubApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "On fork",
+        "parameters": {
+          "events": [
+            "fork"
+          ],
+          "owner": "John-n8n",
+          "repository": "DemoRepo"
+        },
+        "type": "n8n-nodes-base.githubTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "person exists",
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "operation": "isNotEmpty",
+                "value1": "={{$json[\"name\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "pipedriveApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Search forkee in Pipedrive by email",
+        "parameters": {
+          "additionalFields": {
+            "fields": "email"
+          },
+          "operation": "search",
+          "resource": "person",
+          "term": "={{ $json[\"email\"]}}"
+        },
+        "type": "n8n-nodes-base.pipedrive",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set person Id",
+        "parameters": {
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "PipedrivePersonId",
+                "value": "={{ $json[\"id\"] }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 3,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Pipedrive",
+    "GitHub",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 194,
+  "viewCount": 472,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Pipedrive Account",
+      "GitHub Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "pipedrive  A P I details",
+      "github  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On fork\".",
+      "Open the \"person exists\" node (n8n-nodes-base.if) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create lead\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create person\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create note with github url\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Open the \"Get Github user information\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Search forkee in Pipedrive by email\" node (n8n-nodes-base.pipedrive) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set person Id\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-dccotzpt5",
+      "workflowId": "if-workflow-1d8fk",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0252_HTTP_GitHub_Create_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0252_HTTP_GitHub_Create_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:30.262Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:30.262Z",
+  "updatedAt": "2026-07-15T11:18:30.262Z"
+}

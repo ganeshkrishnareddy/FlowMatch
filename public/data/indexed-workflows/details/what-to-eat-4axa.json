@@ -1,0 +1,671 @@
+{
+  "id": "what-to-eat-gao8l",
+  "name": "What To Eat",
+  "slug": "what-to-eat-4axa",
+  "description": "Production-ready workflow: What To Eat. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "What To Eat workflow containing 10 nodes.",
+  "originalWorkflowJson": {
+    "id": "11",
+    "name": "What To Eat",
+    "nodes": [
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          100,
+          400
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 10
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-83b522fc"
+      },
+      {
+        "name": "Search Criteria",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          300,
+          400
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "RecipeCount",
+                "value": 3
+              },
+              {
+                "name": "IngredientCount",
+                "value": 5
+              },
+              {
+                "name": "CaloriesMin"
+              },
+              {
+                "name": "CaloriesMax",
+                "value": 1500
+              },
+              {
+                "name": "TimeMin"
+              },
+              {
+                "name": "TimeMax",
+                "value": 30
+              }
+            ],
+            "string": [
+              {
+                "name": "Diet",
+                "value": "balanced"
+              },
+              {
+                "name": "Health",
+                "value": "random"
+              },
+              {
+                "name": "SearchItem",
+                "value": "chicken"
+              },
+              {
+                "name": "AppID",
+                "value": "Enter Your Edamam AppID Here"
+              },
+              {
+                "name": "AppKey",
+                "value": "Enter Your Edamam AppKey Here"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "typeVersion": 1,
+        "id": "node-9c67d2ca"
+      },
+      {
+        "name": "Set Query Values",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          500,
+          400
+        ],
+        "parameters": {
+          "functionCode": "items[0].json.calories = items[0].json.CaloriesMin + \"-\" + items[0].json.CaloriesMax;\nitems[0].json.time = items[0].json.TimeMin + \"-\" + items[0].json.TimeMax;\n\nif (items[0].json.Diet.toUpperCase() == \"RANDOM\") {\n  arrDiet = [\"balanced\",\"high-fiber\",\"high-protein\",\"low-carb\",\"low-fat\",\"low-sodium\"];\n  intRandomNumber = Math.floor(Math.random() * 6);\n  items[0].json.Diet = arrDiet[intRandomNumber];\n}\n\nif (items[0].json.Health.toUpperCase() == \"RANDOM\") {\n  arrHealth = [\"alcohol-free\",\"immuno-supportive\",\"celery-free\",\"crustacean-free\",\"dairy-free\",\"egg-free\",\"fish-free\",\"fodmap-free\",\"gluten-free\",\"keto-friendly\",\"kidney-friendly\",\"kosher\",\"low-potassium\",\"lupine-free\",\"mustard-free\",\"low-fat-abs\",\"no-oil-added\",\"low-sugar\",\"paleo\",\"peanut-free\",\"pecatarian\",\"pork-free\",\"red-meat-free\",\"sesame-free\",\"shellfish-free\",\"soy-free\",\"sugar-conscious\",\"tree-nut-free\",\"vegan\",\"vegetarian\",\"wheat-free\"];\n  intRandomNumber = Math.floor(Math.random() * 31);\n  items[0].json.Health = arrHealth[intRandomNumber];\n}\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-ce0377b6"
+      },
+      {
+        "name": "Set Recipe ID Values",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1080,
+          400
+        ],
+        "parameters": {
+          "functionCode": "items[0].json.from = Math.floor(Math.random() * items[0].json.RecipeCount) + 1;\nitems[0].json.to = items[0].json.from + items[0].json.ReturnCount;\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-ea8e1a3b"
+      },
+      {
+        "name": "Retrieve Recipe Counts",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          700,
+          400
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "q",
+                "value": "={{$node[\"Set Query Values\"].json[\"SearchItem\"]}}"
+              },
+              {
+                "name": "app_id",
+                "value": "={{$node[\"Set Query Values\"].json[\"AppID\"]}}"
+              },
+              {
+                "name": "app_key",
+                "value": "={{$node[\"Set Query Values\"].json[\"AppKey\"]}}"
+              },
+              {
+                "name": "ingr",
+                "value": "={{$node[\"Set Query Values\"].json[\"IngredientCount\"]}}"
+              },
+              {
+                "name": "diet",
+                "value": "={{$node[\"Set Query Values\"].json[\"Diet\"]}}"
+              },
+              {
+                "name": "calories",
+                "value": "={{$node[\"Set Query Values\"].json[\"calories\"]}}"
+              },
+              {
+                "name": "time",
+                "value": "={{$node[\"Set Query Values\"].json[\"time\"]}}"
+              },
+              {
+                "name": "from",
+                "value": "1"
+              },
+              {
+                "name": "to",
+                "value": "2"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-04f8e0f3"
+      },
+      {
+        "name": "Retrieve Recipes",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          1260,
+          400
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "q",
+                "value": "={{$node[\"Search Criteria\"].json[\"SearchItem\"]}}"
+              },
+              {
+                "name": "app_id",
+                "value": "={{$node[\"Search Criteria\"].json[\"AppID\"]}}"
+              },
+              {
+                "name": "app_key",
+                "value": "={{$node[\"Search Criteria\"].json[\"AppKey\"]}}"
+              },
+              {
+                "name": "from",
+                "value": "={{$node[\"Set Recipe ID Values\"].json[\"from\"]}}"
+              },
+              {
+                "name": "to",
+                "value": "={{$node[\"Set Recipe ID Values\"].json[\"to\"]}}"
+              },
+              {
+                "name": "ingr",
+                "value": "={{$node[\"Search Criteria\"].json[\"IngredientCount\"]}}"
+              },
+              {
+                "name": "diet",
+                "value": "={{$node[\"Search Criteria\"].json[\"Diet\"]}}"
+              },
+              {
+                "name": "calories",
+                "value": "={{$node[\"Set Query Values\"].json[\"calories\"]}}"
+              },
+              {
+                "name": "time",
+                "value": "={{$node[\"Set Query Values\"].json[\"time\"]}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-911fc972"
+      },
+      {
+        "name": "Set Counts",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          880,
+          400
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "RecipeCount",
+                "value": "={{$node[\"Retrieve Recipe Counts\"].json[\"count\"]}}"
+              },
+              {
+                "name": "ReturnCount",
+                "value": "={{$node[\"Search Criteria\"].json[\"RecipeCount\"]}}"
+              }
+            ]
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-bfbd449d"
+      },
+      {
+        "name": "Send Recipes",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          1660,
+          400
+        ],
+        "parameters": {
+          "html": "={{$node[\"Create Email Body in HTML\"].json[\"emailBody\"]}}",
+          "options": {},
+          "subject": "={{$node[\"Set Query Values\"].json[\"RecipeCount\"]}} {{$node[\"Set Query Values\"].json[\"Diet\"]}}, {{$node[\"Set Query Values\"].json[\"Health\"]}} {{$node[\"Set Query Values\"].json[\"SearchItem\"]}} recipes under {{$node[\"Set Query Values\"].json[\"CaloriesMax\"]}} calories ready in under {{$node[\"Set Query Values\"].json[\"TimeMax\"]}} minutes",
+          "toEmail": "Enter Your Email Address Here",
+          "fromEmail": "Enter Your Email Address Here"
+        },
+        "credentials": {
+          "smtp": "Gmail Creds"
+        },
+        "typeVersion": 1,
+        "id": "node-22c10aee"
+      },
+      {
+        "name": "Create Email Body in HTML",
+        "type": "n8n-nodes-base.function",
+        "position": [
+          1460,
+          400
+        ],
+        "parameters": {
+          "functionCode": "arrRecipes = items[0].json.hits;\nitems[0].json = {};\n\nstrEmailBody = \"Here are your recipes for today:<br><ul>\";\n\narrRecipes.forEach(createHTML);\n\nfunction createHTML(value, index, array) {\n  strEmailBody = strEmailBody + \"<li><a href=\\\"\"+ value.recipe.shareAs + \"\\\">\" + value.recipe.label + \"</a></li>\";\n}\n\nstrEmailBody = strEmailBody + \"</ul>\";\n\nitems[0].json.emailBody = strEmailBody\n\nreturn items;"
+        },
+        "typeVersion": 1,
+        "id": "node-d7d7a9b9"
+      },
+      {
+        "id": "error-94e451dc",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": true,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-08068628",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.641429",
+      "updatedAt": "2025-09-29T07:07:45.641442",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: What To Eat. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "What To Eat",
+    "nodes": [
+      {
+        "name": "Create Email Body in HTML",
+        "parameters": {
+          "functionCode": "arrRecipes = items[0].json.hits;\nitems[0].json = {};\n\nstrEmailBody = \"Here are your recipes for today:<br><ul>\";\n\narrRecipes.forEach(createHTML);\n\nfunction createHTML(value, index, array) {\n  strEmailBody = strEmailBody + \"<li><a href=\\\"\"+ value.recipe.shareAs + \"\\\">\" + value.recipe.label + \"</a></li>\";\n}\n\nstrEmailBody = strEmailBody + \"</ul>\";\n\nitems[0].json.emailBody = strEmailBody\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "name": "Retrieve Recipe Counts",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "q",
+                "value": "={{$node[\"Set Query Values\"].json[\"SearchItem\"]}}"
+              },
+              {
+                "name": "app_id",
+                "value": "={{$node[\"Set Query Values\"].json[\"AppID\"]}}"
+              },
+              {
+                "name": "app_key",
+                "value": "={{$node[\"Set Query Values\"].json[\"AppKey\"]}}"
+              },
+              {
+                "name": "ingr",
+                "value": "={{$node[\"Set Query Values\"].json[\"IngredientCount\"]}}"
+              },
+              {
+                "name": "diet",
+                "value": "={{$node[\"Set Query Values\"].json[\"Diet\"]}}"
+              },
+              {
+                "name": "calories",
+                "value": "={{$node[\"Set Query Values\"].json[\"calories\"]}}"
+              },
+              {
+                "name": "time",
+                "value": "={{$node[\"Set Query Values\"].json[\"time\"]}}"
+              },
+              {
+                "name": "from",
+                "value": "1"
+              },
+              {
+                "name": "to",
+                "value": "2"
+              }
+            ]
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Retrieve Recipes",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "q",
+                "value": "={{$node[\"Search Criteria\"].json[\"SearchItem\"]}}"
+              },
+              {
+                "name": "app_id",
+                "value": "={{$node[\"Search Criteria\"].json[\"AppID\"]}}"
+              },
+              {
+                "name": "app_key",
+                "value": "={{$node[\"Search Criteria\"].json[\"AppKey\"]}}"
+              },
+              {
+                "name": "from",
+                "value": "={{$node[\"Set Recipe ID Values\"].json[\"from\"]}}"
+              },
+              {
+                "name": "to",
+                "value": "={{$node[\"Set Recipe ID Values\"].json[\"to\"]}}"
+              },
+              {
+                "name": "ingr",
+                "value": "={{$node[\"Search Criteria\"].json[\"IngredientCount\"]}}"
+              },
+              {
+                "name": "diet",
+                "value": "={{$node[\"Search Criteria\"].json[\"Diet\"]}}"
+              },
+              {
+                "name": "calories",
+                "value": "={{$node[\"Set Query Values\"].json[\"calories\"]}}"
+              },
+              {
+                "name": "time",
+                "value": "={{$node[\"Set Query Values\"].json[\"time\"]}}"
+              }
+            ]
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Search Criteria",
+        "parameters": {
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "RecipeCount",
+                "value": 3
+              },
+              {
+                "name": "IngredientCount",
+                "value": 5
+              },
+              {
+                "name": "CaloriesMin"
+              },
+              {
+                "name": "CaloriesMax",
+                "value": 1500
+              },
+              {
+                "name": "TimeMin"
+              },
+              {
+                "name": "TimeMax",
+                "value": 30
+              }
+            ],
+            "string": [
+              {
+                "name": "Diet",
+                "value": "balanced"
+              },
+              {
+                "name": "Health",
+                "value": "random"
+              },
+              {
+                "name": "SearchItem",
+                "value": "chicken"
+              },
+              {
+                "name": "AppID",
+                "value": "Enter Your Edamam AppID Here"
+              },
+              {
+                "name": "AppKey",
+                "value": "Enter Your Edamam AppKey Here"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "smtp": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Send Recipes",
+        "parameters": {
+          "fromEmail": "Enter Your Email Address Here",
+          "html": "={{$node[\"Create Email Body in HTML\"].json[\"emailBody\"]}}",
+          "options": {},
+          "subject": "={{$node[\"Set Query Values\"].json[\"RecipeCount\"]}} {{$node[\"Set Query Values\"].json[\"Diet\"]}}, {{$node[\"Set Query Values\"].json[\"Health\"]}} {{$node[\"Set Query Values\"].json[\"SearchItem\"]}} recipes under {{$node[\"Set Query Values\"].json[\"CaloriesMax\"]}} calories ready in under {{$node[\"Set Query Values\"].json[\"TimeMax\"]}} minutes",
+          "toEmail": "Enter Your Email Address Here"
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Counts",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "RecipeCount",
+                "value": "={{$node[\"Retrieve Recipe Counts\"].json[\"count\"]}}"
+              },
+              {
+                "name": "ReturnCount",
+                "value": "={{$node[\"Search Criteria\"].json[\"RecipeCount\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Query Values",
+        "parameters": {
+          "functionCode": "items[0].json.calories = items[0].json.CaloriesMin + \"-\" + items[0].json.CaloriesMax;\nitems[0].json.time = items[0].json.TimeMin + \"-\" + items[0].json.TimeMax;\n\nif (items[0].json.Diet.toUpperCase() == \"RANDOM\") {\n  arrDiet = [\"balanced\",\"high-fiber\",\"high-protein\",\"low-carb\",\"low-fat\",\"low-sodium\"];\n  intRandomNumber = Math.floor(Math.random() * 6);\n  items[0].json.Diet = arrDiet[intRandomNumber];\n}\n\nif (items[0].json.Health.toUpperCase() == \"RANDOM\") {\n  arrHealth = [\"alcohol-free\",\"immuno-supportive\",\"celery-free\",\"crustacean-free\",\"dairy-free\",\"egg-free\",\"fish-free\",\"fodmap-free\",\"gluten-free\",\"keto-friendly\",\"kidney-friendly\",\"kosher\",\"low-potassium\",\"lupine-free\",\"mustard-free\",\"low-fat-abs\",\"no-oil-added\",\"low-sugar\",\"paleo\",\"peanut-free\",\"pecatarian\",\"pork-free\",\"red-meat-free\",\"sesame-free\",\"shellfish-free\",\"soy-free\",\"sugar-conscious\",\"tree-nut-free\",\"vegan\",\"vegetarian\",\"wheat-free\"];\n  intRandomNumber = Math.floor(Math.random() * 31);\n  items[0].json.Health = arrHealth[intRandomNumber];\n}\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set Recipe ID Values",
+        "parameters": {
+          "functionCode": "items[0].json.from = Math.floor(Math.random() * items[0].json.RecipeCount) + 1;\nitems[0].json.to = items[0].json.from + items[0].json.ReturnCount;\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 10,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Emailsend"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 207,
+  "viewCount": 461,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Emailsend Account"
+    ],
+    "requiredCredentials": [
+      "smtp details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"Set Query Values\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Set Recipe ID Values\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Retrieve Recipe Counts\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Retrieve Recipes\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Send Recipes\" node (n8n-nodes-base.emailSend) and configure the action parameters, mappings, and fields.",
+      "Open the \"Create Email Body in HTML\" node (n8n-nodes-base.function) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Search Criteria\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"Set Counts\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 93,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-2gwrmy2wq",
+      "workflowId": "what-to-eat-gao8l",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0084_HTTP_Cron_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0084_HTTP_Cron_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:07.107Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:07.107Z",
+  "updatedAt": "2026-07-15T11:29:07.107Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

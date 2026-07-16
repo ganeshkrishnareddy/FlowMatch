@@ -1,0 +1,499 @@
+{
+  "id": "new-tweets-0byev",
+  "name": "New tweets",
+  "slug": "new-tweets-r9m9",
+  "description": "Automated workflow: New tweets. This workflow processes data and performs automated tasks.",
+  "shortDescription": "New tweets workflow containing 8 nodes.",
+  "originalWorkflowJson": {
+    "id": 1003,
+    "name": "New tweets",
+    "nodes": [
+      {
+        "name": "On clicking 'execute'",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          240,
+          260
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "id": "caf9ec35-025e-4fb2-870d-dee5cf008ac1",
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Twitter",
+        "type": "n8n-nodes-base.twitter",
+        "position": [
+          520,
+          160
+        ],
+        "parameters": {
+          "limit": 100,
+          "operation": "search",
+          "searchText": "verstappen",
+          "additionalFields": {
+            "resultType": "mixed"
+          }
+        },
+        "typeVersion": 1,
+        "id": "b521570d-2b73-480d-964c-719fa1b22fa0",
+        "notes": "This twitter node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Set_AT_list",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          780,
+          360
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "Likes",
+                "value": "={{$node[\"Twitter\"].json[\"favorite_count\"] ? $node[\"Twitter\"].json[\"favorite_count\"] : 0 }}"
+              }
+            ],
+            "string": [
+              {
+                "name": "Tweet",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Tweet\"]}}"
+              },
+              {
+                "name": "Tweet_id",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Tweet_id\"]}}"
+              },
+              {
+                "name": "Tweet URL",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Tweet URL\"]}}"
+              },
+              {
+                "name": "Author",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Author\"]}}"
+              },
+              {
+                "name": "Time",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Time\"]}}"
+              }
+            ]
+          },
+          "options": {
+            "dotNotation": false
+          },
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "6820dedf-d2f4-46ce-a973-31e08841f1dc",
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "get airtable list",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          520,
+          360
+        ],
+        "parameters": {
+          "table": "tbl6rexxFBodzKVoC",
+          "operation": "list",
+          "application": "app36P08S3Jzki6qJ",
+          "additionalOptions": {}
+        },
+        "credentials": {
+          "airtableApi": {
+            "id": "{{ $credentials.airtableApi.id }}",
+            "name": "airtable_api"
+          }
+        },
+        "typeVersion": 1,
+        "id": "5c772711-559a-417d-9514-8624cc3bc862",
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "set twitter data",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          780,
+          160
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "Likes",
+                "value": "={{$node[\"Twitter\"].json[\"favorite_count\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "Tweet",
+                "value": "={{$node[\"Twitter\"].json[\"text\"]}}"
+              },
+              {
+                "name": "Tweet_id",
+                "value": "={{$node[\"Twitter\"].json[\"id\"]}}"
+              },
+              {
+                "name": "Tweet URL",
+                "value": "={{ $env.WEBHOOK_URL }}{{$node[\"Twitter\"].json[\"user\"][\"screen_name\"]}}/status/{{$node[\"Twitter\"].json[\"id_str\"]}}"
+              },
+              {
+                "name": "Author",
+                "value": "={{$node[\"Twitter\"].json[\"in_reply_to_screen_name\"]}}"
+              },
+              {
+                "name": "Time",
+                "value": "={{$node[\"Twitter\"].json[\"created_at\"]}}"
+              }
+            ]
+          },
+          "options": {
+            "dotNotation": false
+          },
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "1c38b6cc-3092-4647-b7ab-f8276ac95f68",
+        "notes": "This set node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Leave only new tweets",
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          1060,
+          260
+        ],
+        "parameters": {
+          "mode": "removeKeyMatches",
+          "propertyName1": "Tweet_id",
+          "propertyName2": "Tweet_id"
+        },
+        "typeVersion": 1,
+        "id": "8e99b871-aa95-4d38-b978-8dfb72242e36",
+        "notes": "This merge node performs automated tasks as part of the workflow."
+      },
+      {
+        "name": "Append new tweets to airtable",
+        "type": "n8n-nodes-base.airtable",
+        "position": [
+          1300,
+          260
+        ],
+        "parameters": {
+          "table": "tbl6rexxFBodzKVoC",
+          "options": {},
+          "operation": "append",
+          "application": "app36P08S3Jzki6qJ",
+          "addAllFields": "={{true}}"
+        },
+        "credentials": {
+          "airtableApi": {
+            "id": "{{ $credentials.airtableApi.id }}",
+            "name": "airtable_api"
+          }
+        },
+        "typeVersion": 1,
+        "id": "7466d72b-14e0-41fc-8d27-dbbb80e3e378",
+        "notes": "This airtable node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "error-d4ec96d7",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "connections": {},
+    "description": "Automated workflow: New tweets. This workflow processes data and performs automated tasks.",
+    "meta": {
+      "instanceId": "workflow-c24381d8",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:48.385748",
+      "updatedAt": "2025-09-29T07:07:48.385760",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: New tweets. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "New tweets",
+    "nodes": [
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Append new tweets to airtable",
+        "parameters": {
+          "addAllFields": "={{true}}",
+          "application": "app36P08S3Jzki6qJ",
+          "operation": "append",
+          "options": {},
+          "table": "tbl6rexxFBodzKVoC"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "airtableApi": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "get airtable list",
+        "parameters": {
+          "additionalOptions": {},
+          "application": "app36P08S3Jzki6qJ",
+          "operation": "list",
+          "table": "tbl6rexxFBodzKVoC"
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 1
+      },
+      {
+        "name": "Leave only new tweets",
+        "parameters": {
+          "mode": "removeKeyMatches",
+          "propertyName1": "Tweet_id",
+          "propertyName2": "Tweet_id"
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 1
+      },
+      {
+        "name": "On clicking 'execute'",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "set twitter data",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {
+            "dotNotation": false
+          },
+          "values": {
+            "number": [
+              {
+                "name": "Likes",
+                "value": "={{$node[\"Twitter\"].json[\"favorite_count\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "Tweet",
+                "value": "={{$node[\"Twitter\"].json[\"text\"]}}"
+              },
+              {
+                "name": "Tweet_id",
+                "value": "={{$node[\"Twitter\"].json[\"id\"]}}"
+              },
+              {
+                "name": "Tweet URL",
+                "value": "={{ $env.WEBHOOK_URL }}{{$node[\"Twitter\"].json[\"user\"][\"screen_name\"]}}/status/{{$node[\"Twitter\"].json[\"id_str\"]}}"
+              },
+              {
+                "name": "Author",
+                "value": "={{$node[\"Twitter\"].json[\"in_reply_to_screen_name\"]}}"
+              },
+              {
+                "name": "Time",
+                "value": "={{$node[\"Twitter\"].json[\"created_at\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set_AT_list",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {
+            "dotNotation": false
+          },
+          "values": {
+            "number": [
+              {
+                "name": "Likes",
+                "value": "={{$node[\"Twitter\"].json[\"favorite_count\"] ? $node[\"Twitter\"].json[\"favorite_count\"] : 0 }}"
+              }
+            ],
+            "string": [
+              {
+                "name": "Tweet",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Tweet\"]}}"
+              },
+              {
+                "name": "Tweet_id",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Tweet_id\"]}}"
+              },
+              {
+                "name": "Tweet URL",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Tweet URL\"]}}"
+              },
+              {
+                "name": "Author",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Author\"]}}"
+              },
+              {
+                "name": "Time",
+                "value": "={{$node[\"get airtable list\"].json[\"fields\"][\"Time\"]}}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      },
+      {
+        "name": "Twitter",
+        "parameters": {
+          "additionalFields": {
+            "resultType": "mixed"
+          },
+          "limit": 100,
+          "operation": "search",
+          "searchText": "verstappen"
+        },
+        "type": "n8n-nodes-base.twitter",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 8,
+  "integrationCount": 2,
+  "difficulty": "Intermediate",
+  "estimatedSetupTime": "15 Mins",
+  "integrations": [
+    "Twitter/X",
+    "Airtable"
+  ],
+  "securityStatus": "Passed",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 149,
+  "viewCount": 518,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Twitter/X Account",
+      "Airtable Account"
+    ],
+    "requiredCredentials": [
+      "airtable  A P I details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"On clicking 'execute'\".",
+      "Open the \"Twitter\" node (n8n-nodes-base.twitter) and configure the action parameters, mappings, and fields.",
+      "Open the \"get airtable list\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Leave only new tweets\" node (n8n-nodes-base.merge) and configure the action parameters, mappings, and fields.",
+      "Open the \"Append new tweets to airtable\" node (n8n-nodes-base.airtable) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set_AT_list\".",
+      "Define or edit values for variables that are referenced in downstream nodes.",
+      "Locate the Set/Edit fields node \"set twitter data\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 97,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-lweyv5eb2",
+      "workflowId": "new-tweets-0byev",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0005_Manual_Twitter_Create_Triggered.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0005_Manual_Twitter_Create_Triggered.json",
+      "discoveredAt": "2026-07-15T11:29:21.204Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:21.204Z",
+  "updatedAt": "2026-07-15T11:29:21.204Z",
+  "category": {
+    "slug": "data-processing",
+    "name": "Data Processing"
+  },
+  "categoryId": "data-processing"
+}

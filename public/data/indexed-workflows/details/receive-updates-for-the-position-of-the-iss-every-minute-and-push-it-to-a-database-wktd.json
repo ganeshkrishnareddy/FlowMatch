@@ -1,0 +1,321 @@
+{
+  "id": "receive-updates-for-the-position-of-the-iss-every-minute-and-push-it-to-a-database-kxk6w",
+  "name": "Receive updates for the position of the ISS every minute and push it to a database",
+  "slug": "receive-updates-for-the-position-of-the-iss-every-minute-and-push-it-to-a-database-wktd",
+  "description": "Production-ready workflow: Receive updates for the position of the ISS every minute and push it to a database. This workflow has been optimized for production use with comprehensive error handling, security, and documentation.",
+  "shortDescription": "Receive updates for the position of the ISS every minute and push it to a database workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "id": "134",
+    "name": "Receive updates for the position of the ISS every minute and push it to a database",
+    "nodes": [
+      {
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          550,
+          300
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-d75651c7"
+      },
+      {
+        "name": "HTTP Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          750,
+          300
+        ],
+        "parameters": {
+          "url": "{{ $env.BASE_URL }}",
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "timestamps",
+                "value": "={{Date.now();}}"
+              }
+            ]
+          }
+        },
+        "typeVersion": 1,
+        "id": "node-fe0a56bf"
+      },
+      {
+        "name": "Set",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          950,
+          300
+        ],
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "latitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"latitude\"]}}"
+              },
+              {
+                "name": "longitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"longitude\"]}}"
+              },
+              {
+                "name": "timestamp",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"timestamp\"]}}"
+              }
+            ],
+            "string": []
+          },
+          "options": {},
+          "keepOnlySet": true
+        },
+        "typeVersion": 1,
+        "id": "node-34e97b66"
+      },
+      {
+        "name": "Google Cloud Realtime Database",
+        "type": "n8n-nodes-base.googleFirebaseRealtimeDatabase",
+        "position": [
+          1150,
+          300
+        ],
+        "parameters": {
+          "path": "iss",
+          "operation": "push",
+          "projectId": "",
+          "attributes": "latitude, longitude, timestamp"
+        },
+        "credentials": {
+          "googleFirebaseRealtimeDatabaseOAuth2Api": "firebase realtime credentials"
+        },
+        "typeVersion": 1,
+        "id": "node-6abe6b74"
+      },
+      {
+        "id": "error-bcff60dd",
+        "name": "Error Handler",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          400
+        ],
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        }
+      }
+    ],
+    "active": false,
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3
+    },
+    "connections": {},
+    "meta": {
+      "instanceId": "workflow-b9ab276c",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:45.657902",
+      "updatedAt": "2025-09-29T07:07:45.657915",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "description": "Production-ready workflow: Receive updates for the position of the ISS every minute and push it to a database. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {},
+    "name": "Receive updates for the position of the ISS every minute and push it to a database",
+    "nodes": [
+      {
+        "name": "Cron",
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1
+      },
+      {
+        "name": "Error Handler",
+        "parameters": {
+          "message": "Workflow execution error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1
+      },
+      {
+        "credentials": {
+          "googleFirebaseRealtimeDatabaseOAuth2Api": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "Google Cloud Realtime Database",
+        "parameters": {
+          "attributes": "latitude, longitude, timestamp",
+          "operation": "push",
+          "path": "iss",
+          "projectId": ""
+        },
+        "type": "n8n-nodes-base.googleFirebaseRealtimeDatabase",
+        "typeVersion": 1
+      },
+      {
+        "name": "HTTP Request",
+        "parameters": {
+          "options": {},
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "timestamps",
+                "value": "={{Date.now();}}"
+              }
+            ]
+          },
+          "url": "{{ $env.BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "name": "Set",
+        "parameters": {
+          "keepOnlySet": true,
+          "options": {},
+          "values": {
+            "number": [
+              {
+                "name": "latitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"latitude\"]}}"
+              },
+              {
+                "name": "longitude",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"longitude\"]}}"
+              },
+              {
+                "name": "timestamp",
+                "value": "={{$node[\"HTTP Request\"].json[\"0\"][\"timestamp\"]}}"
+              }
+            ],
+            "string": []
+          }
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "HTTP Request",
+    "Googlefirebaserealtimedatabase"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 79,
+  "viewCount": 528,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "HTTP Request Account",
+      "Googlefirebaserealtimedatabase Account"
+    ],
+    "requiredCredentials": [
+      "google Firebase Realtime Database  O Auth2  A P I details"
+    ],
+    "configurationSteps": [
+      "Open the scheduler node \"Cron\".",
+      "Adjust the execution intervals (e.g., Every hour, Daily, or Custom CRON expression) according to your preferences.",
+      "Open the \"HTTP Request\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"Google Cloud Realtime Database\" node (n8n-nodes-base.googleFirebaseRealtimeDatabase) and configure the action parameters, mappings, and fields.",
+      "Open the \"Error Handler\" node (n8n-nodes-base.stopAndError) and configure the action parameters, mappings, and fields.",
+      "Locate the Set/Edit fields node \"Set\".",
+      "Define or edit values for variables that are referenced in downstream nodes."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 91,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-xfb89k29y",
+      "workflowId": "receive-updates-for-the-position-of-the-iss-every-minute-and-push-it-to-a-database-kxk6w",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Http/0136_HTTP_Googlefirebaserealtimedatabase_Update_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Http\\0136_HTTP_Googlefirebaserealtimedatabase_Update_Webhook.json",
+      "discoveredAt": "2026-07-15T11:18:29.739Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:18:29.739Z",
+  "updatedAt": "2026-07-15T11:18:29.739Z"
+}

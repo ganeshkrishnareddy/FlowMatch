@@ -1,0 +1,614 @@
+{
+  "id": "manualtrigger-workflow-m0g28",
+  "name": "Manualtrigger Workflow",
+  "slug": "manualtrigger-workflow-v3xh",
+  "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 5 different services: stickyNote, httpRequest, readWriteFile, stopAndError, manualTrigger. It contains 10 nodes and follows best practices for error handling and security.",
+  "shortDescription": "Manualtrigger Workflow workflow containing 5 nodes.",
+  "originalWorkflowJson": {
+    "meta": {
+      "instanceId": "workflow-cd494a44",
+      "versionId": "1.0.0",
+      "createdAt": "2025-09-29T07:07:49.031802",
+      "updatedAt": "2025-09-29T07:07:49.031875",
+      "owner": "n8n-user",
+      "license": "MIT",
+      "category": "automation",
+      "status": "active",
+      "priority": "high",
+      "environment": "production"
+    },
+    "nodes": [
+      {
+        "id": "463ebdc7-9c6f-4464-9a0e-4078be11a787",
+        "name": "When clicking ‘Test workflow’",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [
+          280,
+          240
+        ],
+        "parameters": {},
+        "typeVersion": 1,
+        "notes": "This manualTrigger node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "531d78cd-9f44-468a-9f88-30816922eb1b",
+        "name": "Write Result File to Disk",
+        "type": "n8n-nodes-base.readWriteFile",
+        "position": [
+          1140,
+          240
+        ],
+        "parameters": {
+          "options": {},
+          "fileName": "document.pdf",
+          "operation": "write",
+          "dataPropertyName": "=data"
+        },
+        "typeVersion": 1,
+        "notes": "This readWriteFile node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "7702ad91-05fd-4bfc-816a-3e863c1ca148",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          640,
+          60
+        ],
+        "parameters": {
+          "width": 420,
+          "height": 361,
+          "content": "## Authentication\nConversion requests must be authenticated. Please create \n[ConvertAPI account to get authentication secret]({{ $env.API_BASE_URL }}\n\nCreate a query auth credential with __secret__ as name and your secret from the convertAPI dashboard as value"
+        },
+        "typeVersion": 1,
+        "notes": "This stickyNote node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "09d95adb-3c05-4727-8d0b-498870d08cca",
+        "name": "Download File",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          480,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          }
+        },
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      },
+      {
+        "id": "c5e25b57-ff04-4b4c-aab4-d92f8e18409e",
+        "name": "File conversion",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          800,
+          240
+        ],
+        "parameters": {
+          "url": "{{ $env.API_BASE_URL }}",
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "sendHeaders": true,
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "file",
+                "parameterType": "formBinaryData",
+                "inputDataFieldName": "=data"
+              }
+            ]
+          },
+          "genericAuthType": "httpQueryAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/octet-stream"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpQueryAuth": {
+            "id": "oHfHaXdP6a8AieHO",
+            "name": "Convertapi token"
+          }
+        },
+        "notesInFlow": true,
+        "typeVersion": 4.2,
+        "notes": "This httpRequest node performs automated tasks as part of the workflow."
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "09d95adb-3c05-4727-8d0b-498870d08cca": {
+        "main": [
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-8d63769a",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-e41008f7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-db98eba7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-71e8fc0e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-8885ce90",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-850a3fb0",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-f83f8939",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-e02a0829",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "c5e25b57-ff04-4b4c-aab4-d92f8e18409e": {
+        "main": [
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-6242cc83",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-96af8515",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-d5b7d58b",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-567aa753",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-07527cf6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-8fef655e",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-969c4cd7",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-614a7c78",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "531d78cd-9f44-468a-9f88-30816922eb1b": {
+        "main": [
+          [
+            {
+              "node": "error-handler-531d78cd-9f44-468a-9f88-30816922eb1b-c08a434d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": null,
+      "timezone": "UTC",
+      "executionTimeout": 3600,
+      "maxExecutions": 1000,
+      "retryOnFail": true,
+      "retryCount": 3,
+      "retryDelay": 1000
+    },
+    "description": "Automated workflow: Manualtrigger Workflow. This workflow integrates 5 different services: stickyNote, httpRequest, readWriteFile, stopAndError, manualTrigger. It contains 10 nodes and follows best practices for error handling and security.",
+    "tags": [
+      "automation",
+      "n8n",
+      "production-ready",
+      "excellent",
+      "optimized"
+    ],
+    "notes": "Excellent quality workflow: Manualtrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+  },
+  "normalizedWorkflowJson": {
+    "connections": {
+      "09d95adb-3c05-4727-8d0b-498870d08cca": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-8d63769a"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-e41008f7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-db98eba7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-71e8fc0e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-8885ce90"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-850a3fb0"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-f83f8939"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-09d95adb-3c05-4727-8d0b-498870d08cca-e02a0829"
+            }
+          ]
+        ]
+      },
+      "531d78cd-9f44-468a-9f88-30816922eb1b": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-531d78cd-9f44-468a-9f88-30816922eb1b-c08a434d"
+            }
+          ]
+        ]
+      },
+      "c5e25b57-ff04-4b4c-aab4-d92f8e18409e": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-6242cc83"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-96af8515"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-d5b7d58b"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-567aa753"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-07527cf6"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-8fef655e"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-969c4cd7"
+            }
+          ],
+          [
+            {
+              "index": 0,
+              "node": "error-handler-c5e25b57-ff04-4b4c-aab4-d92f8e18409e-614a7c78"
+            }
+          ]
+        ]
+      }
+    },
+    "name": "Manualtrigger Workflow",
+    "nodes": [
+      {
+        "name": "Download File",
+        "parameters": {
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "credentials": {
+          "httpQueryAuth": {
+            "id": "REDACTED"
+          }
+        },
+        "name": "File conversion",
+        "parameters": {
+          "authentication": "{{ $credentials.genericCredentialType }}",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "inputDataFieldName": "=data",
+                "name": "file",
+                "parameterType": "formBinaryData"
+              }
+            ]
+          },
+          "contentType": "multipart-form-data",
+          "genericAuthType": "httpQueryAuth",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/octet-stream"
+              }
+            ]
+          },
+          "method": "POST",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          },
+          "sendBody": true,
+          "sendHeaders": true,
+          "url": "{{ $env.API_BASE_URL }}"
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2
+      },
+      {
+        "name": "Sticky Note",
+        "parameters": {
+          "content": "## Authentication\nConversion requests must be authenticated. Please create \n[ConvertAPI account to get authentication secret]({{ $env.API_BASE_URL }}\n\nCreate a query auth credential with __secret__ as name and your secret from the convertAPI dashboard as value",
+          "height": 361,
+          "width": 420
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1
+      },
+      {
+        "name": "When clicking ‘Test workflow’",
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1
+      },
+      {
+        "name": "Write Result File to Disk",
+        "parameters": {
+          "dataPropertyName": "=data",
+          "fileName": "document.pdf",
+          "operation": "write",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1
+      }
+    ]
+  },
+  "nodeCount": 5,
+  "integrationCount": 2,
+  "difficulty": "Beginner",
+  "estimatedSetupTime": "10 Mins",
+  "integrations": [
+    "Readwritefile",
+    "HTTP Request"
+  ],
+  "securityStatus": "Review Recommended",
+  "verified": true,
+  "featured": true,
+  "downloadCount": 162,
+  "viewCount": 765,
+  "workflowOrigin": "third_party_import",
+  "instructionStatus": "auto_generated",
+  "instructions": {
+    "prerequisites": [
+      "An active n8n instance installed locally, in a Docker container, or hosted on n8n Cloud.",
+      "Basic familiarity with importing JSON templates in n8n."
+    ],
+    "setupInstructions": [
+      "Download the JSON configuration for this workflow.",
+      "Import the JSON into n8n.",
+      "Ensure you set up credentials for all connected integrations.",
+      "Test your trigger and run execution."
+    ],
+    "requiredAccounts": [
+      "Readwritefile Account",
+      "HTTP Request Account"
+    ],
+    "requiredCredentials": [
+      "http Query Auth details"
+    ],
+    "configurationSteps": [
+      "Verify the settings of the trigger node \"When clicking ‘Test workflow’\".",
+      "Open the \"Write Result File to Disk\" node (n8n-nodes-base.readWriteFile) and configure the action parameters, mappings, and fields.",
+      "Open the \"Sticky Note\" node (n8n-nodes-base.stickyNote) and configure the action parameters, mappings, and fields.",
+      "Open the \"Download File\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "Open the \"File conversion\" node (n8n-nodes-base.httpRequest) and configure the action parameters, mappings, and fields.",
+      "No global variables node (Set node) is present. If you need dynamic constants, add a Set node after the trigger."
+    ],
+    "testingSteps": [
+      "Click the \"Test step\" or \"Listen for test event\" button on your Trigger node.",
+      "Send a test trigger from your source service (e.g. fill a test form or trigger a webhook trigger).",
+      "Verify that the node canvas lights up green, indicating successful data flow.",
+      "Open the final destination node to confirm that output records were saved correctly."
+    ],
+    "expectedResult": "Upon trigger activation, inputs will flow through the configured nodes and execute actions successfully.",
+    "troubleshooting": [
+      "Check credential warning symbols. Most workflow issues stem from expired OAuth connections or missing API permissions.",
+      "Verify that the data keys coming from your Trigger node match the exact names mapped in subsequent nodes (e.g., {{ $json.body.email }}).",
+      "Open the Execution history tab in n8n to view logs and determine which node failed."
+    ],
+    "securityNotes": [
+      "Never hardcode API keys, passwords, or authentication bearer tokens in the plain text fields of node parameters.",
+      "If you download or share this workflow JSON, sanitize any sensitive parameters or configuration nodes."
+    ],
+    "customizationIdeas": [
+      "Add an email node at the end to notify you of successful executions.",
+      "Incorporate an AI LLM node to summarize trigger payloads before writing them to integrations."
+    ]
+  },
+  "qualityScore": 90,
+  "validationStatus": "Valid",
+  "provenanceStatus": "source_repository_indexed",
+  "importBatch": "zie619-source-2026-07",
+  "sources": [
+    {
+      "id": "src-j696oi3v1",
+      "workflowId": "manualtrigger-workflow-m0g28",
+      "sourceName": "Zie619 n8n Workflows Repository",
+      "sourceUrl": "https://github.com/Zie619/n8n-workflows/blob/main/workflows/Manual/0507_Manual_Stickynote_Automation_Webhook.json",
+      "sourceAuthor": "Original author not identified",
+      "sourceLicense": "MIT License",
+      "sourceRepository": "https://github.com/Zie619/n8n-workflows",
+      "sourceFilePath": "Manual\\0507_Manual_Stickynote_Automation_Webhook.json",
+      "discoveredAt": "2026-07-15T11:29:29.863Z"
+    }
+  ],
+  "createdAt": "2026-07-15T11:29:29.863Z",
+  "updatedAt": "2026-07-15T11:29:29.863Z",
+  "category": {
+    "slug": "cybersecurity",
+    "name": "Cybersecurity"
+  },
+  "categoryId": "cybersecurity"
+}

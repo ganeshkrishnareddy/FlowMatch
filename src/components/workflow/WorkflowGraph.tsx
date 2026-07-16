@@ -100,6 +100,19 @@ export default function WorkflowGraph({ workflowJson }: WorkflowGraphProps) {
       }
     }
 
+    // Fallback: If no connections could be parsed, build a horizontal sequential flow
+    if (flowEdges.length === 0 && flowNodes.length > 1) {
+      for (let i = 0; i < flowNodes.length - 1; i++) {
+        flowEdges.push({
+          id: `edge-seq-${i}-${flowNodes[i].id}-${flowNodes[i + 1].id}`,
+          source: flowNodes[i].id,
+          target: flowNodes[i + 1].id,
+          animated: true,
+          style: { stroke: '#7c3aed', strokeWidth: 1.5 },
+        });
+      }
+    }
+
     setNodes(flowNodes);
     setEdges(flowEdges);
   }, [workflowJson, setNodes, setEdges]);

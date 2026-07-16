@@ -25,10 +25,22 @@ export default function Footer() {
             <p className="text-sm leading-relaxed text-zinc-400 dark:text-zinc-500">
               Search thousands of ready-to-use automation workflows.
             </p>
-            <div className="text-xs text-zinc-400 dark:text-zinc-600 space-y-1">
-              <div>📊 Workflows: <span className="text-zinc-600 dark:text-zinc-400 font-semibold">{stats.totalWorkflows.toLocaleString()}</span></div>
-              <div>🔌 Integrations: <span className="text-zinc-600 dark:text-zinc-400 font-semibold">{stats.integrationsCount}</span></div>
-              <div>📁 Categories: <span className="text-zinc-600 dark:text-zinc-400 font-semibold">{stats.categoriesCount}</span></div>
+            <div className="text-xs text-zinc-400 dark:text-zinc-600 space-y-1.5 mt-2">
+              <div>
+                <Link to="/workflows" className="hover:text-zinc-900 dark:hover:text-white transition-colors inline-flex items-center gap-1.5">
+                  <span>📊</span> Workflows: <span className="text-zinc-600 dark:text-zinc-400 font-semibold">{stats.totalWorkflows.toLocaleString()}</span>
+                </Link>
+              </div>
+              <div>
+                <Link to="/integrations" className="hover:text-zinc-900 dark:hover:text-white transition-colors inline-flex items-center gap-1.5">
+                  <span>🔌</span> Integrations: <span className="text-zinc-600 dark:text-zinc-400 font-semibold">{stats.integrationsCount}</span>
+                </Link>
+              </div>
+              <div>
+                <Link to="/categories" className="hover:text-zinc-900 dark:hover:text-white transition-colors inline-flex items-center gap-1.5">
+                  <span>📁</span> Categories: <span className="text-zinc-600 dark:text-zinc-400 font-semibold">{stats.categoriesCount}</span>
+                </Link>
+              </div>
             </div>
           </div>
 

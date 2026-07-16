@@ -26,7 +26,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2 shrink-0">
               <FlowMatchLogo size={28} showWordmark />
             </Link>
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-500 dark:text-zinc-400">
@@ -68,17 +68,18 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
             </button>
           </div>
 
-          <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-1">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              className="w-11 h-11 inline-flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50"
               aria-label="Toggle theme"
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white focus:outline-none"
+              className="w-11 h-11 inline-flex items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-colors"
+              aria-expanded={isOpen}
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -86,16 +87,16 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
         </div>
       </div>
 
-      {isOpen && (
-        <div className="md:hidden border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 pt-2 pb-4 space-y-1">
-          <Link to="/workflows" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white">Discover</Link>
-          <Link to="/ai-match" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white">AI Match</Link>
-          <Link to="/categories" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white">Categories</Link>
-          <Link to="/integrations" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white">Integrations</Link>
-          <Link to="/collections" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white">Collections</Link>
-          <a href="https://razorpay.me/@ProgVision" target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-2 text-base font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center mt-2 bg-zinc-50 dark:bg-zinc-900/40">Support ☕</a>
-        </div>
-      )}
+      <div 
+        className={`md:hidden border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 pt-2 pb-4 space-y-1 transition-all duration-300 ease-in-out origin-top ${isOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 absolute pointer-events-none -translate-y-4'}`}
+      >
+        <Link to="/workflows" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-3 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white transition-colors">Discover</Link>
+        <Link to="/ai-match" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-3 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white transition-colors">AI Match</Link>
+        <Link to="/categories" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-3 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white transition-colors">Categories</Link>
+        <Link to="/integrations" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-3 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white transition-colors">Integrations</Link>
+        <Link to="/collections" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-3 text-base font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white transition-colors">Collections</Link>
+        <a href="https://razorpay.me/@ProgVision" target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)} className="block rounded-md px-3 py-3 text-base font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center mt-2 bg-zinc-50 dark:bg-zinc-900/40 transition-colors">Support ☕</a>
+      </div>
     </nav>
   );
 }

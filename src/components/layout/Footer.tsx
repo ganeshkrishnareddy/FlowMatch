@@ -17,12 +17,12 @@ export default function Footer() {
   return (
     <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-zinc-500 dark:text-zinc-400 py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2">
-              <FlowMatchLogo size={22} showWordmark />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="space-y-4 col-span-2 md:col-span-1">
+            <Link to="/" className="flex items-center gap-2 shrink-0">
+              <FlowMatchLogo size={24} showWordmark />
             </Link>
-            <p className="text-sm leading-relaxed text-zinc-400 dark:text-zinc-500">
+            <p className="text-sm leading-relaxed text-zinc-400 dark:text-zinc-500 max-w-xs">
               Search thousands of ready-to-use automation workflows.
             </p>
             <div className="pt-2">

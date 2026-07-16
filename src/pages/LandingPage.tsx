@@ -10,17 +10,21 @@ import SEOHead from '../components/common/SEOHead';
 
 export default function LandingPage() {
   const [query, setQuery] = useState('');
-  const [stats, setStats] = useState({
-    totalWorkflows: 0,
-    verifiedWorkflows: 0,
-    integrationsCount: 0,
-    categoriesCount: 0,
+  const [stats, setStats] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem('flowmatch_stats');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return null;
   });
   const [featured, setFeatured] = useState<Workflow[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    workflowRepository.getStats().then(setStats).catch(console.error);
+    workflowRepository.getStats().then((data) => {
+      setStats(data);
+      localStorage.setItem('flowmatch_stats', JSON.stringify(data));
+    }).catch(console.error);
     workflowRepository.getFeaturedWorkflows(6).then(setFeatured).catch(console.error);
   }, []);
 
@@ -49,36 +53,38 @@ export default function LandingPage() {
     <div className="space-y-20 py-8">
       <SEOHead title="Search 5,000+ n8n Workflow Templates" description="Discover 5,000+ verified n8n workflow templates. Search, compare, visualize, and deploy automation workflows with AI-powered matching, security analysis, and 300+ integrations." path="/" />
       {/* Hero Section */}
-      <div className="text-center max-w-4xl mx-auto space-y-6 pt-12 pb-6">
+      <div className="text-center max-w-4xl mx-auto space-y-5 sm:space-y-6 pt-8 sm:pt-12 pb-4 sm:pb-6 px-4 sm:px-0">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/30 bg-violet-50 dark:bg-violet-950/20 text-xs font-semibold text-violet-600 dark:text-violet-400">
           <span>Workflow discovery & matching engine</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight">
+        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.15] sm:leading-tight">
           Find Your Perfect<br />
           <span className="bg-gradient-to-r from-violet-500 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
             Automation Workflow
           </span>
         </h1>
 
-        <p className="text-lg sm:text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto font-medium">
+        <p className="text-base sm:text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto font-medium px-2 sm:px-0">
           Describe what you want to automate. FlowMatch searches 5,000+ n8n workflows to find the closest templates for your tools and process.
         </p>
 
         {/* Natural Language Search Box */}
-        <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto pt-4 relative">
-          <div className="relative flex items-center">
-            <Search className="absolute left-4 h-5 w-5 text-zinc-400 dark:text-zinc-500" />
-            <input
-              type="text"
-              placeholder="Describe what you want to automate..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 py-4 pl-12 pr-40 text-base text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 shadow-lg dark:shadow-2xl"
-            />
+        <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto pt-4 relative px-4 sm:px-0">
+          <div className="relative flex flex-col sm:block gap-3">
+            <div className="relative w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Describe what you want to automate..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full h-[52px] rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 pl-12 pr-4 sm:pr-[170px] text-base text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 shadow-lg dark:shadow-2xl"
+              />
+            </div>
             <button
               type="submit"
-              className="absolute right-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:from-violet-500 hover:to-indigo-500 transition-all flex items-center gap-1.5"
+              className="w-full sm:w-auto h-[52px] sm:h-[40px] sm:absolute sm:right-1.5 sm:top-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg px-6 sm:px-5 flex items-center justify-center gap-2 text-sm font-semibold hover:from-violet-500 hover:to-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/50"
             >
               <span>Find My Workflow</span>
               <ArrowRight className="h-4 w-4" />
@@ -147,9 +153,13 @@ export default function LandingPage() {
             <Layers className="h-5 w-5" />
           </div>
           <div className="space-y-0.5">
-            <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
-              <AnimatedCounter value={stats.totalWorkflows} />
-            </div>
+            {stats ? (
+              <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
+                <AnimatedCounter value={stats.totalWorkflows} />
+              </div>
+            ) : (
+              <div className="h-9 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mx-auto mb-1"></div>
+            )}
             <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold">Workflows</div>
           </div>
         </div>
@@ -158,9 +168,13 @@ export default function LandingPage() {
             <Puzzle className="h-5 w-5" />
           </div>
           <div className="space-y-0.5">
-            <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
-              <AnimatedCounter value={stats.integrationsCount} />
-            </div>
+            {stats ? (
+              <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
+                <AnimatedCounter value={stats.integrationsCount} />
+              </div>
+            ) : (
+              <div className="h-9 w-16 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mx-auto mb-1"></div>
+            )}
             <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold">Integrations</div>
           </div>
         </div>
@@ -169,9 +183,13 @@ export default function LandingPage() {
             <Grid3X3 className="h-5 w-5" />
           </div>
           <div className="space-y-0.5">
-            <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
-              <AnimatedCounter value={stats.categoriesCount} />
-            </div>
+            {stats ? (
+              <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
+                <AnimatedCounter value={stats.categoriesCount} />
+              </div>
+            ) : (
+              <div className="h-9 w-12 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mx-auto mb-1"></div>
+            )}
             <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold">Categories</div>
           </div>
         </div>
@@ -180,9 +198,13 @@ export default function LandingPage() {
             <CheckCircle className="h-5 w-5" />
           </div>
           <div className="space-y-0.5">
-            <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
-              <AnimatedCounter value={stats.verifiedWorkflows} />
-            </div>
+            {stats ? (
+              <div className="text-3xl font-extrabold text-zinc-900 dark:text-white animate-fade-in">
+                <AnimatedCounter value={stats.verifiedWorkflows} />
+              </div>
+            ) : (
+              <div className="h-9 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mx-auto mb-1"></div>
+            )}
             <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold">Quality Checked</div>
           </div>
         </div>

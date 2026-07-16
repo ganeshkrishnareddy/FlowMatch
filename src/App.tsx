@@ -2,11 +2,10 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import LandingPage from './pages/LandingPage';
-import WorkflowsPage from './pages/WorkflowsPage';
 import { Loader2 } from 'lucide-react';
 
-// Lazy loaded page components
 const WorkflowDetailsPage = lazy(() => import('./pages/WorkflowDetailsPage'));
+const WorkflowsPage = lazy(() => import('./pages/WorkflowsPage'));
 const AIMatchPage = lazy(() => import('./pages/AIMatchPage'));
 const CategoriesPage = lazy(() => import('./pages/CategoriesPage'));
 const CategoryDetailPage = lazy(() => import('./pages/CategoryDetailPage'));

@@ -2,15 +2,7 @@
 
 <img src="docs/banner.png" alt="FlowMatch — Discover, Search & Compare 5,000+ n8n Workflow Templates" width="75%" />
 
-<br />
-
-# FlowMatch
-
-**Find the perfect n8n workflow in seconds.**
-
-Discover, search, compare and deploy from over 5,000 curated automation templates — powered by AI matching, security scanning, and quality analysis.
-
-<br />
+**Find the perfect n8n workflow in seconds.** Discover, search, compare and deploy from over 5,000 curated automation templates.
 
 [![GitHub stars](https://img.shields.io/github/stars/ganeshkrishnareddy/FlowMatch?style=flat&logo=github&color=8b5cf6)](https://github.com/ganeshkrishnareddy/FlowMatch/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/ganeshkrishnareddy/FlowMatch?style=flat&logo=github&color=6366f1)](https://github.com/ganeshkrishnareddy/FlowMatch/network)
@@ -24,14 +16,10 @@ Discover, search, compare and deploy from over 5,000 curated automation template
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages-F38020?logo=cloudflare&logoColor=white)](https://pages.cloudflare.com)
 [![n8n](https://img.shields.io/badge/n8n-Compatible-EA4B71?logo=n8n&logoColor=white)](https://n8n.io)
 
-<br />
-
 [![Workflows](https://img.shields.io/badge/Workflows-5%2C123-8b5cf6?style=for-the-badge)](https://flowmatch.progvision.in/workflows)
 [![Integrations](https://img.shields.io/badge/Integrations-301+-f97316?style=for-the-badge)](https://flowmatch.progvision.in/integrations)
 [![Categories](https://img.shields.io/badge/Categories-36-0ea5e9?style=for-the-badge)](https://flowmatch.progvision.in/categories)
 [![Quality Checked](https://img.shields.io/badge/Quality%20Checked-3%2C376-10b981?style=for-the-badge)](https://flowmatch.progvision.in/workflows)
-
-<br />
 
 [🌐 Live Demo](https://flowmatch.progvision.in) · [📖 Documentation](https://flowmatch.progvision.in/about) · [🐛 Report Bug](https://github.com/ganeshkrishnareddy/FlowMatch/issues) · [💡 Request Feature](https://github.com/ganeshkrishnareddy/FlowMatch/issues)
 

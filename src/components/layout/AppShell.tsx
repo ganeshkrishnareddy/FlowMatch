@@ -11,7 +11,7 @@ export default function AppShell({ children }: AppShellProps) {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('flowmatch-theme');
       if (saved) return saved === 'dark';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return true; // Default to dark mode if no theme is saved
     }
     return true;
   });

@@ -19,6 +19,7 @@ const AdminGeneratePage = lazy(() => import('./pages/AdminGeneratePage'));
 const CollectionsPage = lazy(() => import('./pages/CollectionsPage'));
 const UseCasePage = lazy(() => import('./pages/UseCasePage'));
 const AlternativesPage = lazy(() => import('./pages/AlternativesPage'));
+const LegalPage = lazy(() => import('./pages/LegalPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function LoadingFallback() {
@@ -57,6 +58,12 @@ export default function App() {
             <Route path="/sources" element={<SourcesPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/alternatives" element={<AlternativesPage />} />
+
+            {/* Legal Policies */}
+            <Route path="/privacy" element={<LegalPage />} />
+            <Route path="/terms" element={<LegalPage />} />
+            <Route path="/workflow-removal" element={<LegalPage />} />
+            <Route path="/copyright-policy" element={<LegalPage />} />
 
             {/* Admin Tools */}
             <Route path="/admin/import" element={<AdminImportPage />} />

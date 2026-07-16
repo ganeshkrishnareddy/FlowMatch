@@ -16,12 +16,12 @@
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages-F38020?logo=cloudflare&logoColor=white)](https://pages.cloudflare.com)
 [![n8n](https://img.shields.io/badge/n8n-Compatible-EA4B71?logo=n8n&logoColor=white)](https://n8n.io)
 
-[![Workflows](https://img.shields.io/badge/Workflows-5%2C123-8b5cf6?style=for-the-badge)](https://flowmatch.progvision.in/workflows)
-[![Integrations](https://img.shields.io/badge/Integrations-301+-f97316?style=for-the-badge)](https://flowmatch.progvision.in/integrations)
-[![Categories](https://img.shields.io/badge/Categories-36-0ea5e9?style=for-the-badge)](https://flowmatch.progvision.in/categories)
-[![Quality Checked](https://img.shields.io/badge/Quality%20Checked-3%2C376-10b981?style=for-the-badge)](https://flowmatch.progvision.in/workflows)
+[![Workflows](https://img.shields.io/badge/Workflows-5%2C123-8b5cf6?style=for-the-badge)](https://flowmatch.tech/workflows)
+[![Integrations](https://img.shields.io/badge/Integrations-301+-f97316?style=for-the-badge)](https://flowmatch.tech/integrations)
+[![Categories](https://img.shields.io/badge/Categories-36-0ea5e9?style=for-the-badge)](https://flowmatch.tech/categories)
+[![Quality Checked](https://img.shields.io/badge/Quality%20Checked-3%2C376-10b981?style=for-the-badge)](https://flowmatch.tech/workflows)
 
-[🌐 Live Demo](https://flowmatch.progvision.in) · [📖 Documentation](https://flowmatch.progvision.in/about) · [🐛 Report Bug](https://github.com/ganeshkrishnareddy/FlowMatch/issues) · [💡 Request Feature](https://github.com/ganeshkrishnareddy/FlowMatch/issues)
+[🌐 Live Demo](https://flowmatch.tech) · [📖 Documentation](https://flowmatch.tech/about) · [🐛 Report Bug](https://github.com/ganeshkrishnareddy/FlowMatch/issues) · [💡 Request Feature](https://github.com/ganeshkrishnareddy/FlowMatch/issues)
 
 </div>
 
@@ -29,7 +29,7 @@
 
 ## 🌐 Live Demo
 
-> **[flowmatch.progvision.in](https://flowmatch.progvision.in)**
+> **[flowmatch.tech](https://flowmatch.tech)**
 >
 > Try searching for workflows like *"Send Slack alerts from Gmail"* or *"Sync Shopify orders to Google Sheets"*
 
@@ -135,7 +135,7 @@ Every workflow is parsed, normalized, security-scanned, and enriched with human-
 </tr>
 </table>
 
-[Browse all 36 categories →](https://flowmatch.progvision.in/categories)
+[Browse all 36 categories →](https://flowmatch.tech/categories)
 
 ---
 
@@ -232,7 +232,7 @@ Create a `.env` file based on `.env.example`:
 ```env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_SITE_URL=https://flowmatch.progvision.in
+VITE_SITE_URL=https://flowmatch.tech
 ```
 
 ---
